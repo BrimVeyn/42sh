@@ -1,9 +1,10 @@
-NAME			:= minishell
+NAME			:= 42sh
 
 LIBFT			:= libftprintf/libftprintf.a
 CC 				:= gcc
 LDFLAGS			:= -lreadline -lncurses
 CFLAGS 			:= -Wall -Werror -Wextra -g3 -fsanitize=address
+
 SRC 			:= source/main.c
 
 LEXER_TEST		:= lexer_test
