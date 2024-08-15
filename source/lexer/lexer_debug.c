@@ -1,23 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   string.h                                           :+:      :+:    :+:   */
+/*   lexer_debug.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/15 13:45:27 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/15 13:51:01 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/08/15 15:04:37 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/08/15 16:20:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
+#include "lexer.h"
 
-typedef struct String {
-	char *str;
-	size_t size;
-	size_t capacity;
-} String;
-
-void string_append_char(String *s, char c);
-void string_append_slice(String *s, char *c);
-void string_append_string(String *lhs, String *rhs);
+void lexer_debug(Lexer_p lexer) {
+	printf("--- Lexer state ---\n");
+	printf("Input = |%s|\n", lexer->input);
+	printf("Position = %d\n", lexer->position);
+	printf("Read_position = %d\n", lexer->read_position);
+	printf("Ch = %c | %d\n", lexer->ch, lexer->ch);
+	printf("-------------------\n");
+}

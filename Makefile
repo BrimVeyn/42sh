@@ -1,23 +1,21 @@
 NAME			:= minishell
 
 LIBFT			:= libftprintf/libftprintf.a
-CC 				:= cc
+CC 				:= gcc
 LDFLAGS			:= -lreadline -lncurses
-CFLAGS 			:= -Wall -Werror -Wextra
-DEBUG 			:= -DDEBUG
+CFLAGS 			:= -Wall -Werror -Wextra -g3 -fsanitize=address
 SRC 			:= source/main.c
+
+LEXER_TEST		:= lexer_test
+LEXER_TEST_SRC	:= $(wildcard source/lexer/*.c)
+LEXER_SRC 		:= $(filter-out lexer_main.c, $(wildcard *.c))
+LEXER_TEST_OBJ	:= $(LEXER_TEST_SRC:source/%.c=objects/%.o)
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
 
+
 OBJDIR 			:= objects
-DOUBLE_DIR		:= double_linked_list
-STRING_DIR		:= string_utils
-STAR_DIR		:= star_list
-MISC_DIR		:= misc
-BUILTINS		:= builtins
-PARSING_DIR		:= parsing
-EXEC			:= exec
-UTILS_EXEC      := utils_exec
+LEXER_DIR		:= lexer
 
 DEF_COLOR		:= \033[0;39m
 GRAY			:= \033[0;90m
@@ -30,6 +28,12 @@ CYAN			:= \033[0;96m
 WHITE			:= \033[0;97m
 
 all: $(NAME)
+
+$(LEXER_TEST): $(LIBFT) $(LEXER_OBJ)
+	@echo "$(RED)Making test binary: $(LEXER_TEST)"
+	@printf "$(MAGENTA)"
+	$(CC) $(LEXER_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(LEXER_TEST)
+	@printf "$(LEXER_TEST) done !$(DEF_COLOR)"
 
 $(NAME): $(LIBFT) $(OBJDIR) $(OBJ)
 	@echo "$(GREEN)Making binary: $(NAME)"
@@ -54,12 +58,12 @@ fclean: clean
 	@printf "$(RED)Binary deleted !$(DEF_COLOR)\n"
 
 $(OBJDIR):
-	@mkdir -p $(OBJDIR) $(OBJDIR)/$(STAR_DIR) $(OBJDIR)/$(DOUBLE_DIR) $(OBJDIR)/$(STRING_DIR) $(OBJDIR)/$(MISC_DIR) $(OBJDIR)/$(BUILTINS)  $(OBJDIR)/$(PARSING_DIR) $(OBJDIR)/$(EXEC) $(OBJDIR)/$(UTILS_EXEC)
+	@mkdir -p $(OBJDIR) $(OBJDIR)/$(LEXER_DIR) 
 
 $(LIBFT) :
 	@make --no-print-directory -C libftprintf/
 
 re: fclean all
 
-.PHONY: all clean fclean re 
+.PHONY: all clean fclean re lexer_test
 

@@ -1,23 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   string.h                                           :+:      :+:    :+:   */
+/*   lexer_main.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/15 13:45:27 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/15 13:51:01 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/08/15 14:08:53 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/08/15 17:04:32 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
+#include "lexer.h"
+#include <stdint.h>
 
-typedef struct String {
-	char *str;
-	size_t size;
-	size_t capacity;
-} String;
+int main(void) {
+	char *input = strdup(" <file <file echo \"salut\"");
 
-void string_append_char(String *s, char c);
-void string_append_slice(String *s, char *c);
-void string_append_string(String *lhs, String *rhs);
+	Lexer_p lexer = lexer_init(input);
+	lexer_debug(lexer);
+
+	Token tok = lexer_get_next_token(lexer);
+
+	printf("filename = |%s|\n", tok.redir.filename);
+	printf("type = %d\n", tok.redir.type);
+	free(tok.redir.filename);
+
+	lexer_deinit(lexer);
+}

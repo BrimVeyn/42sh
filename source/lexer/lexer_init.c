@@ -1,23 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   string.h                                           :+:      :+:    :+:   */
+/*   lexer_init.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/15 13:45:27 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/15 13:51:01 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/08/15 14:45:20 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/08/15 16:22:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
+#include "lexer.h"
 
-typedef struct String {
-	char *str;
-	size_t size;
-	size_t capacity;
-} String;
+Lexer_p lexer_init(char *input) {
+	Lexer_p lexer = ft_calloc(1, sizeof(Lexer));
 
-void string_append_char(String *s, char c);
-void string_append_slice(String *s, char *c);
-void string_append_string(String *lhs, String *rhs);
+	Lexer self = {
+		.input = input,
+		.position = 0,
+		.read_position = 0,
+		.ch = 0,
+	};
+	*lexer = self;
+	lexer_read_char(lexer);
+
+	return lexer;
+}

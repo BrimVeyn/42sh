@@ -1,23 +1,38 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   string.h                                           :+:      :+:    :+:   */
+/*   ast.h                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/15 13:45:27 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/15 13:51:01 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/08/15 14:06:45 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/08/15 16:51:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
+#ifndef AST_H
+#define AST_H
 
-typedef struct String {
-	char *str;
-	size_t size;
-	size_t capacity;
-} String;
+#include "../lexer/lexer.h"
+#include "../lexer/lexer_struct.h"
 
-void string_append_char(String *s, char c);
-void string_append_slice(String *s, char *c);
-void string_append_string(String *lhs, String *rhs);
+typedef struct Node {
+	Token token;
+	struct Node *left;
+	struct Node *right;
+} Node;
+
+typedef struct Utils {
+	//ptr to utils AST functions;
+	//build;
+	//print;
+	//deinit;
+} Utils;
+
+typedef struct AST {
+	Node		*root;
+	char			*input;
+	Utils	*func;
+} AST;
+
+#endif // !AST_H
