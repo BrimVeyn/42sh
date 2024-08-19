@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:04:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/16 18:17:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/19 15:46:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,12 @@ typedef enum {
 	T_COMMAND,
 	T_EXPANSION, 
 	T_PATTERN_MATCHING,
+	T_CONTROL_GROUP,
+	T_CONTROL_SUBSTITUTION,
 	//---------------
 	T_SEPARATOR,
+	//---------------
+	T_WORD,
 	//---------------
 	T_UNKNOWN_TYPE //error ?
 } type_of_token;
@@ -36,15 +40,23 @@ typedef enum {
 	S_OR, // ||
 	S_PIPE, // |
 	S_SEMI, // ;
-	S_AMPERSAND, // &
+	S_BG, // &
 } type_of_separator;
 
 typedef enum {
-	R_INPUT, //<
-	R_OUTPUT, //>
-	R_APPEND, //>>
-	R_HERE_DOC, //<<
-	R_AMPERSAND, //<& //>&
+	CG_SUBSHELL,
+	CG_CONTROL_GROUP,
+} type_of_command_grouping;
+
+typedef enum {
+	R_INPUT, //[?n]<[file|n]
+	R_OUTPUT, //[?n]>[file|n]
+	R_APPEND, //[?n]>>[file|n]
+	R_HERE_DOC, //[?n]<<[delimiter]
+	R_DUP_IN, //[?n]<&[n]
+	R_DUP_OUT, //[?n]>&[n]
+	R_DUP_BOTH, //&>[file] >&[file]
+	R_DUP_BOTH_APPEND, //&>>[file]
 	R_UNKNOWN, //error ?
 } type_of_redirection;
 
