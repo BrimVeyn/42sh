@@ -9,8 +9,9 @@ SRC 			:= source/main.c
 
 LEXER_TEST		:= lexer_test
 LEXER_TEST_SRC	:= $(wildcard source/lexer/*.c)
-LEXER_SRC 		:= $(filter-out lexer_main.c, $(wildcard *.c))
 LEXER_TEST_OBJ	:= $(LEXER_TEST_SRC:source/%.c=objects/%.o)
+
+LEXER_SRC 		:= $(filter-out lexer_main.c, $(wildcard *.c))
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
 

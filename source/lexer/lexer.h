@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:07:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/15 16:51:11 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/16 12:09:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct Lexer {
+typedef struct {
 	char		*input;
 	uint16_t	position;
 	uint16_t	read_position;
