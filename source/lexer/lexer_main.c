@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:08:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/20 18:25:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/20 19:36:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ bool tokenCmp(Token *expected, Token *got) {
 				return false;
 			if (!tokenCmp(expected->ex_prefix, got->ex_prefix))
 				return false;
-			if (!got->ex_prefix || strcmp(expected->ex_infix, got->ex_infix))
+			if (!got->ex_infix || strcmp(expected->ex_infix, got->ex_infix))
 				return false;
 			if (!tokenCmp(expected->ex_postfix, got->ex_postfix))
 				return false;
@@ -75,7 +75,7 @@ void tokenToString(Token *t) {
 			printf("T_EXPRESSION { ");
 			printf("Type: %s, ExPrefix: \n", tagName(t->ex_type));
 			tokenToString(t->ex_prefix);
-			printf("ex_infix: %s ExSuffix: \n", t->ex_infix);
+			printf("ex_infix: |%s| ExSuffix: \n", t->ex_infix);
 			tokenToString(t->ex_postfix);
 			printf("}\n");
 			break;
@@ -182,6 +182,29 @@ int main(void) {
 	Token *expected_6 = genRedirTok(R_OUTPUT, 10, -1, expr_tok_6);
 	Token *got_6 = oneTokenTest(test_input_6);
 	tokenAssert(expected_6, got_6, test_input_6, 6);
+
+	char *test_input_7 = (char *) gc_add(ft_strdup("10>file"));
+	Token *expr_tok_7 = genExprTok(EX_WORD, none_token, "file", none_token);
+	Token *expected_7 = genRedirTok(R_OUTPUT, 10, -1, expr_tok_7);
+	Token *got_7 = oneTokenTest(test_input_7);
+	tokenAssert(expected_7, got_7, test_input_7, 7);
+
+	char *test_input_8 = (char *) gc_add(ft_strdup("10>homme$(echo femme)"));
+	Token *expr_9 = genExprTok(EX_CONTROL_SUBSTITUTION, none_token, "echo femme", none_token);
+	Token *expr_8 = genExprTok(EX_WORD, none_token, "homme", expr_9);
+	Token *expected_8 = genRedirTok(R_OUTPUT, 10, -1, expr_8);
+	Token *got_8 = oneTokenTest(test_input_8);
+	tokenAssert(expected_8, got_8, test_input_8, 8);
+
+	char *test_input_9 = (char *) gc_add(ft_strdup("10>hom$(echo me)mer$(echo hey)no"));
+	Token *expr_13 = genExprTok(EX_WORD, none_token, "no", none_token);
+	Token *expr_12 = genExprTok(EX_CONTROL_SUBSTITUTION, none_token, "echo hey", expr_13);
+	Token *expr_11 = genExprTok(EX_WORD, none_token, "mer", expr_12);
+	Token *expr_10 = genExprTok(EX_CONTROL_SUBSTITUTION, none_token, "echo me", expr_11);
+	Token *expr_tok_9 = genExprTok(EX_WORD, none_token, "hom", expr_10);
+	Token *expected_9 = genRedirTok(R_OUTPUT, 10, -1, expr_tok_9);
+	Token *got_9 = oneTokenTest(test_input_9);
+	tokenAssert(expected_9, got_9, test_input_9, 9);
 	
 	// char *test_input_3 = (char *) gc_add(ft_strdup("10>>file"));
 	// Token *expected_3 = redirectionGen(R_APPEND, 10, -1, "file");
