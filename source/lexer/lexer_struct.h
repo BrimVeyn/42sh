@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 13:55:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/19 17:10:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/20 16:59:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,16 +21,17 @@
 typedef struct Token {
 	type_of_token tag;
 	union {
-		struct {
-			type_of_redirection r_type;
-			char		*filename;
-			uint16_t	fd_prefix;
-			uint16_t	fd_postfix;
-		};  //redirection
 
 		struct {
-			char *w_word;
-		}; //untyped word --> will be translated at parsing time
+			type_of_separator s_type;
+		}; //separator
+
+		struct {
+			type_of_redirection r_type;
+			int16_t	fd_prefix;
+			int16_t	fd_postfix;
+			struct Token *filename;
+		};  //redirection
 
 		struct {
 			type_of_command c_type;
@@ -46,15 +47,16 @@ typedef struct Token {
 		}; //command grouping;
 
 		struct {
-			type_of_expression e_type;
+			type_of_expression ex_type;
+			struct Token *ex_prefix;
+			char *ex_infix;
+			struct Token *ex_postfix;
 		}; //shell expansion
-		
-		struct {
-			type_of_separator s_type;
-		}; //separator
 
 		struct {
-			type_of_pattern_matching type;
+			char *pm_prefix;
+			char *pm_infix;
+			char *pm_postfix;
 		}; //pattern_matching
 	};
 } Token;
@@ -72,7 +74,7 @@ typedef struct {
 	token_or_error_tag tag;
 	union {
 		syntax_error error;
-		Token token;
+		Token *token;
 	};
 } Token_or_Error;
 
