@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/20 18:20:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/21 16:33:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,9 +128,11 @@ bool followed_by_redirection(Lexer_p l) {
 
 //assert that the next word is a number
 bool word_is_number(Lexer_p l) {
-	while (is_number(l->peak_ch)) {
+	uint16_t size = 0;
+	for (; is_number(l->peak_ch); size += 1) {
 		lexer_peak_char(l);
 	}
+	if (size == 0) return false;
 	if (is_whitespace(l->peak_ch) || l->peak_ch == '\0') return true;
 	return false;
 }
@@ -149,31 +151,27 @@ static char *get_next_word(Lexer_p l) {
 	return word;
 }
 
+//Identifies the type of expression and returns it
 type_of_expression get_expression_type(Lexer_p l) {
 	type_of_expression type = EX_ERROR;
 	lexer_peak_char(l);
 	switch (l->peak_ch) {
 		case '(':
-			type = EX_CONTROL_SUBSTITUTION;
-			lexer_peak_char(l);
-			lexer_pos_from_peak(l);
+			type = EX_ERROR;
+			lexer_peak_from_pos(l);
 			break;
 		case '{':
 			type = EX_VARIABLE_EXPANSION;
 			lexer_peak_char(l);
 			lexer_pos_from_peak(l);
 			break;
-		case '0' ... '9':
-		case 'A' ... 'Z':
-		case 'a' ... 'z':
-			type = EX_WORD;
-			break;
 		default:
-			printf("EX_ERROR ? what do we do boys\n");
+			type = EX_WORD;
 			break;
 	}
 	return type;
 }
+
 
 char *get_ctrl_sub_word(Lexer_p l) {
 	const uint16_t start = l->position;
@@ -186,18 +184,10 @@ char *get_ctrl_sub_word(Lexer_p l) {
 	return word;
 }
 
-bool has_child_expr(Lexer_p l) {
-	while (l->peak_ch && l->peak_ch != ')') {
-		if (l->peak_ch == '$')
-			return true;
-		lexer_peak_char(l);
-	}
-	return false;
-}
 
-char *get_till_next_expr(Lexer_p l) {
+char *get_var_exp_name(Lexer_p l) {
 	const uint16_t start = l->position;
-	while(l->ch && l->ch != '$') {
+	while(l->ch && l->ch != '}') {
 		lexer_read_char(l);
 	}
 	const uint16_t end = l->position;
@@ -205,14 +195,61 @@ char *get_till_next_expr(Lexer_p l) {
 	return word;
 }
 
+char *get_error_message(Token *prev, Token *curr, type_of_error type) {
+	(void) prev;
+	(void) curr;
+	switch(type) {
+		case ERROR_UNEXPCTED_TOKEN:
+			return gc_add(strdup("Fuck you\n"));
+		default:
+			return gc_add(strdup("Not handled error\n"));
+	}
+}
+
+void eat_scalar(Lexer_p l, char c) {
+	while (l->ch == c) {
+		lexer_read_char(l);
+	}
+}
+
+void read_till_next_scalar(Lexer_p l, char c) {
+	while (l->ch != c) {
+		lexer_read_char(l);
+	}
+}
+
+char *get_ctrl_sub_input(Lexer_p l) {
+	uint16_t const start = l->position + 1;
+	uint16_t par_found = 0;
+	uint16_t par_needed = 1;
+
+	while (l->ch && par_found != par_needed) {
+		lexer_read_char(l);
+		if (l->ch == ')') {
+			par_found += 1;
+			continue;
+        }
+		if (l->ch == '(')
+			par_needed += 1;
+	}
+
+	const uint16_t end = l->position; 
+	if (l->ch == ')') lexer_read_char(l);
+	return gc_add(ft_substr(l->input, start, end - start));
+}
+
 //Extract next token from the input
-Token_or_Error lexer_get_next_token(Lexer_p l) {
+Token *lexer_get_next_token(Lexer_p l) {
 	Token *self = gc_add(ft_calloc(1, sizeof(Token)));
 	Token token;
 
 	eat_whitespace(l);
 
 	switch(l->ch) {
+		case '\0':
+			token.tag = T_END_OF_FILE;
+			break;
+		
 		case '<':
 		case '>':
 		case '&':
@@ -225,12 +262,7 @@ Token_or_Error lexer_get_next_token(Lexer_p l) {
 					token.fd_postfix = ft_atoi(&l->input[l->position]);
 					lexer_pos_from_peak(l);
 				} else {
-					Token_or_Error maybe_filename = lexer_get_next_token(l);
-					if (maybe_filename.tag == ERROR) {
-						printf("An error has occured ?\n");
-					} else {
-						token.filename = maybe_filename.token;
-					}
+					token.filename =  lexer_get_next_token(l);
 				}
 			} else {
 				lexer_peak_from_pos(l);
@@ -243,53 +275,42 @@ Token_or_Error lexer_get_next_token(Lexer_p l) {
 			printf("Separator !\n");
 			break;
 
+		case '\'':
+		case '\"':
+		case '\\':
+			printf("Inhibitors not handled yet\n");
+			break;
+
 		case '$':
 			token_expression_init(&token);
 			token.ex_type = get_expression_type(l);
-			if (token.ex_type == EX_CONTROL_SUBSTITUTION) {
-				if (has_child_expr(l)) {
-					token.ex_infix = get_till_next_expr(l);
-					Token_or_Error maybe_filename = lexer_get_next_token(l);
-					if (maybe_filename.tag == ERROR) {
-						printf("An error has occured ?\n");
-					} else {
-						token.ex_postfix = maybe_filename.token;
-					}
-				} else {
-					token.ex_infix = get_ctrl_sub_word(l);
-					// printf("ICI C -> %c\n", l->ch);
-					if (l->ch && !is_whitespace(l->ch) && l->ch != ')') {
-						Token_or_Error maybe_filename = lexer_get_next_token(l);
-						if (maybe_filename.tag == ERROR) {
-							printf("An error has occured ?\n");
-						} else {
-							token.ex_postfix = maybe_filename.token;
-						}
-					}
+			if (token.ex_type == EX_ERROR) {
+				token_control_group_init(&token);
+				lexer_read_char(l);
+				token.cs_type = CG_CONTROL_SUBSTITUTION;
+			}
+			if (token.cs_type == CG_CONTROL_SUBSTITUTION) {
+				char *cl_input = get_ctrl_sub_input(l);
+				printf("INPUT = %s\n", cl_input);
+				Lexer_p cs_l = lexer_init(cl_input);
+				token.cs_list = lexer_lex_all(cs_l);
+				printf("l->ch %c\n", l->ch);
+				if (!is_whitespace(l->ch)) {
+					token.cs_postfix = lexer_get_next_token(l);
 				}
-			} else if (token.ex_type == EX_VARIABLE_EXPANSION) {
-				//to do
-				token.ex_infix = get_next_word(l);
+				break;
 			}
 			break;
 
 		case 'a' ... 'z':
 		case 'A' ... 'Z':
 			//handle case of expression postfix an expression
+			// printf("WORD = %s\n", &l->input[l->position]);
 			token_expression_init(&token);
-			token.ex_type = get_expression_type(l);
-			if (token.ex_type == EX_WORD) {
-				if (has_child_expr(l)) {
-					token.ex_infix = get_till_next_expr(l);
-					Token_or_Error maybe_filename = lexer_get_next_token(l);
-					if (maybe_filename.tag == ERROR) {
-						printf("An error has occured ?\n");
-					} else {
-						token.ex_postfix = maybe_filename.token;
-					}
-				} else {
-					token.ex_infix = get_next_word(l);
-				}
+			token.ex_type = EX_WORD;
+			token.ex_infix = get_next_word(l);
+			if (!is_whitespace(l->ch)) {
+				token.ex_postfix = lexer_get_next_token(l);
 			}
 			break;
 
@@ -304,23 +325,29 @@ Token_or_Error lexer_get_next_token(Lexer_p l) {
 					token.fd_postfix = ft_atoi(&l->input[l->position]);
 					lexer_pos_from_peak(l);
 				} else {
-					Token_or_Error maybe_filename = lexer_get_next_token(l);
-					if (maybe_filename.tag == ERROR) {
-						printf("An error has occured ?\n");
-					} else {
-						token.filename = maybe_filename.token;
-					}
+					token.filename = lexer_get_next_token(l);
 				}
 			}
 			break;
+
+		default:
+			printf("Lexing case not handled !\n");
+			break;
 	}
-
 	*self = token;
+	return self;
+}
 
-	Token_or_Error return_value = {
-		.tag = TOKEN,
-		.token = self,
-	};
+void tokenListToString(TokenList *tl) {
+	for (uint16_t i = 0; i < tl->size; i++) {
+		tokenToString(tl->t[i], 0);
+	}
+}
 
-	return return_value;
+TokenList *lexer_lex_all(Lexer_p l) {
+	TokenList *self = token_list_init();
+	while (l->ch) {
+		token_list_add(self, lexer_get_next_token(l));
+	}
+	return self;
 }

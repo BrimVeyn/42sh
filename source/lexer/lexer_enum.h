@@ -6,23 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:04:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/20 18:16:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/21 15:09:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LEXER_ENUM_H
 #define LEXER_ENUM_H
 
-#include <stdio.h>
-#define C_RESET       "\033[0m"
-#define C_BLACK       "\033[0;30m"
-#define C_RED         "\033[0;31m"
-#define C_GREEN       "\033[0;32m"
-#define C_YELLOW      "\033[0;33m"
-#define C_BLUE        "\033[0;34m"
-#define C_MAGENTA     "\033[0;35m"
-#define C_CYAN        "\033[0;36m"
-#define C_WHITE       "\033[0;37m"
 
 typedef enum {
 	//---------------
@@ -37,12 +27,17 @@ typedef enum {
 	//---------------
 	T_UNKNOWN_TYPE, //error ?
 	//---------------
+	T_END_OF_FILE,
+	//---------------
 	T_NONE, //w/0 prefix | suffix
 } type_of_token;
 
 typedef enum {
+	ERROR_UNEXPCTED_TOKEN,
+} type_of_error;
+
+typedef enum {
 	EX_WORD,
-	EX_CONTROL_SUBSTITUTION,
 	EX_VARIABLE_EXPANSION,
 	EX_BRACES_EXPANSION,
 	EX_PATTERN_MATCHING,
@@ -61,6 +56,7 @@ typedef enum {
 typedef enum {
 	CG_SUBSHELL,
 	CG_CONTROL_GROUP,
+	CG_CONTROL_SUBSTITUTION,
 } type_of_command_grouping;
 
 typedef enum {
@@ -82,10 +78,14 @@ typedef enum {
 
 char *get_tagName_redirection(type_of_redirection type);
 char *get_tagName_expression(type_of_expression type);
+char *get_tagName_token(type_of_token type);
+char *get_tagName_command_grouping(type_of_command_grouping type);
 
 #define tagName(param) _Generic((param), \
 	type_of_redirection: get_tagName_redirection,	\
 	type_of_expression: get_tagName_expression,		\
+	type_of_token: get_tagName_token,				\
+	type_of_command_grouping: get_tagName_command_grouping,				\
     default : printf("Format not handled ! (tagName)\n") \
 )(param)
 

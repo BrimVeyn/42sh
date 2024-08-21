@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:07:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/20 16:18:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/21 14:47:04 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 # define LEXER_H
 
 #include "../../libftprintf/header/libft.h"
+#include "../../include/colors.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -40,7 +42,8 @@ typedef struct {
 } Garbage;
 
 //-----------------Lexer------------------//
-Token_or_Error	lexer_get_next_token(Lexer_p lexer);
+TokenList		*lexer_lex_all(Lexer_p l);
+Token			*lexer_get_next_token(Lexer_p lexer);
 Lexer_p			lexer_init(char *input);
 void			lexer_debug(Lexer_p lexer);
 void			lexer_deinit(Lexer_p lexer);
@@ -55,12 +58,19 @@ void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
 //----------------Token---------------------//
 void			token_redirection_init(Token *token);
 void			token_expression_init(Token *token);
+void			token_control_group_init(Token *token);
 Token			*token_empty_init(void);
 
 //----------------Garbage-------------------//
-void gc_init(void);
-void *gc_add(void *ptr);
-void gc_cleanup(void);
+void			gc_init(void);
+void			*gc_add(void *ptr);
+void			gc_cleanup(void);
+//----------------TokenList----------------//
+TokenList		*token_list_init(void);
+void			token_list_add(TokenList *tl, Token *token);
+//---------------Debug---------------------//
+void			tokenToString(Token *t, size_t offset);
+void			tokenListToString(TokenList *tl);
 
 
 #endif // !LEXER_H

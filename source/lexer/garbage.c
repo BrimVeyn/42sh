@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/20 11:08:14 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/21 15:58:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void gc_init(void) {
 }
 
 void *gc_add(void *ptr) {
-	if (gc.size == gc.capacity) {
+	if (gc.size >= gc.capacity) {
 		gc.capacity *= 2;
 		gc.garbage = ft_realloc(gc.garbage, gc.size, gc.capacity, sizeof(void *));
 		if (!gc.garbage)
