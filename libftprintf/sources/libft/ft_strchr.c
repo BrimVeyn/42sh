@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strchr.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbardavi@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:13:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2023/12/24 12:38:00 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/22 10:33:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ char	*ft_strchr(const char *string, int searchedChar)
 
 	c = (char)searchedChar;
 	if (c == '\0')
-		return ((char *)string + ft_strlen(string));
+		return (NULL);
 	while (*string)
 	{
 		if (*string == c)

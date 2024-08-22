@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:08:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/21 17:02:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/22 16:32:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-
 bool tokenCmp(Token *expected, Token *got) {
 	if (expected->tag != got->tag) return false;
 
@@ -27,11 +26,7 @@ bool tokenCmp(Token *expected, Token *got) {
 		case T_REDIRECTION:
 			if (expected->r_type != got->r_type)
 				return false;
-			if (!tokenCmp(expected->filename, got->filename))
-				return false;
-			if (expected->fd_prefix != got->fd_prefix)
-				return false;
-			if (expected->fd_postfix != got->fd_postfix)
+			if (!tokenCmp(expected->r_postfix, got->r_postfix))
 				return false;
 			break;
 		case T_NONE:
@@ -46,16 +41,16 @@ bool tokenCmp(Token *expected, Token *got) {
 			if (!tokenCmp(expected->ex_postfix, got->ex_postfix))
 				return false;
 			break;
-		case T_CONTROL_GROUP:
-			if (expected->cs_type != got->cs_type)
+		case T_COMMAND_GROUPING:
+			if (expected->cg_type != got->cg_type)
 				return false;
-			if (expected->cs_list->size != got->cs_list->size)
+			if (expected->cg_list->size != got->cg_list->size)
 				return false;
-			for (uint16_t i = 0; i < expected->cs_list->size; i++) {
-				if (!tokenCmp(expected->cs_list->t[i], got->cs_list->t[i]))
+			for (uint16_t i = 0; i < expected->cg_list->size; i++) {
+				if (!tokenCmp(expected->cg_list->t[i], got->cg_list->t[i]))
 					return false;
 			}
-			return tokenCmp(expected->cs_postfix, got->cs_postfix);
+			return tokenCmp(expected->cg_postfix, got->cg_postfix);
 			break;
 		default:
 			printf("Missing comparison here !\n");
@@ -72,20 +67,15 @@ void printOffset(size_t offset) {
 
 void tokenToString(Token *t, size_t offset) {
 	printOffset(offset);
+	if (t->e != ERROR_NONE) {
+		printf(C_RED"ERROR: %s\n"C_RESET, tagName(t->e));
+	}
 	switch(t->tag) {
 		case T_REDIRECTION:
 			printf(C_LIGHT_YELLOW"T_REDIRECTION"C_RESET" {\n");
 			printOffset(offset + 4);
 			printf("Type: "C_MEDIUM_YELLOW"%s\n"C_RESET, tagName(t->r_type));
-			if (t->fd_prefix != -1) {
-				printOffset(offset + 4);
-				printf("FdPrefix: "C_PEACH"|%d|\n"C_RESET, t->fd_prefix);
-			}
-			if (t->fd_postfix != -1) {
-				printOffset(offset + 4);
-				printf("FdPostfix: "C_PEACH"|%d|\n"C_RESET, t->fd_postfix);
-			}
-			tokenToString(t->filename, offset + 4);
+			tokenToString(t->r_postfix, offset + 4);
 			printOffset(offset);
 			printf("}\n");
 			break;
@@ -96,9 +86,9 @@ void tokenToString(Token *t, size_t offset) {
 			printf(C_MEDIUM_GRAY"T_EOF"C_RESET" {}\n");
 			break;
 		case T_EXPRESSION:
-			printf(C_LIGHT_CYAN"T_EXPRESSION"C_RESET" {\n");
+			printf(C_MEDIUM_CYAN"T_EXPRESSION"C_RESET" {\n");
 			printOffset(offset + 4);
-			printf("Type: "C_MEDIUM_CYAN"%s\n"C_RESET, tagName(t->ex_type));
+			printf("Type: "C_LIGHT_CYAN"%s\n"C_RESET, tagName(t->ex_type));
 			printOffset(offset + 4);
 			printf("ExPrefix:");
 			tokenToString(t->ex_prefix, offset + 4);
@@ -110,40 +100,33 @@ void tokenToString(Token *t, size_t offset) {
 			printOffset(offset);
 			printf("}\n");
 			break;
-		case T_CONTROL_GROUP:
-			printf(C_LIGHT_CYAN"T_CONTROL_GROUP"C_RESET" {\n");
-			printOffset(offset);
-			printf("Type: "C_MEDIUM_CYAN"%s\n"C_RESET, tagName(t->cs_type));
-			printOffset(offset);
-			printf("CgList "C_BRONZE"{\n"C_RESET);
-			for (uint16_t i = 0; i < t->cs_list->size; i++) {
-				tokenToString(t->cs_list->t[i], offset + 4);
+		case T_COMMAND_GROUPING:
+			printf(C_BRONZE"T_COMMAND_GROUPING"C_RESET" {\n");
+			printOffset(offset + 4);
+			printf("Type: "C_LIGHT_BROWN"%s\n"C_RESET, tagName(t->cg_type));
+			printOffset(offset + 4);
+			printf("CgList: "C_BRONZE"{\n"C_RESET);
+			for (uint16_t i = 0; i < t->cg_list->size; i++) {
+				tokenToString(t->cg_list->t[i], offset + 4);
 			}
-			printOffset(offset);
-			printf("CgPostfix:");
-			tokenToString(t->cs_postfix, offset + 4);
-			printOffset(offset);
+			printOffset(offset + 4);
 			printf(C_BRONZE"}\n"C_RESET);
+			printOffset(offset + 4);
+			printf("CgPostfix:");
+			tokenToString(t->cg_postfix, offset + 4);
+			printOffset(offset);
+			printf("}\n"C_RESET);
+			break;
+		case T_SEPARATOR:
+			printf(C_PURPLE"T_SEPARATOR"C_RESET" {\n");
+			printOffset(offset + 4);
+			printf("Type: "C_VIOLET"%s\n"C_RESET, tagName(t->s_type));
 			break;
 		default:
 			printf("Format not handled\n");
 	}
 }
 
-
-//Used to generate a token of type T_REDIRECTION
-Token *genRedirTok(type_of_redirection type, int16_t preFd, int16_t postFd, Token *filename) {
-	Token *tok = (Token *) gc_add(ft_calloc(1, sizeof(Token)));
-	Token self = {
-		.tag = T_REDIRECTION,
-		.r_type = type,
-		.fd_prefix = preFd,
-		.fd_postfix = postFd,
-		.filename = filename,
-	};
-	*tok = self;
-	return tok;
-}
 
 //Generate expr token
 Token *genExprTok(type_of_expression type, Token *prefix, char *infix, Token *postfix) {
@@ -198,32 +181,73 @@ Token *genEOFTok(void) {
 	return self;
 }
 
-Token *genCtrlSubTok(type_of_command_grouping type, TokenList *tl, Token *postfix) {
-	Token *self = gc_add(ft_calloc(1, sizeof(Token)));
-	Token tok = {
-		.tag = T_CONTROL_GROUP,
-		.cs_type = type,
-		.cs_list = tl,
-		.cs_postfix = postfix,
-	};
-	*self = tok;
+// Token *genCtrlSubTok(type_of_command_grouping type, TokenList *tl, Token *postfix) {
+// 	Token *self = gc_add(ft_calloc(1, sizeof(Token)));
+// 	Token tok = {
+// 		.tag = T_COMMAND_GROUPING,
+// 		.cg_type = type,
+// 		.cg_list = tl,
+// 		.cg_postfix = postfix,
+// 	};
+// 	*self = tok;
+// 	return self;
+// }
+
+void tokenListToString(TokenList *tl) {
+	for (uint16_t i = 0; i < tl->size; i++) {
+		tokenToString(tl->t[i], 0);
+	}
+}
+
+TokenList *lexer_lex_all(Lexer_p l) {
+	TokenList *self = token_list_init();
+	while (l->ch != '\0') {
+		printf("LEXALL: l->ch: %d %c\n", l->ch, l->ch);
+		token_list_add(self, lexer_get_next_token(l));
+	}
 	return self;
 }
 
-int main(void) {
+void tokenToStringAll(TokenList *t) {
+	for (uint16_t i = 0; i < t->size; i++) {
+		tokenToString(t->t[i], 0);
+	}
+}
+
+#include <readline/readline.h>
+#include <readline/history.h>
+
+int main(int ac, char *av[]) {
 	//Basic redirection test
 	gc_init();
 
 	Token *none_token __attribute__((unused)) = genNoneTok();
 	Token *eof_token __attribute__((unused)) = genEOFTok();
 
-	char *test_input_1 = (char *) gc_add(ft_strdup("$(10<10 >makefile echo salut $(cat makefile))"));
-	TokenList *tl_1 = token_list_init();
-	token_list_add(tl_1, genExprTok(EX_WORD, none_token, "dekodeko", none_token));
-	token_list_add(tl_1, genExprTok(EX_WORD, none_token, "salut", none_token));
-	Token *expected_1 = genCtrlSubTok(CG_CONTROL_SUBSTITUTION, tl_1, none_token);
-	Token *got_1 = oneTokenTest(test_input_1);
-	tokenAssert(expected_1, got_1, test_input_1, 12);
+	// char *test_input_1 = (char *) gc_add(ft_strdup("10<< file $(salut !)"));
+	// (void) test_input_1;
+	//
+	// Lexer_p l = lexer_init(test_input_1);
+	// TokenList *l1 = lexer_lex_all(l);
+	// tokenToStringAll(l1);
+	if (ac == 2 && !ft_strcmp("-i", av[1])) {
+		char *input = NULL;
+		while ((input = readline("> ")) != NULL) {
+			Lexer_p l = lexer_init(input);
+			TokenList *l1 = lexer_lex_all(l);
+			tokenToStringAll(l1);
+			add_history(input);
+		}
+	}
+
+
+	// TokenList *tl_1 = token_list_init();
+	// token_list_add(tl_1, genExprTok(EX_WORD, none_token, "dekodeko", none_token));
+	// token_list_add(tl_1, genExprTok(EX_WORD, none_token, "salut", none_token));
+	// Token *expected_1 = genCtrlSubTok(CG_CONTROL_SUBSTITUTION, tl_1, none_token);
+	// (void) expected_1;
+	// Token *got_1 = oneTokenTest(test_input_1);
+	// tokenAssert(none_token, got_1, test_input_1, 12);
 
 	gc_cleanup();
 }

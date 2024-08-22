@@ -35,7 +35,7 @@ $(LEXER_TEST): $(LIBFT) $(LEXER_OBJ)
 	@echo "$(RED)Making test binary: $(LEXER_TEST)"
 	@printf "$(MAGENTA)"
 	$(CC) $(LEXER_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(LEXER_TEST)
-	@printf "$(LEXER_TEST) done !$(DEF_COLOR)"
+	@printf "$(LEXER_TEST) done !$(DEF_COLOR)\n"
 
 $(NAME): $(LIBFT) $(OBJDIR) $(OBJ)
 	@echo "$(GREEN)Making binary: $(NAME)"

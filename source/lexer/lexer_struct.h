@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 13:55:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/21 14:48:40 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/22 13:59:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,9 @@
 #include "lexer_enum.h"
 #include "lexer.h"
 
-
 typedef struct Token {
 	type_of_token tag;
+	type_of_error e;
 	union {
 
 		struct {
@@ -29,15 +29,14 @@ typedef struct Token {
 
 		struct {
 			type_of_redirection r_type;
-			int16_t	fd_prefix;
-			int16_t	fd_postfix;
-			struct Token *filename;
+			struct Token *r_postfix;
 		};  //redirection
 
 		struct {
-			type_of_command_grouping cs_type;
-			struct TokenList *cs_list;
-			struct Token *cs_postfix;
+			type_of_command_grouping cg_type;
+			Lexer_p cg_lexer;
+			struct TokenList *cg_list;
+			struct Token *cg_postfix;
 		}; //Control substitution
 
 		struct {
@@ -45,7 +44,6 @@ typedef struct Token {
 			char *binary;
 			char *args;
 		};//shell command
-
 
 		struct {
 			type_of_expression ex_type;

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:07:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/21 14:47:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/22 16:40:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,6 @@ typedef struct {
 	uint16_t	position;
 	uint16_t	read_position;
 	char		ch;
-	uint16_t	peak_position;
-	char		peak_ch;
 
 } Lexer;
 
@@ -58,7 +56,7 @@ void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
 //----------------Token---------------------//
 void			token_redirection_init(Token *token);
 void			token_expression_init(Token *token);
-void			token_control_group_init(Token *token);
+void			token_command_grouping_init(Token *token);
 Token			*token_empty_init(void);
 
 //----------------Garbage-------------------//
