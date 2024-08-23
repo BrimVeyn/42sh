@@ -9,6 +9,10 @@ SRC 			:= source/main.c
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
 
+REGEX_TEST		:= regex_test
+REGEX_TEST_SRC	:= $(wildcard source/regex/*.c)
+REGEX_TEST_OBJ	:= $(REGEX_TEST_SRC:source/%.c=objects/%.o)
+
 OBJDIR 			:= objects
 DOUBLE_DIR		:= double_linked_list
 STRING_DIR		:= string_utils
@@ -30,6 +34,12 @@ CYAN			:= \033[0;96m
 WHITE			:= \033[0;97m
 
 all: $(NAME)
+
+$(REGEX_TEST): $(LIBFT) $(REGEX_OBJ)
+	@echo "$(RED)Making test binary: $(REGEX_TEST)"
+	@printf "$(MAGENTA)"
+	$(CC) $(REGEX_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(REGEX_TEST)
+	@printf "$(REGEX_TEST) done !$(DEF_COLOR)\n"
 
 $(NAME): $(LIBFT) $(OBJDIR) $(OBJ)
 	@echo "$(GREEN)Making binary: $(NAME)"
@@ -61,4 +71,4 @@ $(LIBFT) :
 
 re: fclean all
 
-.PHONY: all clean fclean re 
+.PHONY: all clean fclean re regex_test
