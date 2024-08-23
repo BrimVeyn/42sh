@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/22 13:06:43 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/23 10:29:16 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,8 +107,6 @@ int regex_matchrange(char *regexp, char *text, int *text_pos){
 }
 
 int regex_matchhere(char *regexp, char *text, int *text_pos) {
-    printf("regexp char: %c\n", *regexp);
-    fflush(stdout);
     if (regexp[0] == '\0') {
         return 1;
     }
@@ -156,6 +154,7 @@ int main(void) {
     regex_test("H[a-z]", text);
     regex_test("Heee[a-z]", text);
     regex_test("H[a-z]*", text);
+    printf("Salut\n");
 
     return 0;
 }
