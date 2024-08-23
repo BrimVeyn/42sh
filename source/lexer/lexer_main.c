@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:08:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/22 16:32:48 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/23 15:55:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,7 @@ Token *genNoneTok(void) {
 Token *oneTokenTest(char *input) {
 	Lexer_p l = lexer_init(input);
 
-	Token *tok = lexer_get_next_token(l);
+	Token *tok = lexer_get_next_token(l, false);
 	return tok;
 }
 
@@ -203,7 +203,7 @@ TokenList *lexer_lex_all(Lexer_p l) {
 	TokenList *self = token_list_init();
 	while (l->ch != '\0') {
 		printf("LEXALL: l->ch: %d %c\n", l->ch, l->ch);
-		token_list_add(self, lexer_get_next_token(l));
+		token_list_add(self, lexer_get_next_token(l, false));
 	}
 	return self;
 }
@@ -230,6 +230,7 @@ int main(int ac, char *av[]) {
 	// Lexer_p l = lexer_init(test_input_1);
 	// TokenList *l1 = lexer_lex_all(l);
 	// tokenToStringAll(l1);
+	
 	if (ac == 2 && !ft_strcmp("-i", av[1])) {
 		char *input = NULL;
 		while ((input = readline("> ")) != NULL) {

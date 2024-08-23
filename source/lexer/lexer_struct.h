@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 13:55:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/22 13:59:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/23 14:35:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ typedef struct Token {
 			struct Token *ex_prefix;
 			char *ex_infix;
 			struct Token *ex_postfix;
-		}; //shell expansion
+		}; //expression
 
 		struct {
 			char *pm_prefix;

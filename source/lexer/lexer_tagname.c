@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:09:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/22 16:07:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/23 13:25:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,8 @@ const char *get_tagName_error(type_of_error type) {
 			return "ERROR_NONE";
 		case ERROR_UNCLOSED_SQ:
 			return "ERROR_UNCLOSED_SQ";
+		case ERROR_UNCLOSED_DQ:
+			return "ERROR_UNCLOSED_DQ";
 		case ERROR_UNCLOSED_CG:
 			return "ERROR_UNCLOSED_CG";
 		case ERROR_UNEXPCTED_TOKEN:
@@ -102,8 +104,6 @@ const char *get_tagName_command_grouping(type_of_command_grouping type) {
 			return "CG_CONTROL_GROUP";
 		case CG_CONTROL_SUBSTITUTION:
 			return "CG_CONTROL_SUBSTITUTION";
-		case CG_INHIBITOR_DQUOTE:
-			return "CG_INHIBITOR_DQUOTE";
 		default:
 			return "Not handled ! (control sub)";
 	}
@@ -123,6 +123,8 @@ const char *get_tagName_expression(type_of_expression type) {
 			return "EX_PATTERN_MATCHING";
 		case EX_INHIBITOR_SQUOTE:
 			return "EX_INHIBITOR_SQUOTE";
+		case EX_INHIBITOR_DQUOTE:
+			return "EX_INHIBITOR_DQUOTE";
 		case EX_ERROR:
 			return "EX_ERROR";
 		default:

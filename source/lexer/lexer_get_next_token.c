@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/22 16:40:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/23 16:31:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,11 +160,6 @@ type_of_command_grouping get_command_grouping_type(Lexer_p l) {
 		lexer_read_x_char(l, 2);
 		return CG_CONTROL_GROUP;
 	}
-	else if (l->ch == '\"') {
-		lexer_read_char(l);
-		printf("l->ch: %c, l->position: %d\n", l->ch, l->position);
-		return CG_INHIBITOR_DQUOTE;
-	}
 	else {
 		lexer_read_char(l);
 		return CG_SUBSHELL;
@@ -179,6 +174,10 @@ type_of_expression get_expression_type(Lexer_p l) {
 	else if (ft_strchr("*[]?!", l->ch)) {
 		lexer_read_char(l);
 		return EX_PATTERN_MATCHING;
+	}
+	else if (l->ch == '\"') {
+		lexer_read_char(l);
+		return EX_INHIBITOR_DQUOTE;
 	}
 	else if (l->ch == '\'') {
 		lexer_read_char(l);
@@ -218,12 +217,13 @@ char *get_till_sq(Token *token, Lexer_p l) {
 
 char *get_till_dq(Token *token, Lexer_p l) {
 	const uint16_t start = l->position;
-	while (l->ch && l->ch != '\"')
+	while (l->ch && l->ch != '\"') {
 		lexer_read_char(l);
+    }
 	const uint16_t end = l->position;
 
 	if (l->ch != '\"')
-		token->e = ERROR_NONE;
+		token->e = ERROR_UNCLOSED_DQ;
 	else
 		lexer_read_char(l);
 
@@ -258,6 +258,7 @@ char *get_till_special_or_whitespace(Lexer_p l) {
 }
 
 type_of_error check_identifier_syntax(char *identifier) {
+	if (ft_strlen(identifier) == 1 && *identifier == '?') return ERROR_NONE;
 	if (!ft_isalpha(*identifier) && !(*identifier == '_')) {
 		return ERROR_BAD_SUBSTITUTION;
 	} else identifier += 1;
@@ -294,13 +295,12 @@ char *get_till_end_of_cg(Token *token, Lexer_p l) {
 	const uint16_t start = l->position;
 	const char target = (token->cg_type == CG_SUBSHELL) * ')'
 		+ (token->cg_type == CG_CONTROL_SUBSTITUTION) * ')'
-		+ (token->cg_type == CG_INHIBITOR_DQUOTE) * '\"'
 		+ (token->cg_type == CG_CONTROL_GROUP) * '}';
 	uint16_t found = 0;
 	uint16_t needed = 1;
 	while (l->ch) {
 		if (token->cg_type == CG_CONTROL_SUBSTITUTION && l->ch == '(') {
-			lexer_read_x_char(l, 1);
+			lexer_read_char(l);
 			needed += 1;
 		} else if (token->cg_type == CG_CONTROL_GROUP && l->ch == '{') {
 			lexer_read_char(l);
@@ -311,20 +311,29 @@ char *get_till_end_of_cg(Token *token, Lexer_p l) {
 		lexer_read_char(l);
 	}
 	const uint16_t end = l->position;
+	// const char *
 	if (l->ch != target || needed != found) {
 		token->e = ERROR_UNCLOSED_CG;
 	} else lexer_read_char(l);
 	return (char *) gc_add(ft_substr(l->input, start, end - start));
 }
-
+bool is_valid_control_group(TokenList *list) {
+	if (list->size < 2) return false;
+	return true;
+}
 
 //Extract next token from the input
-Token *lexer_get_next_token(Lexer_p l) {
+Token *lexer_get_next_token(Lexer_p l, bool recursive_call) {
 	Token *token = gc_add(ft_calloc(1, sizeof(Token)));
 
 	eat_whitespace(l);
 
 	token->tag = get_token_tag(l);
+	//Here we unchain all separators if they were following any expression w/o whitespaces
+	if (recursive_call && token->tag == T_SEPARATOR) {
+		token->tag = T_NONE;
+		return token;
+	}
 	token->e = ERROR_NONE;
 	init_token_from_tag(token);
 
@@ -334,14 +343,15 @@ Token *lexer_get_next_token(Lexer_p l) {
 		case T_REDIRECTION:
 			token->r_type = get_redirection_type(l);
 			eat_whitespace(l);
-			token->r_postfix = lexer_get_next_token(l);
+			token->r_postfix = lexer_get_next_token(l, true);
 			break;
 		case T_COMMAND_GROUPING:
 			token->cg_type = get_command_grouping_type(l);
 			token->cg_lexer = lexer_init(get_till_end_of_cg(token, l));
 			token->cg_list = lexer_lex_all(token->cg_lexer);
+			if (!is_valid_control_group(token->cg_list)) token->e = ERROR_UNEXPCTED_TOKEN;
 			if (!is_whitespace(l->ch)) {
-				token->cg_postfix = lexer_get_next_token(l);
+				token->cg_postfix = lexer_get_next_token(l, true);
 			}
 			break;
 		case T_EXPRESSION:
@@ -349,6 +359,8 @@ Token *lexer_get_next_token(Lexer_p l) {
 			switch (token->ex_type) {
 				case EX_INHIBITOR_SQUOTE:
 					token->ex_infix = get_till_sq(token, l); break;
+				case EX_INHIBITOR_DQUOTE:
+					token->ex_infix = get_till_dq(token, l); break;
 				case EX_VARIABLE_EXPANSION:
 					token->ex_infix = get_identifier(token, l); break;
 				case EX_WORD:
@@ -357,7 +369,7 @@ Token *lexer_get_next_token(Lexer_p l) {
 					token->ex_infix = NULL;
 			}
 			if (!is_whitespace(l->ch)) {
-				token->ex_postfix = lexer_get_next_token(l);
+				token->ex_postfix = lexer_get_next_token(l, true);
 			}
 			break;
 		default:

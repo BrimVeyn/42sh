@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:04:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/22 16:01:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/23 13:25:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ typedef enum {
 	ERROR_NONE, //error free 
 	ERROR_UNEXPCTED_TOKEN, //<> ||| <<<< <<<>
 	ERROR_UNCLOSED_SQ, //'....\0
+	ERROR_UNCLOSED_DQ, //'....\0
 	ERROR_UNCLOSED_CG, //".....\0
 	ERROR_BAD_SUBSTITUTION, // cf invalid identifier | brace expansion ? maybe
 	ERROR_ESCAPED_SQ, //'..\'..'
@@ -45,6 +46,7 @@ typedef enum {
 	EX_BRACES_EXPANSION, //{[range|enum]}
 	EX_PATTERN_MATCHING, //*[]?!
 	EX_INHIBITOR_SQUOTE, //"[any]"
+	EX_INHIBITOR_DQUOTE, //"[any]"
 	EX_ERROR, //Error ?
 	// EX_ARITHMETIC_EXPRESSION, //eventually
 } type_of_expression;
@@ -60,7 +62,6 @@ typedef enum {
 typedef enum {
 	CG_SUBSHELL, //([any])
 	CG_CONTROL_GROUP, //$([any])
-	CG_INHIBITOR_DQUOTE, //"[any]"
 	CG_CONTROL_SUBSTITUTION, //{ [any]; }
 } type_of_command_grouping;
 
