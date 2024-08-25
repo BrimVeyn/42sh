@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/23 13:28:00 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/25 12:50:54 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,17 +59,10 @@ int regex_matchstar(char c, char *regexp, char *text, int *text_pos) {
     return regex_matchhere(regexp, text, text_pos);
 }
 
-int regex_is_range_match(char **regexp, char c){
-    char start = (*regexp)[0];
-    char end = (*regexp)[2];
-    *regexp += 3;
+int regex_is_range_match(char *regexp, char c) {
+    char start = regexp[0];
+    char end = regexp[2];
     return (start <= c && c <= end);
-}
-
-int regex_find_range_end(char *regexp){
-    int i = 0;
-    for (; regexp[i] != ']'; i++){}
-    return i;
 }
 
 int regex_find_range_start(char *regexp){
@@ -78,42 +71,62 @@ int regex_find_range_start(char *regexp){
     return i;
 }
 
-int regex_matchrange(char *regexp, char *text, int *text_pos){
+int regex_find_range_end(char *regexp){
+    int i = 0;
+    for (; regexp[i] != ']'; i++){}
+    return i;
+}
+
+int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found) {
     int has_star = (regexp[regex_find_range_end(regexp) + 1] == '*');
-    do {
-        if (regexp[1] == '-' && regex_is_range_match(&regexp, *text)){
-            (*text_pos)++;
-            if (has_star){
-                return regex_matchrange(regexp + regex_find_range_start(regexp), text + 1, text_pos);
-            }
-            return regex_matchhere(regexp + regex_find_range_end(regexp) + 1, text + 1, text_pos);
+    int matched = 0;
+    /*printf("regxp: %c\n", *regexp);*/
+    while(*regexp != ']') {
+        // implemente litteral charactere here (&& regexp[0] != '//')
+        // +2 to skip current char and -
+        if (regexp[1] == '-' && (regexp += 2) && regex_is_range_match(regexp - 2, *text)){
+            matched = 1;
+        } else if (*regexp == *text && *regexp != '-'){
+            matched = 1;
         }
-        if (regexp[0] == *text){
+
+        if (matched){
+            previous_found = 1;
             (*text_pos)++;
+            text++;
             if (has_star){
-                return regex_matchrange(regexp + regex_find_range_start(regexp), text + 1, text_pos);
+                return regex_matchrange(regexp + regex_find_range_start(regexp) + 1, text, text_pos, previous_found);
             }
-            return regex_matchhere(regexp + regex_find_range_end(regexp) + 1, text + 1, text_pos);
+            return regex_matchhere(regexp + regex_find_range_end(regexp) + 1, text, text_pos);
         }
-        if (*regexp == ']')
-            break;
+        //debug printf
+        else{
+            /*printf("%c is not in the range\n", *text);*/
+        }
+
+        //avoid going to far after a range comparaison
+        /*if (*(regexp - 2) != '-' || *regexp != ']')*/
         regexp++;
-    } while(*regexp != ']' && *regexp);
-    if (has_star){
-        printf("return star\n");
-        if (*text_pos != 0)
-            return regex_matchhere(regexp + 2, text, text_pos);
     }
+    
+    if (has_star) {
+        /*printf("Not found but there is a star\n");*/
+        if (previous_found)
+            return regex_matchhere(regexp + 2, text, text_pos);
+        return regex_matchhere(regexp + 1, text, text_pos);
+        // if text_pos
+    }
+
     return 0;
 }
 
 int regex_matchhere(char *regexp, char *text, int *text_pos) {
-    printf("regexp char: %c\ntext char: %c\n", *regexp, *text);
+    /*printf("regexp char: %c\ntext char: %c\n", *regexp, *text);*/
     if (regexp[0] == '\0') {
         return 1;
     }
     if (regexp[0] == '['){
-        return regex_matchrange(regexp + 1, text, text_pos);
+        return regex_matchrange(regexp + 1, text, text_pos, 0);
     }
     if (regexp[1] == '*') {
         return regex_matchstar(*regexp, regexp + 2, text, text_pos);
@@ -122,6 +135,8 @@ int regex_matchhere(char *regexp, char *text, int *text_pos) {
         (*text_pos)++;
         return regex_matchhere(regexp + 1, text + 1, text_pos);
     }
+
+    /*printf("regex_matchhere return 0\n");*/
     return 0;
 }
 
@@ -169,6 +184,11 @@ int main(int ac, char **av) {
         regex_test("Heee[a-z]", text);
         regex_test("H[a-z]*", text);
         regex_test("[4-8]*", text);
+        regex_test("[a-z4-8]*", "000aaaaa44444");
+        regex_test("[a-z ]*", "Hello world!");
+        regex_test("^[a-z ]*", "Hello world!");
+        regex_test("^H[a-z]*", "Hello world!");
+
     }
     return 0;
 }
