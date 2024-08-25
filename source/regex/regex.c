@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/25 12:50:54 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/25 13:17:42 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,36 @@ typedef struct {
     int start;
     int end;
 } match_result;
+
+int matchdigit(char c){
+    return (0 <= c && c <= 9);
+}
+
+int matchalpha(char c){
+    return (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z'));
+}
+
+int matchalphanum(char c){
+    return matchdigit(c) || matchalpha(c);
+}
+
+int matchwhitespace(char c){
+    return (('\a' <= c && c <= '\r') || c == ' ');
+}
+
+int matchmetachar(char c, const char* str)
+{
+  switch (str[0])
+  {
+    case 'd': return  matchdigit(c);
+    case 'D': return !matchdigit(c);
+    case 'w': return  matchalphanum(c);
+    case 'W': return !matchalphanum(c);
+    case 's': return  matchwhitespace(c);
+    case 'S': return !matchwhitespace(c);
+    default:  return (c == str[0]);
+  }
+}
 
 match_result regex_match(char *regexp, char *text) {
     match_result result = { -1, -1 };
@@ -86,7 +116,7 @@ int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found
         // +2 to skip current char and -
         if (regexp[1] == '-' && (regexp += 2) && regex_is_range_match(regexp - 2, *text)){
             matched = 1;
-        } else if (*regexp == *text && *regexp != '-'){
+        } else if (*regexp == *text){
             matched = 1;
         }
 
@@ -100,12 +130,7 @@ int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found
             return regex_matchhere(regexp + regex_find_range_end(regexp) + 1, text, text_pos);
         }
         //debug printf
-        else{
-            /*printf("%c is not in the range\n", *text);*/
-        }
 
-        //avoid going to far after a range comparaison
-        /*if (*(regexp - 2) != '-' || *regexp != ']')*/
         regexp++;
     }
     
@@ -131,6 +156,10 @@ int regex_matchhere(char *regexp, char *text, int *text_pos) {
     if (regexp[1] == '*') {
         return regex_matchstar(*regexp, regexp + 2, text, text_pos);
     }
+    if (regexp[0] == '\\' && matchmetachar(*text, regexp + 1)){
+        (*text_pos)++;
+        return regex_matchhere(regexp + 2, text + 1, text_pos);
+    }
     if (*text != '\0' && (regexp[0] == '.' || regexp[0] == *text)) {
         (*text_pos)++;
         return regex_matchhere(regexp + 1, text + 1, text_pos);
@@ -139,6 +168,7 @@ int regex_matchhere(char *regexp, char *text, int *text_pos) {
     /*printf("regex_matchhere return 0\n");*/
     return 0;
 }
+
 
 void regex_test(char *regexp, char *text){
     match_result result = regex_match(regexp, text);
@@ -187,7 +217,9 @@ int main(int ac, char **av) {
         regex_test("[a-z4-8]*", "000aaaaa44444");
         regex_test("[a-z ]*", "Hello world!");
         regex_test("^[a-z ]*", "Hello world!");
-        regex_test("^H[a-z]*", "Hello world!");
+        regex_test("^H[a-z-]*", "Hello-world!");
+        regex_test("^H[a-z]*\\sw", "Hello world!");
+        printf("Hello\\s\n");
 
     }
     return 0;
