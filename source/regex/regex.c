@@ -6,12 +6,11 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/25 13:17:42 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/26 11:45:59 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "regex.h"
-#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -116,6 +115,8 @@ int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found
         // +2 to skip current char and -
         if (regexp[1] == '-' && (regexp += 2) && regex_is_range_match(regexp - 2, *text)){
             matched = 1;
+        } else if (regexp[0] == '\\' && matchmetachar(*text, regexp + 1)){
+            matched = 1;
         } else if (*regexp == *text){
             matched = 1;
         }
@@ -129,7 +130,6 @@ int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found
             }
             return regex_matchhere(regexp + regex_find_range_end(regexp) + 1, text, text_pos);
         }
-        //debug printf
 
         regexp++;
     }
@@ -149,6 +149,9 @@ int regex_matchhere(char *regexp, char *text, int *text_pos) {
     /*printf("regexp char: %c\ntext char: %c\n", *regexp, *text);*/
     if (regexp[0] == '\0') {
         return 1;
+    }
+    if (regexp[0] == '$'){
+        return (*text == '\0');
     }
     if (regexp[0] == '['){
         return regex_matchrange(regexp + 1, text, text_pos, 0);
