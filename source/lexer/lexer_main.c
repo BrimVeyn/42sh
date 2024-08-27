@@ -6,11 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:08:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 13:41:59 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 15:22:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "lexer.h"
+#include "../parser/parser.h"
 #include "lexer_enum.h"
 #include "lexer_struct.h"
 #include <stdint.h>
@@ -134,6 +135,10 @@ int main(int ac, char *av[]) {
 			TokenList *l1 = lexer_lex_all(l);
 			tokenToStringAll(l1);
 			add_history(input);
+			Parser *p = parser_init(input);
+			parser_print_state(p);
+			parser_parse_all(p);
+			parser_print_state(p);
 		}
 	}
 

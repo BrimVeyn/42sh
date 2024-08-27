@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 13:42:50 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 15:00:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ void lexer_read_x_char(Lexer_p l, uint16_t n) {
 }
 
 type_of_token get_token_tag(Lexer_p l) {
-	if (ft_strchr("&|;\n)", l->ch) || !l->ch) {
+	if (ft_strchr("&|;\n)", l->ch) || l->ch == '\0') {
 		return T_SEPARATOR;
 	}
 	if (ft_strchr("><", l->ch)
@@ -102,15 +102,18 @@ type_of_separator get_separator_type(Lexer_p l) {
 	}
 	else if (l->ch == ';') {
 		lexer_read_char(l);
-		return S_SEMI;
+		return S_SEMI_COLUMN;
 	}
 	else if (l->ch == ')') {
 		lexer_read_char(l);
 		return S_PAR_CLOSE;
 	}
-	else {
+	else if (l->ch == '&'){
 		lexer_read_char(l);
 		return S_BG;
+	} else {
+		printf("error separator type l->ch = %d %c\n", l->ch, l->ch);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -176,6 +179,24 @@ TokenList *lexer_lex_till(Lexer_p l, type_of_separator sep) {
 	return self;
 }
 
+TokenList *lexer_lex_till_operator(Lexer_p l) {
+	TokenList *self = token_list_init();
+	while (l->ch != '\0') {
+		Token *tmp = lexer_get_next_token(l, false);
+		token_list_add(self, tmp);
+		if (tmp->tag == T_SEPARATOR && 
+			(tmp->s_type == S_BG ||
+			tmp->s_type == S_EOF ||
+			tmp->s_type == S_OR ||
+			tmp->s_type == S_AND ||
+			tmp->s_type == S_PIPE ||
+			tmp->s_type == S_SEMI_COLUMN ||
+			tmp->s_type == S_NEWLINE))
+			break;
+	}
+	return self;
+}
+
 bool is_delimiter(type_mode mode, char c) {
 	if (mode == DEFAULT) {
 		return ft_strchr("$();|\n \t", c) || c == '\0';
@@ -222,20 +243,10 @@ Token *lexer_get_next_token(Lexer_p l, bool recursive_call) {
 		case T_GROUPING:
 			token->g_type = get_group_type(l);
 			if (token->g_type == G_DQUOTE) {
-				token->g_lexer = lexer_init(&l->input[l->position], DQUOTE);
+				token->g_list = lexer_lex_till(l, S_DQ);
 			} else {
-				token->g_lexer = lexer_init(&l->input[l->position], DEFAULT);
+				token->g_list = lexer_lex_till(l, S_PAR_CLOSE);
 			}
-			printf("l->ch = %c\n", l->ch);
-			token->g_list = lexer_lex_till(token->g_lexer, S_PAR_CLOSE);
-			l->position += token->g_lexer->position;
-			l->read_position += token->g_lexer->read_position;
-			if (l->read_position >= l->input_len) {
-				l->ch = 0;
-			} else {
-				l->ch = l->input[l->read_position];
-			}
-			printf("for subfix l->ch = %c %d\n", l->ch, l->ch);
 			if (l->ch && !is_whitespace(l->ch)) {
 				token->g_postfix = lexer_get_next_token(l, true);
 			}
@@ -244,7 +255,7 @@ Token *lexer_get_next_token(Lexer_p l, bool recursive_call) {
 			token->w_infix = get_word(l);
 			if (l->ch && !is_whitespace(l->ch)) {
 				token->w_postfix = lexer_get_next_token(l, true);
-			} 
+			}
 			break;
 		default:
 			printf("Default case of get_next_token !\n");
