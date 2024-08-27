@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/15 13:55:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 14:43:20 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/08/27 15:33:36 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/08/27 15:47:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,10 +49,11 @@ typedef struct Token {
 	};
 } Token;
 
-typedef struct {
-	char *bin;
-	char **args;
-} SimpleCommand;
+
+typedef enum {
+	R_FD,
+	R_FILENAME,
+} type_of_suffix;
 
 typedef struct TokenList {
 	Token		**t;
