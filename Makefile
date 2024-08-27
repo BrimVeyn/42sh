@@ -19,6 +19,10 @@ REGEX_TEST		:= regex_test
 REGEX_TEST_SRC	:= $(wildcard source/regex/*.c)
 REGEX_TEST_OBJ	:= $(REGEX_TEST_SRC:source/%.c=objects/%.o)
 
+EXEC_TEST		:= exec_test
+EXEC_TEST_SRC	:= $(wildcard source/exec/*.c)
+EXEC_TEST_OBJ	:= $(EXEC_TEST_SRC:source/%.c=objects/%.o)
+
 OBJDIR 			:= objects
 LEXER_DIR		:= lexer
 
@@ -39,6 +43,12 @@ $(LEXER_TEST): $(LIBFT) $(LEXER_OBJ)
 	@printf "$(MAGENTA)"
 	$(CC) $(LEXER_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(LEXER_TEST)
 	@printf "$(LEXER_TEST) done !$(DEF_COLOR)\n"
+
+$(EXEC_TEST): $(LIBFT) $(EXEC_OBJ)
+	@echo "$(RED)Making test binary: $(EXEC_TEST)"
+	@printf "$(MAGENTA)"
+	$(CC) $(EXEC_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(EXEC_TEST)
+	@printf "$(EXEC_TEST) done !$(DEF_COLOR)\n"
 
 $(REGEX_TEST): $(LIBFT) $(REGEX_OBJ)
 	@echo "$(RED)Making test binary: $(REGEX_TEST)"
@@ -76,4 +86,4 @@ $(LIBFT) :
 
 re: fclean all
 	
-.PHONY: all clean fclean re regex_test lexer_test
+.PHONY: all clean fclean re regex_test lexer_test exec_test

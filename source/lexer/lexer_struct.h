@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_struct.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 13:55:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 11:29:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 13:22:15 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,21 @@ typedef struct {
 	char *bin;
 	char **args;
 } SimpleCommand;
+
+typedef enum {
+	R_FD,
+	R_FILENAME,
+} type_of_suffix;
+
+typedef struct {
+	int prefix_fd;
+	type_of_redirection r_type;
+	type_of_suffix su_type;
+	union {
+		int fd;
+		char *filename;
+	};
+} Redirection;
 
 typedef struct TokenList {
 	Token		**t;
