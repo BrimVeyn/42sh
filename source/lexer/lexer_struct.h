@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 13:55:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/23 14:35:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 11:29:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,14 @@
 #include "lexer_enum.h"
 #include "lexer.h"
 
+#define DELIMITERS_DEFAULT "|$;\0\n"
+#define DELIMITERS_DQUOTE "$\0"
+
 typedef struct Token {
 	type_of_token tag;
 	type_of_error e;
+	char *delimiters;
 	union {
-
 		struct {
 			type_of_separator s_type;
 		}; //separator
@@ -33,55 +36,33 @@ typedef struct Token {
 		};  //redirection
 
 		struct {
-			type_of_command_grouping cg_type;
-			Lexer_p cg_lexer;
-			struct TokenList *cg_list;
-			struct Token *cg_postfix;
-		}; //Control substitution
+			char			*w_infix;
+			struct Token	*w_postfix;
+		}; //word
 
 		struct {
-			type_of_command c_type;
-			char *binary;
-			char *args;
-		};//shell command
-
-		struct {
-			type_of_expression ex_type;
-			struct Token *ex_prefix;
-			char *ex_infix;
-			struct Token *ex_postfix;
-		}; //expression
-
-		struct {
-			char *pm_prefix;
-			char *pm_infix;
-			char *pm_postfix;
-		}; //pattern_matching
+			type_of_grouping		g_type;
+			Lexer_p					g_lexer;
+			struct TokenList		*g_list;
+			struct Token			*g_postfix;
+		}; // idk bru
 	};
 } Token;
 
+typedef struct {
+	char *bin;
+	char **args;
+} SimpleCommand;
+
 typedef struct TokenList {
-	Token **t;
-	uint16_t size;
-	uint16_t capacity;
+	Token		**t;
+	uint16_t	size;
+	uint16_t	capacity;
 } TokenList;
 
-typedef enum {
-	ERROR,
-	TOKEN,
-} token_or_error_tag;
-
 typedef struct {
-	type_of_error error;
-	char *error_message;
+	type_of_error	error;
+	char			*error_message;
 } Error;
-
-typedef struct {
-	token_or_error_tag tag;
-	union {
-		Error e;
-		Token *token; // or token
-	};
-} Token_or_Error;
 
 #endif // !LEXER_STRUCT_H

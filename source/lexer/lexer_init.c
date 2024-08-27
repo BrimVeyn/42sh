@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:45:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/22 16:39:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/26 17:12:55 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,21 +33,21 @@ Lexer_p lexer_init(char *input) {
 
 //Allocate a empty token_ptr
 Token *token_empty_init(void) {
-	Token *self = ft_calloc(1, sizeof(Token));
+	Token *self = (Token *) ft_calloc(1, sizeof(Token));
+	if (!self) exit(EXIT_FAILURE);
 	self->tag = T_NONE;
 	return self;
 }
 
 void token_command_grouping_init(Token *token) {
-	token->cg_list = NULL;
-	token->cg_postfix = (Token *) gc_add(token_empty_init());
+	token->g_lexer = NULL;
+	token->g_list = NULL;
+	token->g_postfix = (Token *) gc_add(token_empty_init());
 }
 
-//initialise expr token
-void token_expression_init(Token *token) {
-	token->ex_prefix = (Token *) gc_add(token_empty_init());
-	token->ex_infix = NULL;
-	token->ex_postfix = (Token *) gc_add(token_empty_init());
+void token_word_init(Token *token) {
+	token->w_infix = NULL;
+	token->w_postfix = (Token *) gc_add(token_empty_init());
 }
 
 //initialise token redir struct

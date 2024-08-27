@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:07:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/23 15:53:48 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 10:36:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef enum {
+	
+} type_of_state;
+
 typedef struct {
+	
 	char		*input;
 	uint16_t	input_len;
 	uint16_t	position;
@@ -41,7 +46,7 @@ typedef struct {
 
 //-----------------Lexer------------------//
 TokenList		*lexer_lex_all(Lexer_p l);
-Token *lexer_get_next_token(Lexer_p l, bool recursive_call);
+Token *lexer_get_next_token(Lexer_p l, bool recursive_call, const char *delimiters);
 Lexer_p			lexer_init(char *input);
 void			lexer_debug(Lexer_p lexer);
 void			lexer_deinit(Lexer_p lexer);
