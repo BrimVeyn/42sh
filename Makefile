@@ -15,6 +15,9 @@ LEXER_SRC 		:= $(filter-out lexer_main.c, $(wildcard *.c))
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
 
+REGEX_TEST		:= regex_test
+REGEX_TEST_SRC	:= $(wildcard source/regex/*.c)
+REGEX_TEST_OBJ	:= $(REGEX_TEST_SRC:source/%.c=objects/%.o)
 
 OBJDIR 			:= objects
 LEXER_DIR		:= lexer
@@ -36,6 +39,12 @@ $(LEXER_TEST): $(LIBFT) $(LEXER_OBJ)
 	@printf "$(MAGENTA)"
 	$(CC) $(LEXER_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(LEXER_TEST)
 	@printf "$(LEXER_TEST) done !$(DEF_COLOR)\n"
+
+$(REGEX_TEST): $(LIBFT) $(REGEX_OBJ)
+	@echo "$(RED)Making test binary: $(REGEX_TEST)"
+	@printf "$(MAGENTA)"
+	$(CC) $(REGEX_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(REGEX_TEST)
+	@printf "$(REGEX_TEST) done !$(DEF_COLOR)\n"
 
 $(NAME): $(LIBFT) $(OBJDIR) $(OBJ)
 	@echo "$(GREEN)Making binary: $(NAME)"
@@ -66,6 +75,5 @@ $(LIBFT) :
 	@make --no-print-directory -C libftprintf/
 
 re: fclean all
-
-.PHONY: all clean fclean re lexer_test
-
+	
+.PHONY: all clean fclean re regex_test lexer_test
