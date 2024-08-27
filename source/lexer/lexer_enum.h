@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:04:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 12:02:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 14:59:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ typedef enum {
 	S_AND,// &&
 	S_OR, // ||
 	S_PIPE, // |
-	S_SEMI, // ;
+	S_SEMI_COLUMN, // ;
 	S_BG, // &
 	S_NEWLINE, // \n
 	S_EOF, // \0

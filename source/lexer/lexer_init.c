@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:45:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 11:38:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 14:43:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,6 @@ Token *token_empty_init(void) {
 }
 
 void token_command_grouping_init(Token *token) {
-	token->g_lexer = NULL;
 	token->g_list = NULL;
 	token->g_postfix = (Token *) gc_add(token_empty_init());
 }

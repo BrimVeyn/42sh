@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 13:55:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 13:44:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 14:43:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ typedef struct Token {
 
 		struct {
 			type_of_grouping		g_type;
-			Lexer_p					g_lexer;
 			struct TokenList		*g_list;
 			struct Token			*g_postfix;
 		}; // idk bru

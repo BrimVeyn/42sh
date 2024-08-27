@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:07:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 13:44:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 14:53:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,8 @@ Lexer_p			lexer_init(char *input, type_mode mode);
 void			lexer_debug(Lexer_p lexer);
 void			lexer_deinit(Lexer_p lexer);
 void			lexer_read_char(Lexer_p l);
+TokenList *lexer_lex_till_operator(Lexer_p l);
+TokenList *lexer_lex_till(Lexer_p l, type_of_separator sep);
 
 //-----------------Utils------------------//
 bool			is_whitespace(char c);
@@ -76,6 +78,7 @@ void			token_list_add(TokenList *tl, Token *token);
 //---------------Debug---------------------//
 void			tokenToString(Token *t, size_t offset);
 void			tokenListToString(TokenList *tl);
+void			tokenToStringAll(TokenList *t);
 
 
 #endif // !LEXER_H

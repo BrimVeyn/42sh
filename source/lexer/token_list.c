@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 13:37:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/21 14:00:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 13:52:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 TokenList *token_list_init(void) {
 	TokenList *self = gc_add(ft_calloc(1, sizeof(TokenList)));
 	TokenList tl = {
-		.t = gc_add(ft_calloc(10, sizeof(Token *))),
+		.t = (Token **) gc_add(ft_calloc(10, sizeof(Token *))),
 		.size = 0,
 		.capacity = 10,
 	};
