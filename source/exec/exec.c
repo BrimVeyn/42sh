@@ -6,48 +6,18 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 11:37:43 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/27 13:44:54 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/27 15:29:39 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 
+#include "../lexer/lexer.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/wait.h>
-
-typedef enum {
-	R_INPUT, //[?n]<[ex|n]
-	R_OUTPUT, //[?n]>[ex|n]
-	R_APPEND, //[?n]>>[ex|n]
-	R_HERE_DOC, //[?n]<<[delimiter]
-	R_DUP_IN, //[?n]<&[ex|n]
-	R_DUP_OUT, //[?n]>&[ex|n]
-	R_DUP_BOTH, //&>[ex|n]
-	R_DUP_BOTH_APPEND, //&>>[ex]
-} type_of_redirection;
-
-typedef struct {
-	char *bin;
-	char **args;
-} SimpleCommand;
-
-typedef enum {
-	R_FD,
-	R_FILENAME,
-} type_of_suffix;
-
-typedef struct {
-	int prefix_fd;
-	type_of_redirection r_type;
-	type_of_suffix su_type;
-	union {
-		int fd;
-		char *filename;
-	};
-} Redirection;
 
 SimpleCommand init_test_simple_command(void){
 	SimpleCommand command;
@@ -58,7 +28,6 @@ SimpleCommand init_test_simple_command(void){
 	return command;
 }
 
-
 Redirection init_test_redirect(void){
 	Redirection redirect;
 	redirect.filename = "Makefile";
@@ -67,24 +36,65 @@ Redirection init_test_redirect(void){
 	return redirect;
 }
 
-void apply_redirect(Redirection redirect){
+
+void apply_redirect(const Redirection redirect){
 	int fd = redirect.fd;
-	if (redirect.r_type == R_INPUT){
-		if (redirect.su_type == R_FILENAME){
-			if ((fd = open(redirect.filename, O_RDONLY)) == -1){
-				perror("Can't open file:");
-				exit(EXIT_FAILURE);
-			}
-		}
+	const int open_flag = (redirect.r_type == R_INPUT) * (O_RDONLY)
+		+ (redirect.r_type == R_OUTPUT) * (O_WRONLY | O_TRUNC | O_CREAT)
+		+ (redirect.r_type == R_APPEND) * (O_WRONLY | O_CREAT);
 
-		dup2(fd, STDIN_FILENO);
-		
-		if (redirect.su_type == R_FILENAME){
-			close(fd);
-		}
+	const int dup_on = (redirect.r_type == R_INPUT) * STDIN_FILENO
+		+ (redirect.r_type == R_OUTPUT || redirect.r_type == R_APPEND) * STDOUT_FILENO; 
+
+	if ((fd = open(redirect.filename, open_flag)) == -1){
+		perror("Can't open file:");
+		exit(EXIT_FAILURE);
 	}
-	else if (redirect.r_type == R_OUTPUT){
+	dup2(fd, dup_on);
+	if (redirect.su_type == R_FILENAME){
+		close(fd);
+	}
+}
 
+RedirectionList *redirection_list_init(void);
+void redirection_list_add(RedirectionList *rl, Redirection *redirection);
+void redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
+
+RedirectionList *redirection_list_init(void) {
+	RedirectionList *self = gc_add(ft_calloc(1, sizeof(RedirectionList)));
+	RedirectionList rl = {
+		.r = gc_add(ft_calloc(10, sizeof(Redirection *))),
+		.size = 0,
+		.capacity = 10,
+	};
+	*self = rl;
+	return self;
+}
+
+void redirection_list_add(RedirectionList *rl, Redirection *redirection) {
+	if (rl->size >= rl->capacity) {
+		rl->capacity *= 2;
+		rl->r = ft_realloc(rl->r, rl->size, rl->capacity, sizeof(Redirection *));
+	}
+	rl->r[rl->size] = redirection;
+	rl->size += 1;
+}
+
+void redirection_list_prepend(RedirectionList *rl, Redirection *redirection){
+	if (rl->size >= rl->capacity) {
+		rl->capacity *= 2;
+		rl->r = ft_realloc(rl->r, rl->size, rl->capacity, sizeof(Redirection *));
+	}
+	rl->size += 1;
+	for (int i = rl->size; i > 0; i--){
+		rl->r[i] = rl->r[i - 1];
+	}
+	rl->r[0] = redirection;
+}
+
+void apply_all_redirect(RedirectionList redirections){
+	for (int i = 0; redirections.r[i]; i++){
+		apply_redirect(*redirections.r[i]);
 	}
 }
 

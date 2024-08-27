@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:08:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 10:33:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 13:41:59 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,16 @@ void tokenToString(Token *t, size_t offset) {
 			break;
 		case T_NONE:
 			printf(C_MEDIUM_GRAY"T_NONE"C_RESET" {}\n");
+			break;
+		case T_WORD:
+			printf(C_MEDIUM_BLUE"T_WORD"C_RESET" {\n");
+			printOffset(offset + 4);
+			printf(C_LIGHT_BLUE"w_infix: %s\n"C_RESET, t->w_infix);
+			printOffset(offset + 4);
+			printf(C_LIGHT_BLUE"w_postfix: "C_RESET);
+			tokenToString(t->w_postfix, offset + 4);
+			printOffset(offset);
+			printf("}\n");
 			break;
 		case T_GROUPING:
 			printf(C_BRONZE"T_COMMAND_GROUPING"C_RESET" {\n");
@@ -120,7 +130,7 @@ int main(int ac, char *av[]) {
 	if (ac == 2 && !ft_strcmp("-i", av[1])) {
 		char *input = NULL;
 		while ((input = readline("> ")) != NULL) {
-			Lexer_p l = lexer_init(input);
+			Lexer_p l = lexer_init(input, DEFAULT);
 			TokenList *l1 = lexer_lex_all(l);
 			tokenToStringAll(l1);
 			add_history(input);

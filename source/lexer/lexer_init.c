@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:45:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/26 17:12:55 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 11:38:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,11 @@
 #include "lexer_enum.h"
 #include "lexer_struct.h"
 
-Lexer_p lexer_init(char *input) {
+Lexer_p lexer_init(char *input, type_mode mode) {
 	Lexer_p lexer = gc_add(ft_calloc(1, sizeof(Lexer)));
 
 	Lexer self = {
+		.mode = mode,
 		.input = input,
 		.input_len = ft_strlen(input),
 		.position = 0,
