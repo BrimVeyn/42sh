@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 10:32:41 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 13:42:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ void lexer_read_x_char(Lexer_p l, uint16_t n) {
 }
 
 type_of_token get_token_tag(Lexer_p l) {
-	if (ft_strchr("&|;\0\n", l->ch)) {
+	if (ft_strchr("&|;\n)", l->ch) || !l->ch) {
 		return T_SEPARATOR;
 	}
 	if (ft_strchr("><", l->ch)
@@ -58,10 +58,10 @@ type_of_token get_token_tag(Lexer_p l) {
 		return T_REDIRECTION;
 	}
 	if (!ft_strncmp("$(", &l->input[l->position], 2)
-		|| l->ch == '(') {
+		|| ft_strchr("(\"", l->ch)) {
 		return T_GROUPING;
 	}
-	return T_NONE;
+	return T_WORD;
 }
 
 void init_token_from_tag(Token *token) {
@@ -72,13 +72,23 @@ void init_token_from_tag(Token *token) {
 		case T_GROUPING:
 			token_command_grouping_init(token);
 			break;
+		case T_WORD:
+			token_word_init(token);
 		default:
 			return;
 	}
 }
 
 type_of_separator get_separator_type(Lexer_p l) {
-	if (!ft_strncmp("&&", &l->input[l->position], 2)) {
+	if (l->ch == '\0') {
+		lexer_read_char(l);
+		return S_EOF;
+	}
+	else if (l->ch == '\n') {
+		lexer_read_char(l);
+		return S_NEWLINE;
+	}
+	else if (!ft_strncmp("&&", &l->input[l->position], 2)) {
 		lexer_read_x_char(l, 2);
 		return S_AND;
 	}
@@ -93,6 +103,10 @@ type_of_separator get_separator_type(Lexer_p l) {
 	else if (l->ch == ';') {
 		lexer_read_char(l);
 		return S_SEMI;
+	}
+	else if (l->ch == ')') {
+		lexer_read_char(l);
+		return S_PAR_CLOSE;
 	}
 	else {
 		lexer_read_char(l);
@@ -135,8 +149,55 @@ type_of_redirection get_redirection_type(Lexer_p l) {
 	}
 }
 
+type_of_grouping get_group_type(Lexer_p l) {
+	if (!ft_strncmp("$(", &l->input[l->position], 2)) {
+		lexer_read_x_char(l, 2);
+		return G_COMMAND_SUB;
+	} else if (l->ch == '(') { 
+		lexer_read_char(l);
+		return G_SUBSHELL;
+	} else if (l->ch == '\"'){
+		lexer_read_char(l);
+		return G_DQUOTE;
+	} else {
+		printf("char = %c %d\n", l->ch, l->ch);
+		exit(EXIT_FAILURE);
+	}
+}
+
+TokenList *lexer_lex_till(Lexer_p l, type_of_separator sep) {
+	TokenList *self = token_list_init();
+	while (l->ch != '\0') {
+		Token *tmp = lexer_get_next_token(l, false);
+		token_list_add(self, tmp);
+		if (tmp->tag == T_SEPARATOR && (tmp->s_type == sep || tmp->s_type == S_EOF))
+			break;
+	}
+	return self;
+}
+
+bool is_delimiter(type_mode mode, char c) {
+	if (mode == DEFAULT) {
+		return ft_strchr("$();|\n \t", c) || c == '\0';
+	} else {
+		return ft_strchr("$\0\n", c);
+	}
+}
+
+char *get_word(Lexer_p l) {
+	const uint16_t start = l->position;
+	while (l->ch != '\0') {
+		lexer_read_char(l);
+		if (is_delimiter(l->mode, l->ch)) {
+			break;
+		}
+	}
+	const uint16_t end = l->position;
+	return (char *) gc_add(ft_substr(l->input, start, end - start));
+}
+
 //Extract next token from the input
-Token *lexer_get_next_token(Lexer_p l, bool recursive_call, const char *delimiters) {
+Token *lexer_get_next_token(Lexer_p l, bool recursive_call) {
 	Token *token = gc_add(ft_calloc(1, sizeof(Token)));
 
 	eat_whitespace(l);
@@ -151,14 +212,39 @@ Token *lexer_get_next_token(Lexer_p l, bool recursive_call, const char *delimite
 
 	switch(token->tag) {
 		case T_SEPARATOR:
-			token->s_type = get_separator_type(l); break;
+			token->s_type = get_separator_type(l); 
+			break;
 		case T_REDIRECTION:
 			token->r_type = get_redirection_type(l);
 			eat_whitespace(l);
+			token->r_postfix = lexer_get_next_token(l, true);
 			break;
 		case T_GROUPING:
-			token->delimiters = DELIMITERS_DQUOTE;
-			//oui
+			token->g_type = get_group_type(l);
+			if (token->g_type == G_DQUOTE) {
+				token->g_lexer = lexer_init(&l->input[l->position], DQUOTE);
+			} else {
+				token->g_lexer = lexer_init(&l->input[l->position], DEFAULT);
+			}
+			printf("l->ch = %c\n", l->ch);
+			token->g_list = lexer_lex_till(token->g_lexer, S_PAR_CLOSE);
+			l->position += token->g_lexer->position;
+			l->read_position += token->g_lexer->read_position;
+			if (l->read_position >= l->input_len) {
+				l->ch = 0;
+			} else {
+				l->ch = l->input[l->read_position];
+			}
+			printf("for subfix l->ch = %c %d\n", l->ch, l->ch);
+			if (l->ch && !is_whitespace(l->ch)) {
+				token->g_postfix = lexer_get_next_token(l, true);
+			}
+			break;
+		case T_WORD:
+			token->w_infix = get_word(l);
+			if (l->ch && !is_whitespace(l->ch)) {
+				token->w_postfix = lexer_get_next_token(l, true);
+			} 
 			break;
 		default:
 			printf("Default case of get_next_token !\n");

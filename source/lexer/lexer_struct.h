@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/15 13:55:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 13:22:15 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/08/27 13:46:46 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/08/27 14:43:28 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define LEXER_STRUCT_H
 
 //All tag enums
+#include <stdint.h>
 #pragma once
 #include "lexer_enum.h"
 #include "lexer.h"
@@ -24,7 +25,7 @@
 typedef struct Token {
 	type_of_token tag;
 	type_of_error e;
-	char *delimiters;
+	uint16_t parent;
 	union {
 		struct {
 			type_of_separator s_type;
@@ -74,6 +75,12 @@ typedef struct TokenList {
 	uint16_t	size;
 	uint16_t	capacity;
 } TokenList;
+
+typedef struct RedirectionList {
+	Redirection		**r;
+	uint16_t	size;
+	uint16_t	capacity;
+} RedirectionList;
 
 typedef struct {
 	type_of_error	error;

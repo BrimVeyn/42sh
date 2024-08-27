@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:07:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 10:36:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 13:44:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,12 @@
 #include <stdbool.h>
 
 typedef enum {
-	
-} type_of_state;
+	DEFAULT,
+	DQUOTE,
+} type_mode;
 
 typedef struct {
-	
+	type_mode	mode;
 	char		*input;
 	uint16_t	input_len;
 	uint16_t	position;
@@ -46,8 +47,8 @@ typedef struct {
 
 //-----------------Lexer------------------//
 TokenList		*lexer_lex_all(Lexer_p l);
-Token *lexer_get_next_token(Lexer_p l, bool recursive_call, const char *delimiters);
-Lexer_p			lexer_init(char *input);
+Token			*lexer_get_next_token(Lexer_p l, bool recursive_call);
+Lexer_p			lexer_init(char *input, type_mode mode);
 void			lexer_debug(Lexer_p lexer);
 void			lexer_deinit(Lexer_p lexer);
 void			lexer_read_char(Lexer_p l);
@@ -62,6 +63,7 @@ void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
 void			token_redirection_init(Token *token);
 void			token_expression_init(Token *token);
 void			token_command_grouping_init(Token *token);
+void			token_word_init(Token *token);
 Token			*token_empty_init(void);
 
 //----------------Garbage-------------------//
