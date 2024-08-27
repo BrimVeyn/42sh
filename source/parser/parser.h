@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 13:45:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 15:24:02 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 15:47:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,35 @@ typedef struct {
 	TokenList *peak_command;
 } Parser;
 
+typedef struct {
+	int prefix_fd;
+	type_of_redirection r_type;
+	type_of_suffix su_type;
+	union {
+		int fd;
+		char *filename;
+	};
+} Redirection;
+
+typedef struct RedirectionList {
+	Redirection		**r;
+	uint16_t	size;
+	uint16_t	capacity;
+} RedirectionList;
+
+typedef struct {
+	RedirectionList *redir_list;
+	char *bin;
+	char **args;
+} SimpleCommand;
+
 Parser *parser_init(char *input);
 void parser_get_next_command(Parser *self);
 void parse_current(Parser *self);
 void parser_print_state(Parser *self);
 void parser_parse_all(Parser *self);
+
+RedirectionList *redirection_list_init(void);
+void redirection_list_add(RedirectionList *rl, Redirection *redirection);
+void redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
+
