@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 13:55:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 11:29:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 13:44:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define LEXER_STRUCT_H
 
 //All tag enums
+#include <stdint.h>
 #pragma once
 #include "lexer_enum.h"
 #include "lexer.h"
@@ -24,7 +25,7 @@
 typedef struct Token {
 	type_of_token tag;
 	type_of_error e;
-	char *delimiters;
+	uint16_t parent;
 	union {
 		struct {
 			type_of_separator s_type;
