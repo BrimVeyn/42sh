@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/26 11:45:59 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/28 13:08:50 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,8 +228,3 @@ int main(int ac, char **av) {
     return 0;
 }
 
-/*
-TO DO
-Checker pourquoi repetition quand range fail
-reduire taille de la fonction range
-*/

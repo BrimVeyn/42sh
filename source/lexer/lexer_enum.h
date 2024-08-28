@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_enum.h                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:04:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 14:59:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 16:39:59 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,20 +72,6 @@ typedef enum {
 	C_SHELL, //grep, etc...
 } type_of_command;
 
-const char *get_tagName_token(type_of_token type);
-const char *get_tagName_redirection(type_of_redirection type);
-const char *get_tagName_grouping(type_of_grouping type);
-const char *get_tagName_error(type_of_error type);
-const char *get_tagName_separator(type_of_separator type);
-const char *error_handler(uintptr_t type);
 
-#define tagName(param) _Generic((param),					\
-	type_of_token: get_tagName_token,						\
-	type_of_redirection: get_tagName_redirection,			\
-	type_of_grouping: get_tagName_grouping,	\
-	type_of_error: get_tagName_error,						\
-	type_of_separator: get_tagName_separator,				\
-    default: error_handler									\
-)(param)
 
 #endif // !LEXER_ENUM_H

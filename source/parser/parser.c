@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 13:50:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 16:08:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 16:53:09 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "parser.h"
+#include "../debug/debug.h"
 #include <stdint.h>
 
 Parser *parser_init(char *input) {
@@ -98,7 +99,7 @@ void printRedirList(RedirectionList *rl) {
 		const Redirection *el = rl->r[it];
 		printf("el->prefix_fd: %d\n", el->prefix_fd);
 		printf("el->r_type: %s\n", tagName(el->r_type));
-		//add tagnam for su_type; LARBIN
+		printf("el->su_type: %s\n", tagName(el->su_type));
 		printf("el->filname: %s\n", el->filename);
 	}
 }
@@ -124,4 +125,10 @@ void parser_parse_all(Parser *self) {
 	}
 }
 
-
+/*
+ * TO DO 
+ *
+ * Color debug
+ * check si le fd redirect est un nombre
+ *
+ * */

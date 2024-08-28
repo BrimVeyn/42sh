@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 13:45:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 15:47:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 16:43:19 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,11 @@ typedef struct {
 	TokenList *curr_command;
 	TokenList *peak_command;
 } Parser;
+
+typedef enum {
+	R_FD,
+	R_FILENAME,
+} type_of_suffix;
 
 typedef struct {
 	int prefix_fd;
@@ -35,6 +40,7 @@ typedef struct RedirectionList {
 	uint16_t	capacity;
 } RedirectionList;
 
+
 typedef struct {
 	RedirectionList *redir_list;
 	char *bin;
@@ -50,4 +56,3 @@ void parser_parse_all(Parser *self);
 RedirectionList *redirection_list_init(void);
 void redirection_list_add(RedirectionList *rl, Redirection *redirection);
 void redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
-

@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   lexer_tagname.c                                    :+:      :+:    :+:   */
+/*   debug_tagname.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/20 10:09:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 15:01:22 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/08/27 16:38:02 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/08/27 16:44:33 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lexer.h"
-#include "lexer_enum.h"
+#include "../parser/parser.h"
+#include "../lexer/lexer_enum.h"
 #include <stdint.h>
 
 const char *get_tagName_token(type_of_token type) {
@@ -109,4 +109,15 @@ const char *get_tagName_grouping(type_of_grouping type) {
 
 const char *error_handler(uintptr_t __attribute__((unused)) ptr) {
 	return C_RED"TAGNAME FORMAT NOT HANDLED"C_RESET;
+}
+
+const char *get_tagName_suffix(type_of_suffix type) {
+	switch(type) {
+		case R_FILENAME:
+			return "R_FILENAME";
+		case R_FD:
+			return "R_FD";
+		default:
+			return "R_UNKNOWN";
+	}
 }
