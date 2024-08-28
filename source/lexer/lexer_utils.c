@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 09:13:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/20 11:06:59 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 16:31:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void *ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize) {
 
 //Return true if char is a whitespace
 bool is_whitespace(char c) {
-	return (c == '\n' || c == ' ' || c == '\t' || c == '\r' || c == '\v' || c == '\f');
+	return (c == ' ' || c == '\t');
 }
 
 //Returns true if char is < or >

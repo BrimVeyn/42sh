@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 13:50:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 16:08:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 17:07:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 		count += (el->tag == T_WORD);
 	}
 
-	curr_command->args = (char **) gc_add(ft_calloc(count, sizeof(char *)));
+	curr_command->args = (char **) gc_add(ft_calloc(count + 1, sizeof(char *)));
 
 	size_t i = 0;
 	for (uint16_t it = 0; it < tl->size; it++) {
@@ -89,6 +89,7 @@ SimpleCommand *parser_parse_current(TokenList *tl) {
 	RedirectionList *redirs = parser_get_redirection(tl);
 	SimpleCommand *command = parser_get_command(tl);
 	command->redir_list = redirs;
+
 	return command;
 }
 
@@ -115,13 +116,18 @@ void printCommand(SimpleCommand *command) {
 	printCharChar(command->args);
 }
 
+bool has_reached_eof(TokenList *tl) {
+	const Token *last_el = tl->t[tl->size - 1];
+	return last_el->tag == T_SEPARATOR && last_el->s_type == S_EOF;
+}
+
 void parser_parse_all(Parser *self) {
-	while (self->curr_command->size != 0) {
+	while (true) {
 		SimpleCommand *command = parser_parse_current(self->curr_command);
-		printCommand(command);
+		printCommand(command); //Debug
 		// exec_execute_command(self);
+		if (has_reached_eof(self->curr_command)) 
+			break;
 		parser_get_next_command(self);
 	}
 }
-
-

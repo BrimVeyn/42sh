@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 15:00:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 16:41:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include "lexer_struct.h"
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
 
 //Read a char from input
 void lexer_read_char(Lexer_p l) {
@@ -170,7 +169,7 @@ type_of_grouping get_group_type(Lexer_p l) {
 
 TokenList *lexer_lex_till(Lexer_p l, type_of_separator sep) {
 	TokenList *self = token_list_init();
-	while (l->ch != '\0') {
+	while (true) {
 		Token *tmp = lexer_get_next_token(l, false);
 		token_list_add(self, tmp);
 		if (tmp->tag == T_SEPARATOR && (tmp->s_type == sep || tmp->s_type == S_EOF))
@@ -179,19 +178,16 @@ TokenList *lexer_lex_till(Lexer_p l, type_of_separator sep) {
 	return self;
 }
 
+bool is_operator(type_of_separator s) {
+	return s == S_BG || s == S_EOF || s == S_OR || s == S_AND || s == S_SEMI_COLUMN || s == S_NEWLINE || s == S_PIPE;
+}
+
 TokenList *lexer_lex_till_operator(Lexer_p l) {
 	TokenList *self = token_list_init();
-	while (l->ch != '\0') {
+	while (true) {
 		Token *tmp = lexer_get_next_token(l, false);
 		token_list_add(self, tmp);
-		if (tmp->tag == T_SEPARATOR && 
-			(tmp->s_type == S_BG ||
-			tmp->s_type == S_EOF ||
-			tmp->s_type == S_OR ||
-			tmp->s_type == S_AND ||
-			tmp->s_type == S_PIPE ||
-			tmp->s_type == S_SEMI_COLUMN ||
-			tmp->s_type == S_NEWLINE))
+		if (tmp->tag == T_SEPARATOR && is_operator(tmp->s_type))
 			break;
 	}
 	return self;
@@ -247,13 +243,13 @@ Token *lexer_get_next_token(Lexer_p l, bool recursive_call) {
 			} else {
 				token->g_list = lexer_lex_till(l, S_PAR_CLOSE);
 			}
-			if (l->ch && !is_whitespace(l->ch)) {
+			if (!is_whitespace(l->ch)) {
 				token->g_postfix = lexer_get_next_token(l, true);
 			}
 			break;
 		case T_WORD:
 			token->w_infix = get_word(l);
-			if (l->ch && !is_whitespace(l->ch)) {
+			if (!is_whitespace(l->ch)) {
 				token->w_postfix = lexer_get_next_token(l, true);
 			}
 			break;

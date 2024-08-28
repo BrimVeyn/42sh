@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:09:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 15:01:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 16:30:27 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,10 @@ const char *get_tagName_separator(type_of_separator type) {
 			return "S_PIPE";
 		case S_PAR_CLOSE:
 			return "S_PAR_CLOSE";
+		case S_EOF:
+			return "S_EOF";
+		case S_NEWLINE:
+			return "S_NEWLINE";
 		default:
 			return "tagname missing (separator)";
 	}
