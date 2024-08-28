@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/15 14:08:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 16:43:37 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/08/28 13:38:21 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/08/28 13:38:22 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,6 @@ void tokenListToString(TokenList *tl) {
 TokenList *lexer_lex_all(Lexer_p l) {
 	TokenList *self = token_list_init();
 	while (l->ch != '\0') {
-		printf("LEXALL: l->ch: %d %c\n", l->ch, l->ch);
 		token_list_add(self, lexer_get_next_token(l, false));
 	}
 	return self;
@@ -139,7 +138,6 @@ int main(int ac, char *av[]) {
 			Parser *p = parser_init(input);
 			parser_print_state(p);
 			parser_parse_all(p);
-			parser_print_state(p);
 		}
 	}
 
