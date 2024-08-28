@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:08:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 15:37:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/28 13:11:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,6 @@ void tokenListToString(TokenList *tl) {
 TokenList *lexer_lex_all(Lexer_p l) {
 	TokenList *self = token_list_init();
 	while (l->ch != '\0') {
-		printf("LEXALL: l->ch: %d %c\n", l->ch, l->ch);
 		token_list_add(self, lexer_get_next_token(l, false));
 	}
 	return self;
@@ -138,7 +137,6 @@ int main(int ac, char *av[]) {
 			Parser *p = parser_init(input);
 			parser_print_state(p);
 			parser_parse_all(p);
-			parser_print_state(p);
 		}
 	}
 
