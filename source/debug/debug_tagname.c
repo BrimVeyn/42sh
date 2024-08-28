@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/27 16:38:02 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/27 16:44:33 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/08/28 13:37:54 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/08/28 13:37:57 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,10 @@ const char *get_tagName_separator(type_of_separator type) {
 			return "S_PIPE";
 		case S_PAR_CLOSE:
 			return "S_PAR_CLOSE";
+		case S_EOF:
+			return "S_EOF";
+		case S_NEWLINE:
+			return "S_NEWLINE";
 		default:
 			return "tagname missing (separator)";
 	}
