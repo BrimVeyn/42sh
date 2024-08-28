@@ -6,17 +6,19 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 11:37:43 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 13:36:23 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/28 15:58:10 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 
-#include "../parser/parser.h"
+#define _GNU_SOURCE 1
 #include <unistd.h>
+#include <fcntl.h>
+
+#include "../parser/parser.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
 #include <sys/wait.h>
 
 SimpleCommand init_test_simple_command(void){
@@ -63,7 +65,44 @@ void apply_all_redirect(RedirectionList redirections){
 	}
 }
 
+type_of_separator interface_separator(type_of_separator new_separator, int mode){
+	static type_of_separator separator;
+	if (mode == I_WRITE){
+		separator = new_separator;
+	}
+	return separator;
+}
+
 void exec_simple_command(SimpleCommand *command){
+	type_of_separator next_separator = interface_separator(NULL, I_READ);
+	pid_t id[1024];
+	int i = 1;
+	int pipefd[2];
+
+	if (true){
+		while(command){
+			if (next_separator == S_PIPE){
+				pipe2(pipefd, O_CLOEXEC);
+			}
+			if ((id[i] = fork()) == -1){
+				perror("Fork failed:");
+				exit(EXIT_FAILURE);
+			}
+			command = command->next;
+			if (id[i] == 0){
+
+			}
+			//Execution
+
+			// applyredirect
+			i++;
+		}
+
+		int j = 0;
+		while(j < i){
+			waitpid(id[j++], NULL, 0);
+		}
+	}
 	execve(command->bin, command->args, __environ);
 }
 
