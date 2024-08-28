@@ -3,21 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_main.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:38:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 13:38:22 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/28 15:57:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "lexer.h"
 #include "../parser/parser.h"
-#include "lexer_enum.h"
-#include "lexer_struct.h"
-#include <stdint.h>
-#include <assert.h>
-#include <stdio.h>
 #include "../debug/debug.h"
+#include <time.h>
+#include <unistd.h>
 
 
 void printOffset(size_t offset) {
@@ -112,15 +109,12 @@ void tokenToStringAll(TokenList *t) {
 	}
 }
 
-#include <readline/readline.h>
-#include <readline/history.h>
+
 
 int main(int ac, char *av[]) {
 	//Basic redirection test
 	gc_init();
-
 	Token *none_token __attribute__((unused)) = genNoneTok();
-
 	// char *test_input_1 = (char *) gc_add(ft_strdup("10<< file $(salut !)"));
 	// (void) test_input_1;
 	//

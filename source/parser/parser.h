@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 13:45:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 16:43:19 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/28 14:43:41 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,10 +41,11 @@ typedef struct RedirectionList {
 } RedirectionList;
 
 
-typedef struct {
-	RedirectionList *redir_list;
-	char *bin;
-	char **args;
+typedef struct SimpleCommand {
+	RedirectionList			*redir_list;
+	char					*bin;
+	char					**args;
+	struct SimpleCommand	*next;
 } SimpleCommand;
 
 Parser *parser_init(char *input);

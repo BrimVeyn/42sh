@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 13:38:12 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/28 15:26:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "parser.h"
 #include "../debug/debug.h"
 #include <stdint.h>
+#include <stdio.h>
 
 Parser *parser_init(char *input) {
 	Parser *self = (Parser *) gc_add(ft_calloc(1, sizeof(Parser)));
@@ -69,7 +70,6 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 		if (el->tag == T_WORD) {
 			if (i == 0) {
 				curr_command->bin = el->w_infix;
-				continue;
 			}
 			curr_command->args[i++] = el->w_infix;
 		}
@@ -95,14 +95,23 @@ SimpleCommand *parser_parse_current(TokenList *tl) {
 }
 
 void printRedirList(RedirectionList *rl) {
-	printf("------ Redir list ----\n");
+	printf(C_BRONZE"------ "C_LIGHT_BROWN"Redir list"C_BRONZE"----\n"C_RESET);
 	for (uint16_t it = 0; it < rl->size; it++) {
 		const Redirection *el = rl->r[it];
-		printf("el->prefix_fd: %d\n", el->prefix_fd);
-		printf("el->r_type: %s\n", tagName(el->r_type));
-		printf("el->su_type: %s\n", tagName(el->su_type));
-		printf("el->filname: %s\n", el->filename);
+		printf("prefix_fd ["C_BRONZE"%d"C_RESET"]:\t"C_LIGHT_BROWN"%d\n"C_RESET, it, el->prefix_fd);
+		printf("r_type    ["C_BRONZE"%d"C_RESET"]:\t"C_LIGHT_BROWN"%s\n"C_RESET, it, tagName(el->r_type));
+		printf("su_type   ["C_BRONZE"%d"C_RESET"]:\t"C_LIGHT_BROWN"%s\n"C_RESET, it, tagName(el->su_type));
+		if (el->su_type == R_FD) {
+			printf("suffix_fd ["C_BRONZE"%d"C_RESET"]:"C_LIGHT_BROWN"\t%d\n"C_RESET, it, el->fd);
+		} else if (el->su_type == R_FILENAME) {
+			printf("filename  ["C_BRONZE"%d"C_RESET"]:\t"C_LIGHT_BROWN"%s\n"C_RESET, it, el->filename);
+		}
+		if (it + 1 < rl->size) {
+			printf(C_BRONZE"------------------\n"C_RESET);
+		}
 	}
+	printf(C_BRONZE"---------...---------\n"C_RESET);
+
 }
 
 void printCharChar(char **tab) {
@@ -113,22 +122,35 @@ void printCharChar(char **tab) {
 
 void printCommand(SimpleCommand *command) {
 	printRedirList(command->redir_list);
+	printf(C_GOLD"------ "C_LIGHT_YELLOW"Command"C_GOLD"-------\n"C_RESET);
 	printf("bin: %s\n", command->bin);
 	printCharChar(command->args);
+	printf(C_GOLD"---------...---------\n"C_RESET);
 }
 
-bool has_reached_eof(TokenList *tl) {
+bool has_reached_eof(const TokenList *tl) {
 	const Token *last_el = tl->t[tl->size - 1];
 	return last_el->tag == T_SEPARATOR && last_el->s_type == S_EOF;
 }
 
+type_of_separator cut_separator(TokenList *tl) {
+	const Token *last_el = tl->t[tl->size - 1];
+	if (last_el->tag == T_SEPARATOR) {
+		tl->size -= 1;
+		return last_el->s_type;
+	}
+	return S_DEFAULT;
+}
+
 void parser_parse_all(Parser *self) {
+	//define null operator
 	while (true) {
+		const type_of_separator next_seperator = cut_separator(self->curr_command);
+		printf("seperator = %s\n", tagName(next_seperator));
 		SimpleCommand *command = parser_parse_current(self->curr_command);
 		printCommand(command); //Debug
 		// exec_execute_command(self);
-		if (has_reached_eof(self->curr_command)) 
-			break;
+		if (next_seperator == S_EOF) break;
 		parser_get_next_command(self);
 	}
 }

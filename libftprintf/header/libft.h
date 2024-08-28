@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:15:50 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/02/08 13:52:25 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/28 15:56:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LIBFT_H
 # define LIBFT_H
 
+# define _GNU_SOURCE 1
 # include <stddef.h>
 # include <stdio.h>
 # include <stdlib.h>
