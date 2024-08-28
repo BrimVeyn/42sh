@@ -6,13 +6,13 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 11:41:08 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/27 11:41:38 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/28 13:53:21 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef EXEC_H
 # define EXEC_H
 
-
+#include "../../include/minishell.h"
 
 #endif
