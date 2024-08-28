@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:07:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 14:53:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 16:36:39 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,16 @@ typedef struct {
 
 typedef Lexer * Lexer_p;
 
+#pragma once
 #include "lexer_enum.h"
 #include "lexer_struct.h"
+
+typedef struct TokenList {
+	Token		**t;
+	uint16_t	size;
+	uint16_t	capacity;
+} TokenList;
+
 
 typedef struct {
 	void **garbage;

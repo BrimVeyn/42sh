@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_main.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:08:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 15:37:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 16:43:37 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <stdio.h>
+#include "../debug/debug.h"
 
 
 void printOffset(size_t offset) {

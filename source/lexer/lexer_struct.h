@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_struct.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 15:33:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 15:47:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/27 16:35:41 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,16 +50,7 @@ typedef struct Token {
 } Token;
 
 
-typedef enum {
-	R_FD,
-	R_FILENAME,
-} type_of_suffix;
 
-typedef struct TokenList {
-	Token		**t;
-	uint16_t	size;
-	uint16_t	capacity;
-} TokenList;
 
 typedef struct {
 	type_of_error	error;
