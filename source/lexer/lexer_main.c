@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:38:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 15:57:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/28 16:19:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,8 +108,6 @@ void tokenToStringAll(TokenList *t) {
 		tokenToString(t->t[i], 0);
 	}
 }
-
-
 
 int main(int ac, char *av[]) {
 	//Basic redirection test
