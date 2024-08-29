@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:07:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/28 15:55:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/29 12:53:10 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ typedef Lexer * Lexer_p;
 #pragma once
 #include "lexer_enum.h"
 #include "lexer_struct.h"
+#include "../../include/42sh.h"
 
 typedef struct TokenList {
 	Token		**t;
@@ -78,10 +79,6 @@ void			token_command_grouping_init(Token *token);
 void			token_word_init(Token *token);
 Token			*token_empty_init(void);
 
-//----------------Garbage-------------------//
-void			gc_init(void);
-void			*gc_add(void *ptr);
-void			gc_cleanup(void);
 //----------------TokenList----------------//
 TokenList		*token_list_init(void);
 void			token_list_add(TokenList *tl, Token *token);

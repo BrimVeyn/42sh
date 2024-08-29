@@ -1,19 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   42sh.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/14 16:04:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/29 11:48:58 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/08/28 16:00:12 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/08/29 11:48:24 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/42sh.h"
+#ifndef MAXISH_H
+# define MAXISH_H
 
-int main(int ac, char **av) {
-	(void) ac;
-	(void) av;
-	printf("hello world\n");
-}
+/*_.-=-._.-=-._.-=-._.-=-._.- Includes -._.-=-._.-=-._.-=-._.-=-._.-=-._*/
+
+//----------------Garbage-------------------//
+void			gc_init(void);
+void			*gc_add(void *ptr);
+void			gc_cleanup(void);
+
+# define I_READ 0
+# define I_WRITE 1
+
+#endif

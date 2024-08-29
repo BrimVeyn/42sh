@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 11:41:08 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/29 09:15:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/29 11:50:53 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define EXEC_H
 
 # pragma once
-#include "../../include/minishell.h"
+#include "../../include/42sh.h"
 #include "../parser/parser.h"
 #include <fcntl.h>
 #include <sys/wait.h>

@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   garbage.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/21 15:58:39 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/29 12:50:22 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lexer.h"
+#include "../lexer/lexer.h"
 #include <stdint.h>
 
 //garbage collector

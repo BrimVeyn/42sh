@@ -8,7 +8,7 @@ CFLAGS 			:= -Wall -Werror -Wextra -g3 #-fsanitize=address
 SRC 			:= source/main.c
 
 LEXER_TEST		:= lexer_test
-LEXER_TEST_SRC	:= $(wildcard source/lexer/*.c) $(wildcard source/parser/*.c) $(wildcard source/debug/*.c) $(wildcard source/exec/*.c)
+LEXER_TEST_SRC	:= $(wildcard source/lexer/*.c) $(wildcard source/parser/*.c) $(wildcard source/debug/*.c) $(wildcard source/exec/*.c) $(wildcard source/utils/*.c)
 LEXER_TEST_OBJ	:= $(LEXER_TEST_SRC:source/%.c=objects/%.o)
 
 LEXER_SRC 		:= $(filter-out lexer_main.c, $(wildcard *.c))
@@ -16,11 +16,11 @@ LEXER_SRC 		:= $(filter-out lexer_main.c, $(wildcard *.c))
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
 
 REGEX_TEST		:= regex_test
-REGEX_TEST_SRC	:= $(wildcard source/regex/*.c)
+REGEX_TEST_SRC	:= $(wildcard source/regex/*.c) $(wildcard source/utils/*.c)
 REGEX_TEST_OBJ	:= $(REGEX_TEST_SRC:source/%.c=objects/%.o)
 
 EXEC_TEST		:= exec_test
-EXEC_TEST_SRC	:= $(wildcard source/exec/*.c)
+EXEC_TEST_SRC	:= $(wildcard source/lexer/*.c) $(wildcard source/parser/*.c) $(wildcard source/debug/*.c) $(wildcard source/exec/*.c) $(wildcard source/utils/*.c)
 EXEC_TEST_OBJ	:= $(EXEC_TEST_SRC:source/%.c=objects/%.o)
 
 OBJDIR 			:= objects
