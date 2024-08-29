@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   debug_tagname.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:54 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 13:37:57 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/28 15:02:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,8 @@ const char *get_tagName_separator(type_of_separator type) {
 			return "S_EOF";
 		case S_NEWLINE:
 			return "S_NEWLINE";
+		case S_DEFAULT:
+			return "S_DEFAULT";
 		default:
 			return "tagname missing (separator)";
 	}

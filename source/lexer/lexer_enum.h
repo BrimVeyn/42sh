@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_enum.h                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:04:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 16:39:59 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/28 15:02:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ typedef enum {
 	S_EOF, // \0
 	S_PAR_CLOSE,
 	S_DQ, //"
+	S_DEFAULT,
 } type_of_separator;
 
 typedef enum {

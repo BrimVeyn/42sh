@@ -3,15 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ft_itoa_u.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbardavi@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/10 11:54:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2023/12/24 12:34:31 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/28 15:52:25 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../header/ft_printf.h"
-#include <unistd.h>
 
 static int	count_digit(unsigned int nbr)
 {
