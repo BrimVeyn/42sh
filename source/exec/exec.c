@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 15:59:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/29 10:42:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/29 12:54:32 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,13 +38,31 @@ void apply_all_redirect(RedirectionList *redirections){
 	}
 }
 
+char *find_bin_location(char *bin){
+	char **env = __environ;
+	for (int i = 0; env[i]; i++){
+		// printf("%s\n", env[i]);
+		if (ft_strncmp(env[i], "PATH=", 5) == 0){
+			char **path = ft_split(env[i] + 5, ':');
+			for (int i = 0; path[i]; i++){
+				char *bin_with_path = ft_strjoin(path[i], bin);
+				if (access(bin_with_path, F_OK | X_OK) == 0){
+					return (char *)gc_add(bin_with_path);
+				}
+				free(bin_with_path);
+			}
+		}
+	}
+	return bin;
+}
 
 void exec_simple_command(SimpleCommand *command) {
+	printf("%s\n", find_bin_location("ls"));
     pid_t id[1024] = {0};
-    int pipefd[2];
+    int pipefd[2] = {-1, -1};
     int prev_pipefd = -1;
     int i = 0;
-
+	
     while (command) {
         if (command->next) {
             secure_pipe2(pipefd, O_CLOEXEC);
@@ -64,7 +82,7 @@ void exec_simple_command(SimpleCommand *command) {
         }
         if (prev_pipefd != -1 && close(prev_pipefd)) {}
         if (pipefd[1] != -1 && close(pipefd[1])) {}
-        prev_pipefd = pipefd[0];  // Do not close pipefd[0] here
+        prev_pipefd = pipefd[0];
         command = command->next;
         i++;
     }
@@ -78,3 +96,6 @@ void exec_simple_command(SimpleCommand *command) {
     }
 }
 
+// int main(void){
+// 	printf("%s\n", find_bin_location("ls"));
+// }
