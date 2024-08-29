@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:38:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/29 10:34:39 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/29 16:22:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,12 +114,6 @@ int main(int ac, char *av[]) {
 	//Basic redirection test
 	gc_init();
 	Token *none_token __attribute__((unused)) = genNoneTok();
-	// char *test_input_1 = (char *) gc_add(ft_strdup("10<< file $(salut !)"));
-	// (void) test_input_1;
-	//
-	// Lexer_p l = lexer_init(test_input_1);
-	// TokenList *l1 = lexer_lex_all(l);
-	// tokenToStringAll(l1);
 	
 	if (ac == 2 && !ft_strcmp("-i", av[1])) {
 		char *input = NULL;
@@ -138,16 +132,6 @@ int main(int ac, char *av[]) {
 	}
 
 	rl_clear_history();
-
-
-	// TokenList *tl_1 = token_list_init();
-	// token_list_add(tl_1, genExprTok(EX_WORD, none_token, "dekodeko", none_token));
-	// token_list_add(tl_1, genExprTok(EX_WORD, none_token, "salut", none_token));
-	// Token *expected_1 = genCtrlSubTok(CG_CONTROL_SUBSTITUTION, tl_1, none_token);
-	// (void) expected_1;
-	// Token *got_1 = oneTokenTest(test_input_1);
-	// tokenAssert(none_token, got_1, test_input_1, 12);
-
 	gc_cleanup();
 	return (0);
 }

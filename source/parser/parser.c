@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/29 12:54:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/29 16:19:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,12 +41,23 @@ RedirectionList *parser_get_redirection(TokenList *tl) {
 	RedirectionList *redir_list = redirection_list_init();
 	for (uint16_t it = 0; it < tl->size; it++) {
 		const Token *el = tl->t[it];
-		if (el->tag == T_REDIRECTION) {
+		if (el->tag == T_REDIRECTION ||
+			(el->tag == T_WORD && el->w_postfix->tag == T_REDIRECTION))
+		{
+			const Token *next = (el->tag == T_WORD && el->w_postfix->tag == T_REDIRECTION) ? el->w_postfix : el;
 			Redirection *current_redir = (Redirection *) gc_add(ft_calloc(1, sizeof(Redirection)));
-			current_redir->prefix_fd = -1;
-			current_redir->r_type = el->r_type;
-			current_redir->filename = el->r_postfix->w_infix;
-			current_redir->su_type = R_FILENAME;
+
+			current_redir->prefix_fd = (next != el) ? ft_atoi(el->w_infix) : -1;
+			current_redir->r_type = next->r_type;
+			if (is_number(next->r_postfix->w_infix) &&
+				(next->r_type == R_DUP_OUT ||
+				next->r_type == R_DUP_IN)) {
+				current_redir->su_type = R_FD;
+				current_redir->fd = ft_atoi(next->r_postfix->w_infix);
+			} else {
+				current_redir->su_type = R_FILENAME;
+				current_redir->filename = next->r_postfix->w_infix;
+			}
 			redirection_list_add(redir_list, current_redir);
 		}
 	}
@@ -59,7 +70,7 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 	size_t count = 0;
 	for (uint16_t it = 0; it < tl->size; it++) {
 		const Token *el = tl->t[it];
-		count += (el->tag == T_WORD);
+		count += (el->tag == T_WORD && el->w_postfix->tag != T_REDIRECTION);
 	}
 
 	curr_command->args = (char **) gc_add(ft_calloc(count + 1, sizeof(char *)));
@@ -67,7 +78,7 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 	size_t i = 0;
 	for (uint16_t it = 0; it < tl->size; it++) {
 		const Token *el = tl->t[it];
-		if (el->tag == T_WORD) {
+		if (el->tag == T_WORD && el->w_postfix->tag != T_REDIRECTION) {
 			if (i == 0) {
 				curr_command->bin = el->w_infix;
 			}
