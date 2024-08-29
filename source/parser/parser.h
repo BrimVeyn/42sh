@@ -3,12 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   parser.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 13:45:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/28 16:29:36 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/29 11:49:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#ifndef PARSER_H
+#define PARSER_H
 
 #pragma once
 #include "../lexer/lexer.h"
@@ -59,3 +62,5 @@ void redirection_list_add(RedirectionList *rl, Redirection *redirection);
 void redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
 
 type_of_separator interface_separator(type_of_separator new_separator, int mode);
+
+#endif // !PARSER_H
