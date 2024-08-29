@@ -6,15 +6,8 @@
 }
 
 {
-   ignore_all_ls_leaks
+   ignore_all_bin_leaks
    Memcheck:Leak
    ...
-   obj:*ls*
-}
-
-{
-   ignore_all_grep_leaks
-   Memcheck:Leak
-   ...
-   obj:*grep*
+   obj:*usr*
 }

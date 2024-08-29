@@ -6,14 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 16:57:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/29 09:52:40 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "parser.h"
+#include "../exec/exec.h"
 #include "../debug/debug.h"
-#include <stdint.h>
-#include <stdio.h>
 
 Parser *parser_init(char *input) {
 	Parser *self = (Parser *) gc_add(ft_calloc(1, sizeof(Parser)));
@@ -75,6 +74,7 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 		}
 	}
 	curr_command->args[i] = NULL;
+	curr_command->next = NULL;
 	return curr_command;
 }
 
@@ -179,7 +179,8 @@ void parser_parse_all(Parser *self) {
 		}
 		printf("seperator = %s\n", tagName(next_seperator));
 		printCommand(command); //Debug
-		// exec_execute_command(self);
+		exec_simple_command(command);
+		printf("JE SUIS LA\n");
 		if (next_seperator == S_EOF) break;
 		parser_get_next_command(self);
 	}
