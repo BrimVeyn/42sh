@@ -3,12 +3,12 @@ NAME			:= 42sh
 LIBFT			:= libftprintf/libftprintf.a
 CC 				:= gcc
 LDFLAGS			:= -lreadline -lncurses
-CFLAGS 			:= -Wall -Werror -Wextra -g3 -fsanitize=address
+CFLAGS 			:= -Wall -Werror -Wextra -g3 #-fsanitize=address
 
 SRC 			:= source/main.c
 
 LEXER_TEST		:= lexer_test
-LEXER_TEST_SRC	:= $(wildcard source/lexer/*.c) $(wildcard source/parser/*.c) $(wildcard source/debug/*.c)
+LEXER_TEST_SRC	:= $(wildcard source/lexer/*.c) $(wildcard source/parser/*.c) $(wildcard source/debug/*.c) $(wildcard source/exec/*.c)
 LEXER_TEST_OBJ	:= $(LEXER_TEST_SRC:source/%.c=objects/%.o)
 
 LEXER_SRC 		:= $(filter-out lexer_main.c, $(wildcard *.c))

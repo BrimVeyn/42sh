@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:38:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 16:19:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/29 10:34:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "lexer.h"
 #include "../parser/parser.h"
 #include "../debug/debug.h"
+#include <readline/readline.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -123,15 +124,20 @@ int main(int ac, char *av[]) {
 	if (ac == 2 && !ft_strcmp("-i", av[1])) {
 		char *input = NULL;
 		while ((input = readline("> ")) != NULL) {
-			Lexer_p l = lexer_init(input, DEFAULT);
-			TokenList *l1 = lexer_lex_all(l);
-			tokenToStringAll(l1);
-			add_history(input);
-			Parser *p = parser_init(input);
-			parser_print_state(p);
-			parser_parse_all(p);
+			if (*input) 
+			{
+				Lexer_p l = lexer_init(input, DEFAULT);
+				TokenList *l1 = lexer_lex_all(l);
+				tokenToStringAll(l1);
+				add_history(input);
+				Parser *p = parser_init(input);
+				parser_print_state(p);
+				parser_parse_all(p);
+			}
 		}
 	}
+
+	rl_clear_history();
 
 
 	// TokenList *tl_1 = token_list_init();
@@ -143,4 +149,5 @@ int main(int ac, char *av[]) {
 	// tokenAssert(none_token, got_1, test_input_1, 12);
 
 	gc_cleanup();
+	return (0);
 }

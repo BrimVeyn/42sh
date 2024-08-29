@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 15:59:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 16:53:19 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/29 10:42:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
+#include <unistd.h>
 
 void apply_redirect(const Redirection redirect){
 	int fd = redirect.fd;
@@ -37,32 +38,43 @@ void apply_all_redirect(RedirectionList *redirections){
 	}
 }
 
-void exec_simple_command(SimpleCommand *command){
-	type_of_separator next_separator = interface_separator(NULL, I_READ);
-	pid_t id[1024];
-	int i = 0;
-	int pipefd[2];
 
-	if (true){
-		if (command->next)
-			secure_pipe2(pipefd, O_CLOEXEC);
-		while(command){
-			id[i] = secure_fork();
-			if (id[i] == 0){
-				if (i != 0)
-					secure_dup2(pipefd[0], STDIN_FILENO);
-				if (command->next != NULL)
-					secure_dup2(pipefd[1], STDOUT_FILENO);
-				apply_all_redirect(command->redir_list);
-				secure_execve(command->bin, command->args, __environ);
-			}
-			command = command->next;
-			i++;
-		}
+void exec_simple_command(SimpleCommand *command) {
+    pid_t id[1024] = {0};
+    int pipefd[2];
+    int prev_pipefd = -1;
+    int i = 0;
 
-		int j = 0;
-		while(j < i){
-			waitpid(id[j++], NULL, 0);
-		}
-	}
+    while (command) {
+        if (command->next) {
+            secure_pipe2(pipefd, O_CLOEXEC);
+        }
+        id[i] = secure_fork();
+        if (id[i] == 0) {
+            if (i != 0) {
+                secure_dup2(prev_pipefd, STDIN_FILENO);
+            }
+            if (command->next) {
+                secure_dup2(pipefd[1], STDOUT_FILENO);
+            }
+            if (prev_pipefd != -1 && close(prev_pipefd)) {}
+            if (pipefd[0] != -1 && close(pipefd[0])) {}
+            command->bin = ft_strjoin("/usr/bin/", command->bin);
+            secure_execve(command->bin, command->args, __environ);
+        }
+        if (prev_pipefd != -1 && close(prev_pipefd)) {}
+        if (pipefd[1] != -1 && close(pipefd[1])) {}
+        prev_pipefd = pipefd[0];  // Do not close pipefd[0] here
+        command = command->next;
+        i++;
+    }
+
+    // Close the last pipe's read end
+    if (prev_pipefd != -1 && close(prev_pipefd)) {}
+
+    int j = 0;
+    while (j < i) {
+        waitpid(id[j++], NULL, 0);
+    }
 }
+
