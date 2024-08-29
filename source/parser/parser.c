@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 15:26:39 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/28 16:57:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,11 +121,16 @@ void printCharChar(char **tab) {
 }
 
 void printCommand(SimpleCommand *command) {
-	printRedirList(command->redir_list);
-	printf(C_GOLD"------ "C_LIGHT_YELLOW"Command"C_GOLD"-------\n"C_RESET);
-	printf("bin: %s\n", command->bin);
-	printCharChar(command->args);
-	printf(C_GOLD"---------...---------\n"C_RESET);
+	SimpleCommand *curr = command;
+	while (curr != NULL) {
+		printf("HOOOO\n");
+		printRedirList(curr->redir_list);
+		printf(C_GOLD"------ "C_LIGHT_YELLOW"Command"C_GOLD"-------\n"C_RESET);
+		printf("bin: %s\n", command->bin);
+		printCharChar(curr->args);
+		printf(C_GOLD"---------...---------\n"C_RESET);
+		curr = curr->next;
+	}
 }
 
 bool has_reached_eof(const TokenList *tl) {
@@ -142,12 +147,37 @@ type_of_separator cut_separator(TokenList *tl) {
 	return S_DEFAULT;
 }
 
+void fill_pipeline(Parser *self, SimpleCommand *command, type_of_separator *next_separator) {
+	SimpleCommand *curr = command;
+	while (*next_separator == S_PIPE) {
+		// Fetch the next command
+		parser_get_next_command(self);
+		
+		// Update the separator for the next loop iteration
+		*next_separator = cut_separator(self->curr_command);
+		
+		// Parse the current command
+		SimpleCommand *next_command = parser_parse_current(self->curr_command);
+		
+		// Link the current command to the next
+		curr->next = next_command;
+		
+		// Move to the next command in the pipeline
+		curr = curr->next;
+	}
+}
+
 void parser_parse_all(Parser *self) {
 	//define null operator
 	while (true) {
-		const type_of_separator next_seperator = cut_separator(self->curr_command);
-		printf("seperator = %s\n", tagName(next_seperator));
+		type_of_separator next_seperator = cut_separator(self->curr_command);
+		const Token *first_element = self->curr_command->t[self->curr_command->size - 1];
+		if (first_element->tag == T_SEPARATOR && first_element->s_type == S_EOF) break;
 		SimpleCommand *command = parser_parse_current(self->curr_command);
+		if (next_seperator == S_PIPE) {
+			fill_pipeline(self, command, &next_seperator);
+		}
+		printf("seperator = %s\n", tagName(next_seperator));
 		printCommand(command); //Debug
 		// exec_execute_command(self);
 		if (next_seperator == S_EOF) break;
