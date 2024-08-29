@@ -6,15 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 16:41:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/28 15:54:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "lexer.h"
 #include "lexer_enum.h"
 #include "lexer_struct.h"
-#include <stdint.h>
-#include <stdio.h>
 
 //Read a char from input
 void lexer_read_char(Lexer_p l) {
@@ -145,9 +143,12 @@ type_of_redirection get_redirection_type(Lexer_p l) {
 		lexer_read_char(l);
 		return R_OUTPUT;
 	}
-	else {
+	else if (l->ch == '<'){
 		lexer_read_char(l);
 		return R_INPUT;
+	} else {
+		printf("Error lexing redirection !\n");
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -195,9 +196,9 @@ TokenList *lexer_lex_till_operator(Lexer_p l) {
 
 bool is_delimiter(type_mode mode, char c) {
 	if (mode == DEFAULT) {
-		return ft_strchr("$();|\n \t", c) || c == '\0';
+		return ft_strchr("<>$();|\n \t", c) || c == '\0';
 	} else {
-		return ft_strchr("$\0\n", c);
+		return ft_strchr("$\n", c) || c == '\0';
 	}
 }
 

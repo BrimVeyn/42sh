@@ -5,14 +5,15 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/03 10:15:50 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 13:52:18 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/08/28 16:00:03 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/08/28 16:00:03 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LIBFT_H
 # define LIBFT_H
 
+# define _GNU_SOURCE 1
 # include <stddef.h>
 # include <stdio.h>
 # include <stdlib.h>
