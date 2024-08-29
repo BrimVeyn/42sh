@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 09:13:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 16:31:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/29 11:49:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,22 @@ bool is_redirection_char(char c) {
 	return (c == '>' || c == '<');
 }
 
-//Returns true if char is 0..9
-bool is_number(char c) {
-	return (c >= '0' && c <= '9');
+bool is_number(char *str) {
+	for (uint16_t i = 0; str[i]; i++) {
+		if (!ft_isdigit(str[i])) return false;
+	}
+	return true;
+}
+
+bool next_token_is_redirection(Lexer_p l) {
+	const char *input_ptr = &l->input[l->position];
+	if (!ft_strncmp(input_ptr, "&>", 2) ||
+		!ft_strncmp(input_ptr, ">&", 2) ||
+		!ft_strncmp(input_ptr, "<&", 2) ||
+		!ft_strncmp(input_ptr, ">>", 2) ||
+		!ft_strncmp(input_ptr, "<<", 2) ||
+		ft_strchr("<>", l->ch)) {
+		return true;
+	}
+	return false;
 }

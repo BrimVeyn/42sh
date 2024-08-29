@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/15 14:07:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/29 12:53:10 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/08/29 12:55:38 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/08/29 12:55:40 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,9 @@ TokenList *lexer_lex_till(Lexer_p l, type_of_separator sep);
 //-----------------Utils------------------//
 bool			is_whitespace(char c);
 bool			is_redirection_char(char c);
-bool			is_number(char c);
 void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
+bool			is_number(char *str);
+bool			next_token_is_redirection(Lexer_p l);
 
 //----------------Token---------------------//
 void			token_redirection_init(Token *token);

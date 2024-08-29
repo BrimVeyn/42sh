@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/28 16:37:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/29 12:53:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "lexer.h"
 #include "lexer_enum.h"
 #include "lexer_struct.h"
+#include <stdint.h>
 
 //Read a char from input
 void lexer_read_char(Lexer_p l) {
@@ -46,13 +47,13 @@ void lexer_read_x_char(Lexer_p l, uint16_t n) {
 }
 
 type_of_token get_token_tag(Lexer_p l) {
-	if (ft_strchr("&|;\n)", l->ch) || l->ch == '\0') {
-		return T_SEPARATOR;
-	}
 	if (ft_strchr("><", l->ch)
 		|| !ft_strncmp("&>", &l->input[l->position], 2)
 		|| !ft_strncmp("&>>", &l->input[l->position], 3)) {
 		return T_REDIRECTION;
+	}
+	if (ft_strchr("&|;\n)", l->ch) || l->ch == '\0') {
+		return T_SEPARATOR;
 	}
 	if (!ft_strncmp("$(", &l->input[l->position], 2)
 		|| ft_strchr("(\"", l->ch)) {
@@ -196,7 +197,7 @@ TokenList *lexer_lex_till_operator(Lexer_p l) {
 
 bool is_delimiter(type_mode mode, char c) {
 	if (mode == DEFAULT) {
-		return ft_strchr("<>$();|\n \t", c) || c == '\0';
+		return ft_strchr("|&<>$();\n \t", c) || c == '\0';
 	} else {
 		return ft_strchr("$\n", c) || c == '\0';
 	}
@@ -213,6 +214,7 @@ char *get_word(Lexer_p l) {
 	const uint16_t end = l->position;
 	return (char *) gc_add(ft_substr(l->input, start, end - start));
 }
+
 
 //Extract next token from the input
 Token *lexer_get_next_token(Lexer_p l, bool recursive_call) {
@@ -236,6 +238,9 @@ Token *lexer_get_next_token(Lexer_p l, bool recursive_call) {
 			token->r_type = get_redirection_type(l);
 			eat_whitespace(l);
 			token->r_postfix = lexer_get_next_token(l, true);
+			if (token->r_postfix->tag == T_NONE) {
+				token->e = ERROR_UNEXPCTED_TOKEN;
+			}
 			break;
 		case T_GROUPING:
 			token->g_type = get_group_type(l);
@@ -250,8 +255,17 @@ Token *lexer_get_next_token(Lexer_p l, bool recursive_call) {
 			break;
 		case T_WORD:
 			token->w_infix = get_word(l);
+			if (!ft_strncmp("&>>", &l->input[l->position], 3) ||
+				(!is_number(token->w_infix) &&
+				next_token_is_redirection(l))) {
+				break;
+			}
 			if (!is_whitespace(l->ch)) {
 				token->w_postfix = lexer_get_next_token(l, true);
+			}
+			if (token->w_postfix->tag == T_REDIRECTION && 
+				token->w_postfix->r_postfix->tag == T_NONE) {
+				token->e = ERROR_UNEXPCTED_TOKEN;
 			}
 			break;
 		default:

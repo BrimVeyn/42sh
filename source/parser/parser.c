@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/29 09:52:40 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/29 12:54:49 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "parser.h"
 #include "../exec/exec.h"
 #include "../debug/debug.h"
+#include <stdio.h>
 
 Parser *parser_init(char *input) {
 	Parser *self = (Parser *) gc_add(ft_calloc(1, sizeof(Parser)));
@@ -123,12 +124,11 @@ void printCharChar(char **tab) {
 void printCommand(SimpleCommand *command) {
 	SimpleCommand *curr = command;
 	while (curr != NULL) {
-		printf("HOOOO\n");
 		printRedirList(curr->redir_list);
-		printf(C_GOLD"------ "C_LIGHT_YELLOW"Command"C_GOLD"-------\n"C_RESET);
+		printf(C_GOLD"------ "C_LIGHT_YELLOW"Command"C_RESET C_GOLD"-------\n"C_RESET);
 		printf("bin: %s\n", command->bin);
 		printCharChar(curr->args);
-		printf(C_GOLD"---------...---------\n"C_RESET);
+		printf(C_GOLD"---------...---------"C_RESET"\n");
 		curr = curr->next;
 	}
 }
@@ -150,46 +150,31 @@ type_of_separator cut_separator(TokenList *tl) {
 void fill_pipeline(Parser *self, SimpleCommand *command, type_of_separator *next_separator) {
 	SimpleCommand *curr = command;
 	while (*next_separator == S_PIPE) {
-		// Fetch the next command
 		parser_get_next_command(self);
-		
-		// Update the separator for the next loop iteration
 		*next_separator = cut_separator(self->curr_command);
-		
-		// Parse the current command
 		SimpleCommand *next_command = parser_parse_current(self->curr_command);
-		
-		// Link the current command to the next
+
 		curr->next = next_command;
-		
-		// Move to the next command in the pipeline
 		curr = curr->next;
 	}
 }
 
 void parser_parse_all(Parser *self) {
-	//define null operator
 	while (true) {
 		type_of_separator next_seperator = cut_separator(self->curr_command);
+
 		const Token *first_element = self->curr_command->t[self->curr_command->size - 1];
 		if (first_element->tag == T_SEPARATOR && first_element->s_type == S_EOF) break;
+
 		SimpleCommand *command = parser_parse_current(self->curr_command);
 		if (next_seperator == S_PIPE) {
 			fill_pipeline(self, command, &next_seperator);
 		}
-		printf("seperator = %s\n", tagName(next_seperator));
+
 		printCommand(command); //Debug
 		exec_simple_command(command);
-		printf("JE SUIS LA\n");
+
 		if (next_seperator == S_EOF) break;
 		parser_get_next_command(self);
 	}
 }
-
-/*
- * TO DO 
- *
- * Color debug
- * check si le fd redirect est un nombre
- *
- * */
