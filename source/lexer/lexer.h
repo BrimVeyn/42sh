@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:07:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/28 15:55:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/29 11:39:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,8 +68,9 @@ TokenList *lexer_lex_till(Lexer_p l, type_of_separator sep);
 //-----------------Utils------------------//
 bool			is_whitespace(char c);
 bool			is_redirection_char(char c);
-bool			is_number(char c);
 void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
+bool			is_number(char *str);
+bool			next_token_is_redirection(Lexer_p l);
 
 //----------------Token---------------------//
 void			token_redirection_init(Token *token);

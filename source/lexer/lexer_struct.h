@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_struct.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 15:33:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 16:35:41 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/29 11:43:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@
 typedef struct Token {
 	type_of_token tag;
 	type_of_error e;
-	uint16_t parent;
 	union {
 		struct {
 			type_of_separator s_type;
