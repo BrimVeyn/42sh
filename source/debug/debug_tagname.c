@@ -6,13 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:54 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 13:53:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 15:16:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../lexer/lexer.h"
-#include "../parser/parser.h"
-#include <stdint.h>
+#include "../../include/42sh.h"
 
 const char *get_tagName_token(type_of_token type) {
 	switch(type) {

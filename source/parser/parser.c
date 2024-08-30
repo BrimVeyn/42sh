@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 14:24:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 16:14:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 #include <stdio.h>
+#include <unistd.h>
 
 bool is_operator(type_of_separator s) {
 	return s == S_BG || s == S_EOF || s == S_OR || s == S_AND || s == S_SEMI_COLUMN || s == S_NEWLINE || s == S_PIPE;
@@ -45,12 +46,18 @@ bool syntax_error_detector(Parser *p) {
 	for (uint16_t it = 0; it < data->size; it++) {
 		const Token *el = data->t[it];
 		if (el->tag == T_SEPARATOR && it == 0) {
-			dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(el->s_type));
+			dprintf(STDERR_FILENO, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(el->s_type));
 			return false;
 		}
 		if (el->tag == T_SEPARATOR && it == data->size - 2 &&
 			(el->s_type == S_AND || el->s_type == S_OR || el->s_type == S_PIPE)) {
-			dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(el->s_type));
+			dprintf(STDERR_FILENO, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(el->s_type));
+			return false;
+		}
+		if (el->e != ERROR_NONE) {
+			const Token *redir = (el->tag == T_REDIRECTION) ? el : el->w_postfix;
+			tokenToString((Token *)el, 0);
+			dprintf(STDERR_FILENO, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(redir->r_type));
 			return false;
 		}
 	}
