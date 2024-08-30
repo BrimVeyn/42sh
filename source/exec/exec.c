@@ -6,13 +6,15 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 10:19:22 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 14:11:47 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/30 16:03:48 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include <fcntl.h>
+#include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 // can have Prefix
 // >&   X
@@ -36,7 +38,8 @@ void apply_redirect(const Redirection redirect){
 	}
 
 	if (redirect.su_type == R_FILENAME && (fd = open(redirect.filename, open_flag, 0664)) == -1){
-		perror("Can't open file");
+		perror(strerror(errno));
+		// perror("Can't open file");
 		exit(EXIT_FAILURE);
 	}
 	

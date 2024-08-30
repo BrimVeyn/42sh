@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 13:45:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/30 13:58:54 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 15:56:51 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ typedef struct SimpleCommand {
 } SimpleCommand;
 
 bool syntax_error_detector(Parser *p);
+bool heredoc_detector(Parser *p);
 Parser *parser_init(char *input);
 void parser_get_next_command(Parser *self);
 void parse_current(Parser *self);
