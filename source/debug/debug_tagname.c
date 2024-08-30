@@ -6,12 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:54 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 15:02:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 13:53:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "../lexer/lexer.h"
 #include "../parser/parser.h"
-#include "../lexer/lexer_enum.h"
 #include <stdint.h>
 
 const char *get_tagName_token(type_of_token type) {
@@ -66,8 +66,8 @@ const char *get_tagName_error(type_of_error type) {
 			return "ERROR_UNCLOSED_DQ";
 		case ERROR_UNCLOSED_CG:
 			return "ERROR_UNCLOSED_CG";
-		case ERROR_UNEXPCTED_TOKEN:
-			return "ERROR_UNEXPCTED_TOKEN";
+		case ERROR_UNEXPECTED_TOKEN:
+			return "ERROR_UNEXPECTED_TOKEN";
 		case ERROR_ESCAPED_SQ:
 			return "ERROR_ESCAPED_SQ";
 		case ERROR_BAD_SUBSTITUTION:

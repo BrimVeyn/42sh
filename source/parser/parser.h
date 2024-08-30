@@ -6,20 +6,23 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 13:45:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/29 11:49:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 13:58:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PARSER_H
 #define PARSER_H
 
-#pragma once
-#include "../lexer/lexer.h"
+#include "../../include/42sh.h"
+#define UNEXPECTED_TOKEN_STR "42sh: syntax error near unexpected token "
 
 typedef struct {
+	type_of_error e;
 	Lexer_p lexer;
-	TokenList *curr_command;
-	TokenList *peak_command;
+	uint16_t it;
+	struct TokenList *data;
+	struct TokenList *curr_command;
+	struct TokenList *peak_command;
 } Parser;
 
 typedef enum {
@@ -51,11 +54,15 @@ typedef struct SimpleCommand {
 	struct SimpleCommand	*next;
 } SimpleCommand;
 
+bool syntax_error_detector(Parser *p);
 Parser *parser_init(char *input);
 void parser_get_next_command(Parser *self);
 void parse_current(Parser *self);
 void parser_print_state(Parser *self);
 void parser_parse_all(Parser *self);
+struct TokenList *lexer_lex_till_operator(Parser *p);
+struct TokenList *lexer_lex_all(Parser *p);
+
 
 RedirectionList *redirection_list_init(void);
 void redirection_list_add(RedirectionList *rl, Redirection *redirection);
