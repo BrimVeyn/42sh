@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 11:41:08 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/29 11:50:53 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/29 13:51:33 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,5 +24,6 @@ void secure_dup2(int oldfd, int newfd);
 void secure_pipe2(int pipefd[2], int flags);
 void secure_execve(const char *pathname, char *const argv[], char *const envp[]);
 void exec_simple_command(SimpleCommand *command);
+char *find_bin_location(char *bin);
 
 #endif
