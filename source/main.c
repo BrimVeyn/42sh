@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 16:04:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/30 14:27:50 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 16:21:04 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/42sh.h"
 #include "lexer/lexer_enum.h"
+#include "parser/parser.h"
 #include <stdio.h>
 
 int main(int ac, char *av[], char *env[]) {
@@ -31,7 +32,7 @@ int main(int ac, char *av[], char *env[]) {
 			if (!syntax_error_detector(p)) {
 				continue;
 			}
-			// here_doc(); LARBIN
+			heredoc_detector(p);
 			tokenToStringAll(p->data);
 			parser_print_state(p);
 			parser_parse_all(p);

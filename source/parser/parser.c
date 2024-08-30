@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 14:24:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 16:10:10 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+#include <fcntl.h>
 #include <stdio.h>
 
 bool is_operator(type_of_separator s) {
@@ -53,6 +54,39 @@ bool syntax_error_detector(Parser *p) {
 			dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(el->s_type));
 			return false;
 		}
+	}
+	return true;
+}
+
+char *here_doc(char *eof){
+	char *input = NULL;
+	static int heredoc_number = 0;
+	char filename[50]; 
+	sprintf(filename, "/tmp/heredoc%d", heredoc_number++);
+	int file_fd = open(filename, O_CREAT | O_WRONLY | O_TRUNC, 0664);
+	//Secure open
+	while((input = readline("heredoc> ")) && ft_strcmp(eof, input)){
+		printf("input %s\n", input);
+		dprintf(file_fd, "%s\n", input);
+	}
+	close(file_fd);
+	return gc_add(ft_strdup(filename));
+}
+
+bool heredoc_detector(Parser *p) {
+	const TokenList *data = p->data;
+	for (uint16_t it = 0; it < data->size; it++) {
+		const Token *el = data->t[it];
+		Token *redir = el->r_postfix;
+		if (el->tag == T_REDIRECTION && el->r_type == R_HERE_DOC) {
+			p->data->t[it]->r_type = R_INPUT;
+			redir->w_infix = here_doc(redir->w_infix);
+		}
+		// if (el->tag == T_SEPARATOR && it == data->size - 2 &&
+		// 	(el->s_type == S_AND || el->s_type == S_OR || el->s_type == S_PIPE)) {
+		// 	dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(el->s_type));
+		// 	return false;
+		// }
 	}
 	return true;
 }
