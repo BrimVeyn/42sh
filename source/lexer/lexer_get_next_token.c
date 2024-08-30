@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/29 12:53:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 10:14:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,12 +47,15 @@ void lexer_read_x_char(Lexer_p l, uint16_t n) {
 }
 
 type_of_token get_token_tag(Lexer_p l) {
+	if (l->ch == '\0') {
+		return T_SEPARATOR;
+	}
 	if (ft_strchr("><", l->ch)
 		|| !ft_strncmp("&>", &l->input[l->position], 2)
 		|| !ft_strncmp("&>>", &l->input[l->position], 3)) {
 		return T_REDIRECTION;
 	}
-	if (ft_strchr("&|;\n)", l->ch) || l->ch == '\0') {
+	if (ft_strchr("&|;\n)", l->ch)) {
 		return T_SEPARATOR;
 	}
 	if (!ft_strncmp("$(", &l->input[l->position], 2)
@@ -255,13 +258,10 @@ Token *lexer_get_next_token(Lexer_p l, bool recursive_call) {
 			break;
 		case T_WORD:
 			token->w_infix = get_word(l);
-			if (!ft_strncmp("&>>", &l->input[l->position], 3) ||
-				(!is_number(token->w_infix) &&
-				next_token_is_redirection(l))) {
-				break;
-			}
-			if (!is_whitespace(l->ch)) {
+			if (!is_whitespace(l->ch) && is_fdable_redirection(l)) {
 				token->w_postfix = lexer_get_next_token(l, true);
+			} else {
+				break;
 			}
 			if (token->w_postfix->tag == T_REDIRECTION && 
 				token->w_postfix->r_postfix->tag == T_NONE) {

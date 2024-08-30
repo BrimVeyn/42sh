@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/29 12:55:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/29 12:55:40 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/29 14:32:27 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ bool			is_redirection_char(char c);
 void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
 bool			is_number(char *str);
 bool			next_token_is_redirection(Lexer_p l);
+bool			is_fdable_redirection(Lexer_p l);
 
 //----------------Token---------------------//
 void			token_redirection_init(Token *token);
