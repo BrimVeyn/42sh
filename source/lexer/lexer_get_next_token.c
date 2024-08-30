@@ -6,14 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/30 13:53:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 15:15:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lexer.h"
-#include "lexer_enum.h"
-#include "lexer_struct.h"
-#include <stdint.h>
+#include "../../include/42sh.h"
 
 //Read a char from input
 void lexer_read_char(Lexer_p l) {

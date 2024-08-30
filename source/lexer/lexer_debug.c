@@ -6,11 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:04:37 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/15 16:20:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 15:14:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lexer.h"
+#include "../../include/42sh.h"
 
 void lexer_debug(Lexer_p lexer) {
 	printf("--- Lexer state ---\n");

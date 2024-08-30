@@ -3,15 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/29 13:51:53 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/30 15:16:34 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../lexer/lexer.h"
-#include <stdint.h>
+#include "../../include/42sh.h"
 
 //garbage collector
 static Garbage gc = {NULL, 0, 0};

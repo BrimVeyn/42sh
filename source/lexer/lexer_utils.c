@@ -6,13 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 10:19:29 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 13:28:26 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 15:15:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lexer.h"
-#include "../debug/debug.h"
-#include "lexer_enum.h"
+#include "../../include/42sh.h"
 
 void printOffset(size_t offset) {
 	for (size_t i = 0; i < offset; i++) {
