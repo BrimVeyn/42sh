@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/29 16:19:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 10:17:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,11 +144,6 @@ void printCommand(SimpleCommand *command) {
 	}
 }
 
-bool has_reached_eof(const TokenList *tl) {
-	const Token *last_el = tl->t[tl->size - 1];
-	return last_el->tag == T_SEPARATOR && last_el->s_type == S_EOF;
-}
-
 type_of_separator cut_separator(TokenList *tl) {
 	const Token *last_el = tl->t[tl->size - 1];
 	if (last_el->tag == T_SEPARATOR) {
@@ -174,7 +169,7 @@ void parser_parse_all(Parser *self) {
 	while (true) {
 		type_of_separator next_seperator = cut_separator(self->curr_command);
 
-		const Token *first_element = self->curr_command->t[self->curr_command->size - 1];
+		const Token *first_element = self->curr_command->t[0];
 		if (first_element->tag == T_SEPARATOR && first_element->s_type == S_EOF) break;
 
 		SimpleCommand *command = parser_parse_current(self->curr_command);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 15:59:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/29 12:54:32 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/30 10:18:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,6 @@ char *find_bin_location(char *bin){
 }
 
 void exec_simple_command(SimpleCommand *command) {
-	printf("%s\n", find_bin_location("ls"));
     pid_t id[1024] = {0};
     int pipefd[2] = {-1, -1};
     int prev_pipefd = -1;
