@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 16:04:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/30 13:50:28 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 14:27:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ int main(int ac, char *av[], char *env[]) {
 			if (!syntax_error_detector(p)) {
 				continue;
 			}
+			// here_doc(); LARBIN
 			tokenToStringAll(p->data);
 			parser_print_state(p);
 			parser_parse_all(p);
