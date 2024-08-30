@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:04:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/29 11:35:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/29 14:32:49 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,9 +58,9 @@ typedef enum {
 } type_of_grouping;
 
 typedef enum {
+	R_OUTPUT, //>[ex|n]
+	R_APPEND, //>>[ex|n]
 	R_INPUT, //[?n]<[ex|n]
-	R_OUTPUT, //[?n]>[ex|n]
-	R_APPEND, //[?n]>>[ex|n]
 	R_HERE_DOC, //[?n]<<[delimiter]
 	R_DUP_IN, //[?n]<&[ex|n]
 	R_DUP_OUT, //[?n]>&[ex|n]
