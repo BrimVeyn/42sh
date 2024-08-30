@@ -5,15 +5,21 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/14 16:04:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/30 16:21:04 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/08/30 16:22:08 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/08/30 16:22:15 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/42sh.h"
-#include "lexer/lexer_enum.h"
-#include "parser/parser.h"
-#include <stdio.h>
+
+int g_signal;
+
+char *init_prompt_and_signals(void) {
+	signal_manager(SIG_PROMPT);
+	rl_event_hook = rl_event_dummy;
+	char *input = readline("42sh > ");
+	return input;
+}
 
 int main(int ac, char *av[], char *env[]) {
 	//Basic redirection test
@@ -21,10 +27,11 @@ int main(int ac, char *av[], char *env[]) {
 	(void) av;
 	(void) env;
 	gc_init();
+	g_signal = 0;
 	Token *none_token __attribute__((unused)) = genNoneTok();
 	
 	char *input = NULL;
-	while ((input = readline("42sh > ")) != NULL) {
+	while ((input = init_prompt_and_signals()) != NULL) {
 		if (*input) 
 		{
 			add_history(input);
@@ -35,6 +42,7 @@ int main(int ac, char *av[], char *env[]) {
 			heredoc_detector(p);
 			tokenToStringAll(p->data);
 			parser_print_state(p);
+			signal_manager(SIG_EXEC);
 			parser_parse_all(p);
 		}
 	}

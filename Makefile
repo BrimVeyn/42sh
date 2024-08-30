@@ -6,7 +6,7 @@
 #    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/29 13:20:27 by nbardavi          #+#    #+#              #
-#    Updated: 2024/08/30 11:32:09 by bvan-pae         ###   ########.fr        #
+#    Updated: 2024/08/30 16:11:57 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,9 +25,10 @@ PARSER_SRC		:= $(wildcard source/parser/*.c)
 AST_SRC			:= $(wildcard source/ast/*.c)
 STRING_SRC		:= $(wildcard source/string/*.c)
 UTILS_SRC		:= $(wildcard source/utils/*.c)
+SIGNALS_SRC		:= $(wildcard source/signals/*.c)
 
 
-SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) $(PARSER_SRC) $(EXEC_SRC)
+SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC)
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
 # TEST
@@ -45,13 +46,7 @@ EXEC_TEST_SRC	:= source/exec/exec_main.c $(DEBUG_SRC) $(EXEC_SRC) $(UTILS_SRC)
 EXEC_TEST_OBJ	:= $(EXEC_TEST_SRC:source/%.c=objects/%.o)
 
 OBJDIR 			:= objects
-LEXER_DIR		:= $(OBJDIR)/lexer
-PARSER_DIR		:= $(OBJDIR)/parser
-EXEC_DIR		:= $(OBJDIR)/exec
-DEBUG_DIR		:= $(OBJDIR)/debug
-UTILS_DIR		:= $(OBJDIR)/utils
-
-DIRS			:= $(OBJDIR) $(LEXER_DIR) $(PARSER_DIR) $(EXEC_DIR) $(DEBUG_DIR) $(UTILS_DIR)
+DIRS			:= $(patsubst source/%,objects/%,$(dir $(wildcard source/*/*)))
 
 DEF_COLOR		:= \033[0;39m
 GRAY			:= \033[0;90m
@@ -104,6 +99,9 @@ fclean: clean
 	@rm -rf $(NAME)
 	@make --no-print-directory -C libftprintf/ fclean
 	@printf "$(RED)Binary deleted !$(DEF_COLOR)\n"
+
+bear:
+	bear -- make re
 
 $(OBJDIR):
 	@mkdir -p $(DIRS)

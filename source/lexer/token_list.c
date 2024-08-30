@@ -6,12 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 13:37:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 13:52:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 15:16:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lexer.h"
-#include "lexer_struct.h"
+#include "../../include/42sh.h"
 
 TokenList *token_list_init(void) {
 	TokenList *self = gc_add(ft_calloc(1, sizeof(TokenList)));
