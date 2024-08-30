@@ -2,3 +2,4 @@
 lexer_test
 regex_test
 compile_commands.json
+.cache
