@@ -6,20 +6,16 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/29 12:55:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 13:29:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 15:14:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LEXER_H
 # define LEXER_H
 
-#include "../../libftprintf/header/libft.h"
-#include "../../include/colors.h"
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+#ifndef MAXISH_H
+	#include "../../include/42sh.h"
+#endif // !MAXI_SH
 
 typedef enum {
 	DEFAULT,
@@ -41,10 +37,6 @@ typedef Lexer * Lexer_p;
 #pragma once
 #include "lexer_enum.h"
 #include "lexer_struct.h"
-
-#ifndef MAXISH_H
-	#include "../../include/42sh.h"
-#endif // !MAXI_SH
 
 typedef struct TokenList {
 	Token		**t;

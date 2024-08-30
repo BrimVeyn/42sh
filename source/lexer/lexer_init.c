@@ -6,13 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:45:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/27 14:43:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 15:15:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lexer.h"
-#include "lexer_enum.h"
-#include "lexer_struct.h"
+#include "../../include/42sh.h"
 
 Lexer_p lexer_init(char *input, type_mode mode) {
 	Lexer_p lexer = gc_add(ft_calloc(1, sizeof(Lexer)));
