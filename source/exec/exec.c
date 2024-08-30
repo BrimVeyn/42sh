@@ -6,12 +6,17 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 15:59:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/29 12:54:32 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/08/30 10:18:38 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
-#include <unistd.h>
+
+// can have Prefix
+// >&   X
+// <&   X
+// <<   
+// <
 
 void apply_redirect(const Redirection redirect){
 	int fd = redirect.fd;
@@ -38,19 +43,21 @@ void apply_all_redirect(RedirectionList *redirections){
 	}
 }
 
+
 char *find_bin_location(char *bin){
 	char **env = __environ;
 	for (int i = 0; env[i]; i++){
-		// printf("%s\n", env[i]);
 		if (ft_strncmp(env[i], "PATH=", 5) == 0){
-			char **path = ft_split(env[i] + 5, ':');
+			char **path = ft_split(env[i] + sizeof("PATH="), ':');
 			for (int i = 0; path[i]; i++){
-				char *bin_with_path = ft_strjoin(path[i], bin);
+				char *bin_with_path = ft_strjoin(path[i], (char *)gc_add(ft_strjoin("/",bin)));
 				if (access(bin_with_path, F_OK | X_OK) == 0){
+					free_charchar(path);
 					return (char *)gc_add(bin_with_path);
 				}
 				free(bin_with_path);
 			}
+			free_charchar(path);
 		}
 	}
 	return bin;
@@ -77,8 +84,7 @@ void exec_simple_command(SimpleCommand *command) {
             }
             if (prev_pipefd != -1 && close(prev_pipefd)) {}
             if (pipefd[0] != -1 && close(pipefd[0])) {}
-            command->bin = ft_strjoin("/usr/bin/", command->bin);
-            secure_execve(command->bin, command->args, __environ);
+            secure_execve(find_bin_location(command->bin), command->args, __environ);
         }
         if (prev_pipefd != -1 && close(prev_pipefd)) {}
         if (pipefd[1] != -1 && close(pipefd[1])) {}
@@ -87,7 +93,6 @@ void exec_simple_command(SimpleCommand *command) {
         i++;
     }
 
-    // Close the last pipe's read end
     if (prev_pipefd != -1 && close(prev_pipefd)) {}
 
     int j = 0;
@@ -95,7 +100,3 @@ void exec_simple_command(SimpleCommand *command) {
         waitpid(id[j++], NULL, 0);
     }
 }
-
-// int main(void){
-// 	printf("%s\n", find_bin_location("ls"));
-// }

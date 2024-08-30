@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/08/29 13:20:27 by nbardavi          #+#    #+#              #
+#    Updated: 2024/08/29 14:22:19 by nbardavi         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 NAME			:= 42sh
 
 LIBFT			:= libftprintf/libftprintf.a
@@ -6,21 +18,29 @@ LDFLAGS			:= -lreadline -lncurses
 CFLAGS 			:= -Wall -Werror -Wextra -g3 #-fsanitize=address
 
 SRC 			:= source/main.c
-
-LEXER_TEST		:= lexer_test
-LEXER_TEST_SRC	:= $(wildcard source/lexer/*.c) $(wildcard source/parser/*.c) $(wildcard source/debug/*.c) $(wildcard source/exec/*.c) $(wildcard source/utils/*.c)
-LEXER_TEST_OBJ	:= $(LEXER_TEST_SRC:source/%.c=objects/%.o)
-
-LEXER_SRC 		:= $(filter-out lexer_main.c, $(wildcard *.c))
+LEXER_SRC 		:= $(filter-out source/lexer/lexer_main.c, $(wildcard source/lexer/*.c))
+EXEC_SRC 		:= $(filter-out source/exec/exec_main.c, $(wildcard source/exec/*.c))
+DEBUG_SRC		:= $(wildcard source/debug/*.c)
+REGEX_SRC		:= $(wildcard source/regex/*.c)
+PARSER_SRC		:= $(wildcard source/parser/*.c)
+AST_SRC			:= $(wildcard source/ast/*.c)
+STRING_SRC		:= $(wildcard source/string/*.c)
+UTILS_SRC		:= $(wildcard source/utils/*.c)
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
 
+# TEST
+
+LEXER_TEST		:= lexer_test
+LEXER_TEST_SRC	:= source/lexer/lexer_main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) $(PARSER_SRC) $(EXEC_SRC)
+LEXER_TEST_OBJ	:= $(LEXER_TEST_SRC:source/%.c=objects/%.o)
+
 REGEX_TEST		:= regex_test
-REGEX_TEST_SRC	:= $(wildcard source/regex/*.c) $(wildcard source/utils/*.c)
+REGEX_TEST_SRC	:= source/regex/regex_main.c $(REGEX_SRC) $(UTILS_SRC)
 REGEX_TEST_OBJ	:= $(REGEX_TEST_SRC:source/%.c=objects/%.o)
 
 EXEC_TEST		:= exec_test
-EXEC_TEST_SRC	:= $(wildcard source/lexer/*.c) $(wildcard source/parser/*.c) $(wildcard source/debug/*.c) $(wildcard source/exec/*.c) $(wildcard source/utils/*.c)
+EXEC_TEST_SRC	:= source/exec/exec_main.c $(DEBUG_SRC) $(EXEC_SRC) $(UTILS_SRC)
 EXEC_TEST_OBJ	:= $(EXEC_TEST_SRC:source/%.c=objects/%.o)
 
 OBJDIR 			:= objects

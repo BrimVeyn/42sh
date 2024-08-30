@@ -1,27 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   string_stream.h                                    :+:      :+:    :+:   */
+/*   exec_main.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/20 14:26:56 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/20 14:34:47 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/08/29 13:01:15 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/08/29 13:47:29 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef STRING_STREAM_H
-#define STRING_STREAM_H
+#include "exec.h"
 
-#include "lexer.h"
-
-typedef struct {
-	char *str;
-	uint16_t size;
-	uint16_t capacity;
-
-} StringStream;
-
-//-----------StringStream utils-------------//
-
-#endif // !STRING_STREAM_H
+int main(void){
+	gc_init();
+	printf("%s\n", find_bin_location("ls"));
+	gc_cleanup();
+}
