@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+         #
+#    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/29 13:20:27 by nbardavi          #+#    #+#              #
-#    Updated: 2024/08/29 14:22:19 by nbardavi         ###   ########.fr        #
+#    Updated: 2024/08/30 11:32:09 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,6 @@ CC 				:= gcc
 LDFLAGS			:= -lreadline -lncurses
 CFLAGS 			:= -Wall -Werror -Wextra -g3 #-fsanitize=address
 
-SRC 			:= source/main.c
 LEXER_SRC 		:= $(filter-out source/lexer/lexer_main.c, $(wildcard source/lexer/*.c))
 EXEC_SRC 		:= $(filter-out source/exec/exec_main.c, $(wildcard source/exec/*.c))
 DEBUG_SRC		:= $(wildcard source/debug/*.c)
@@ -27,8 +26,10 @@ AST_SRC			:= $(wildcard source/ast/*.c)
 STRING_SRC		:= $(wildcard source/string/*.c)
 UTILS_SRC		:= $(wildcard source/utils/*.c)
 
-OBJ 			:= $(SRC:source/%.c=objects/%.o)
 
+SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) $(PARSER_SRC) $(EXEC_SRC)
+
+OBJ 			:= $(SRC:source/%.c=objects/%.o)
 # TEST
 
 LEXER_TEST		:= lexer_test
@@ -44,7 +45,13 @@ EXEC_TEST_SRC	:= source/exec/exec_main.c $(DEBUG_SRC) $(EXEC_SRC) $(UTILS_SRC)
 EXEC_TEST_OBJ	:= $(EXEC_TEST_SRC:source/%.c=objects/%.o)
 
 OBJDIR 			:= objects
-LEXER_DIR		:= lexer
+LEXER_DIR		:= $(OBJDIR)/lexer
+PARSER_DIR		:= $(OBJDIR)/parser
+EXEC_DIR		:= $(OBJDIR)/exec
+DEBUG_DIR		:= $(OBJDIR)/debug
+UTILS_DIR		:= $(OBJDIR)/utils
+
+DIRS			:= $(OBJDIR) $(LEXER_DIR) $(PARSER_DIR) $(EXEC_DIR) $(DEBUG_DIR) $(UTILS_DIR)
 
 DEF_COLOR		:= \033[0;39m
 GRAY			:= \033[0;90m
@@ -99,7 +106,7 @@ fclean: clean
 	@printf "$(RED)Binary deleted !$(DEF_COLOR)\n"
 
 $(OBJDIR):
-	@mkdir -p $(OBJDIR) $(OBJDIR)/$(LEXER_DIR) 
+	@mkdir -p $(DIRS)
 
 $(LIBFT) :
 	@make --no-print-directory -C libftprintf/

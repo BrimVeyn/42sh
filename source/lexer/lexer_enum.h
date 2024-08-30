@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:04:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/29 14:32:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 13:33:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ typedef enum {
 
 typedef enum {
 	ERROR_NONE, //error free 
-	ERROR_UNEXPCTED_TOKEN, //<> ||| <<<< <<<>
+	ERROR_UNEXPECTED_TOKEN, //<> ||| <<<< <<<>
 	ERROR_UNCLOSED_SQ, //'....\0
 	ERROR_UNCLOSED_DQ, //'....\0
 	ERROR_UNCLOSED_CG, //".....\0

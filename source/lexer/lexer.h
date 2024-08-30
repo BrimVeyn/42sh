@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/29 12:55:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/29 14:32:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 13:29:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,14 +41,16 @@ typedef Lexer * Lexer_p;
 #pragma once
 #include "lexer_enum.h"
 #include "lexer_struct.h"
-#include "../../include/42sh.h"
+
+#ifndef MAXISH_H
+	#include "../../include/42sh.h"
+#endif // !MAXI_SH
 
 typedef struct TokenList {
 	Token		**t;
 	uint16_t	size;
 	uint16_t	capacity;
 } TokenList;
-
 
 typedef struct {
 	void **garbage;
@@ -57,13 +59,11 @@ typedef struct {
 } Garbage;
 
 //-----------------Lexer------------------//
-TokenList		*lexer_lex_all(Lexer_p l);
 Token			*lexer_get_next_token(Lexer_p l, bool recursive_call);
 Lexer_p			lexer_init(char *input, type_mode mode);
 void			lexer_debug(Lexer_p lexer);
 void			lexer_deinit(Lexer_p lexer);
 void			lexer_read_char(Lexer_p l);
-TokenList *lexer_lex_till_operator(Lexer_p l);
 TokenList *lexer_lex_till(Lexer_p l, type_of_separator sep);
 
 //-----------------Utils------------------//
@@ -88,6 +88,7 @@ void			token_list_add(TokenList *tl, Token *token);
 void			tokenToString(Token *t, size_t offset);
 void			tokenListToString(TokenList *tl);
 void			tokenToStringAll(TokenList *t);
+Token			*genNoneTok(void);
 
 
 #endif // !LEXER_H

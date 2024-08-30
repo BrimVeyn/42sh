@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/30 10:14:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 13:53:34 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,20 +183,7 @@ TokenList *lexer_lex_till(Lexer_p l, type_of_separator sep) {
 	return self;
 }
 
-bool is_operator(type_of_separator s) {
-	return s == S_BG || s == S_EOF || s == S_OR || s == S_AND || s == S_SEMI_COLUMN || s == S_NEWLINE || s == S_PIPE;
-}
 
-TokenList *lexer_lex_till_operator(Lexer_p l) {
-	TokenList *self = token_list_init();
-	while (true) {
-		Token *tmp = lexer_get_next_token(l, false);
-		token_list_add(self, tmp);
-		if (tmp->tag == T_SEPARATOR && is_operator(tmp->s_type))
-			break;
-	}
-	return self;
-}
 
 bool is_delimiter(type_mode mode, char c) {
 	if (mode == DEFAULT) {
@@ -242,7 +229,7 @@ Token *lexer_get_next_token(Lexer_p l, bool recursive_call) {
 			eat_whitespace(l);
 			token->r_postfix = lexer_get_next_token(l, true);
 			if (token->r_postfix->tag == T_NONE) {
-				token->e = ERROR_UNEXPCTED_TOKEN;
+				token->e = ERROR_UNEXPECTED_TOKEN;
 			}
 			break;
 		case T_GROUPING:
@@ -265,7 +252,7 @@ Token *lexer_get_next_token(Lexer_p l, bool recursive_call) {
 			}
 			if (token->w_postfix->tag == T_REDIRECTION && 
 				token->w_postfix->r_postfix->tag == T_NONE) {
-				token->e = ERROR_UNEXPCTED_TOKEN;
+				token->e = ERROR_UNEXPECTED_TOKEN;
 			}
 			break;
 		default:

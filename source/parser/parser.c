@@ -6,28 +6,71 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 10:17:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/08/30 14:13:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "parser.h"
-#include "../exec/exec.h"
-#include "../debug/debug.h"
+#include "../../include/42sh.h"
 #include <stdio.h>
+
+bool is_operator(type_of_separator s) {
+	return s == S_BG || s == S_EOF || s == S_OR || s == S_AND || s == S_SEMI_COLUMN || s == S_NEWLINE || s == S_PIPE;
+}
+
+TokenList *lexer_lex_till_operator(Parser *p) {
+	const TokenList *list = p->data;
+	TokenList *self = token_list_init();
+	while (p->it < list->size) {
+		Token *tmp = list->t[p->it++];
+		token_list_add(self, tmp);
+		if (tmp->tag == T_SEPARATOR && is_operator(tmp->s_type))
+			break;
+	}
+	return self;
+}
+
+TokenList *lexer_lex_all(Parser *p) {
+	const Lexer_p l = p->lexer;
+	TokenList *self = token_list_init();
+	while (true) {
+		Token *tmp = lexer_get_next_token(l, false);
+		token_list_add(self, tmp);
+		if (tmp->tag == T_SEPARATOR && tmp->s_type == S_EOF) break;
+	}
+	return self;
+}
+
+bool syntax_error_detector(Parser *p) {
+	const TokenList *data = p->data;
+	for (uint16_t it = 0; it < data->size; it++) {
+		const Token *el = data->t[it];
+		if (el->tag == T_SEPARATOR && it == 0) {
+			dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(el->s_type));
+			return false;
+		}
+		if (el->tag == T_SEPARATOR && it == data->size - 2 &&
+			(el->s_type == S_AND || el->s_type == S_OR || el->s_type == S_PIPE)) {
+			dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(el->s_type));
+			return false;
+		}
+	}
+	return true;
+}
 
 Parser *parser_init(char *input) {
 	Parser *self = (Parser *) gc_add(ft_calloc(1, sizeof(Parser)));
 
 	self->lexer = lexer_init(input, DEFAULT);
-	self->curr_command = lexer_lex_till_operator(self->lexer);
-	self->peak_command = lexer_lex_till_operator(self->lexer);
-
+	self->it = 0;
+	self->data = lexer_lex_all(self);
+	self->curr_command = lexer_lex_till_operator(self);
+	self->peak_command = lexer_lex_till_operator(self);
 	return self;
 }
 
 void parser_get_next_command(Parser *self) {
 	self->curr_command = self->peak_command;
-	self->peak_command = lexer_lex_till_operator(self->lexer);
+	self->peak_command = lexer_lex_till_operator(self);
 }
 
 void parser_print_state(Parser *self) {
