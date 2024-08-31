@@ -10,11 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "exec.h"
-#include <fcntl.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
+#include "../../include/42sh.h"
 
 // can have Prefix
 // >&   X
@@ -23,8 +19,25 @@
 // <
 // R_DUP_BOTH, //&>[ex|n]
 // R_DUP_BOTH_APPEND, //&>>[ex]
-//
-void apply_redirect(const Redirection redirect){
+
+int is_valid_fd(int fd) {
+  return fcntl(fd, F_GETFL) != -1;
+}        
+
+bool error_bad_file_descriptor(int fd) {
+    dprintf(STDERR_FILENO, "42sh: %d: Bad file descriptor\n", fd);
+    return false;
+}
+
+//vrai secure_dup2 LARBIN
+bool really_secure_dup2(int from, int to) {
+  if (!is_valid_fd(from)) return error_bad_file_descriptor(from);
+  dup2(from, to);
+  return true;
+}
+
+
+bool apply_redirect(const Redirection redirect){
 	int fd = redirect.fd;
 	const int open_flag = (redirect.r_type == R_INPUT) * (O_RDONLY)
 		+ (redirect.r_type == R_OUTPUT || redirect.r_type == R_DUP_BOTH) * (O_WRONLY | O_TRUNC | O_CREAT)
@@ -46,21 +59,26 @@ void apply_redirect(const Redirection redirect){
 	printf("dup %d on %d\n", fd, dup_on);
 
 	if (redirect.r_type == R_DUP_BOTH || redirect.r_type == R_DUP_BOTH_APPEND){
-		dup2(fd, STDOUT_FILENO);
-		dup2(fd, STDERR_FILENO);
+    if (!really_secure_dup2(fd, STDOUT_FILENO)) return false;
+    if (!really_secure_dup2(fd, STDERR_FILENO)) return false;
 	}
 	else{
-		dup2(fd, dup_on);
+    if (!really_secure_dup2(fd, dup_on)) return false;
 	}
 	if (redirect.su_type == R_FILENAME){
+    printf("close %d\n", fd);
 		close(fd);
 	}
+  return true;
 }
 
-void apply_all_redirect(RedirectionList *redirections){
+bool apply_all_redirect(RedirectionList *redirections){
 	for (int i = 0; redirections->r[i]; i++){
-		apply_redirect(*redirections->r[i]);
+		if (!apply_redirect(*redirections->r[i])) {
+      return false;
+    }
 	}
+  return true;
 }
 
 
@@ -103,9 +121,17 @@ void exec_simple_command(SimpleCommand *command) {
             }
             if (prev_pipefd != -1 && close(prev_pipefd)) {}
             if (pipefd[0] != -1 && close(pipefd[0])) {}
-			apply_all_redirect(command->redir_list);
-            secure_execve(find_bin_location(command->bin), command->args, __environ);
+      if (apply_all_redirect(command->redir_list)) {
+        if (!command->bin) {
+          gc_cleanup();
+          exit(EXIT_SUCCESS);
         }
+        secure_execve(find_bin_location(command->bin), command->args, __environ);
+      } else {
+        gc_cleanup();
+        exit(EXIT_FAILURE);
+      }
+      }
         if (prev_pipefd != -1 && close(prev_pipefd)) {}
         if (pipefd[1] != -1 && close(pipefd[1])) {}
         prev_pipefd = pipefd[0];

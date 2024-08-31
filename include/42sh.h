@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #ifndef MAXISH_H
-# define MAXISH_H 1
+# define MAXISH_H
 
 extern int g_signal;
 /*_.-=-._.-=-._.-=-._.-=-._.- Includes -._.-=-._.-=-._.-=-._.-=-._.-=-._*/
@@ -21,6 +21,8 @@ extern int g_signal;
 #include <stdio.h>
 #include <sys/cdefs.h>
 #include <sys/wait.h>
+#include <fcntl.h>
+#include <errno.h>
 
 #include <stdint.h>
 #include <stdbool.h>

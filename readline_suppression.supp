@@ -6,8 +6,15 @@
 }
 
 {
+   ignore_all_usr_bin_leaks
+   Memcheck:Leak
+   ...
+   obj:/usr/bin/*
+}
+
+{
    ignore_all_bin_leaks
    Memcheck:Leak
    ...
-   obj:*usr*
+   obj:/bin/*
 }
