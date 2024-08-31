@@ -69,11 +69,12 @@ char *here_doc(char *eof){
 	char *input = NULL;
 	static int heredoc_number = 0;
 	char filename[50]; 
-	sprintf(filename, "/tmp/heredoc%d", heredoc_number++);
+	sprintf(filename, "/tmp/here_doc_%d", heredoc_number++);
 	int file_fd = open(filename, O_CREAT | O_WRONLY | O_TRUNC, 0664);
-	//Secure open
-	while((input = readline("heredoc> ")) && ft_strcmp(eof, input)){
-		printf("input %s\n", input);
+  if (file_fd == -1) {
+    return NULL;
+  }
+	while((input = readline("> ")) && ft_strcmp(eof, input)){
 		dprintf(file_fd, "%s\n", input);
 	}
 	close(file_fd);
@@ -83,17 +84,14 @@ char *here_doc(char *eof){
 bool heredoc_detector(Parser *p) {
 	const TokenList *data = p->data;
 	for (uint16_t it = 0; it < data->size; it++) {
-		const Token *el = data->t[it];
-		Token *redir = el->r_postfix;
+		const Token *curr = data->t[it];
+    Token *const el = (curr->tag == T_WORD && curr->w_postfix->tag == T_REDIRECTION) ? curr->w_postfix : (Token *) curr;
 		if (el->tag == T_REDIRECTION && el->r_type == R_HERE_DOC) {
-			p->data->t[it]->r_type = R_INPUT;
-			redir->w_infix = here_doc(redir->w_infix);
+      Token *filename = el->r_postfix;
+      el->r_type = R_INPUT;
+			filename->w_infix = here_doc(filename->w_infix);
+      if (!filename->w_infix) return false;
 		}
-		// if (el->tag == T_SEPARATOR && it == data->size - 2 &&
-		// 	(el->s_type == S_AND || el->s_type == S_OR || el->s_type == S_PIPE)) {
-		// 	dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(el->s_type));
-		// 	return false;
-		// }
 	}
 	return true;
 }

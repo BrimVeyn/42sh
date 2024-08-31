@@ -22,6 +22,7 @@ void secure_dup2(int oldfd, int newfd){
 void secure_pipe2(int pipefd[2], int flags){
 	if (pipe2(pipefd, flags) == -1){
 		perror("Fatal error pipe2: ");
+    gc_cleanup();
 		exit(EXIT_FAILURE);
 	}
 }
@@ -29,6 +30,7 @@ void secure_pipe2(int pipefd[2], int flags){
 void secure_execve(const char *pathname, char *const argv[], char *const envp[]){
 	if (execve(pathname, argv, envp) == -1){
 		perror("Fatal error execve: ");
+    gc_cleanup();
 		exit(EXIT_FAILURE);
 	}
 }
@@ -37,6 +39,7 @@ int secure_fork(void){
 	int id = fork();
 	if (id == -1){
 		perror("Fatal error execve: ");
+    gc_cleanup();
 		exit(EXIT_FAILURE);
 	}
 	return id;
