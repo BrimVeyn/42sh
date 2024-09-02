@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 16:22:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/02 09:37:55 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 17:23:54 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
+
+extern int debug;
 
 bool is_operator(type_of_separator s) {
 	return s == S_BG || s == S_EOF || s == S_OR || s == S_AND || s == S_SEMI_COLUMN || s == S_NEWLINE || s == S_PIPE;
@@ -172,10 +174,14 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 	return curr_command;
 }
 
+void parser_parameter_expansion(TokenList *tl){
+	(void)tl;
+}
+
 SimpleCommand *parser_parse_current(TokenList *tl) {
 	// parser_brace_expansion();
 	// parser_tilde_expansion();
-	// parser_parameter_expansion();
+	parser_parameter_expansion(tl);
 	// parser_command_substitution();
 	// parser_arithmetic_expansion();
 	// parser_word_splitting();
@@ -247,7 +253,9 @@ void fill_pipeline(Parser *self, SimpleCommand *command, type_of_separator *next
 	}
 }
 
-void parser_parse_all(Parser *self) {
+void parser_parse_all(Parser *self, char **env) {
+	static int exitno = 0;
+	(void)exitno;
 	while (true) {
 		type_of_separator next_seperator = cut_separator(self->curr_command);
 
@@ -259,8 +267,10 @@ void parser_parse_all(Parser *self) {
 			fill_pipeline(self, command, &next_seperator);
 		}
 
-		printCommand(command); //Debug
-		exec_simple_command(command);
+		if (debug){
+			printCommand(command); //Debug
+		}
+		exitno = exec_simple_command(command, env);
 
 		if (next_seperator == S_EOF) break;
 		parser_get_next_command(self);

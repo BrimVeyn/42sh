@@ -1,0 +1,4 @@
+echo Hello World
+ls | ls | ls
+ls > ./outfiles/ls
+4<../Makefile cat 5<&4 <&5 | rev | sort | >./outfiles/test >./outfiles/test >./outfiles/test >./outfiles/test2 cat
