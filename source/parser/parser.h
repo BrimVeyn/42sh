@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 13:45:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/30 15:56:51 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/02 13:56:19 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ Parser *parser_init(char *input);
 void parser_get_next_command(Parser *self);
 void parse_current(Parser *self);
 void parser_print_state(Parser *self);
-void parser_parse_all(Parser *self);
+void parser_parse_all(Parser *self, char **env);
 struct TokenList *lexer_lex_till_operator(Parser *p);
 struct TokenList *lexer_lex_all(Parser *p);
 

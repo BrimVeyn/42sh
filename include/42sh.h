@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   42sh.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:00:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/02 10:06:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 13:22:38 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ extern int g_signal;
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <errno.h>
+#include<sys/stat.h>
 
 #include <stdint.h>
 #include <stdbool.h>

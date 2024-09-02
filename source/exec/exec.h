@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 11:41:08 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 15:17:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 11:54:31 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,16 @@
 	#include "../../include/42sh.h"
 #endif // !MAXISH_H
 
+typedef enum {
+	E_ISDIR = 1,
+	E_NOPERM,
+} exec_ernno;
 
 int secure_fork(void);
-void secure_dup2(int oldfd, int newfd);
+bool secure_dup2(int from, int to);
 void secure_pipe2(int pipefd[2], int flags);
 void secure_execve(const char *pathname, char *const argv[], char *const envp[]);
-void exec_simple_command(SimpleCommand *command);
-char *find_bin_location(char *bin);
+int exec_simple_command(SimpleCommand *command, char **env);
+char *find_bin_location(char *bin, char **env);
 
 #endif

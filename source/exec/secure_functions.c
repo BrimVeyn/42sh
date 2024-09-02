@@ -3,20 +3,28 @@
 /*                                                        :::      ::::::::   */
 /*   secure_functions.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:52:42 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 15:16:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 10:55:33 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 
-void secure_dup2(int oldfd, int newfd){
-	if (dup2(oldfd, newfd) == -1){
-		perror("Fatal error dup2: ");
-		exit(EXIT_FAILURE);
-	}
+int is_valid_fd(int fd) {
+	return fcntl(fd, F_GETFL) != -1;
+}        
+
+bool error_bad_file_descriptor(int fd) {
+	dprintf(STDERR_FILENO, "42sh: %d: Bad file descriptor\n", fd);
+	return false;
+}
+
+bool secure_dup2(int from, int to) {
+	if (!is_valid_fd(from)) return error_bad_file_descriptor(from);
+	dup2(from, to);
+	return true;
 }
 
 void secure_pipe2(int pipefd[2], int flags){
@@ -29,8 +37,8 @@ void secure_pipe2(int pipefd[2], int flags){
 
 void secure_execve(const char *pathname, char *const argv[], char *const envp[]){
 	if (execve(pathname, argv, envp) == -1){
-		perror("Fatal error execve: ");
-    gc_cleanup();
+		printf("%s: command not found\n", argv[0]);
+		gc_cleanup();
 		exit(EXIT_FAILURE);
 	}
 }
