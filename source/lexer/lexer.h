@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/29 12:55:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 15:14:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 09:17:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ typedef enum {
 } type_mode;
 
 typedef struct {
-	type_mode	mode;
 	char		*input;
 	uint16_t	input_len;
 	uint16_t	position;
@@ -51,8 +50,8 @@ typedef struct {
 } Garbage;
 
 //-----------------Lexer------------------//
-Token			*lexer_get_next_token(Lexer_p l, bool recursive_call);
-Lexer_p			lexer_init(char *input, type_mode mode);
+Token			*lexer_get_next_token(Lexer_p l, bool recursive_call, type_mode mode);
+Lexer_p			lexer_init(char *input);
 void			lexer_debug(Lexer_p lexer);
 void			lexer_deinit(Lexer_p lexer);
 void			lexer_read_char(Lexer_p l);
@@ -76,6 +75,7 @@ Token			*token_empty_init(void);
 //----------------TokenList----------------//
 TokenList		*token_list_init(void);
 void			token_list_add(TokenList *tl, Token *token);
+void			token_list_add_list(TokenList *t1, TokenList *t2);
 //---------------Debug---------------------//
 void			tokenToString(Token *t, size_t offset);
 void			tokenListToString(TokenList *tl);

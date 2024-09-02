@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:04:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/30 13:33:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 08:52:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,16 +46,12 @@ typedef enum {
 	S_BG, // &
 	S_NEWLINE, // \n
 	S_EOF, // \0
-	S_PAR_CLOSE,
+	S_CMD_SUB, // $(
+	S_SUB_OPEN, // (
+	S_SUB_CLOSE, // )
 	S_DQ, //"
 	S_DEFAULT,
 } type_of_separator;
-
-typedef enum {
-	G_SUBSHELL, //([any])
-	G_COMMAND_SUB, //$([any])
-	G_DQUOTE //" ${ | $( | $"
-} type_of_grouping;
 
 typedef enum {
 	R_OUTPUT, //>[ex|n]

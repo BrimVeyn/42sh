@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 15:33:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/30 11:35:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 08:55:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,12 +42,6 @@ typedef struct Token {
 			char			*w_infix;
 			struct Token	*w_postfix;
 		}; //word
-
-		struct {
-			type_of_grouping		g_type;
-			struct TokenList		*g_list;
-			struct Token			*g_postfix;
-		}; // idk bru
 	};
 } Token;
 
