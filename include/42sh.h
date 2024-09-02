@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:00:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 16:13:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 10:06:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ extern int g_signal;
 void			gc_init(void);
 void			*gc_add(void *ptr);
 void			gc_cleanup(void);
+void gc_free(void *addr);
 
 void			free_charchar(char **s);
 
