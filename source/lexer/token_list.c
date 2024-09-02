@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 13:37:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/02 09:47:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 10:29:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,10 @@ TokenList *token_list_init(void) {
 void token_list_add(TokenList *tl, Token *token) {
 	if (tl->size >= tl->capacity) {
 		tl->capacity *= 2;
-		printf("%p\n", tl->t);
+		Token **tmp = tl->t;
 		tl->t = ft_realloc(tl->t, tl->size, tl->capacity, sizeof(Token *));
-		printf("%p\n", tl->t);
+		gc_free(tmp);
+		gc_add(tl->t);
 	}
 	tl->t[tl->size] = token;
 	tl->size += 1;

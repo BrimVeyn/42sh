@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/02 10:02:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 10:28:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,11 @@
 static Garbage gc = {NULL, 0, 0};
 
 void gc_init(void) {
+	gc.size = 0;
+	gc.capacity = 10;
 	gc.garbage = ft_calloc(10, sizeof(void *));
 	if (!gc.garbage)
 		exit(EXIT_FAILURE);
-	gc.size = 0;
-	gc.capacity = 10;
 }
 
 void *gc_add(void *ptr) {
@@ -44,7 +44,6 @@ void gc_cleanup(void) {
 		free(gc.garbage[i]);
 	}
 	free(gc.garbage);
-
 	gc.garbage = NULL;
 	gc.size = 0;
 	gc.capacity = 0;
@@ -65,7 +64,6 @@ void *ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize) {
 	if (!new_ptr)
 		exit(EXIT_FAILURE);
 	ft_memcpy(new_ptr, ptr, oldSize * elSize);
-	gc_add(new_ptr);
 	gc_free(ptr);
 	return new_ptr;
 }
