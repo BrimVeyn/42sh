@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:54 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 15:16:24 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 08:55:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,14 @@ const char *get_tagName_separator(type_of_separator type) {
 			return "S_SEMI_COLUMN";
 		case S_PIPE:
 			return "S_PIPE";
-		case S_PAR_CLOSE:
-			return "S_PAR_CLOSE";
+		case S_SUB_CLOSE:
+			return "S_SUB_CLOSE";
+		case S_SUB_OPEN:
+			return "S_SUB_OPEN";
+		case S_CMD_SUB:
+			return "S_CMD_SUB";
+		case S_DQ:
+			return "S_DOUBLE_QUOTE";
 		case S_EOF:
 			return "S_EOF";
 		case S_NEWLINE:
@@ -95,19 +101,6 @@ const char *get_tagName_redirection(type_of_redirection type) {
 			return "R_DUP_BOTH_APPEND";
 		default:
 			return "R_UNKNOWN";
-	}
-}
-
-const char *get_tagName_grouping(type_of_grouping type) {
-	switch(type) {
-		case G_SUBSHELL:
-			return "G_SUBSHELL";
-		case G_DQUOTE:
-			return "G_DQUOTE";
-		case G_COMMAND_SUB:
-			return "G_COMMAND_SUB";
-		default:
-			return "Unhandled group\n";
 	}
 }
 

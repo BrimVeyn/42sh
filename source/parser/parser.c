@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 16:22:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 16:22:25 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/02 09:37:55 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ TokenList *lexer_lex_all(Parser *p) {
 	const Lexer_p l = p->lexer;
 	TokenList *self = token_list_init();
 	while (true) {
-		Token *tmp = lexer_get_next_token(l, false);
+		Token *tmp = lexer_get_next_token(l, false, DEFAULT);
 		token_list_add(self, tmp);
 		if (tmp->tag == T_SEPARATOR && tmp->s_type == S_EOF) break;
 	}
@@ -71,9 +71,9 @@ char *here_doc(char *eof){
 	char filename[50]; 
 	sprintf(filename, "/tmp/here_doc_%d", heredoc_number++);
 	int file_fd = open(filename, O_CREAT | O_WRONLY | O_TRUNC, 0664);
-  if (file_fd == -1) {
-    return NULL;
-  }
+	if (file_fd == -1) {
+		return NULL;
+	}
 	while((input = readline("> ")) && ft_strcmp(eof, input)){
 		dprintf(file_fd, "%s\n", input);
 	}
@@ -85,12 +85,12 @@ bool heredoc_detector(Parser *p) {
 	const TokenList *data = p->data;
 	for (uint16_t it = 0; it < data->size; it++) {
 		const Token *curr = data->t[it];
-    Token *const el = (curr->tag == T_WORD && curr->w_postfix->tag == T_REDIRECTION) ? curr->w_postfix : (Token *) curr;
+		Token *const el = (curr->tag == T_WORD && curr->w_postfix->tag == T_REDIRECTION) ? curr->w_postfix : (Token *) curr;
 		if (el->tag == T_REDIRECTION && el->r_type == R_HERE_DOC) {
-      Token *filename = el->r_postfix;
-      el->r_type = R_INPUT;
+			Token *filename = el->r_postfix;
+			el->r_type = R_INPUT;
 			filename->w_infix = here_doc(filename->w_infix);
-      if (!filename->w_infix) return false;
+			if (!filename->w_infix) return false;
 		}
 	}
 	return true;
@@ -99,7 +99,7 @@ bool heredoc_detector(Parser *p) {
 Parser *parser_init(char *input) {
 	Parser *self = (Parser *) gc_add(ft_calloc(1, sizeof(Parser)));
 
-	self->lexer = lexer_init(input, DEFAULT);
+	self->lexer = lexer_init(input);
 	self->it = 0;
 	self->data = lexer_lex_all(self);
 	self->curr_command = lexer_lex_till_operator(self);

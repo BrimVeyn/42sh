@@ -6,17 +6,16 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:45:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/30 15:15:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 09:17:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 
-Lexer_p lexer_init(char *input, type_mode mode) {
+Lexer_p lexer_init(char *input) {
 	Lexer_p lexer = gc_add(ft_calloc(1, sizeof(Lexer)));
 
 	Lexer self = {
-		.mode = mode,
 		.input = input,
 		.input_len = ft_strlen(input),
 		.position = 0,
@@ -36,11 +35,6 @@ Token *token_empty_init(void) {
 	if (!self) exit(EXIT_FAILURE);
 	self->tag = T_NONE;
 	return self;
-}
-
-void token_command_grouping_init(Token *token) {
-	token->g_list = NULL;
-	token->g_postfix = (Token *) gc_add(token_empty_init());
 }
 
 void token_word_init(Token *token) {

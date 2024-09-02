@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 10:19:29 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/30 15:15:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 08:56:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,23 +44,6 @@ void tokenToString(Token *t, size_t offset) {
 			tokenToString(t->w_postfix, offset + 4);
 			printOffset(offset);
 			printf("}\n");
-			break;
-		case T_GROUPING:
-			printf(C_BRONZE"T_COMMAND_GROUPING"C_RESET" {\n");
-			printOffset(offset + 4);
-			printf("Type: "C_LIGHT_BROWN"%s\n"C_RESET, tagName(t->g_type));
-			printOffset(offset + 4);
-			printf("CgList: "C_BRONZE"{\n"C_RESET);
-			for (uint16_t i = 0; i < t->g_list->size; i++) {
-				tokenToString(t->g_list->t[i], offset + 4);
-			}
-			printOffset(offset + 4);
-			printf(C_BRONZE"}\n"C_RESET);
-			printOffset(offset + 4);
-			printf("CgPostfix:");
-			tokenToString(t->g_postfix, offset + 4);
-			printOffset(offset);
-			printf("}\n"C_RESET);
 			break;
 		case T_SEPARATOR:
 			printf(C_PURPLE"T_SEPARATOR"C_RESET" {\n");

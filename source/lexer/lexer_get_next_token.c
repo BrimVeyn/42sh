@@ -6,11 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/30 15:15:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 09:40:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+#include "lexer.h"
+#include "lexer_enum.h"
 
 //Read a char from input
 void lexer_read_char(Lexer_p l) {
@@ -52,12 +54,8 @@ type_of_token get_token_tag(Lexer_p l) {
 		|| !ft_strncmp("&>>", &l->input[l->position], 3)) {
 		return T_REDIRECTION;
 	}
-	if (ft_strchr("&|;\n)", l->ch)) {
+	if (ft_strchr("&|;()$\"\n)", l->ch)) {
 		return T_SEPARATOR;
-	}
-	if (!ft_strncmp("$(", &l->input[l->position], 2)
-		|| ft_strchr("(\"", l->ch)) {
-		return T_GROUPING;
 	}
 	return T_WORD;
 }
@@ -66,9 +64,6 @@ void init_token_from_tag(Token *token) {
 	switch (token->tag) {
 		case T_REDIRECTION:
 			token_redirection_init(token);
-			break;
-		case T_GROUPING:
-			token_command_grouping_init(token);
 			break;
 		case T_WORD:
 			token_word_init(token);
@@ -85,6 +80,10 @@ type_of_separator get_separator_type(Lexer_p l) {
 	else if (l->ch == '\n') {
 		lexer_read_char(l);
 		return S_NEWLINE;
+	}
+	else if (!ft_strncmp("$(", &l->input[l->position], 2)) {
+		lexer_read_x_char(l, 2);
+		return S_CMD_SUB;
 	}
 	else if (!ft_strncmp("&&", &l->input[l->position], 2)) {
 		lexer_read_x_char(l, 2);
@@ -104,7 +103,15 @@ type_of_separator get_separator_type(Lexer_p l) {
 	}
 	else if (l->ch == ')') {
 		lexer_read_char(l);
-		return S_PAR_CLOSE;
+		return S_SUB_CLOSE;
+	}
+	else if (l->ch == '(') {
+		lexer_read_char(l);
+		return S_SUB_OPEN;
+	}
+	else if (l->ch == '\"') {
+		lexer_read_char(l);
+		return S_DQ;
 	}
 	else if (l->ch == '&'){
 		lexer_read_char(l);
@@ -153,48 +160,19 @@ type_of_redirection get_redirection_type(Lexer_p l) {
 	}
 }
 
-type_of_grouping get_group_type(Lexer_p l) {
-	if (!ft_strncmp("$(", &l->input[l->position], 2)) {
-		lexer_read_x_char(l, 2);
-		return G_COMMAND_SUB;
-	} else if (l->ch == '(') { 
-		lexer_read_char(l);
-		return G_SUBSHELL;
-	} else if (l->ch == '\"'){
-		lexer_read_char(l);
-		return G_DQUOTE;
-	} else {
-		printf("char = %c %d\n", l->ch, l->ch);
-		exit(EXIT_FAILURE);
-	}
-}
-
-TokenList *lexer_lex_till(Lexer_p l, type_of_separator sep) {
-	TokenList *self = token_list_init();
-	while (true) {
-		Token *tmp = lexer_get_next_token(l, false);
-		token_list_add(self, tmp);
-		if (tmp->tag == T_SEPARATOR && (tmp->s_type == sep || tmp->s_type == S_EOF))
-			break;
-	}
-	return self;
-}
-
-
-
 bool is_delimiter(type_mode mode, char c) {
 	if (mode == DEFAULT) {
 		return ft_strchr("|&<>$();\n \t", c) || c == '\0';
 	} else {
-		return ft_strchr("$\n", c) || c == '\0';
+		return ft_strchr("\"$", c) || c == '\0';
 	}
 }
 
-char *get_word(Lexer_p l) {
+char *get_word(Lexer_p l, type_mode mode) {
 	const uint16_t start = l->position;
 	while (l->ch != '\0') {
 		lexer_read_char(l);
-		if (is_delimiter(l->mode, l->ch)) {
+		if (is_delimiter(mode, l->ch)) {
 			break;
 		}
 	}
@@ -204,7 +182,7 @@ char *get_word(Lexer_p l) {
 
 
 //Extract next token from the input
-Token *lexer_get_next_token(Lexer_p l, bool recursive_call) {
+Token *lexer_get_next_token(Lexer_p l, bool recursive_call, type_mode mode) {
 	Token *token = gc_add(ft_calloc(1, sizeof(Token)));
 
 	eat_whitespace(l);
@@ -224,26 +202,15 @@ Token *lexer_get_next_token(Lexer_p l, bool recursive_call) {
 		case T_REDIRECTION:
 			token->r_type = get_redirection_type(l);
 			eat_whitespace(l);
-			token->r_postfix = lexer_get_next_token(l, true);
+			token->r_postfix = lexer_get_next_token(l, true, mode);
 			if (token->r_postfix->tag == T_NONE) {
 				token->e = ERROR_UNEXPECTED_TOKEN;
 			}
 			break;
-		case T_GROUPING:
-			token->g_type = get_group_type(l);
-			if (token->g_type == G_DQUOTE) {
-				token->g_list = lexer_lex_till(l, S_DQ);
-			} else {
-				token->g_list = lexer_lex_till(l, S_PAR_CLOSE);
-			}
-			if (!is_whitespace(l->ch)) {
-				token->g_postfix = lexer_get_next_token(l, true);
-			}
-			break;
 		case T_WORD:
-			token->w_infix = get_word(l);
+			token->w_infix = get_word(l, mode);
 			if (!is_whitespace(l->ch) && is_fdable_redirection(l)) {
-				token->w_postfix = lexer_get_next_token(l, true);
+				token->w_postfix = lexer_get_next_token(l, true, mode);
 			} else {
 				break;
 			}
