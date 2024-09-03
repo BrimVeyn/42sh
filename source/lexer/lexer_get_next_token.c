@@ -5,14 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/02 11:11:53 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/09/03 14:00:02 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/03 14:00:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include "lexer.h"
-#include "lexer_enum.h"
 
 TokenList *lexer_lex_all_test(Lexer_p l, type_of_separator sep, type_mode mode) {
 	TokenList *self = token_list_init();
@@ -85,7 +83,7 @@ type_of_token get_token_tag(Lexer_p l) {
 		|| !ft_strncmp("&>>", &l->input[l->position], 3)) {
 		return T_REDIRECTION;
 	}
-	if (ft_strchr("&|;()$\"\n)", l->ch)) {
+	if (ft_strchr("&|;()\"\n)", l->ch)) {
 		return T_SEPARATOR;
 	}
 	return T_WORD;
@@ -193,7 +191,7 @@ type_of_redirection get_redirection_type(Lexer_p l) {
 
 bool is_delimiter(type_mode mode, char c) {
 	if (mode == DEFAULT) {
-		return ft_strchr("|&<>$();\n \t", c) || c == '\0';
+		return ft_strchr("|&<>();\n \t", c) || c == '\0';
 	} else {
 		return ft_strchr("\"$", c) || c == '\0';
 	}

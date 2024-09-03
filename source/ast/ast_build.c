@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 13:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/03 13:58:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/03 15:05:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,12 +56,12 @@ TokenList *extract_operator(TokenList *list, uint16_t *i) {
 }
 
 TokenListVector *split_operator(TokenList *list) {
-	TokenListVector *self = commnandCont_init();
+	TokenListVector *self = token_list_vector_init();
 	uint16_t i = 0;
 	while (i < list->size) {
-		commnandCont_add(self, extract_command(list, &i));
+		token_list_vector_add(self, extract_command(list, &i));
 		if (list->t[i]->tag == T_SEPARATOR && list->t[i]->s_type != S_EOF) {
-			commnandCont_add(self, extract_operator(list, &i));
+			token_list_vector_add(self, extract_operator(list, &i));
 		} else i++;
 	}
 	return self;
