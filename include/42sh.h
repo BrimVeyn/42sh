@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:00:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/02 10:06:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/03 11:35:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,10 @@ extern int g_signal;
 void			gc_init(void);
 void			*gc_add(void *ptr);
 void			gc_cleanup(void);
-void gc_free(void *addr);
+void			gc_free(void *addr);
 
+//----------------Utils--------------------//
 void			free_charchar(char **s);
-
-# define I_READ 0
-# define I_WRITE 1
 
 typedef enum {
 	SIG_PROMPT,
@@ -65,5 +63,9 @@ typedef enum {
 #ifndef SIGNAL_H
 	#include "../source/signals/signals.h"
 #endif // !SIGNAL_H
+
+#ifndef AST_H
+	#include "../source/ast/ast.h"
+#endif // !AST_H
 
 #endif

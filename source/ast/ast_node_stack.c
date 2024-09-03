@@ -1,42 +1,39 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   token_list.c                                       :+:      :+:    :+:   */
+/*   ast_node_stack.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/21 13:37:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/02 13:38:01 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/09/02 15:31:15 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/03 13:23:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
 #include "../../include/42sh.h"
 
-TokenList *token_list_init(void) {
-	TokenList *self = gc_add(ft_calloc(1, sizeof(TokenList)));
-	TokenList tl = {
-		.t = (Token **) gc_add(ft_calloc(10, sizeof(Token *))),
-		.size = 0,
-		.capacity = 10,
-	};
-	*self = tl;
+NodeStack *node_stack_init(void) {
+	NodeStack *self = gc_add(ft_calloc(1, sizeof(NodeStack)));
+	self->data = (Node **) gc_add(ft_calloc(10, sizeof(Node *)));
+	self->size = 0;
+	self->capacity = 10;
 	return self;
 }
 
-void token_list_add(TokenList *tl, Token *token) {
-	if (tl->size >= tl->capacity) {
-		tl->capacity *= 2;
-		Token **tmp = tl->t;
-		tl->t = ft_realloc(tl->t, tl->size, tl->capacity, sizeof(Token *));
-		gc_free(tmp);
-		gc_add(tl->t);
-	}
-	tl->t[tl->size] = token;
-	tl->size += 1;
+Node *node_stack_pop(NodeStack *self) {
+	self->size -= 1;
+	return self->data[self->size];
 }
 
-void token_list_add_list(TokenList *t1, TokenList *t2) {
-	for (uint16_t i = 0; i < t2->size; i++) {
-		token_list_add(t1, t2->t[i]);
+void node_stack_push(NodeStack *tl, Node *token) {
+	if (tl->size >= tl->capacity) {
+		tl->capacity *= 2;
+		Node **tmp = tl->data;
+		tl->data = (Node **) ft_realloc(tl->data, tl->size, tl->capacity, sizeof(Node *));
+		gc_free(tmp);
+		gc_add(tl->data);
 	}
+	tl->data[tl->size] = token;
+	tl->size += 1;
 }

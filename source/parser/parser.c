@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 16:22:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/02 09:37:55 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/03 13:45:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <stdint.h>
 
 bool is_operator(type_of_separator s) {
 	return s == S_BG || s == S_EOF || s == S_OR || s == S_AND || s == S_SEMI_COLUMN || s == S_NEWLINE || s == S_PIPE;
@@ -31,8 +32,7 @@ TokenList *lexer_lex_till_operator(Parser *p) {
 	return self;
 }
 
-TokenList *lexer_lex_all(Parser *p) {
-	const Lexer_p l = p->lexer;
+TokenList *lexer_lex_all(Lexer_p l) {
 	TokenList *self = token_list_init();
 	while (true) {
 		Token *tmp = lexer_get_next_token(l, false, DEFAULT);
@@ -46,7 +46,7 @@ bool syntax_error_detector(Parser *p) {
 	const TokenList *data = p->data;
 	for (uint16_t it = 0; it < data->size; it++) {
 		const Token *el = data->t[it];
-		if (el->tag == T_SEPARATOR && it == 0) {
+		if (el->tag == T_SEPARATOR && it == 0 && (el->s_type != S_SUB_OPEN)) {
 			dprintf(STDERR_FILENO, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(el->s_type));
 			return false;
 		}
@@ -81,8 +81,7 @@ char *here_doc(char *eof){
 	return gc_add(ft_strdup(filename));
 }
 
-bool heredoc_detector(Parser *p) {
-	const TokenList *data = p->data;
+bool heredoc_detector(TokenList *data) {
 	for (uint16_t it = 0; it < data->size; it++) {
 		const Token *curr = data->t[it];
 		Token *const el = (curr->tag == T_WORD && curr->w_postfix->tag == T_REDIRECTION) ? curr->w_postfix : (Token *) curr;
@@ -101,9 +100,11 @@ Parser *parser_init(char *input) {
 
 	self->lexer = lexer_init(input);
 	self->it = 0;
-	self->data = lexer_lex_all(self);
-	self->curr_command = lexer_lex_till_operator(self);
-	self->peak_command = lexer_lex_till_operator(self);
+	self->data = lexer_lex_all_test(self->lexer, S_EOF, DEFAULT);
+	if (self->data) {
+		self->curr_command = lexer_lex_till_operator(self);
+		self->peak_command = lexer_lex_till_operator(self);
+	}
 	return self;
 }
 
