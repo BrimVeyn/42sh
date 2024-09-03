@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
+#    By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/29 13:20:27 by nbardavi          #+#    #+#              #
-#    Updated: 2024/08/30 16:11:57 by bvan-pae         ###   ########.fr        #
+#    Updated: 2024/09/03 13:16:21 by nbardavi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,7 @@ CFLAGS 			:= -Wall -Werror -Wextra -g3 #-fsanitize=address
 LEXER_SRC 		:= $(filter-out source/lexer/lexer_main.c, $(wildcard source/lexer/*.c))
 EXEC_SRC 		:= $(filter-out source/exec/exec_main.c, $(wildcard source/exec/*.c))
 DEBUG_SRC		:= $(wildcard source/debug/*.c)
-REGEX_SRC		:= $(wildcard source/regex/*.c)
+REGEX_SRC		:= $(filter-out source/regex/regex_main.c, $(wildcard source/regex/*.c))
 PARSER_SRC		:= $(wildcard source/parser/*.c)
 AST_SRC			:= $(wildcard source/ast/*.c)
 STRING_SRC		:= $(wildcard source/string/*.c)
@@ -28,7 +28,7 @@ UTILS_SRC		:= $(wildcard source/utils/*.c)
 SIGNALS_SRC		:= $(wildcard source/signals/*.c)
 
 
-SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC)
+SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(REGEX_SRC)
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
 # TEST

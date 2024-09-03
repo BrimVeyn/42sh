@@ -6,11 +6,13 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 10:19:22 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/02 15:53:42 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/03 13:25:29 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "exec.h"
 #include "../../include/42sh.h"
+#include <sys/wait.h>
 
 // can have Prefix
 // >&   X
@@ -78,7 +80,7 @@ char *find_bin_location(char *bin, char **env){
 
 	struct stat file_stat;
 	if (stat(bin, &file_stat) != -1){
-		printf("%d", there_is_slash(bin));
+
 		if (S_ISDIR(file_stat.st_mode)){
 			dprintf(2, "%s: Is a directory\n", bin);
 			return NULL;
@@ -90,12 +92,11 @@ char *find_bin_location(char *bin, char **env){
 			dprintf(2, "%s: Permission Denied\n", bin);
 			return NULL;
 		}
+
 	}
-	// else{
-	// 	if (there_is_slash(bin)){
-	// 		dprintf(2, "%s: No such file or directory\n", bin);
-	// 		return NULL;
-	// 	}
+	// else if (there_is_slash(bin)){
+	// 	dprintf(2, "%s: No such file or directory\n", bin);
+	// 	return NULL;
 	// }
 
 	for (int i = 0; env[i]; i++){
@@ -120,11 +121,28 @@ char *find_bin_location(char *bin, char **env){
 	return NULL;
 }
 
+int exec_init_subshell(void *line, bool has_pipe){
+	(void)line;
+	int pipefd[2];
+	if (has_pipe == true){
+		secure_pipe2(pipefd, O_CLOEXEC);
+	}
+	int id = secure_fork();
+	if (id == 0){
+		//call ast
+		exit(EXIT_SUCCESS);
+	}
+	int exitno = 0;
+	waitpid(id, &exitno, 0);
+	return exitno;
+}
+
 int exec_simple_command(SimpleCommand *command, char **env) {
 	pid_t id[1024] = {0};
 	int pipefd[2] = {-1, -1};
 	int prev_pipefd = -1;
 	int i = 0;
+	
 
 	while (command) {
 		if (command->next) {

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/02 17:11:24 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/03 11:42:30 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,7 @@ type_of_redirection get_redirection_type(Lexer_p l) {
 
 bool is_delimiter(type_mode mode, char c) {
 	if (mode == DEFAULT) {
-		return ft_strchr("|&<>$();\n \t", c) || c == '\0';
+		return ft_strchr("|&<>();\n \t", c) || c == '\0';
 	} else {
 		return ft_strchr("\"$", c) || c == '\0';
 	}

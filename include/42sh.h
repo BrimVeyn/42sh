@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:00:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/02 13:22:38 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/03 13:13:06 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,5 +66,9 @@ typedef enum {
 #ifndef SIGNAL_H
 	#include "../source/signals/signals.h"
 #endif // !SIGNAL_H
+
+#ifndef REGEX_H
+	#include "../source/regex/regex.h"
+#endif // !REGEX_H
 
 #endif

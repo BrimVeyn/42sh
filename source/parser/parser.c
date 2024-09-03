@@ -6,16 +6,18 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 16:22:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/02 17:23:54 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/03 13:58:29 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 #include <fcntl.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 
 extern int debug;
+int exitno = 0;
 
 bool is_operator(type_of_separator s) {
 	return s == S_BG || s == S_EOF || s == S_OR || s == S_AND || s == S_SEMI_COLUMN || s == S_NEWLINE || s == S_PIPE;
@@ -176,12 +178,31 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 
 void parser_parameter_expansion(TokenList *tl){
 	(void)tl;
+
+	for (uint16_t i = 0; i < tl->size; i++){
+		Token *el = tl->t[i];
+
+		if (el->tag == T_WORD){
+			match_result result = regex_match("${[^}]*}", el->w_infix);
+			if (result.start != -1){
+				result = regex_match("${?}", el->w_infix);
+				if (result.start != -1){
+					char *start = ft_substr(el->w_infix, 0, result.start);
+					char *end = ft_substr(el->w_infix, result.end, ft_strlen(el->w_infix));
+					char *tmp = ft_strjoin(start, gc_add(ft_itoa(exitno)));
+					el->w_infix = gc_add(ft_strjoin(tmp, end));
+					free(tmp); free(start); free(end);
+				}
+			}
+		}
+	}
+
 }
 
 SimpleCommand *parser_parse_current(TokenList *tl) {
 	// parser_brace_expansion();
 	// parser_tilde_expansion();
-	parser_parameter_expansion(tl);
+	// parser_parameter_expansion(tl);
 	// parser_command_substitution();
 	// parser_arithmetic_expansion();
 	// parser_word_splitting();
@@ -254,8 +275,6 @@ void fill_pipeline(Parser *self, SimpleCommand *command, type_of_separator *next
 }
 
 void parser_parse_all(Parser *self, char **env) {
-	static int exitno = 0;
-	(void)exitno;
 	while (true) {
 		type_of_separator next_seperator = cut_separator(self->curr_command);
 
