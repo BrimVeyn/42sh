@@ -1,42 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   token_list.c                                       :+:      :+:    :+:   */
+/*   ast_tokenlistlist.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/21 13:37:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/02 13:38:01 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/09/02 13:38:32 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/03 13:38:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 
-TokenList *token_list_init(void) {
-	TokenList *self = gc_add(ft_calloc(1, sizeof(TokenList)));
-	TokenList tl = {
-		.t = (Token **) gc_add(ft_calloc(10, sizeof(Token *))),
-		.size = 0,
-		.capacity = 10,
-	};
-	*self = tl;
+TokenListVector *commnandCont_init(void) {
+	TokenListVector *self = gc_add(ft_calloc(1, sizeof(TokenListVector)));
+	self->data = (TokenList **) gc_add(ft_calloc(10, sizeof(TokenList *)));
+	self->size = 0;
+	self->capacity = 10;
 	return self;
 }
 
-void token_list_add(TokenList *tl, Token *token) {
+void commnandCont_add(TokenListVector *tl, TokenList *token) {
 	if (tl->size >= tl->capacity) {
 		tl->capacity *= 2;
-		Token **tmp = tl->t;
-		tl->t = ft_realloc(tl->t, tl->size, tl->capacity, sizeof(Token *));
+		TokenList **tmp = tl->data;
+		tl->data = ft_realloc(tl->data, tl->size, tl->capacity, sizeof(TokenList *));
 		gc_free(tmp);
-		gc_add(tl->t);
+		gc_add(tl->data);
 	}
-	tl->t[tl->size] = token;
+	tl->data[tl->size] = token;
 	tl->size += 1;
-}
-
-void token_list_add_list(TokenList *t1, TokenList *t2) {
-	for (uint16_t i = 0; i < t2->size; i++) {
-		token_list_add(t1, t2->t[i]);
-	}
 }
