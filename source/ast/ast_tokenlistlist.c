@@ -6,13 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 13:38:32 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/03 13:38:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/03 15:05:49 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 
-TokenListVector *commnandCont_init(void) {
+TokenListVector *token_list_vector_init(void) {
 	TokenListVector *self = gc_add(ft_calloc(1, sizeof(TokenListVector)));
 	self->data = (TokenList **) gc_add(ft_calloc(10, sizeof(TokenList *)));
 	self->size = 0;
@@ -20,7 +20,7 @@ TokenListVector *commnandCont_init(void) {
 	return self;
 }
 
-void commnandCont_add(TokenListVector *tl, TokenList *token) {
+void token_list_vector_add(TokenListVector *tl, TokenList *token) {
 	if (tl->size >= tl->capacity) {
 		tl->capacity *= 2;
 		TokenList **tmp = tl->data;

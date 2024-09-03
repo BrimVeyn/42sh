@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/28 16:00:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/03 11:35:43 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/09/03 14:01:25 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/03 16:47:49 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ extern int g_signal;
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <errno.h>
+#include<sys/stat.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -44,6 +45,7 @@ typedef enum {
 	SIG_EXEC,
 } type_of_signals;
 
+
 #ifndef LEXER_H
 	#include "../source/lexer/lexer.h"
 #endif // !LEXER_H
@@ -51,6 +53,10 @@ typedef enum {
 #ifndef PARSER_H
 	#include "../source/parser/parser.h"
 #endif // !LEXER_H
+
+#ifndef AST_H
+#include "../source/ast/ast.h"
+#endif // !AST_H
 
 #ifndef EXEC_H
 	#include "../source/exec/exec.h"
@@ -64,8 +70,9 @@ typedef enum {
 	#include "../source/signals/signals.h"
 #endif // !SIGNAL_H
 
-#ifndef AST_H
-	#include "../source/ast/ast.h"
-#endif // !AST_H
+
+#ifndef REGEX_H
+	#include "../source/regex/regex.h"
+#endif // !REGEX_H
 
 #endif

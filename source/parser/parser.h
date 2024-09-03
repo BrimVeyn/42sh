@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/27 13:45:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/03 13:46:04 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/09/03 14:01:49 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/03 17:16:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,10 +61,11 @@ Parser *parser_init(char *input);
 void parser_get_next_command(Parser *self);
 void parse_current(Parser *self);
 void parser_print_state(Parser *self);
-void parser_parse_all(Parser *self);
+void parser_parse_all(Parser *self, char **env);
+SimpleCommand *parser_parse_current(TokenList *tl);
+void printCommand(SimpleCommand *command);
 TokenList *lexer_lex_till_operator(Parser *p);
 TokenList *lexer_lex_all(Lexer_p l);
-
 
 RedirectionList *redirection_list_init(void);
 void redirection_list_add(RedirectionList *rl, Redirection *redirection);

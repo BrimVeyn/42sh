@@ -5,8 +5,8 @@
 #                                                     +:+ +:+         +:+      #
 #    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/08/29 13:20:27 by nbardavi          #+#    #+#              #
-#    Updated: 2024/09/02 12:20:57 by bvan-pae         ###   ########.fr        #
+#    Created: 2024/09/03 13:59:35 by bvan-pae          #+#    #+#              #
+#    Updated: 2024/09/03 13:59:48 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,14 +21,14 @@ LEXER_SRC 		:= $(filter-out source/lexer/lexer_main.c, $(wildcard source/lexer/*
 EXEC_SRC 		:= $(filter-out source/exec/exec_main.c, $(wildcard source/exec/*.c))
 AST_SRC			:= $(filter-out source/ast/ast_main.c, $(wildcard source/ast/*.c))
 DEBUG_SRC		:= $(wildcard source/debug/*.c)
-REGEX_SRC		:= $(wildcard source/regex/*.c)
+REGEX_SRC		:= $(filter-out source/regex/regex_main.c, $(wildcard source/regex/*.c))
 PARSER_SRC		:= $(wildcard source/parser/*.c)
 STRING_SRC		:= $(wildcard source/string/*.c)
 UTILS_SRC		:= $(wildcard source/utils/*.c)
 SIGNALS_SRC		:= $(wildcard source/signals/*.c)
 
 
-SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC)
+SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC) $(REGEX_SRC)
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
 # TEST

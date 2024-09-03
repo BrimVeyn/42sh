@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 13:08:50 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/03 13:14:45 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,26 +14,19 @@
 #include <stdint.h>
 #include <stdio.h>
 
-int regex_matchhere(char *regexp, char *text, int *text_pos);
-
-typedef struct {
-    int start;
-    int end;
-} match_result;
-
-int matchdigit(char c){
+static int matchdigit(char c){
     return (0 <= c && c <= 9);
 }
 
-int matchalpha(char c){
+static int matchalpha(char c){
     return (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z'));
 }
 
-int matchalphanum(char c){
+static int matchalphanum(char c){
     return matchdigit(c) || matchalpha(c);
 }
 
-int matchwhitespace(char c){
+static int matchwhitespace(char c){
     return (('\a' <= c && c <= '\r') || c == ' ');
 }
 
@@ -76,7 +69,10 @@ match_result regex_match(char *regexp, char *text) {
 }
 
 int regex_matchstar(char c, char *regexp, char *text, int *text_pos) {
-    while (*text != '\0' && ((*text == c )|| c == '.')) {
+ //    printf("Regex matchstar\n");
+	// printf("comparing regexp: %c\ntext: %c\n", c, *text);
+	while (*text != '\0' && ((*text == c )|| c == '.')) {
+		// printf("comparing regexp: %c\ntext: %c\n", c, *text);
         (*text_pos)++;
         text++;
     }
@@ -109,7 +105,12 @@ int regex_find_range_end(char *regexp){
 int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found) {
     int has_star = (regexp[regex_find_range_end(regexp) + 1] == '*');
     int matched = 0;
-    /*printf("regxp: %c\n", *regexp);*/
+	int has_caret = (*regexp == '^');
+
+	if (has_caret){
+		regexp++;
+	}
+
     while(*regexp != ']') {
         // implemente litteral charactere here (&& regexp[0] != '//')
         // +2 to skip current char and -
@@ -121,7 +122,7 @@ int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found
             matched = 1;
         }
 
-        if (matched){
+        if ((matched && !has_caret) || (!matched && has_caret && *regexp)){
             previous_found = 1;
             (*text_pos)++;
             text++;
@@ -146,13 +147,13 @@ int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found
 }
 
 int regex_matchhere(char *regexp, char *text, int *text_pos) {
-    /*printf("regexp char: %c\ntext char: %c\n", *regexp, *text);*/
+	// printf("regexp char: %c\ntext char: %c\n", *regexp, *text);
     if (regexp[0] == '\0') {
         return 1;
     }
-    if (regexp[0] == '$'){
-        return (*text == '\0');
-    }
+    // if (regexp[0] == '$'){
+    //     return (*text == '\0');
+    // }
     if (regexp[0] == '['){
         return regex_matchrange(regexp + 1, text, text_pos, 0);
     }
@@ -172,7 +173,6 @@ int regex_matchhere(char *regexp, char *text, int *text_pos) {
     return 0;
 }
 
-
 void regex_test(char *regexp, char *text){
     match_result result = regex_match(regexp, text);
     printf("start: %d\nend: %d\n", result.start, result.end);
@@ -189,42 +189,5 @@ void regex_test(char *regexp, char *text){
 
     printf("%s\n", regexp);
     printf("==================\n");
-}
-
-#include <readline/readline.h>
-#include <readline/history.h>
-
-int main(int ac, char **av) {
-    if (ac >= 2 && !strcmp(av[1], "-i")){
-        char *input = NULL;
-        char *string = readline("enter string\n> ");
-        while((input = readline("> ")) != NULL){
-            regex_test(input, string);
-            add_history(input);
-        }
-    } else{
-        char *text = "Heeello-world! 0123456789";
-        regex_test("Heeello", text);
-        regex_test("Hedllo", text);
-        regex_test("Hi*", text);
-        regex_test("He*", text);
-        regex_test("He*l", text);
-        regex_test("ee", text);
-        regex_test("^ee", text);
-        regex_test("^He", text);
-        regex_test("H[A-Z]", text);
-        regex_test("H[a-z]", text);
-        regex_test("Heee[a-z]", text);
-        regex_test("H[a-z]*", text);
-        regex_test("[4-8]*", text);
-        regex_test("[a-z4-8]*", "000aaaaa44444");
-        regex_test("[a-z ]*", "Hello world!");
-        regex_test("^[a-z ]*", "Hello world!");
-        regex_test("^H[a-z-]*", "Hello-world!");
-        regex_test("^H[a-z]*\\sw", "Hello world!");
-        printf("Hello\\s\n");
-
-    }
-    return 0;
 }
 

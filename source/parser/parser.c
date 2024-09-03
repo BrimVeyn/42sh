@@ -5,16 +5,16 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/30 16:22:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/03 13:45:58 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/09/03 14:02:10 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/03 17:25:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include <fcntl.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdint.h>
+#include <time.h>
+
+extern int debug;
+int exitno = 0;
 
 bool is_operator(type_of_separator s) {
 	return s == S_BG || s == S_EOF || s == S_OR || s == S_AND || s == S_SEMI_COLUMN || s == S_NEWLINE || s == S_PIPE;
@@ -173,10 +173,118 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 	return curr_command;
 }
 
+void parser_parameter_expansion(TokenList *tl){
+	(void)tl;
+
+	for (uint16_t i = 0; i < tl->size; i++){
+		Token *el = tl->t[i];
+
+		if (el->tag == T_WORD){
+			match_result result = regex_match("${[^}]*}", el->w_infix);
+			if (result.start != -1){
+				result = regex_match("${?}", el->w_infix);
+				if (result.start != -1){
+					char *start = ft_substr(el->w_infix, 0, result.start);
+					char *end = ft_substr(el->w_infix, result.end, ft_strlen(el->w_infix));
+					char *tmp = ft_strjoin(start, gc_add(ft_itoa(exitno)));
+					el->w_infix = gc_add(ft_strjoin(tmp, end));
+					free(tmp); free(start); free(end);
+				}
+			}
+		}
+	}
+
+}
+
+//echo 0 ; echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
+//echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
+//echo 1 | (echo 2 && echo 3) | echo 4
+//echo -2 | echo -1 | echo 0; echo 1 | echo 2
+
+type_of_separator next_separator(TokenList *list, int *i) {
+	int j = *i;
+	while (j < list->size) {
+		if (list->t[j]->tag == T_SEPARATOR && 
+			(list->t[j]->s_type == S_SEMI_COLUMN ||
+			list->t[j]->s_type == S_PIPE)) {
+			return list->t[j]->s_type;
+		}
+		(j)++;
+	}
+	return S_EOF;
+}
+
+bool is_pipe(TokenList *list, int *i) {
+	return (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_PIPE);
+}
+
+bool is_eof(TokenList *list, int *i) {
+	return (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_EOF);
+}
+
+bool is_semi(TokenList *list, int *i) {
+	return (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SEMI_COLUMN);
+}
+
+bool has_subshell(TokenList *list, int *i) {
+	return list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_OPEN;
+}
+
+bool is_end_sub(TokenList *list, int *i) {
+	return list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_CLOSE;
+}
+
+Node *extract_subshell(TokenList *list, int *i) {
+	TokenList *newlist = token_list_init();
+	(*i)++;
+	while (!is_end_sub(list, i)) {
+		token_list_add(newlist, list->t[*i]);
+		(*i)++;
+	}
+	(*i)++;
+	return ast_build(newlist);
+}
+
+TokenList *extract_tokens(TokenList *list, int *i) {
+	TokenList *newlist = token_list_init();
+	while (*i < list->size && !is_pipe(list, i) && !is_eof(list, i) && !is_semi(list, i)) {
+		token_list_add(newlist, list->t[*i]);
+		(*i)++;
+	}
+	(*i)++;
+	return newlist;
+}
+
+ExecuterList *build_executer_list(TokenList *list) {
+	ExecuterList *self = executer_list_init();
+	int i = 0;
+	while (i < list->size) {
+		if (next_separator(list, &i) == S_PIPE) {
+			Executer *executer = NULL;
+			while (next_separator(list, &i) != S_EOF && next_separator(list, &i) != S_SEMI_COLUMN) {
+				if (has_subshell(list, &i)) {
+					Executer *new = executer_init(extract_subshell(list, &i), NULL);
+					executer_push_back(&executer, new);
+				} else {
+					Executer *new = executer_init(NULL, extract_tokens(list, &i));
+					executer_push_back(&executer, new);
+				}
+			}
+			executer_list_push(self, executer);
+		}
+		if (next_separator(list, &i) == S_EOF || next_separator(list, &i) == S_SEMI_COLUMN) {
+			Executer *executer = executer_init(NULL, extract_tokens(list, &i));
+			executer_list_push(self, executer);
+		}
+	}
+	return self;
+}
+
 SimpleCommand *parser_parse_current(TokenList *tl) {
+	
 	// parser_brace_expansion();
 	// parser_tilde_expansion();
-	// parser_parameter_expansion();
+	// parser_parameter_expansion(tl);
 	// parser_command_substitution();
 	// parser_arithmetic_expansion();
 	// parser_word_splitting();
@@ -248,7 +356,7 @@ void fill_pipeline(Parser *self, SimpleCommand *command, type_of_separator *next
 	}
 }
 
-void parser_parse_all(Parser *self) {
+void parser_parse_all(Parser *self, char **env) {
 	while (true) {
 		type_of_separator next_seperator = cut_separator(self->curr_command);
 
@@ -260,8 +368,11 @@ void parser_parse_all(Parser *self) {
 			fill_pipeline(self, command, &next_seperator);
 		}
 
-		printCommand(command); //Debug
-		exec_simple_command(command);
+		if (debug){
+			printCommand(command); //Debug
+		}
+		(void) env;
+		// exitno = exec_node(command, env);
 
 		if (next_seperator == S_EOF) break;
 		parser_get_next_command(self);
