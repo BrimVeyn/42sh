@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 13:14:29 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/03 15:58:46 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/04 15:31:09 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,17 @@ int main(int ac, char **av) {
         regex_test("^[a-z ]*", "Hello world!");
         regex_test("^H[a-z-]*", "Hello-world!");
         regex_test("^H[a-z]*\\sw", "Hello world!");
-        regex_test("${[A-Za-z_]*}", "echo ${PATH}");
-		regex_test("${[^}]*}", "echo ${PATH}");
-		regex_test("${[^}]*}", "echo ${}");
-		regex_test("${}", "${}");
+        regex_test("\\${[A-Za-z_]*}", "echo ${PATH}");
+		regex_test("\\${[^}]*}", "echo ${PATH}");
+		regex_test("\\${[^}]*}", "echo ${}");
+		regex_test("\\${}", "${}");
+		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*}", "${}");
+		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*}", "${PATH}");
+		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*}", "${8PATH}");
+		regex_test("\\${[^}]*}", "${9PATH}");
+		regex_test("\\${[^}]*$", "${vide");
+		regex_test("\\${[^}]*$", "${dsadas}");
+		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*}", "${PA${PATH}");
     }
     return 0;
 }
