@@ -5,16 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/30 16:22:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/03 17:00:37 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/04 10:05:18 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/04 10:52:13 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include <fcntl.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <unistd.h>
 
 extern int debug;
 int exitno = 0;
@@ -35,8 +31,7 @@ TokenList *lexer_lex_till_operator(Parser *p) {
 	return self;
 }
 
-TokenList *lexer_lex_all(Parser *p) {
-	const Lexer_p l = p->lexer;
+TokenList *lexer_lex_all(Lexer_p l) {
 	TokenList *self = token_list_init();
 	while (true) {
 		Token *tmp = lexer_get_next_token(l, false, DEFAULT);
@@ -50,7 +45,7 @@ bool syntax_error_detector(Parser *p) {
 	const TokenList *data = p->data;
 	for (uint16_t it = 0; it < data->size; it++) {
 		const Token *el = data->t[it];
-		if (el->tag == T_SEPARATOR && it == 0) {
+		if (el->tag == T_SEPARATOR && it == 0 && (el->s_type != S_SUB_OPEN)) {
 			dprintf(STDERR_FILENO, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(el->s_type));
 			return false;
 		}
@@ -85,8 +80,7 @@ char *here_doc(char *eof){
 	return gc_add(ft_strdup(filename));
 }
 
-bool heredoc_detector(Parser *p) {
-	const TokenList *data = p->data;
+bool heredoc_detector(TokenList *data) {
 	for (uint16_t it = 0; it < data->size; it++) {
 		const Token *curr = data->t[it];
 		Token *const el = (curr->tag == T_WORD && curr->w_postfix->tag == T_REDIRECTION) ? curr->w_postfix : (Token *) curr;
@@ -105,9 +99,11 @@ Parser *parser_init(char *input) {
 
 	self->lexer = lexer_init(input);
 	self->it = 0;
-	self->data = lexer_lex_all(self);
-	self->curr_command = lexer_lex_till_operator(self);
-	self->peak_command = lexer_lex_till_operator(self);
+	self->data = lexer_lex_all_test(self->lexer, S_EOF, DEFAULT);
+	if (self->data) {
+		self->curr_command = lexer_lex_till_operator(self);
+		self->peak_command = lexer_lex_till_operator(self);
+	}
 	return self;
 }
 
@@ -236,7 +232,114 @@ void parser_parameter_expansion(TokenList *tl){
 
 }
 
+//echo 0 ; echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
+//echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
+//echo 1 | (echo 2 && echo 3) | echo 4
+//echo -2 | echo -1 | echo 0; echo 1 | echo 2
+
+type_of_separator next_separator(TokenList *list, int *i) {
+	int j = *i;
+	while (j < list->size) {
+		if (list->t[j]->tag == T_SEPARATOR && 
+			(list->t[j]->s_type == S_SEMI_COLUMN ||
+			list->t[j]->s_type == S_PIPE)) {
+			return list->t[j]->s_type;
+		}
+		(j)++;
+	}
+	return S_EOF;
+}
+
+bool is_pipe(TokenList *list, int *i) {
+	return (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_PIPE);
+}
+
+bool is_eof(TokenList *list, int *i) {
+	return (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_EOF);
+}
+
+bool is_semi(TokenList *list, int *i) {
+	return (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SEMI_COLUMN);
+}
+
+bool has_subshell(TokenList *list, int *i) {
+	return (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_OPEN);
+}
+
+bool is_end_sub(TokenList *list, int *i) {
+	return list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_CLOSE;
+}
+
+Node *extract_subshell(TokenList *list, int *i) {
+	TokenList *newlist = token_list_init();
+	(*i)++;
+	while (!is_end_sub(list, i)) {
+		token_list_add(newlist, list->t[*i]);
+		(*i)++;
+	}
+	(*i) += 2;
+	return ast_build(newlist);
+}
+
+TokenList *extract_tokens(TokenList *list, int *i) {
+	TokenList *newlist = token_list_init();
+	while (*i < list->size && !is_pipe(list, i) && !is_eof(list, i) && !is_semi(list, i)) {
+		token_list_add(newlist, list->t[*i]);
+		(*i)++;
+	}
+	(*i)++;
+	return newlist;
+}
+
+ExecuterList *build_executer_list(TokenList *list) {
+	ExecuterList *self = executer_list_init();
+	int i = 0;
+	if (debug){
+		printf(C_RED"VRAI\n"C_RESET);
+		tokenToStringAll(list);
+	}
+	while (i < list->size) {
+		if (next_separator(list, &i) == S_PIPE) {
+			// printf("salut mec !\n");
+			Executer *executer = NULL;
+			while (next_separator(list, &i) == S_PIPE) {
+				if (has_subshell(list, &i)) {
+					Executer *new = executer_init(extract_subshell(list, &i), NULL);
+					executer_push_back(&executer, new);
+				} else {
+					// printf("ok !\n");
+					Executer *new = executer_init(NULL, extract_tokens(list, &i));
+					executer_push_back(&executer, new);
+				}
+			}
+			if (i < list->size) {
+				if (has_subshell(list, &i)) {
+					Executer *new = executer_init(extract_subshell(list, &i), NULL);
+					executer_push_back(&executer, new);
+				} else {
+					Executer *new = executer_init(NULL, extract_tokens(list, &i));
+					executer_push_back(&executer, new);
+				}
+			}
+			executer_list_push(self, executer);
+		}
+		if (i < list->size && (next_separator(list, &i) == S_EOF || next_separator(list, &i) == S_SEMI_COLUMN)) {
+			Executer *executer = NULL;
+			if (has_subshell(list, &i)) {
+				Executer *new = executer_init(extract_subshell(list, &i), NULL);
+				executer_push_back(&executer, new);
+			} else {
+				Executer *new = executer_init(NULL, extract_tokens(list, &i));
+				executer_push_back(&executer, new);
+			}
+			executer_list_push(self, executer);
+		}
+	}
+	return self;
+}
+
 SimpleCommand *parser_parse_current(TokenList *tl) {
+	
 	// parser_brace_expansion();
 	// parser_tilde_expansion();
 	parser_parameter_expansion(tl);
@@ -326,7 +429,8 @@ void parser_parse_all(Parser *self, char **env) {
 		if (debug){
 			printCommand(command); //Debug
 		}
-		exitno = exec_simple_command(command, env);
+		(void) env;
+		// exitno = exec_node(command, env);
 
 		if (next_seperator == S_EOF) break;
 		parser_get_next_command(self);

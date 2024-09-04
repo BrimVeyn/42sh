@@ -3,16 +3,45 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_get_next_token.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/15 15:53:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/03 11:42:30 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/03 14:00:02 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/03 14:00:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include "lexer.h"
-#include "lexer_enum.h"
+
+TokenList *lexer_lex_all_test(Lexer_p l, type_of_separator sep, type_mode mode) {
+	TokenList *self = token_list_init();
+	while (true) {
+		Token *tmp = lexer_get_next_token(l, false, mode);
+		token_list_add(self, tmp);
+
+		if (tmp->tag == T_SEPARATOR && (tmp->s_type == sep || tmp->s_type == S_EOF)) break;
+
+		if (tmp->tag == T_SEPARATOR && (tmp->s_type == S_CMD_SUB || tmp->s_type == S_SUB_OPEN)) {
+			TokenList *list = lexer_lex_all_test(l, S_SUB_CLOSE, DEFAULT);
+			Token *last_el = list->t[list->size - 1];
+			if (last_el->tag == T_SEPARATOR && last_el->s_type != S_SUB_CLOSE) {
+				dprintf(2, UNCLOSED_SUBSHELL"`%s\'\n", tagName((type_of_separator) S_SUB_CLOSE));
+				return NULL;
+			}
+			token_list_add_list(self, list);
+		}
+
+		if (tmp->tag == T_SEPARATOR && tmp->s_type == S_DQ) {
+			TokenList *list = lexer_lex_all_test(l, S_DQ, DQUOTE);
+			Token *last_el = list->t[list->size - 1];
+			if (last_el->tag == T_SEPARATOR || last_el->s_type != S_DQ) {
+				dprintf(2, UNCLOSED_QUOTES"`%s\'\n", tagName((type_of_separator) S_DQ));
+				return NULL;
+			}
+			token_list_add_list(self, list);
+		}
+	}
+	return self;
+}
 
 //Read a char from input
 void lexer_read_char(Lexer_p l) {

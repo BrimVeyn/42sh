@@ -6,11 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 15:09:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/08/30 15:39:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 12:17:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+int g_signal;
 
 void signal_sigint_prompt(__attribute__((unused)) int code) {
 	rl_done = 1;

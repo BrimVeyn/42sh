@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 11:41:08 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/02 11:54:31 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/03 16:45:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ int secure_fork(void);
 bool secure_dup2(int from, int to);
 void secure_pipe2(int pipefd[2], int flags);
 void secure_execve(const char *pathname, char *const argv[], char *const envp[]);
-int exec_simple_command(SimpleCommand *command, char **env);
+int exec_node(Node *node, char **env);
 char *find_bin_location(char *bin, char **env);
 
 #endif
