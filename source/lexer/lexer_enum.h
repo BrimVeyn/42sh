@@ -6,14 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:04:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/02 08:52:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/04 13:07:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LEXER_ENUM_H
 #define LEXER_ENUM_H
 
-#include <stdint.h>
 typedef enum {
 	T_COMMAND,
 	//---------------
@@ -68,7 +67,5 @@ typedef enum {
 	C_BUILTIN, //echo, etc...
 	C_SHELL, //grep, etc...
 } type_of_command;
-
-
 
 #endif // !LEXER_ENUM_H

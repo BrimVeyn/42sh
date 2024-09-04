@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   debug_tagname.c                                    :+:      :+:    :+:   */
+/*   debug_tag_name.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:54 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/02 10:48:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/04 15:49:25 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 
-const char *get_tagName_token(type_of_token type) {
+const char *get_tag_name_token(type_of_token type) {
 	switch(type) {
 		case T_REDIRECTION:
 			return "T_REDIRECTION";
@@ -29,7 +29,7 @@ const char *get_tagName_token(type_of_token type) {
 	}
 }
 
-const char *get_tagName_separator(type_of_separator type) {
+const char *get_tag_name_separator(type_of_separator type) {
 	switch(type) {
 		case S_BG:
 			return "S_BG";
@@ -60,7 +60,7 @@ const char *get_tagName_separator(type_of_separator type) {
 	}
 }
 
-const char *get_tagName_error(type_of_error type) {
+const char *get_tag_name_error(type_of_error type) {
 	switch(type) {
 		case ERROR_NONE:
 			return "ERROR_NONE";
@@ -81,7 +81,7 @@ const char *get_tagName_error(type_of_error type) {
 	}
 }
 
-const char *get_tagName_redirection(type_of_redirection type) {
+const char *get_tag_name_redirection(type_of_redirection type) {
 	switch(type) {
 		case R_INPUT:
 			return "R_INPUT";
@@ -108,7 +108,7 @@ const char *error_handler(uintptr_t __attribute__((unused)) ptr) {
 	return C_RED"TAGNAME FORMAT NOT HANDLED"C_RESET;
 }
 
-const char *get_tagName_suffix(type_of_suffix type) {
+const char *get_tag_name_suffix(type_of_suffix type) {
 	switch(type) {
 		case R_FILENAME:
 			return "R_FILENAME";

@@ -1,15 +1,3 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    tester.sh                                          :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/09/02 14:47:19 by nbardavi          #+#    #+#              #
-#    Updated: 2024/09/03 15:39:51 by nbardavi         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
 #!/bin/bash
 
 EXEC_PATH="../42sh"
@@ -22,6 +10,7 @@ if [[ $1 ]]; then
 else
 	test_lists=(
 		"test"
+		"syntax"
 	)
 fi
 
@@ -32,6 +21,7 @@ BOLD="\e[1m"
 YELLOW="\033[0;33m"
 GREY="\033[38;5;244m"
 PURPLE="\033[0;35m"
+GREEN="\033[92m"
 BLUE="\033[0;36m"
 RED="\e[0;31m"
 RESET="\033[0m"
@@ -53,23 +43,26 @@ do
 		rm -rf ./42sh_outfiles/*
 
 		EXEC_OUTPUT=$(echo -e "$line" | $EXEC_PATH 2>/dev/null | $REMOVE_COLORS | $REMOVE_EXIT)
-		EXEC_ERROR=$(echo -e "$line" | $EXEC_PATH 1>/dev/null | $REMOVE_COLORS | $REMOVE_EXIT)
+		EXEC_ERROR=$(echo -e "$line" | $EXEC_PATH 2>&1 1>/dev/null | $REMOVE_COLORS | $REMOVE_EXIT | rev | cut -d':' -f1 | rev)
 		EXEC_EXITNO=$(echo -e "$line\nexit\n" | $EXEC_PATH 2>/dev/null | $REMOVE_COLORS | grep -o '[0-9]*$')
 		cp ./outfiles/* ./42sh_outfiles &>/dev/null
 
 		rm -rf ./outfiles/*
 		rm -rf ./bash_outfiles/*
 		BASH_OUTPUT=$(echo -e "$line" | bash 2>/dev/null)
-		BASH_ERROR=$(echo -e "$line" | bash 1>/dev/null)
-		BASH_EXITNO=$(echo $?)
+		BASH_ERROR=$(echo -e "$line" | bash 2>&1 1>/dev/null | rev | cut -d':' -f1 | rev)
+		BASH_EXITNO=$(echo ${?})
 		cp ./outfiles/* ./bash_outfiles &>/dev/null
 
 		FILE_DIFF=$(diff -q ./42sh_outfiles ./bash_outfiles)
 
 		printf "$BLUE$BOLD Test %3s:" $i
 		
-		if [[ "$EXEC_OUTPUT" == "$BASH_OUTPUT" && "$EXEC_ERROR"=="$BASH_ERROR"  && "$EXEC_EXITNO"=="$BASH_EXITNO" && !$FILE_DIFF ]]; then
-			printf "  ✅  "
+		if [[ "$EXEC_OUTPUT" == "$BASH_OUTPUT" && !$FILE_DIFF ]]; then
+			printf "  ✅"
+			if [[ "$EXEC_ERROR" != "$BASH_ERROR" ]]; then
+				printf "⚠️ "
+			fi
 			((ok++))
 		else
 			printf "  ❌  "
@@ -84,19 +77,25 @@ do
 			printf "42sh error: %s\n" "$EXEC_ERROR"
 			printf "bash error: %s\n" "$BASH_ERROR"
 		fi
+		# if [[ "$EXEC_EXITNO" != "$BASH_EXITNO" ]]; then
+		# 	printf "42sh exitno: %s\n" "$EXEC_EXITNO"
+		# 	printf "bash exitno: %s\n" "$BASH_EXITNO"
+		# fi
 		if [[ "$FILE_DIFF" ]];then
 			echo $FILE_DIFF
 			cat 42sh_outfiles/*
 			cat bash_outfiles/*
 		fi
-		# if [[ "$EXEC_EXITNO" != "$BASH_EXITNO" ]]; then
-		# 	printf "42sh exitno: %s\n" "$EXEC_EXITNO"
-		# 	printf "bash exitno: %s\n" "$BASH_EXITNO"
-		# fi
 
 		printf "$RESET"
 	done < "$file"
 done
+
+printf "${GREEN}${ok}${RESET} / ${GREEN}${i}${RESET} test(s) passed !\n"
+
+if [[ "${i}" == "${ok}" ]]; then
+	printf "${GREEN}Congrats !${RESET}\n";
+fi
 
 rm -rf ./outfiles
 rm -rf ./42sh_outfiles

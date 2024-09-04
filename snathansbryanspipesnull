@@ -1,0 +1,15 @@
+42sh
+ast_test
+compile_commands.json
+exec_test
+include
+leak.sh
+lexer_test
+libftprintf
+Makefile
+objects
+readline_suppression.supp
+regex_test
+snathansbryanspipesnull
+source
+tester

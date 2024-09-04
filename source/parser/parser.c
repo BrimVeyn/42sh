@@ -3,65 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:05:18 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/04 10:52:13 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/04 13:32:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 
-extern int debug;
-int exitno = 0;
-
 bool is_operator(type_of_separator s) {
 	return s == S_BG || s == S_EOF || s == S_OR || s == S_AND || s == S_SEMI_COLUMN || s == S_NEWLINE || s == S_PIPE;
-}
-
-TokenList *lexer_lex_till_operator(Parser *p) {
-	const TokenList *list = p->data;
-	TokenList *self = token_list_init();
-	while (p->it < list->size) {
-		Token *tmp = list->t[p->it++];
-		token_list_add(self, tmp);
-		if (tmp->tag == T_SEPARATOR && is_operator(tmp->s_type))
-			break;
-	}
-	return self;
-}
-
-TokenList *lexer_lex_all(Lexer_p l) {
-	TokenList *self = token_list_init();
-	while (true) {
-		Token *tmp = lexer_get_next_token(l, false, DEFAULT);
-		token_list_add(self, tmp);
-		if (tmp->tag == T_SEPARATOR && tmp->s_type == S_EOF) break;
-	}
-	return self;
-}
-
-bool syntax_error_detector(Parser *p) {
-	const TokenList *data = p->data;
-	for (uint16_t it = 0; it < data->size; it++) {
-		const Token *el = data->t[it];
-		if (el->tag == T_SEPARATOR && it == 0 && (el->s_type != S_SUB_OPEN)) {
-			dprintf(STDERR_FILENO, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(el->s_type));
-			return false;
-		}
-		if (el->tag == T_SEPARATOR && it == data->size - 2 &&
-			(el->s_type == S_AND || el->s_type == S_OR || el->s_type == S_PIPE)) {
-			dprintf(STDERR_FILENO, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(el->s_type));
-			return false;
-		}
-		if (el->e != ERROR_NONE) {
-			const Token *redir = (el->tag == T_REDIRECTION) ? el : el->w_postfix;
-			tokenToString((Token *)el, 0);
-			dprintf(STDERR_FILENO, UNEXPECTED_TOKEN_STR"`%s\'\n", tagName(redir->r_type));
-			return false;
-		}
-	}
-	return true;
 }
 
 char *here_doc(char *eof){
@@ -92,31 +44,6 @@ bool heredoc_detector(TokenList *data) {
 		}
 	}
 	return true;
-}
-
-Parser *parser_init(char *input) {
-	Parser *self = (Parser *) gc_add(ft_calloc(1, sizeof(Parser)));
-
-	self->lexer = lexer_init(input);
-	self->it = 0;
-	self->data = lexer_lex_all_test(self->lexer, S_EOF, DEFAULT);
-	if (self->data) {
-		self->curr_command = lexer_lex_till_operator(self);
-		self->peak_command = lexer_lex_till_operator(self);
-	}
-	return self;
-}
-
-void parser_get_next_command(Parser *self) {
-	self->curr_command = self->peak_command;
-	self->peak_command = lexer_lex_till_operator(self);
-}
-
-void parser_print_state(Parser *self) {
-	printf(C_RED"---- CURR_COMMAND------\n"C_RESET);
-	tokenToStringAll(self->curr_command);
-	printf(C_RED"----PEAK_COMMAND-------\n"C_RESET);
-	tokenToStringAll(self->peak_command);
 }
 
 RedirectionList *parser_get_redirection(TokenList *tl) {
@@ -205,7 +132,7 @@ void parser_parameter_expansion(TokenList *tl){
 						count++;
 						char *start = ft_substr(el->w_infix, 0, result.start);
 						char *end = ft_substr(el->w_infix, result.end, ft_strlen(el->w_infix));
-						char *tmp = ft_strjoin(start, gc_add(ft_itoa(exitno)));
+						char *tmp = ft_strjoin(start, gc_add(ft_itoa(g_exitno)));
 						el->w_infix = gc_add(ft_strjoin(tmp, end));
 						free(tmp); free(start); free(end);
 					}
@@ -250,26 +177,6 @@ type_of_separator next_separator(TokenList *list, int *i) {
 	return S_EOF;
 }
 
-bool is_pipe(TokenList *list, int *i) {
-	return (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_PIPE);
-}
-
-bool is_eof(TokenList *list, int *i) {
-	return (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_EOF);
-}
-
-bool is_semi(TokenList *list, int *i) {
-	return (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SEMI_COLUMN);
-}
-
-bool has_subshell(TokenList *list, int *i) {
-	return (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_OPEN);
-}
-
-bool is_end_sub(TokenList *list, int *i) {
-	return list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_CLOSE;
-}
-
 Node *extract_subshell(TokenList *list, int *i) {
 	TokenList *newlist = token_list_init();
 	(*i)++;
@@ -294,7 +201,7 @@ TokenList *extract_tokens(TokenList *list, int *i) {
 ExecuterList *build_executer_list(TokenList *list) {
 	ExecuterList *self = executer_list_init();
 	int i = 0;
-	if (debug){
+	if (g_debug){
 		printf(C_RED"VRAI\n"C_RESET);
 		tokenToStringAll(list);
 	}
@@ -303,7 +210,7 @@ ExecuterList *build_executer_list(TokenList *list) {
 			// printf("salut mec !\n");
 			Executer *executer = NULL;
 			while (next_separator(list, &i) == S_PIPE) {
-				if (has_subshell(list, &i)) {
+				if (is_subshell(list, &i)) {
 					Executer *new = executer_init(extract_subshell(list, &i), NULL);
 					executer_push_back(&executer, new);
 				} else {
@@ -313,7 +220,7 @@ ExecuterList *build_executer_list(TokenList *list) {
 				}
 			}
 			if (i < list->size) {
-				if (has_subshell(list, &i)) {
+				if (is_subshell(list, &i)) {
 					Executer *new = executer_init(extract_subshell(list, &i), NULL);
 					executer_push_back(&executer, new);
 				} else {
@@ -325,7 +232,7 @@ ExecuterList *build_executer_list(TokenList *list) {
 		}
 		if (i < list->size && (next_separator(list, &i) == S_EOF || next_separator(list, &i) == S_SEMI_COLUMN)) {
 			Executer *executer = NULL;
-			if (has_subshell(list, &i)) {
+			if (is_subshell(list, &i)) {
 				Executer *new = executer_init(extract_subshell(list, &i), NULL);
 				executer_push_back(&executer, new);
 			} else {
@@ -354,88 +261,3 @@ SimpleCommand *parser_parse_current(TokenList *tl) {
 
 	return command;
 }
-
-void printRedirList(RedirectionList *rl) {
-	printf(C_BRONZE"------ "C_LIGHT_BROWN"Redir list"C_BRONZE"----\n"C_RESET);
-	for (uint16_t it = 0; it < rl->size; it++) {
-		const Redirection *el = rl->r[it];
-		printf("prefix_fd ["C_BRONZE"%d"C_RESET"]:\t"C_LIGHT_BROWN"%d\n"C_RESET, it, el->prefix_fd);
-		printf("r_type    ["C_BRONZE"%d"C_RESET"]:\t"C_LIGHT_BROWN"%s\n"C_RESET, it, tagName(el->r_type));
-		printf("su_type   ["C_BRONZE"%d"C_RESET"]:\t"C_LIGHT_BROWN"%s\n"C_RESET, it, tagName(el->su_type));
-		if (el->su_type == R_FD) {
-			printf("suffix_fd ["C_BRONZE"%d"C_RESET"]:"C_LIGHT_BROWN"\t%d\n"C_RESET, it, el->fd);
-		} else if (el->su_type == R_FILENAME) {
-			printf("filename  ["C_BRONZE"%d"C_RESET"]:\t"C_LIGHT_BROWN"%s\n"C_RESET, it, el->filename);
-		}
-		if (it + 1 < rl->size) {
-			printf(C_BRONZE"------------------\n"C_RESET);
-		}
-	}
-	printf(C_BRONZE"---------...---------\n"C_RESET);
-
-}
-
-void printCharChar(char **tab) {
-	for (uint16_t it = 0; tab[it]; it++) {
-		printf("arg[%d]: %s\n", it, tab[it]);
-	}
-}
-
-void printCommand(SimpleCommand *command) {
-	SimpleCommand *curr = command;
-	while (curr != NULL) {
-		printRedirList(curr->redir_list);
-		printf(C_GOLD"------ "C_LIGHT_YELLOW"Command"C_RESET C_GOLD"-------\n"C_RESET);
-		printf("bin: %s\n", command->bin);
-		printCharChar(curr->args);
-		printf(C_GOLD"---------...---------"C_RESET"\n");
-		curr = curr->next;
-	}
-}
-
-type_of_separator cut_separator(TokenList *tl) {
-	const Token *last_el = tl->t[tl->size - 1];
-	if (last_el->tag == T_SEPARATOR) {
-		tl->size -= 1;
-		return last_el->s_type;
-	}
-	return S_DEFAULT;
-}
-
-void fill_pipeline(Parser *self, SimpleCommand *command, type_of_separator *next_separator) {
-	SimpleCommand *curr = command;
-	while (*next_separator == S_PIPE) {
-		parser_get_next_command(self);
-		*next_separator = cut_separator(self->curr_command);
-		SimpleCommand *next_command = parser_parse_current(self->curr_command);
-
-		curr->next = next_command;
-		curr = curr->next;
-	}
-}
-
-void parser_parse_all(Parser *self, char **env) {
-	while (true) {
-		type_of_separator next_seperator = cut_separator(self->curr_command);
-
-		const Token *first_element = self->curr_command->t[0];
-		if (first_element->tag == T_SEPARATOR && first_element->s_type == S_EOF) break;
-
-		SimpleCommand *command = parser_parse_current(self->curr_command);
-		if (next_seperator == S_PIPE) {
-			fill_pipeline(self, command, &next_seperator);
-		}
-
-		if (debug){
-			printCommand(command); //Debug
-		}
-		(void) env;
-		// exitno = exec_node(command, env);
-
-		if (next_seperator == S_EOF) break;
-		parser_get_next_command(self);
-	}
-}
-
-// To do
-// Handle error ${8PATH} -> work on regex

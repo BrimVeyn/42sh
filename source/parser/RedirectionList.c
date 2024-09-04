@@ -1,17 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   redirection_list.c                                 :+:      :+:    :+:   */
+/*   RedirectionList.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 15:32:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/02 10:30:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/04 13:08:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include "parser.h"
 
 RedirectionList *redirection_list_init(void) {
 	RedirectionList *self = gc_add(ft_calloc(1, sizeof(RedirectionList)));
