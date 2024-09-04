@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/02 10:28:54 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/04 13:16:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,33 +59,4 @@ void gc_free(void *addr) {
 	}
 }
 
-void *ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize) {
-	void *new_ptr = malloc(nbEl * elSize);
-	if (!new_ptr)
-		exit(EXIT_FAILURE);
-	ft_memcpy(new_ptr, ptr, oldSize * elSize);
-	gc_free(ptr);
-	return new_ptr;
-}
 
-bool is_whitespace(char c) {
-	return (c == ' ' || c == '\t');
-}
-
-bool is_redirection_char(char c) {
-	return (c == '>' || c == '<');
-}
-
-bool is_number(char *str) {
-	for (uint16_t i = 0; str[i]; i++) {
-		if (!ft_isdigit(str[i])) return false;
-	}
-	return true;
-}
-
-void free_charchar(char **s){
-	for (int i = 0; s[i]; i++){
-		free(s[i]);
-	}
-	free(s);
-}

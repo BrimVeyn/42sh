@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:00:15 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 10:52:48 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/04 13:22:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/42sh.h"
 
-int debug = 0;
+int g_debug = 0;
 
 char *gnl() {
 	char buffer[2];
@@ -49,23 +49,6 @@ char *init_prompt_and_signals(void) {
 	return input;
 }
 
-int ft_strlenlen(char **strstr){
-	int i = 0;
-	for (; strstr[i]; i++){}
-	return i;
-}
-
-char **ft_strdupdup(char **env){
-	char **strstr = ft_calloc(ft_strlenlen(env), sizeof(char *));
-	if (!strstr){
-		return NULL;
-	}
-	for (int i = 0; env[i]; i++){
-		strstr[i] = ft_strdup(env[i]);
-	}
-	return strstr;
-}
-
 int main(int ac, char *av[], char *env[]) {
 	//Basic redirection test
 	(void) ac;
@@ -73,14 +56,13 @@ int main(int ac, char *av[], char *env[]) {
 	(void) env;
 
 	if (ac != 1 && !ft_strcmp("-d", av[1])){
-		debug = 1;
+		g_debug = 1;
 	}
 
 	char **dup_env = ft_strdupdup(env);
 	(void) dup_env;
 	gc_init();
 	g_signal = 0;
-	Token *none_token __attribute__((unused)) = genNoneTok();
 	
 	char *input = NULL;
 
@@ -90,11 +72,12 @@ int main(int ac, char *av[], char *env[]) {
 			add_history(input);
 			Lexer_p lexer = lexer_init(input);
 			TokenList *tokens = lexer_lex_all(lexer);
+			if (lexer_syntax_error(tokens)) continue; 
 			heredoc_detector(tokens);
 			signal_manager(SIG_EXEC);
 			Node *AST = ast_build(tokens);
 			ast_execute(AST);
-			if (debug){
+			if (g_debug){
 				printTree(AST);
 			}
 		}

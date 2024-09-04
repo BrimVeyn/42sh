@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ast_build.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 13:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 10:50:35 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/04 14:21:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,19 +158,14 @@ void printTree(Node *self) {
 }
 
 // Example usage
+
+// echo 1 echo 2 && echo 3 ||
 Node *generateTree(TokenListVector *list) {
 	NodeStack *self = node_stack_init();
 	for (uint16_t i = 0; i < list->size; i++) {
 		if (!is_op(list->data[i])) {
-			//operator
 			node_stack_push(self, gen_operand_node(list->data[i]));
 		} else {
-			//is_operator
-			if (self->size < 2) {
-				printf("oooooppsiiiee\n");
-				exit(EXIT_FAILURE);
-			}
-
 			Node *right = node_stack_pop(self);
 			Node *left = node_stack_pop(self);
 			node_stack_push(self, gen_operator_node(list->data[i], left, right));
@@ -190,7 +185,7 @@ void branch_list_to_rpn(TokenListVector *list) {
 
 Node *ast_build(TokenList *tokens) {
 	TokenListVector *branch_list = split_operator(tokens);
-	if (debug){
+	if (g_debug){
 		tokenListToStringAll(branch_list); //Debug
 	}
 	branch_list_to_rpn(branch_list);

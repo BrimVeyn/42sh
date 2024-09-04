@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:49 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/03 17:16:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/04 14:24:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,9 @@
 
 #include "../../include/42sh.h"
 #define UNEXPECTED_TOKEN_STR "42sh: syntax error near unexpected token "
-#define UNCLOSED_SUBSHELL "42sh: syntax error: unclosed subshell, expected "
-#define UNCLOSED_QUOTES "42sh: syntax error: unclosed quotes, expected "
+#define UNCLOSED_SUBSHELL_STR "42sh: syntax error: unclosed subshell, expected "
+#define UNCLOSED_QUOTES_STR "42sh: syntax error: unclosed quotes, expected "
 
-typedef struct {
-	type_of_error e;
-	Lexer_p lexer;
-	uint16_t it;
-	struct TokenList *data;
-	struct TokenList *curr_command;
-	struct TokenList *peak_command;
-} Parser;
 
 typedef enum {
 	R_FD,
@@ -55,16 +47,9 @@ typedef struct SimpleCommand {
 	struct SimpleCommand	*next;
 } SimpleCommand;
 
-bool syntax_error_detector(Parser *p);
 bool heredoc_detector(TokenList *data);
-Parser *parser_init(char *input);
-void parser_get_next_command(Parser *self);
-void parse_current(Parser *self);
-void parser_print_state(Parser *self);
-void parser_parse_all(Parser *self, char **env);
 SimpleCommand *parser_parse_current(TokenList *tl);
 void printCommand(SimpleCommand *command);
-TokenList *lexer_lex_till_operator(Parser *p);
 TokenList *lexer_lex_all(Lexer_p l);
 
 RedirectionList *redirection_list_init(void);

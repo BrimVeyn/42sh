@@ -6,75 +6,44 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 10:19:29 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/03 17:17:55 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/04 13:10:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 
-void printOffset(size_t offset) {
-	for (size_t i = 0; i < offset; i++) {
-		printf(" ");
+void lexer_read_char(Lexer_p l) {
+	if (l->read_position >= l->input_len) {
+		l->ch = 0;
+	} else {
+		l->ch = l->input[l->read_position];
 	}
+	l->position = l->read_position;
+	l->read_position += 1;
 }
 
-void tokenToString(Token *t, size_t offset) {
-	printOffset(offset);
-	if (t->e != ERROR_NONE) {
-		printf(C_RED"ERROR: %s\n"C_RESET, tagName(t->e));
-	}
-	switch(t->tag) {
-		case T_REDIRECTION:
-			printf(C_LIGHT_YELLOW"T_REDIRECTION"C_RESET" {\n");
-			printOffset(offset + 4);
-			printf("Type: "C_MEDIUM_YELLOW"%s\n"C_RESET, tagName(t->r_type));
-			tokenToString(t->r_postfix, offset + 4);
-			printOffset(offset);
-			printf("}\n");
-			break;
-		case T_NONE:
-			printf(C_MEDIUM_GRAY"T_NONE"C_RESET" {}\n");
-			break;
-		case T_WORD:
-			printf(C_MEDIUM_BLUE"T_WORD"C_RESET" {\n");
-			printOffset(offset + 4);
-			printf(C_LIGHT_BLUE"w_infix: %s\n"C_RESET, t->w_infix);
-			printOffset(offset + 4);
-			printf(C_LIGHT_BLUE"w_postfix: "C_RESET);
-			tokenToString(t->w_postfix, offset + 4);
-			printOffset(offset);
-			printf("}\n");
-			break;
-		case T_SEPARATOR:
-			printf(C_PURPLE"T_SEPARATOR"C_RESET" {\n");
-			printOffset(offset + 4);
-			printf("Type: "C_VIOLET"%s\n"C_RESET, tagName(t->s_type));
-			break;
-		default:
-			printf("Format not handled\n");
-	}
-}
-
-//Generate generic empty token
-Token *genNoneTok(void) {
-	Token *tok = (Token *) gc_add(ft_calloc(1, sizeof(Token)));
-	Token self = {
-		.tag = T_NONE,
-	};
-	*tok = self;
-	return tok;
-}
-
-void tokenListToString(TokenList *tl) {
-	for (uint16_t i = 0; i < tl->size; i++) {
-		tokenToString(tl->t[i], 0);
+void lexer_read_x_char(Lexer_p l, uint16_t n) {
+	for (uint16_t i = 0; i < n; i++) {
+		lexer_read_char(l);
 	}
 }
 
 
-void tokenToStringAll(TokenList *t) {
-	for (uint16_t i = 0; i < t->size; i++) {
-		tokenToString(t->t[i], 0);
+char *get_word(Lexer_p l, type_mode mode) {
+	const uint16_t start = l->position;
+	while (l->ch != '\0') {
+		lexer_read_char(l);
+		if (is_delimiter(mode, l->ch)) {
+			break;
+		}
+	}
+	const uint16_t end = l->position;
+	return (char *) gc_add(ft_substr(l->input, start, end - start));
+}
+
+void eat_whitespace(Lexer_p l) {
+	while (is_whitespace(l->ch)) {
+		lexer_read_char(l);
 	}
 }
 
@@ -86,4 +55,34 @@ bool is_fdable_redirection(Lexer_p l) {
 		return true;
 	}
 	return false;
+}
+
+bool is_whitespace(char c) {
+	return (c == ' ' || c == '\t');
+}
+
+bool is_redirection_char(char c) {
+	return (c == '>' || c == '<');
+}
+
+bool is_number(char *str) {
+	for (uint16_t i = 0; str[i]; i++) {
+		if (!ft_isdigit(str[i])) return false;
+	}
+	return true;
+}
+
+bool is_delimiter(type_mode mode, char c) {
+	if (mode == DEFAULT) {
+		return ft_strchr("|&<>();\n \t", c) || c == '\0';
+	} else {
+		return ft_strchr("\"$", c) || c == '\0';
+	}
+}
+
+void free_charchar(char **s){
+	for (int i = 0; s[i]; i++){
+		free(s[i]);
+	}
+	free(s);
 }

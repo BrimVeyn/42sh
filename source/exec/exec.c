@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 10:19:22 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/04 11:07:40 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/04 15:29:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,11 +40,8 @@ bool apply_redirect(const Redirection redirect){
 
 	if (redirect.su_type == R_FILENAME && (fd = open(redirect.filename, open_flag, 0664)) == -1){
 		perror(strerror(errno));
-		// perror("Can't open file");
 		exit(EXIT_FAILURE);
 	}
-
-	printf("dup %d on %d\n", fd, dup_on);
 
 	if (redirect.r_type == R_DUP_BOTH || redirect.r_type == R_DUP_BOTH_APPEND){
 		if (!secure_dup2(fd, STDOUT_FILENO)) return false;
@@ -54,7 +51,6 @@ bool apply_redirect(const Redirection redirect){
 		if (!secure_dup2(fd, dup_on)) return false;
 	}
 	if (redirect.su_type == R_FILENAME){
-		printf("close %d\n", fd);
 		close(fd);
 	}
 	return true;
@@ -164,7 +160,7 @@ int exec_executer(Executer *executer) {
 	Executer *current = executer;
 	int pipefd[2];
 	bool prev_pipe = false;
-	int id[1024];
+	pid_t id[1024];
 	int i = 0;
 
 	const int STDIN_SAVE = dup(STDIN_FILENO);
@@ -173,11 +169,11 @@ int exec_executer(Executer *executer) {
 
 	while (current) {
 
-		if (prev_pipe == true){
+		if (prev_pipe) {
 			secure_dup2(pipefd[0], STDIN_FILENO);
             close(pipefd[0]);
 		}
-		if (current->next){
+		if (current->next) {
 			prev_pipe = true;
 			secure_pipe2(pipefd, O_CLOEXEC);
 			secure_dup2(pipefd[1], STDOUT_FILENO);
@@ -185,8 +181,8 @@ int exec_executer(Executer *executer) {
 		}
 
 		if (current->data_tag == DATA_NODE) {
-			int id = secure_fork();
-			if (id == 0){
+			pid_t id = secure_fork();
+			if (id == 0) {
 				g_exitno = ast_execute(current->n_data);
 				exit (g_exitno);
 			}
@@ -195,7 +191,7 @@ int exec_executer(Executer *executer) {
 
 		if (current->data_tag == DATA_TOKENS) {
 			id[i] = secure_fork();
-			if (id[i] == 0){
+			if (id[i] == 0) {
 				SimpleCommand *command = parser_parse_current(current->s_data);
 				exec_simple_command(command);
 			}
@@ -208,9 +204,12 @@ int exec_executer(Executer *executer) {
 		i++;
 		current = current->next;
 	}
-	for (int j = 0; j < i; j++){
+	for (int j = 0; j < i; j++) {
 		waitpid(id[j], &g_exitno, 0);
 	}
+	close(STDIN_SAVE);
+	close(STDOUT_SAVE);
+	close(STDERR_SAVE);
 	return g_exitno;
 }
 

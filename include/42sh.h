@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   42sh.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 10:50:30 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/04 13:16:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 extern int g_signal;
 extern int g_exitno;
-extern int debug;
+extern int g_debug;
 /*_.-=-._.-=-._.-=-._.-=-._.- Includes -._.-=-._.-=-._.-=-._.-=-._.-=-._*/
 #include "../libftprintf/header/libft.h"
 #include "../include/colors.h"
@@ -40,6 +40,9 @@ void			gc_free(void *addr);
 
 //----------------Utils--------------------//
 void			free_charchar(char **s);
+void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
+int				ft_strlenlen(char **strstr);
+char			**ft_strdupdup(char **env);
 
 typedef enum {
 	SIG_PROMPT,
