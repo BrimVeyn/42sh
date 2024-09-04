@@ -6,7 +6,7 @@
 #    By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/02 14:47:19 by nbardavi          #+#    #+#              #
-#    Updated: 2024/09/02 16:40:04 by nbardavi         ###   ########.fr        #
+#    Updated: 2024/09/03 15:39:51 by nbardavi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -67,8 +67,8 @@ do
 		FILE_DIFF=$(diff -q ./42sh_outfiles ./bash_outfiles)
 
 		printf "$BLUE$BOLD Test %3s:" $i
-
-		if [[ "$EXEC_OUTPUT" == "$BASH_OUTPUT" && "$EXEC_ERROR"=="$BASH_ERROR"  && !$FILE_DIFF ]]; then
+		
+		if [[ "$EXEC_OUTPUT" == "$BASH_OUTPUT" && "$EXEC_ERROR"=="$BASH_ERROR"  && "$EXEC_EXITNO"=="$BASH_EXITNO" && !$FILE_DIFF ]]; then
 			printf "  ✅  "
 			((ok++))
 		else
@@ -89,6 +89,10 @@ do
 			cat 42sh_outfiles/*
 			cat bash_outfiles/*
 		fi
+		# if [[ "$EXEC_EXITNO" != "$BASH_EXITNO" ]]; then
+		# 	printf "42sh exitno: %s\n" "$EXEC_EXITNO"
+		# 	printf "bash exitno: %s\n" "$BASH_EXITNO"
+		# fi
 
 		printf "$RESET"
 	done < "$file"
