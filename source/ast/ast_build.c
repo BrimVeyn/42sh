@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 13:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/03 15:05:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/04 09:35:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,8 +43,10 @@ TokenList *extract_command(TokenList *list, uint16_t *i) {
 				(*i)++;
 			}
 		}
-		token_list_add(self, list->t[*i]);
-		(*i)++;
+		if (*i < list->size) {
+			token_list_add(self, list->t[*i]);
+			(*i)++;
+		}
 	}
 	return self;
 }
@@ -60,7 +62,7 @@ TokenListVector *split_operator(TokenList *list) {
 	uint16_t i = 0;
 	while (i < list->size) {
 		token_list_vector_add(self, extract_command(list, &i));
-		if (list->t[i]->tag == T_SEPARATOR && list->t[i]->s_type != S_EOF) {
+		if (i < list->size && list->t[i]->tag == T_SEPARATOR && list->t[i]->s_type != S_EOF) {
 			token_list_vector_add(self, extract_operator(list, &i));
 		} else i++;
 	}
@@ -72,6 +74,7 @@ void tokenListToStringAll(TokenListVector *cont) {
 		printf("------------%d---------\n", i);
 		tokenToStringAll(cont->data[i]);
 	}
+	printf("-----------------------------\n");
 }
 
 bool is_op (TokenList *list) {
