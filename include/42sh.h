@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/28 16:00:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/03 13:13:06 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/03 14:01:25 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/04 10:50:30 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 # define MAXISH_H
 
 extern int g_signal;
+extern int g_exitno;
+extern int debug;
 /*_.-=-._.-=-._.-=-._.-=-._.- Includes -._.-=-._.-=-._.-=-._.-=-._.-=-._*/
 #include "../libftprintf/header/libft.h"
 #include "../include/colors.h"
@@ -34,18 +36,17 @@ extern int g_signal;
 void			gc_init(void);
 void			*gc_add(void *ptr);
 void			gc_cleanup(void);
-void gc_free(void *addr);
+void			gc_free(void *addr);
 
+//----------------Utils--------------------//
 void			free_charchar(char **s);
-
-# define I_READ 0
-# define I_WRITE 1
 
 typedef enum {
 	SIG_PROMPT,
 	SIG_HERE_DOC,
 	SIG_EXEC,
 } type_of_signals;
+
 
 #ifndef LEXER_H
 	#include "../source/lexer/lexer.h"
@@ -54,6 +55,10 @@ typedef enum {
 #ifndef PARSER_H
 	#include "../source/parser/parser.h"
 #endif // !LEXER_H
+
+#ifndef AST_H
+#include "../source/ast/ast.h"
+#endif // !AST_H
 
 #ifndef EXEC_H
 	#include "../source/exec/exec.h"
@@ -66,6 +71,7 @@ typedef enum {
 #ifndef SIGNAL_H
 	#include "../source/signals/signals.h"
 #endif // !SIGNAL_H
+
 
 #ifndef REGEX_H
 	#include "../source/regex/regex.h"

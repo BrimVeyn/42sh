@@ -6,13 +6,16 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 10:19:22 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/03 13:25:29 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/04 11:07:40 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "../../include/42sh.h"
 #include <sys/wait.h>
+#include <unistd.h>
+
+int g_exitno;
 
 // can have Prefix
 // >&   X
@@ -137,60 +140,94 @@ int exec_init_subshell(void *line, bool has_pipe){
 	return exitno;
 }
 
-int exec_simple_command(SimpleCommand *command, char **env) {
-	pid_t id[1024] = {0};
-	int pipefd[2] = {-1, -1};
-	int prev_pipefd = -1;
+void exec_simple_command(SimpleCommand *command) {
+	if (apply_all_redirect(command->redir_list)) {
+		if (!command->bin) {
+			gc_cleanup();
+			exit(EXIT_SUCCESS);
+		}
+		char *path = find_bin_location(command->bin, __environ);
+		if (path != NULL){
+			secure_execve(path, command->args, __environ);
+		}
+		exit(EXIT_FAILURE);
+		//fid_bin_location exit number
+	} else {
+		gc_cleanup();
+		exit(EXIT_FAILURE);
+	}
+	printf("OULALALALALA\n");
+	exit(EXIT_FAILURE);
+}
+
+int exec_executer(Executer *executer) {
+	Executer *current = executer;
+	int pipefd[2];
+	bool prev_pipe = false;
+	int id[1024];
 	int i = 0;
-	
 
-	while (command) {
-		if (command->next) {
+	const int STDIN_SAVE = dup(STDIN_FILENO);
+	const int STDOUT_SAVE = dup(STDOUT_FILENO);
+	const int STDERR_SAVE = dup(STDERR_FILENO);
+
+	while (current) {
+
+		if (prev_pipe == true){
+			secure_dup2(pipefd[0], STDIN_FILENO);
+            close(pipefd[0]);
+		}
+		if (current->next){
+			prev_pipe = true;
 			secure_pipe2(pipefd, O_CLOEXEC);
+			secure_dup2(pipefd[1], STDOUT_FILENO);
+            close(pipefd[1]);
 		}
-		id[i] = secure_fork();
-		if (id[i] == 0) {
-			if (i != 0) {
-				secure_dup2(prev_pipefd, STDIN_FILENO);
+
+		if (current->data_tag == DATA_NODE) {
+			int id = secure_fork();
+			if (id == 0){
+				g_exitno = ast_execute(current->n_data);
+				exit (g_exitno);
 			}
-			if (command->next) {
-				secure_dup2(pipefd[1], STDOUT_FILENO);
-			}
-			if (prev_pipefd != -1 && close(prev_pipefd)) {}
-			if (pipefd[0] != -1 && close(pipefd[0])) {}
-			if (apply_all_redirect(command->redir_list)) {
-				if (!command->bin) {
-					gc_cleanup();
-					exit(EXIT_SUCCESS);
-				}
-				char *path = find_bin_location(command->bin, env);
-				if (path != NULL){
-					secure_execve(path, command->args, env);
-				}
-				exit(EXIT_SUCCESS);
-			} else {
-				gc_cleanup();
-				exit(EXIT_FAILURE);
+			waitpid(id, &g_exitno, 0);
+		}
+
+		if (current->data_tag == DATA_TOKENS) {
+			id[i] = secure_fork();
+			if (id[i] == 0){
+				SimpleCommand *command = parser_parse_current(current->s_data);
+				exec_simple_command(command);
 			}
 		}
-		if (prev_pipefd != -1 && close(prev_pipefd)) {}
-		if (pipefd[1] != -1 && close(pipefd[1])) {}
-		prev_pipefd = pipefd[0];
-		command = command->next;
+
+		secure_dup2(STDIN_SAVE, STDIN_FILENO);
+		secure_dup2(STDOUT_SAVE, STDOUT_FILENO);
+		secure_dup2(STDERR_SAVE, STDERR_FILENO);
+		
 		i++;
+		current = current->next;
 	}
-
-	if (prev_pipefd != -1 && close(prev_pipefd)) {}
-
-	int j = 0;
-	int exitno = 0;
-	while (j < i) {
-		waitpid(id[j++], &exitno, 0);
+	for (int j = 0; j < i; j++){
+		waitpid(id[j], &g_exitno, 0);
 	}
-	return exitno;
+	return g_exitno;
+}
+
+int exec_node(Node *node, char **env) {
+	(void) env;
+
+	ExecuterList *list = build_executer_list(node->value.operand);
+	// printf("tag = %d\n", list->data[0]->data_tag);
+
+	for (int it = 0; it < list->size; it++) {
+		Executer *executer = list->data[it];
+		g_exitno = exec_executer(executer);
+	}
+	return g_exitno;
 }
 //
-// int exec_simple_command(SimpleCommand *command, char **env) {
+// int exec_node(SimpleCommand *command, char **env) {
 // 	pid_t id[1024] = {0};
 // 	int pipefd[2] = {-1, -1};
 // 	int prev_pipefd = -1;

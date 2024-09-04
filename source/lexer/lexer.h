@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/29 12:55:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/02 09:17:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/02 11:10:34 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ void			lexer_debug(Lexer_p lexer);
 void			lexer_deinit(Lexer_p lexer);
 void			lexer_read_char(Lexer_p l);
 TokenList *lexer_lex_till(Lexer_p l, type_of_separator sep);
+TokenList *lexer_lex_all_test(Lexer_p l, type_of_separator sep, type_mode mode);
 
 //-----------------Utils------------------//
 bool			is_whitespace(char c);
