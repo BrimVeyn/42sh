@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/03 13:14:45 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/04 15:34:39 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ int matchmetachar(char c, const char* str)
     case 'W': return !matchalphanum(c);
     case 's': return  matchwhitespace(c);
     case 'S': return !matchwhitespace(c);
+	case '$': return c == '$';
     default:  return (c == str[0]);
   }
 }
@@ -47,6 +48,7 @@ int matchmetachar(char c, const char* str)
 match_result regex_match(char *regexp, char *text) {
     match_result result = { -1, -1 };
     int text_pos = 0;
+	int i = 0;
 
     if (regexp[0] == '^') {
         if (regex_matchhere(regexp + 1, text, &text_pos)) {
@@ -57,12 +59,14 @@ match_result regex_match(char *regexp, char *text) {
     }
 
     do {
+		text_pos = i;
         int start_text_pos = text_pos;
         if (regex_matchhere(regexp, text, &text_pos)) {
             result.start = start_text_pos;
             result.end = text_pos;
             return result;
         }
+		i++;
     } while (*text++ != '\0' && ++text_pos);
 
     return result;
@@ -126,7 +130,7 @@ int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found
             previous_found = 1;
             (*text_pos)++;
             text++;
-            if (has_star){
+            if (has_star && *text){
                 return regex_matchrange(regexp + regex_find_range_start(regexp) + 1, text, text_pos, previous_found);
             }
             return regex_matchhere(regexp + regex_find_range_end(regexp) + 1, text, text_pos);
@@ -147,29 +151,29 @@ int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found
 }
 
 int regex_matchhere(char *regexp, char *text, int *text_pos) {
-	// printf("regexp char: %c\ntext char: %c\n", *regexp, *text);
-    if (regexp[0] == '\0') {
+	// printf("regexp char: %c | text char: %c | text_pos: %d\n", *regexp, *text, *text_pos);
+    if (regexp[0] == '\0' || (*text == '\0' && (regexp[0] == '*' && (regexp[1] == '$' || regexp[1] == '\0')))) {
         return 1;
     }
-    // if (regexp[0] == '$'){
-    //     return (*text == '\0');
-    // }
+	if (regexp[0] == '\\' && matchmetachar(*text, regexp + 1)){
+		(*text_pos)++;
+		return regex_matchhere(regexp + 2, text + 1, text_pos);
+	}
+    if (regexp[0] == '$'){
+        return (*text == '\0');
+    }
     if (regexp[0] == '['){
         return regex_matchrange(regexp + 1, text, text_pos, 0);
     }
     if (regexp[1] == '*') {
         return regex_matchstar(*regexp, regexp + 2, text, text_pos);
     }
-    if (regexp[0] == '\\' && matchmetachar(*text, regexp + 1)){
-        (*text_pos)++;
-        return regex_matchhere(regexp + 2, text + 1, text_pos);
-    }
     if (*text != '\0' && (regexp[0] == '.' || regexp[0] == *text)) {
         (*text_pos)++;
         return regex_matchhere(regexp + 1, text + 1, text_pos);
     }
 
-    /*printf("regex_matchhere return 0\n");*/
+    // printf("regex_matchhere return 0\n");
     return 0;
 }
 
