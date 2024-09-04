@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:02:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/03 17:25:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/04 09:36:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,7 +227,7 @@ bool is_semi(TokenList *list, int *i) {
 }
 
 bool has_subshell(TokenList *list, int *i) {
-	return list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_OPEN;
+	return (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_OPEN);
 }
 
 bool is_end_sub(TokenList *list, int *i) {
@@ -241,7 +241,7 @@ Node *extract_subshell(TokenList *list, int *i) {
 		token_list_add(newlist, list->t[*i]);
 		(*i)++;
 	}
-	(*i)++;
+	(*i) += 2;
 	return ast_build(newlist);
 }
 
@@ -258,10 +258,23 @@ TokenList *extract_tokens(TokenList *list, int *i) {
 ExecuterList *build_executer_list(TokenList *list) {
 	ExecuterList *self = executer_list_init();
 	int i = 0;
+	printf(C_RED"VRAI\n"C_RESET);
+	tokenToStringAll(list);
 	while (i < list->size) {
 		if (next_separator(list, &i) == S_PIPE) {
+			printf("salut mec !\n");
 			Executer *executer = NULL;
-			while (next_separator(list, &i) != S_EOF && next_separator(list, &i) != S_SEMI_COLUMN) {
+			while (next_separator(list, &i) == S_PIPE) {
+				if (has_subshell(list, &i)) {
+					Executer *new = executer_init(extract_subshell(list, &i), NULL);
+					executer_push_back(&executer, new);
+				} else {
+					printf("ok !\n");
+					Executer *new = executer_init(NULL, extract_tokens(list, &i));
+					executer_push_back(&executer, new);
+				}
+			}
+			if (i < list->size) {
 				if (has_subshell(list, &i)) {
 					Executer *new = executer_init(extract_subshell(list, &i), NULL);
 					executer_push_back(&executer, new);
@@ -272,8 +285,15 @@ ExecuterList *build_executer_list(TokenList *list) {
 			}
 			executer_list_push(self, executer);
 		}
-		if (next_separator(list, &i) == S_EOF || next_separator(list, &i) == S_SEMI_COLUMN) {
-			Executer *executer = executer_init(NULL, extract_tokens(list, &i));
+		if (i < list->size && (next_separator(list, &i) == S_EOF || next_separator(list, &i) == S_SEMI_COLUMN)) {
+			Executer *executer = NULL;
+			if (has_subshell(list, &i)) {
+				Executer *new = executer_init(extract_subshell(list, &i), NULL);
+				executer_push_back(&executer, new);
+			} else {
+				Executer *new = executer_init(NULL, extract_tokens(list, &i));
+				executer_push_back(&executer, new);
+			}
 			executer_list_push(self, executer);
 		}
 	}
