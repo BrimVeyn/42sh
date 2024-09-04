@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 13:14:29 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/03 13:15:02 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/03 15:58:46 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@ int main(int ac, char **av) {
         regex_test("^H[a-z]*\\sw", "Hello world!");
         regex_test("${[A-Za-z_]*}", "echo ${PATH}");
 		regex_test("${[^}]*}", "echo ${PATH}");
+		regex_test("${[^}]*}", "echo ${}");
+		regex_test("${}", "${}");
     }
     return 0;
 }

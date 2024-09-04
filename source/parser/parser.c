@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 16:22:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/03 13:58:29 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/03 17:00:37 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,24 +176,61 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 	return curr_command;
 }
 
-void parser_parameter_expansion(TokenList *tl){
-	(void)tl;
+char *parser_get_variable_value(char *name){
+	char **env = __environ;
 
+	for (int i = 0; env[i]; i++){
+		if (ft_strncmp(env[i], gc_add(ft_strjoin(name, "=")), ft_strlen(name) + 1) == 0){
+			return ft_strdup(env[i] + ft_strlen(name) + 1);
+		}
+	}
+	return NULL;
+}
+
+void parser_parameter_expansion(TokenList *tl){
 	for (uint16_t i = 0; i < tl->size; i++){
 		Token *el = tl->t[i];
 
 		if (el->tag == T_WORD){
-			match_result result = regex_match("${[^}]*}", el->w_infix);
-			if (result.start != -1){
-				result = regex_match("${?}", el->w_infix);
+			match_result result;
+			int count = 0;
+			do{
+				result = regex_match("${}", el->w_infix);
+				// printf("%d %d", result.start, result.end);
 				if (result.start != -1){
-					char *start = ft_substr(el->w_infix, 0, result.start);
-					char *end = ft_substr(el->w_infix, result.end, ft_strlen(el->w_infix));
-					char *tmp = ft_strjoin(start, gc_add(ft_itoa(exitno)));
-					el->w_infix = gc_add(ft_strjoin(tmp, end));
-					free(tmp); free(start); free(end);
+					dprintf(2, "${}: bad substitution\n");
+					exit(EXIT_FAILURE);
 				}
-			}
+
+				result = regex_match("${[^}]*}", el->w_infix);
+				if (result.start != -1){
+					result = regex_match("${?}", el->w_infix);
+					if (result.start != -1){
+						count++;
+						char *start = ft_substr(el->w_infix, 0, result.start);
+						char *end = ft_substr(el->w_infix, result.end, ft_strlen(el->w_infix));
+						char *tmp = ft_strjoin(start, gc_add(ft_itoa(exitno)));
+						el->w_infix = gc_add(ft_strjoin(tmp, end));
+						free(tmp); free(start); free(end);
+					}
+					result = regex_match ("${[0-9a-zA-Z_]*}", el->w_infix);
+					if (result.start != -1){
+						count++;
+						char *value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.start + 2, result.end - result.start - 3)));
+						if (!value){
+							dprintf(2, "mauvais nom fdp\n");
+							break;
+						}
+						char *start = ft_substr(el->w_infix, 0, result.start);
+						char *end = ft_substr(el->w_infix, result.end, ft_strlen(el->w_infix));
+						char *tmp = ft_strjoin(start, value);
+						el->w_infix = gc_add(ft_strjoin(tmp, end));
+						free(tmp); free(start); free(end); free(value);
+					}
+				}
+				result = regex_match("${[^}]*}", el->w_infix);
+
+			} while(result.start != -1);
 		}
 	}
 
@@ -202,7 +239,7 @@ void parser_parameter_expansion(TokenList *tl){
 SimpleCommand *parser_parse_current(TokenList *tl) {
 	// parser_brace_expansion();
 	// parser_tilde_expansion();
-	// parser_parameter_expansion(tl);
+	parser_parameter_expansion(tl);
 	// parser_command_substitution();
 	// parser_arithmetic_expansion();
 	// parser_word_splitting();
@@ -295,3 +332,6 @@ void parser_parse_all(Parser *self, char **env) {
 		parser_get_next_command(self);
 	}
 }
+
+// To do
+// Handle error ${8PATH} -> work on regex

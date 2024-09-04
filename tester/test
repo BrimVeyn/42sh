@@ -2,3 +2,7 @@ echo Hello World
 ls | ls | ls
 ls > ./outfiles/ls
 4<../Makefile cat 5<&4 <&5 | rev | sort | >./outfiles/test >./outfiles/test >./outfiles/test >./outfiles/test2 cat
+echo 0 ; echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
+echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
+echo 1 | (echo 2 && echo 3) | echo 4
+echo 1; echo 2 | echo 3
