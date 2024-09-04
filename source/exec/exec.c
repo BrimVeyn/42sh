@@ -6,12 +6,13 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 10:19:22 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/04 11:07:40 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/04 15:57:38 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "../../include/42sh.h"
+#include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -73,34 +74,36 @@ bool apply_all_redirect(RedirectionList *redirections){
 int there_is_slash(char *str){
 	for (int i = 0; str[i]; i++){
 		if (str[i] == '/'){
-			return 0;
+			return 1;
 		}
 	}
-	return 1;
+	return 0;
 }
 
 char *find_bin_location(char *bin, char **env){
-
 	struct stat file_stat;
 	if (stat(bin, &file_stat) != -1){
 
 		if (S_ISDIR(file_stat.st_mode)){
 			dprintf(2, "%s: Is a directory\n", bin);
-			return NULL;
+			g_exitno = 126;
+			return (NULL);
 		}
 		if (file_stat.st_mode & S_IXUSR){
 			return bin;
 		}
 		else {
 			dprintf(2, "%s: Permission Denied\n", bin);
-			return NULL;
+			g_exitno = 126;
+			return (NULL);
 		}
 
 	}
-	// else if (there_is_slash(bin)){
-	// 	dprintf(2, "%s: No such file or directory\n", bin);
-	// 	return NULL;
-	// }
+	else if (stat(bin, &file_stat) == -1 && there_is_slash(bin)){
+		dprintf(2, "%s: No such file or directory\n", bin);
+		g_exitno = 127;
+		return (NULL);
+	}
 
 	for (int i = 0; env[i]; i++){
 		if (ft_strncmp(env[i], "PATH=", 5) == 0){
@@ -120,24 +123,9 @@ char *find_bin_location(char *bin, char **env){
 			free_charchar(path);
 		}
 	}
-	dprintf(2, "%s: Command not found\n", bin);
+	dprintf(2, "%s: command not found\n", bin);
+	g_exitno = 127;
 	return NULL;
-}
-
-int exec_init_subshell(void *line, bool has_pipe){
-	(void)line;
-	int pipefd[2];
-	if (has_pipe == true){
-		secure_pipe2(pipefd, O_CLOEXEC);
-	}
-	int id = secure_fork();
-	if (id == 0){
-		//call ast
-		exit(EXIT_SUCCESS);
-	}
-	int exitno = 0;
-	waitpid(id, &exitno, 0);
-	return exitno;
 }
 
 void exec_simple_command(SimpleCommand *command) {
@@ -150,14 +138,11 @@ void exec_simple_command(SimpleCommand *command) {
 		if (path != NULL){
 			secure_execve(path, command->args, __environ);
 		}
-		exit(EXIT_FAILURE);
-		//fid_bin_location exit number
-	} else {
 		gc_cleanup();
-		exit(EXIT_FAILURE);
 	}
-	printf("OULALALALALA\n");
-	exit(EXIT_FAILURE);
+	else
+		gc_cleanup();
+	exit(g_exitno);
 }
 
 int exec_executer(Executer *executer) {
@@ -190,7 +175,9 @@ int exec_executer(Executer *executer) {
 				g_exitno = ast_execute(current->n_data);
 				exit (g_exitno);
 			}
-			waitpid(id, &g_exitno, 0);
+			int exitn = 0;
+			waitpid(id, &exitn, 0);
+			g_exitno = WEXITSTATUS(exitn);
 		}
 
 		if (current->data_tag == DATA_TOKENS) {
@@ -209,7 +196,9 @@ int exec_executer(Executer *executer) {
 		current = current->next;
 	}
 	for (int j = 0; j < i; j++){
-		waitpid(id[j], &g_exitno, 0);
+		int exitn = 0;
+		waitpid(id[j], &exitn, 0);
+		g_exitno = WEXITSTATUS(exitn);
 	}
 	return g_exitno;
 }
@@ -226,50 +215,3 @@ int exec_node(Node *node, char **env) {
 	}
 	return g_exitno;
 }
-//
-// int exec_node(SimpleCommand *command, char **env) {
-// 	pid_t id[1024] = {0};
-// 	int pipefd[2] = {-1, -1};
-// 	int prev_pipefd = -1;
-// 	int i = 0;
-//
-// 	while (command) {
-// 		if (command->next) {
-// 			secure_pipe2(pipefd, O_CLOEXEC);
-// 		}
-// 		id[i] = secure_fork();
-// 		if (id[i] == 0) {
-// 			if (i != 0) {
-// 				secure_dup2(prev_pipefd, STDIN_FILENO);
-// 			}
-// 			if (command->next) {
-// 				secure_dup2(pipefd[1], STDOUT_FILENO);
-// 			}
-// 			if (prev_pipefd != -1 && close(prev_pipefd)) {}
-// 			if (pipefd[0] != -1 && close(pipefd[0])) {}
-// 			if (apply_all_redirect(command->redir_list)) {
-// 				if (!command->bin) {
-// 					gc_cleanup();
-// 					exit(EXIT_SUCCESS);
-// 				}
-// 				secure_execve(find_bin_location(command->bin, env), command->args, __environ);
-// 			} else {
-// 				gc_cleanup();
-// 				exit(EXIT_FAILURE);
-// 			}
-// 		}
-// 		if (prev_pipefd != -1 && close(prev_pipefd)) {}
-// 		if (pipefd[1] != -1 && close(pipefd[1])) {}
-// 		prev_pipefd = pipefd[0];
-// 		command = command->next;
-// 		i++;
-// 	}
-//
-// 	if (prev_pipefd != -1 && close(prev_pipefd)) {}
-//
-// 	int j = 0;
-// 	while (j < i) {
-// 		waitpid(id[j++], NULL, 0);
-// 	}
-// 	return 1;
-// }

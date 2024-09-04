@@ -6,14 +6,13 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:05:18 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/04 10:52:13 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/04 15:54:09 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 
 extern int debug;
-int exitno = 0;
 
 bool is_operator(type_of_separator s) {
 	return s == S_BG || s == S_EOF || s == S_OR || s == S_AND || s == S_SEMI_COLUMN || s == S_NEWLINE || s == S_PIPE;
@@ -180,7 +179,7 @@ char *parser_get_variable_value(char *name){
 			return ft_strdup(env[i] + ft_strlen(name) + 1);
 		}
 	}
-	return NULL;
+	return ft_strdup("");
 }
 
 void parser_parameter_expansion(TokenList *tl){
@@ -190,43 +189,49 @@ void parser_parameter_expansion(TokenList *tl){
 		if (el->tag == T_WORD){
 			match_result result;
 			int count = 0;
+			char *value = NULL;
+			int pos = -1;
+
 			do{
-				result = regex_match("${}", el->w_infix);
-				// printf("%d %d", result.start, result.end);
-				if (result.start != -1){
+				for (int i = 0; el->w_infix[i]; i++){
+					if (el->w_infix[i] == '$'){
+						pos = i;
+						break;
+					}
+				}
+				if (pos == -1){
+					break;
+				}
+
+				if (regex_match("\\${}", el->w_infix).start == pos || //match ${} 
+					regex_match("\\${[^}]*$", el->w_infix).start == pos || //if missing }
+					(regex_match("\\${[^}]*}", el->w_infix).start == pos && regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", el->w_infix).start != pos)){ //check if first char is a number
 					dprintf(2, "${}: bad substitution\n");
 					exit(EXIT_FAILURE);
 				}
-
-				result = regex_match("${[^}]*}", el->w_infix);
-				if (result.start != -1){
-					result = regex_match("${?}", el->w_infix);
-					if (result.start != -1){
-						count++;
-						char *start = ft_substr(el->w_infix, 0, result.start);
-						char *end = ft_substr(el->w_infix, result.end, ft_strlen(el->w_infix));
-						char *tmp = ft_strjoin(start, gc_add(ft_itoa(exitno)));
-						el->w_infix = gc_add(ft_strjoin(tmp, end));
-						free(tmp); free(start); free(end);
-					}
-					result = regex_match ("${[0-9a-zA-Z_]*}", el->w_infix);
-					if (result.start != -1){
-						count++;
-						char *value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.start + 2, result.end - result.start - 3)));
-						if (!value){
-							dprintf(2, "mauvais nom fdp\n");
-							break;
-						}
-						char *start = ft_substr(el->w_infix, 0, result.start);
-						char *end = ft_substr(el->w_infix, result.end, ft_strlen(el->w_infix));
-						char *tmp = ft_strjoin(start, value);
-						el->w_infix = gc_add(ft_strjoin(tmp, end));
-						free(tmp); free(start); free(end); free(value);
-					}
+				
+				result = regex_match("\\${?}", el->w_infix);
+				if (result.start != -1)
+					value = ft_itoa(g_exitno);
+				else{
+					result = regex_match ("\\${[0-9a-zA-Z_]*}", el->w_infix);
+					if (result.start != -1)
+						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.start + 2, result.end - result.start - 3)));
+					else
+						break;
 				}
-				result = regex_match("${[^}]*}", el->w_infix);
+				
+				count++;
+				char *start = ft_substr(el->w_infix, 0, result.start);
+				char *end = ft_substr(el->w_infix, result.end, ft_strlen(el->w_infix));
+				if (start &&
+				value){}
+				char *tmp = ft_strjoin(start, value);
 
-			} while(result.start != -1);
+				el->w_infix = gc_add(ft_strjoin(tmp, end));
+				free(tmp); free(start); free(end); free(value);
+
+			} while(regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", el->w_infix).start != -1);
 		}
 	}
 

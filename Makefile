@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
+#    By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/03 13:59:35 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/09/04 09:47:29 by bvan-pae         ###   ########.fr        #
+#    Updated: 2024/09/04 15:55:25 by nbardavi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME			:= 42sh
 LIBFT			:= libftprintf/libftprintf.a
 CC 				:= gcc
 LDFLAGS			:= -lreadline -lncurses
-CFLAGS 			:= -Wall -Werror -Wextra -g3 #-fsanitize=address
+CFLAGS 			:= -Wall -Werror -Wextra -g3 #-fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
 
 LEXER_SRC 		:= $(filter-out source/lexer/lexer_main.c, $(wildcard source/lexer/*.c))
 EXEC_SRC 		:= $(filter-out source/exec/exec_main.c, $(wildcard source/exec/*.c))
