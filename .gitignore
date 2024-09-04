@@ -1,5 +1,6 @@
 42sh
 lexer_test
 regex_test
+ast_test
 compile_commands.json
 .cache
