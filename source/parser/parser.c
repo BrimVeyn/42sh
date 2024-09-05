@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:53:22 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 14:55:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 15:35:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,10 +239,10 @@ TokenList *extract_tokens(TokenList *list, int *i) {
 }
 
 ExecuterList *build_executer_list(TokenList *list) {
-	if (g_debug > 2){
-		printf(C_RED"----------Before EXECUTER-------------"C_RESET"\n");
-		tokenToStringAll(list); //Debug
-	}
+	// if (true){
+	// 	printf(C_RED"----------Before EXECUTER-------------"C_RESET"\n");
+	// 	tokenToStringAll(list); //Debug
+	// }
 	ExecuterList *self = executer_list_init();
 	int i = 0;
 	while (i < list->size) {

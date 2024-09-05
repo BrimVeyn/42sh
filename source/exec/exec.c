@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:53:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 09:53:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 15:36:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,7 @@ void exec_simple_command(SimpleCommand *command) {
 		}
 		char *path = find_bin_location(command->bin, __environ);
 		if (path != NULL){
+			printf("BIN = %s\n", command->bin);
 			secure_execve(path, command->args, __environ);
 		}
 		gc_cleanup();
@@ -217,6 +218,7 @@ int exec_executer(Executer *executer, char **env) {
 		int exitn = 0;
 		waitpid(id[j], &exitn, 0);
 		g_exitno = WEXITSTATUS(exitn);
+		printf("exitno = %d\n", g_exitno);
 	}
 	return true;
 }
