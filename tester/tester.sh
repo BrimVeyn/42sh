@@ -11,6 +11,7 @@ else
 	test_lists=(
 		"test"
 		"syntax"
+		"expand"
 	)
 fi
 

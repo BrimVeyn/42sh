@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/04 15:59:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 17:10:17 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/09/05 09:53:13 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/05 09:53:13 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,6 @@
 #include <unistd.h>
 
 int g_exitno;
-
-// can have Prefix
-// >&   X
-// <&   X
-// <<   
-// <
-// R_DUP_BOTH, //&>[ex|n]
-// R_DUP_BOTH_APPEND, //&>>[ex]
 
 bool apply_redirect(const Redirection redirect){
 	int fd = redirect.fd;
@@ -138,12 +130,23 @@ void exec_simple_command(SimpleCommand *command) {
 	}
 	else
 		gc_cleanup();
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
 	exit(g_exitno);
 }
 
-int exec_executer(Executer *executer) {
+int exec_builtin(SimpleCommand *command, char **env){
+	(void)env;
+	if (!ft_strcmp(command->bin, "exit")){
+		exit(g_exitno);
+	}
+	return 0;
+}
+
+int exec_executer(Executer *executer, char **env) {
 	Executer *current = executer;
-	int pipefd[2];
+	int pipefd[2] = {-1 , -1};
 	bool prev_pipe = false;
 	pid_t id[1024];
 	int i = 0;
@@ -168,7 +171,8 @@ int exec_executer(Executer *executer) {
 		if (current->data_tag == DATA_NODE) {
 			pid_t id = secure_fork();
 			if (id == 0) {
-				g_exitno = ast_execute(current->n_data);
+				gc_addcharchar(env);
+				g_exitno = ast_execute(current->n_data, env);
 				exit (g_exitno);
 			}
 			int exitn = 0;
@@ -177,10 +181,25 @@ int exec_executer(Executer *executer) {
 		}
 
 		if (current->data_tag == DATA_TOKENS) {
-			id[i] = secure_fork();
-			if (id[i] == 0) {
+			{
 				SimpleCommand *command = parser_parse_current(current->s_data);
-				exec_simple_command(command);
+				if (!command && pipefd[0] == -1){
+					close(STDIN_SAVE);
+					close(STDOUT_SAVE);
+					close(STDERR_SAVE);
+					return false;
+				}
+				if (pipefd[0] == -1 && exec_builtin(command, env)){
+					break;
+				}
+				id[i] = secure_fork();
+				if (id[i] == 0) {
+					gc_addcharchar(env);
+					close(STDIN_SAVE);
+					close(STDOUT_SAVE);
+					close(STDERR_SAVE);
+					exec_simple_command(command);
+				}
 			}
 		}
 
@@ -191,26 +210,27 @@ int exec_executer(Executer *executer) {
 		i++;
 		current = current->next;
 	}
+	close(STDIN_SAVE);
+	close(STDOUT_SAVE);
+	close(STDERR_SAVE);
 	for (int j = 0; j < i; j++){
 		int exitn = 0;
 		waitpid(id[j], &exitn, 0);
 		g_exitno = WEXITSTATUS(exitn);
 	}
-	close(STDIN_SAVE);
-	close(STDOUT_SAVE);
-	close(STDERR_SAVE);
-	return g_exitno;
+	return true;
 }
 
 int exec_node(Node *node, char **env) {
 	(void) env;
 
 	ExecuterList *list = build_executer_list(node->value.operand);
-	// printf("tag = %d\n", list->data[0]->data_tag);
 
 	for (int it = 0; it < list->size; it++) {
 		Executer *executer = list->data[it];
-		g_exitno = exec_executer(executer);
+		if (exec_executer(executer, env) == false) {
+			break;
+		}
 	}
 	return g_exitno;
 }
