@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 15:59:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 16:01:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/04 17:33:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,14 +183,24 @@ type_of_separator next_separator(TokenList *list, int *i) {
 	return S_EOF;
 }
 
-Node *extract_subshell(TokenList *list, int *i) {
+TokenList *extract_subshell_rec(TokenList *list, int *i) {
 	TokenList *newlist = token_list_init();
 	(*i)++;
-	while (!is_end_sub(list, i)) {
+	while (*i < list->size && !is_end_sub(list, i)) {
 		token_list_add(newlist, list->t[*i]);
+		if (*i < list->size && is_subshell(list, i)) {
+			TokenList *test = extract_subshell_rec(list, i);
+			token_list_add_list(newlist, test);
+		}
 		(*i)++;
 	}
-	(*i) += 2;
+	(*i) += 1;
+	return newlist;
+}
+
+Node *extract_subshell(TokenList *list, int *i) {
+	TokenList *newlist = extract_subshell_rec(list, i);
+	(*i) += 1;
 	return ast_build(newlist);
 }
 

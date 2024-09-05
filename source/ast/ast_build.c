@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 13:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 14:21:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 09:49:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ TokenList *extract_command(TokenList *list, uint16_t *i) {
 	TokenList *self = token_list_init();
 	while (*i < list->size && !is_operator_ast(list->t[*i])) {
 		if (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_OPEN) {
-			while (!(list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_CLOSE)) {
+			while (*i < list->size && !(list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_CLOSE)) {
 				token_list_add(self, list->t[*i]);
 				(*i)++;
 			}
@@ -81,85 +81,6 @@ bool is_op (TokenList *list) {
 	return (list->size == 1 && list->t[0]->tag == T_SEPARATOR);
 }
 
-char *getKind(Node *node) {
-	switch(node->tag) {
-		case N_OPERAND:
-			return "HEY";
-			break;
-		case N_OPERATOR:
-			switch (node->value.operator) {
-				case S_AND:
-					return "AND";
-					break;
-				case S_OR:
-					return "OR";
-					break;
-				default:
-					return "";
-			}
-			break;
-		default:
-			return "";
-	}
-}
-
-
-void printAST(Node *node, char *padding, bool has_rhs) {
-    if (node != NULL) {
-        printf("\n");
-        printf("%s", padding);
-
-        if (has_rhs) {
-            printf("├──");
-        } else {
-            printf("└──");
-        }
-
-        printf("%s", getKind(node));
-
-        char *new_padding = (char *)malloc(strlen(padding) + 4);
-        strcpy(new_padding, padding);
-
-        if (has_rhs) {
-            strcat(new_padding, "│  ");
-        } else {
-            strcat(new_padding, "   ");
-        }
-
-        if (node->left != NULL) {
-            printAST(node->left, new_padding, node->right != NULL);
-        }
-        if (node->right != NULL) {
-            printAST(node->right, new_padding, false);
-        }
-
-        free(new_padding);
-    }
-}
-
-void printTree(Node *self) {
-    printf("%s", getKind(self));
-
-    // const char *pointerRight = "└──";
-    // const char *pointerLeft = (self->right != NULL) ? "├──" : "└──";
-
-    char *ss = (char *)malloc(1);
-    ss[0] = '\0';
-
-    if (self->left != NULL) {
-        printAST(self->left, ss, self->right != NULL);
-    }
-    if (self->right != NULL) {
-        printAST(self->right, ss, false);
-    }
-
-    printf("\n");
-    free(ss);
-}
-
-// Example usage
-
-// echo 1 echo 2 && echo 3 ||
 Node *generateTree(TokenListVector *list) {
 	NodeStack *self = node_stack_init();
 	for (uint16_t i = 0; i < list->size; i++) {
@@ -192,3 +113,4 @@ Node *ast_build(TokenList *tokens) {
 	Node *AST = generateTree(branch_list);
 	return AST;
 }
+

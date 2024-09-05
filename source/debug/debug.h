@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 16:39:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/04 15:53:59 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 09:39:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,10 @@ void printCommand(SimpleCommand *command);
 void lexer_debug(Lexer_p lexer);
 void tokenToString(Token *t, size_t offset);
 void tokenToStringAll(TokenList *t);
+
+//---------------AST----------------------//
+void printTree(Node *self);
+void tokenListToStringAll(TokenListVector *cont);
 
 
 #define tagName(param) _Generic((param),					\
