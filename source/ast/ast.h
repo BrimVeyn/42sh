@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ast.h                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:06:45 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 12:15:41 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 09:35:45 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ Node *node_stack_pop(NodeStack *self);
 void node_stack_push(NodeStack *tl, Node *token);
 void printTree(Node *self);
 Node *ast_build(TokenList *tokens);
-int ast_execute(Node *AST);
+int ast_execute(Node *AST, char **env);
 
 void tokenListToStringAll(TokenListVector *cont);
 void branch_list_to_rpn(TokenListVector *list);

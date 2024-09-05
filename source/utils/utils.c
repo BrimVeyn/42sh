@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 13:16:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 09:33:27 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,4 +59,9 @@ void gc_free(void *addr) {
 	}
 }
 
-
+void gc_addcharchar(char **str) {
+	for (uint16_t i = 0; str[i]; i++){
+		gc_add(str[i]);
+	}
+	gc_add(str);
+}

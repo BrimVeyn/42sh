@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
+#    By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/04 15:58:56 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/09/04 15:58:57 by bvan-pae         ###   ########.fr        #
+#    Updated: 2024/09/05 09:43:48 by nbardavi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 

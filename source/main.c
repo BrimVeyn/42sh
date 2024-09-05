@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:00:15 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 13:22:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 09:48:42 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/42sh.h"
+#include <unistd.h>
 
 int g_debug = 0;
 
@@ -76,14 +77,17 @@ int main(int ac, char *av[], char *env[]) {
 			heredoc_detector(tokens);
 			signal_manager(SIG_EXEC);
 			Node *AST = ast_build(tokens);
-			ast_execute(AST);
+			ast_execute(AST, dup_env);
 			if (g_debug){
 				printTree(AST);
 			}
 		}
 	}
-
+	free_charchar(dup_env);
 	rl_clear_history();
 	gc_cleanup();
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
 	return (0);
 }
