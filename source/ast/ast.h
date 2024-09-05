@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:53:28 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 09:54:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 14:09:49 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ typedef struct {
 	TokenList **data;
 	uint16_t size;
 	uint16_t capacity;
-} TokenListVector;
+} TokenListStack;
 
 typedef enum {
 	N_OPERAND,
@@ -65,14 +65,16 @@ typedef struct {
 
 //----------------AST-----------------//
 Node		*ast_build(TokenList *tokens);
-Node		*generateTree(TokenListVector *list);
+Node		*generateTree(TokenListStack *list);
 int			ast_execute(Node *AST, char **env);
 
-//----------------Token List Vector------------------//
-TokenListVector *token_list_vector_init(void);
-TokenListVector *split_operator(TokenList *list);
-void			token_list_vector_add(TokenListVector *tl, TokenList *token);
-void			branch_list_to_rpn(TokenListVector *list);
+//----------------Token List Stack------------------//
+TokenListStack		*token_list_stack_init(void);
+TokenList			*token_list_stack_pop(TokenListStack *self);
+void				token_list_stack_push(TokenListStack *self, TokenList *token);
+TokenListStack		*branch_stack_to_rpn(TokenListStack *list);
+TokenListStack		*split_operator(TokenList *list);
+void				skip_subshell(TokenList *newlist, TokenList *list, int *i);
 
 //----------------Node Stack------------------//
 NodeStack	*node_stack_init(void);
