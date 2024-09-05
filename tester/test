@@ -9,3 +9,20 @@ echo 1; echo 2 | echo 3
 (echo 1 && echo 2 && echo 3 || echo 4) | djeidj
 (cat ../Makefile | rev | sort | rev) && notfound 2>/dev/null || echo Yes
 10<../Makefile cat <&10 >./outfiles/test | rev && (echo salut);
+(echo Hello World)
+(echo Hello; echo World)
+(echo Start; (echo Nested; echo Subshell); echo End)
+(echo This && echo That)
+(false || echo This ran because the first command failed)
+(echo First && false || echo Fallback)
+(echo This will run && echo And then this)
+(false && echo Won't run || echo But this will)
+((echo Outer && (echo Inner || echo Fallback)) || echo Outer fallback)
+(echo Start && false || echo Continue; echo End)
+(echo Outer && (false || echo Inner) && echo Final)
+(false && (echo Won't run && echo Neither will this) || echo This will run)
+(VARIABLE=value && echo $VARIABLE)
+((echo A && echo B) || (echo C && echo D) && echo E)
+(echo Start && false || (echo Intermediate && echo End))
+(false || (echo Subshell ran && exit 1)) && echo This won't print
+((echo Check && true) && echo Passed || echo Failed)

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/29 12:55:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/04 15:41:28 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 09:50:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ typedef struct {
 } Garbage;
 
 //-----------------Lexer------------------//
+TokenList		*lexer_lex_all(Lexer_p l);
 Token			*lexer_get_next_token(Lexer_p l, bool recursive_call, type_mode mode);
 Lexer_p			lexer_init(char *input);
 void			lexer_debug(Lexer_p lexer);

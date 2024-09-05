@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:49 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 14:24:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 09:50:25 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,15 +47,12 @@ typedef struct SimpleCommand {
 	struct SimpleCommand	*next;
 } SimpleCommand;
 
-bool heredoc_detector(TokenList *data);
 SimpleCommand *parser_parse_current(TokenList *tl);
-void printCommand(SimpleCommand *command);
-TokenList *lexer_lex_all(Lexer_p l);
+bool heredoc_detector(TokenList *data);
 
+//-----------------Redirection List----------------//
 RedirectionList *redirection_list_init(void);
 void redirection_list_add(RedirectionList *rl, Redirection *redirection);
 void redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
-
-type_of_separator interface_separator(type_of_separator new_separator, int mode);
 
 #endif // !PARSER_H
