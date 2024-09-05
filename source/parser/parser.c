@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 15:59:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 16:01:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/04 16:28:43 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ char *parser_get_variable_value(char *name){
 	return ft_strdup("");
 }
 
-void parser_parameter_expansion(TokenList *tl){
+bool parser_parameter_expansion(TokenList *tl){
 	for (uint16_t i = 0; i < tl->size; i++){
 		Token *el = tl->t[i];
 
@@ -135,7 +135,8 @@ void parser_parameter_expansion(TokenList *tl){
 					regex_match("\\${[^}]*$", el->w_infix).start == pos || //if missing }
 					(regex_match("\\${[^}]*}", el->w_infix).start == pos && regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", el->w_infix).start != pos)){ //check if first char is a number
 					dprintf(2, "${}: bad substitution\n");
-					exit(EXIT_FAILURE);
+					g_exitno = 1;
+					return false;
 				}
 				
 				result = regex_match("\\${?}", el->w_infix);
@@ -162,7 +163,7 @@ void parser_parameter_expansion(TokenList *tl){
 			} while(regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", el->w_infix).start != -1);
 		}
 	}
-
+	return true;
 }
 
 //echo 0 ; echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
@@ -255,7 +256,9 @@ SimpleCommand *parser_parse_current(TokenList *tl) {
 	
 	// parser_brace_expansion();
 	// parser_tilde_expansion();
-	parser_parameter_expansion(tl);
+	if (!parser_parameter_expansion(tl)){
+		return NULL;
+	}
 	// parser_command_substitution();
 	// parser_arithmetic_expansion();
 	// parser_word_splitting();
@@ -264,6 +267,6 @@ SimpleCommand *parser_parse_current(TokenList *tl) {
 	RedirectionList *redirs = parser_get_redirection(tl);
 	SimpleCommand *command = parser_get_command(tl);
 	command->redir_list = redirs;
-
+	
 	return command;
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   42sh.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 13:16:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 09:33:50 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ void			gc_init(void);
 void			*gc_add(void *ptr);
 void			gc_cleanup(void);
 void			gc_free(void *addr);
+void			gc_addcharchar(char **str);
 
 //----------------Utils--------------------//
 void			free_charchar(char **s);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils_string.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 13:14:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 13:15:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 09:39:39 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int ft_strlenlen(char **strstr){
 }
 
 char **ft_strdupdup(char **env){
-	char **strstr = ft_calloc(ft_strlenlen(env), sizeof(char *));
+	char **strstr = ft_calloc(ft_strlenlen(env) + 1, sizeof(char *));
 	if (!strstr){
 		return NULL;
 	}
