@@ -6,15 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 13:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 09:49:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 15:08:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-
-bool is_operator_ast(Token *tok) {
-	return tok->tag == T_SEPARATOR && (tok->s_type == S_AND || tok->s_type == S_OR || tok->s_type == S_EOF);
-}
+#include "ast.h"
 
 Node *gen_operator_node(TokenList *tok, Node *left, Node *right) {
 	Node *self = gc_add(ft_calloc(1, sizeof(Node)));
@@ -34,16 +31,25 @@ Node *gen_operand_node(TokenList *list) {
 	return self;
 }
 
-TokenList *extract_command(TokenList *list, uint16_t *i) {
+bool is_semi_or_bg(const TokenList *list, const int *it) {
+	return is_semi(list, it) || is_bg(list, it);
+}
+
+bool is_or_or_and(const TokenList *list, const int *it) {
+	return is_or(list, it) || is_and(list, it);
+}
+
+bool is_ast_operator(const TokenList *list, const int *it) {
+	return is_semi_or_bg(list, it) || is_or_or_and(list, it);
+}
+
+TokenList *extract_command(TokenList *list, int *i) {
 	TokenList *self = token_list_init();
-	while (*i < list->size && !is_operator_ast(list->t[*i])) {
-		if (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_OPEN) {
-			while (*i < list->size && !(list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_CLOSE)) {
-				token_list_add(self, list->t[*i]);
-				(*i)++;
-			}
+	while (*i < list->size && !is_ast_operator(list, i)) {
+		if (is_subshell(list, i)) {
+			skip_subshell(self, list, i);
 		}
-		if (*i < list->size) {
+		if (*i < list->size && !is_ast_operator(list, i)) {
 			token_list_add(self, list->t[*i]);
 			(*i)++;
 		}
@@ -51,66 +57,129 @@ TokenList *extract_command(TokenList *list, uint16_t *i) {
 	return self;
 }
 
-TokenList *extract_operator(TokenList *list, uint16_t *i) {
+TokenList *extract_operator(TokenList *list, int *i) {
 	TokenList *self = token_list_init();
 	token_list_add(self, list->t[(*i)++]);
 	return self;
 }
 
-TokenListVector *split_operator(TokenList *list) {
-	TokenListVector *self = token_list_vector_init();
-	uint16_t i = 0;
+TokenListStack *split_operator(TokenList *list) {
+	TokenListStack *self = token_list_stack_init();
+	int i = 0;
 	while (i < list->size) {
-		token_list_vector_add(self, extract_command(list, &i));
-		if (i < list->size && list->t[i]->tag == T_SEPARATOR && list->t[i]->s_type != S_EOF) {
-			token_list_vector_add(self, extract_operator(list, &i));
+		if (is_eof(list,&i)) {
+			i++;
+			continue;
+		}
+		token_list_stack_push(self, extract_command(list, &i));
+		if (i < list->size && is_ast_operator(list, &i)) {
+			token_list_stack_push(self, extract_operator(list, &i));
 		} else i++;
 	}
 	return self;
 }
 
-void tokenListToStringAll(TokenListVector *cont) {
+void tokenListToStringAll(TokenListStack *cont) {
 	for (uint16_t i = 0; i < cont->size; i++) {
-		printf("------------%d---------\n", i);
+		printf(C_BRIGHT_YELLOW"------------%d---------"C_RESET"\n", i);
 		tokenToStringAll(cont->data[i]);
 	}
-	printf("-----------------------------\n");
+	printf(C_BRIGHT_YELLOW"-----------------------------"C_RESET"\n");
 }
 
 bool is_op (TokenList *list) {
 	return (list->size == 1 && list->t[0]->tag == T_SEPARATOR);
 }
 
-Node *generateTree(TokenListVector *list) {
+Node *generateTree(TokenListStack *list) {
 	NodeStack *self = node_stack_init();
 	for (uint16_t i = 0; i < list->size; i++) {
 		if (!is_op(list->data[i])) {
 			node_stack_push(self, gen_operand_node(list->data[i]));
 		} else {
-			Node *right = node_stack_pop(self);
-			Node *left = node_stack_pop(self);
-			node_stack_push(self, gen_operator_node(list->data[i], left, right));
+			if (self->size == 1) {
+				Node *left = node_stack_pop(self);
+				node_stack_push(self, gen_operator_node(list->data[i], left, NULL));
+			} else {
+				Node *right = node_stack_pop(self);
+				Node *left = node_stack_pop(self);
+				node_stack_push(self, gen_operator_node(list->data[i], left, right));
+			}
 		}
 	}
 	return node_stack_pop(self);
 }
 
-void branch_list_to_rpn(TokenListVector *list) {
-	// || and && have same precedence, so fuck it
-	for (int i = list->size - 1; i > 1; i-= 2) {
-		TokenList *tmp = list->data[i];
-		list->data[i] = list->data[i - 1];
-		list->data[i - 1] = tmp;
+// || and && have same precedence {1}
+// & and ; have same precedence {2}
+// {1} has higher precedence than {2}
+
+bool has_higher_precedence(TokenListStack *operator, TokenList *current) {
+	if (operator->size == 0) return true;
+	const TokenList *last_el = operator->data[operator->size - 1];
+	const int zero = 0;
+
+	if (is_or_or_and(current, &zero) && is_semi_or_bg(last_el, &zero))
+		return true;
+	return false;
+}
+
+bool has_equal_precedence(TokenListStack *operator, TokenList *current) {
+	const TokenList *last_el = operator->data[operator->size - 1];
+	const int zero = 0;
+
+	if (is_or_or_and(current, &zero) && is_or_or_and(last_el, &zero)) 
+		return true;
+	if (is_semi_or_bg(current, &zero) && is_semi_or_bg(last_el, &zero)) 
+		return true;
+	return false;
+}
+
+bool is_stack_empty(TokenListStack *stack) {
+	return (stack->size == 0);
+}
+
+TokenListStack *branch_stack_to_rpn(TokenListStack *list) {
+	TokenListStack *output = token_list_stack_init();
+	TokenListStack *operator = token_list_stack_init();
+	const int zero = 0;
+	
+	for (int i = 0; i < list->size; i++) {
+		TokenList *current = list->data[i];
+		if (is_ast_operator(current, &zero)) {
+			while(!has_higher_precedence(operator, current)) {
+				token_list_stack_push(output, token_list_stack_pop(operator));
+			}
+			token_list_stack_push(operator, current);
+		} else {
+			token_list_stack_push(output, current);
+		}
 	}
+	while (operator->size > 0) {
+		token_list_stack_push(output, token_list_stack_pop(operator));
+	}
+	return output;
 }
 
 Node *ast_build(TokenList *tokens) {
-	TokenListVector *branch_list = split_operator(tokens);
-	if (g_debug){
-		tokenListToStringAll(branch_list); //Debug
+	TokenListStack *branch_stack = split_operator(tokens);
+	// if (g_debug){
+	// 	printf(C_RED"----------BEFORE-------------"C_RESET"\n");
+	// 	tokenListToStringAll(branch_stack); //Debug
+	// }
+	TokenListStack *branch_queue = branch_stack_to_rpn(branch_stack);
+	// if (g_debug){
+	// 	printf(C_RED"----------AFTER-------------"C_RESET"\n");
+	// 	tokenListToStringAll(branch_queue); //Debug
+	// }
+	Node *AST = generateTree(branch_queue);
+	if (g_debug) {
+		printf("------\n");
+		printTree(AST);
+		printf("-----\n");
+		// gc_cleanup();
+		// exit(EXIT_FAILURE);
 	}
-	branch_list_to_rpn(branch_list);
-	Node *AST = generateTree(branch_list);
 	return AST;
 }
 

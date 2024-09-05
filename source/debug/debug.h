@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 16:39:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/05 09:39:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 12:52:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void tokenToStringAll(TokenList *t);
 
 //---------------AST----------------------//
 void printTree(Node *self);
-void tokenListToStringAll(TokenListVector *cont);
+void tokenListToStringAll(TokenListStack *cont);
 
 
 #define tagName(param) _Generic((param),					\

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:40:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 09:40:40 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 14:41:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,18 @@
 char *getKind(Node *node) {
 	switch(node->tag) {
 		case N_OPERAND:
-			return "HEY";
+			return "cmd";
 			break;
 		case N_OPERATOR:
 			switch (node->value.operator) {
 				case S_AND:
 					return "AND";
-					break;
 				case S_OR:
 					return "OR";
-					break;
+				case S_SEMI_COLUMN:
+					return ";";
+				case S_BG:
+					return "&";
 				default:
 					return "";
 			}

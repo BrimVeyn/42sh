@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:53:22 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 09:53:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 14:55:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,16 +184,34 @@ type_of_separator next_separator(TokenList *list, int *i) {
 	return S_EOF;
 }
 
+void skip_subshell(TokenList *newlist, TokenList *list, int *i) {
+	token_list_add(newlist, list->t[*i]);
+	(*i)++;
+	while (*i < list->size && !is_end_sub(list, i)) {
+		if (is_subshell(list, i)) {
+			skip_subshell(newlist, list, i);
+		}
+		if (*i < list->size) {
+			token_list_add(newlist, list->t[*i]);
+			(*i)++;
+		}
+	}
+	if (*i < list->size && is_end_sub(list, i))
+		token_list_add(newlist, list->t[*i]);
+	(*i)++;
+}
+
 TokenList *extract_subshell_rec(TokenList *list, int *i) {
 	TokenList *newlist = token_list_init();
 	(*i)++;
 	while (*i < list->size && !is_end_sub(list, i)) {
-		token_list_add(newlist, list->t[*i]);
 		if (*i < list->size && is_subshell(list, i)) {
-			TokenList *test = extract_subshell_rec(list, i);
-			token_list_add_list(newlist, test);
+			skip_subshell(newlist, list, i);
 		}
-		(*i)++;
+		if (*i < list->size) {
+			token_list_add(newlist, list->t[*i]);
+			(*i)++;
+		}
 	}
 	(*i) += 1;
 	return newlist;
@@ -202,6 +220,11 @@ TokenList *extract_subshell_rec(TokenList *list, int *i) {
 Node *extract_subshell(TokenList *list, int *i) {
 	TokenList *newlist = extract_subshell_rec(list, i);
 	(*i) += 1;
+	if (g_debug > 2) {
+		printf("============================================\n");
+		tokenToStringAll(newlist);
+		printf("============================================\n");
+	}
 	return ast_build(newlist);
 }
 
@@ -216,22 +239,20 @@ TokenList *extract_tokens(TokenList *list, int *i) {
 }
 
 ExecuterList *build_executer_list(TokenList *list) {
+	if (g_debug > 2){
+		printf(C_RED"----------Before EXECUTER-------------"C_RESET"\n");
+		tokenToStringAll(list); //Debug
+	}
 	ExecuterList *self = executer_list_init();
 	int i = 0;
-	if (g_debug){
-		printf(C_RED"VRAI\n"C_RESET);
-		tokenToStringAll(list);
-	}
 	while (i < list->size) {
 		if (next_separator(list, &i) == S_PIPE) {
-			// printf("salut mec !\n");
 			Executer *executer = NULL;
 			while (next_separator(list, &i) == S_PIPE) {
 				if (is_subshell(list, &i)) {
 					Executer *new = executer_init(extract_subshell(list, &i), NULL);
 					executer_push_back(&executer, new);
 				} else {
-					// printf("ok !\n");
 					Executer *new = executer_init(NULL, extract_tokens(list, &i));
 					executer_push_back(&executer, new);
 				}
