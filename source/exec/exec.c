@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/05 09:53:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 15:36:45 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/09/05 15:39:59 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/05 17:40:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,16 +56,6 @@ bool apply_all_redirect(RedirectionList *redirections){
 		}
 	}
 	return true;
-}
-
-
-int there_is_slash(char *str){
-	for (int i = 0; str[i]; i++){
-		if (str[i] == '/'){
-			return 1;
-		}
-	}
-	return 0;
 }
 
 char *find_bin_location(char *bin, char **env){
@@ -124,7 +114,7 @@ void exec_simple_command(SimpleCommand *command) {
 		}
 		char *path = find_bin_location(command->bin, __environ);
 		if (path != NULL){
-			printf("BIN = %s\n", command->bin);
+			// printf("BIN = %s\n", command->bin);
 			secure_execve(path, command->args, __environ);
 		}
 		gc_cleanup();
@@ -173,12 +163,22 @@ int exec_executer(Executer *executer, char **env) {
 			pid_t id = secure_fork();
 			if (id == 0) {
 				gc_addcharchar(env);
+				// printf("-------SUBSHELL START---------\n");
+				// printTree(current->n_data);
 				g_exitno = ast_execute(current->n_data, env);
+				// printf("-------SUB EXITNO = %d\n", g_exitno);
+				// printf("-------SUBSHELL END---------\n");
+				// printf("END-OF EXECUTER STATUS = %d\n", g_exitno);
+				//LE BUG VENAIT DE LA LARBIN
+				// close(STDIN_SAVE); close(STDOUT_SAVE); close(STDERR_SAVE);
+				// close(STDIN_FILENO); close(STDOUT_FILENO); close(STDERR_FILENO);
+				//MERDE !
+				// gc_cleanup();
 				exit (g_exitno);
 			}
-			int exitn = 0;
-			waitpid(id, &exitn, 0);
-			g_exitno = WEXITSTATUS(exitn);
+			int status = 0;
+			waitpid(id, &status, 0);
+			g_exitno = WEXITSTATUS(status);
 		}
 
 		if (current->data_tag == DATA_TOKENS) {
@@ -208,24 +208,22 @@ int exec_executer(Executer *executer, char **env) {
 		secure_dup2(STDOUT_SAVE, STDOUT_FILENO);
 		secure_dup2(STDERR_SAVE, STDERR_FILENO);
 		
-		i++;
+		i += !(current->data_tag == DATA_NODE);
 		current = current->next;
 	}
 	close(STDIN_SAVE);
 	close(STDOUT_SAVE);
 	close(STDERR_SAVE);
-	for (int j = 0; j < i; j++){
-		int exitn = 0;
-		waitpid(id[j], &exitn, 0);
-		g_exitno = WEXITSTATUS(exitn);
-		printf("exitno = %d\n", g_exitno);
+	for (int j = 0; j < i; j++) {
+		int status = 0;
+		waitpid(id[j], &status, 0);
+		g_exitno = WEXITSTATUS(status);  // <-- Correct handling of status
+		// printf("exitno = %d\n", status);
 	}
 	return true;
 }
 
 int exec_node(Node *node, char **env) {
-	(void) env;
-
 	ExecuterList *list = build_executer_list(node->value.operand);
 
 	for (int it = 0; it < list->size; it++) {
