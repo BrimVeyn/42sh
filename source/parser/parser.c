@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:53:22 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 14:55:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 15:21:15 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -281,6 +281,94 @@ ExecuterList *build_executer_list(TokenList *list) {
 		}
 	}
 	return self;
+}
+
+// int main() {
+//     const char *dossier = ".";  // Par exemple, le répertoire courant
+//     struct dirent *entry;       // Pointeur pour les entrées du répertoire
+//     DIR *dir = opendir(dossier);  // Ouvre le répertoire
+//
+//     if (dir == NULL) {
+//         // Si le répertoire n'a pas pu être ouvert
+//         perror("opendir");
+//         return EXIT_FAILURE;
+//     }
+//
+//     // Tant qu'il y a des entrées dans le répertoire
+//     while ((entry = readdir(dir)) != NULL) {
+//         // Affiche le nom de l'entrée (fichier ou dossier)
+//         printf("%s\n", entry->d_name);
+//     }
+//
+//     // Ferme le répertoire
+//     closedir(dir);
+//     return EXIT_SUCCESS;
+// }
+
+char *parser_bash_to_regexp(char *str){
+	char *new_str = NULL;
+	for (int i = 0; str[i]; i++){
+		if (str[i] == '*'){
+			char *start = (i == 0) ? ft_strdup("") : ft_substr(str, 0, i);
+			char *end = (i == (int)ft_strlen(str)) ? ft_strdup("") : ft_substr(str, i + 1, ft_strlen(str) - i);
+			free(new_str);
+			new_str = ft_calloc(ft_strlen(str) + 2, sizeof(char));
+			sprintf(new_str, "%s.*%s", start, end);
+			free(str);
+			str = new_str;
+			i += 2;
+		}
+	}
+	return new_str;
+}
+
+int parser_filename_expansion(TokenList *tl){
+	
+	for (uint16_t i = 0; i < tl->size; i++) {
+		const Token *el = tl->t[i];
+		char *str = el->w_infix;
+	
+		//need to handle /*
+		if ((el->tag == T_WORD || el->tag == T_REDIRECTION) && there_is_star(str)) {
+			struct dirent *entry;
+			DIR *dir;
+			(void)entry;
+			(void)dir;
+
+			if (!there_is_slash(str)){
+				dir = opendir(".");
+			} else {
+				printf("Bon, la j'ai la flemme je le ferais plus tard\n");
+			}
+
+			char *regexp = parser_bash_to_regexp(str);
+			
+			// while ((entry = readdir(dir)) != NULL) {
+			// 	if (regex_match(regexp, str))
+			// 	printf("%s\n", entry->d_name);
+			// }
+			free(regexp);
+		}
+	}
+	return true;
+}
+
+int there_is_slash(char *str){
+	for (int i = 0; str[i]; i++){
+		if (str[i] == '/'){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int there_is_star(char *str){
+	for (int i = 0; str[i]; i++){
+		if (str[i] == '*'){
+			return 1;
+		}
+	}
+	return 0;
 }
 
 SimpleCommand *parser_parse_current(TokenList *tl) {

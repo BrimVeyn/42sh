@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:53:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 09:53:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 15:19:59 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,16 +56,6 @@ bool apply_all_redirect(RedirectionList *redirections){
 		}
 	}
 	return true;
-}
-
-
-int there_is_slash(char *str){
-	for (int i = 0; str[i]; i++){
-		if (str[i] == '/'){
-			return 1;
-		}
-	}
-	return 0;
 }
 
 char *find_bin_location(char *bin, char **env){
