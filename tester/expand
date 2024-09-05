@@ -1,0 +1,4 @@
+echo ${}
+echo ${PATH}
+echo ${8PATH}
+echo ${PATH${salut}}

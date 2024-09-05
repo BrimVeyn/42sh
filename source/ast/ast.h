@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/15 14:06:45 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 09:39:28 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/09/05 09:53:28 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/05 09:54:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ typedef struct {
 //----------------AST-----------------//
 Node		*ast_build(TokenList *tokens);
 Node		*generateTree(TokenListVector *list);
-int			ast_execute(Node *AST);
+int			ast_execute(Node *AST, char **env);
 
 //----------------Token List Vector------------------//
 TokenListVector *token_list_vector_init(void);
