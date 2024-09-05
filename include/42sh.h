@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 09:33:50 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/05 15:21:37 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ extern int g_debug;
 #include <fcntl.h>
 #include <errno.h>
 #include<sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -44,6 +46,8 @@ void			free_charchar(char **s);
 void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
 int				ft_strlenlen(char **strstr);
 char			**ft_strdupdup(char **env);
+int				there_is_star(char *str);
+int				there_is_slash(char *str);
 
 typedef enum {
 	SIG_PROMPT,

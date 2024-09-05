@@ -1,0 +1,22 @@
+Fix exit status problem when nested subshells ! 
+(echo B && false) || (echo C && echo D) --> works
+((echo B && false) || (echo C && echo D)) --> doesn't work
+
+⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+search for LARBIN (je te deteste)
+⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+
+
+Fix double free in nested subshells !
+
+Add more unit test covering all redirection scenarios + parsing error scenarios
+
+Implement a debug level ! "./42sh -d1" > "./42sh -d4"
+
+exit builtin must be a priority !
+
+Simplify the command ---> ";\n" = ";"  ";     \n\n\n\n\n\n\" = ";" etc
+
+Move history file to an absolute location, create the file/directory if it doesn't exist
+
+If and only if everything works as expected (no leaks, tester 100%), work on parsing modules

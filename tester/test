@@ -43,4 +43,5 @@ echo 1; echo 2 | echo 3
 (false || (echo A && (echo B && false || echo C)) && echo D)
 (echo A && echo B || (false && echo C) && (echo D && false) || echo E)
 ((false || echo A) && echo B || (echo C && echo D); echo E)
+(echo A && false) || echo B
 echo A || echo B; echo A || echo B
