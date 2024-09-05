@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:53:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 15:19:59 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/05 15:31:54 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,14 +159,17 @@ int exec_executer(Executer *executer, char **env) {
 		}
 
 		if (current->data_tag == DATA_NODE) {
-			pid_t id = secure_fork();
-			if (id == 0) {
+			id[i] = secure_fork();
+			if (id[i] == 0) {
 				gc_addcharchar(env);
 				g_exitno = ast_execute(current->n_data, env);
+				close(STDIN_SAVE); close(STDOUT_SAVE); close(STDERR_SAVE);
+				close(STDIN_FILENO); close(STDOUT_FILENO); close(STDERR_FILENO);
+				gc_cleanup();
 				exit (g_exitno);
 			}
 			int exitn = 0;
-			waitpid(id, &exitn, 0);
+			waitpid(id[i], &exitn, 0);
 			g_exitno = WEXITSTATUS(exitn);
 		}
 
