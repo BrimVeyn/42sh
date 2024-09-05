@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 13:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 15:08:50 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/05 15:25:04 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,15 +163,15 @@ TokenListStack *branch_stack_to_rpn(TokenListStack *list) {
 
 Node *ast_build(TokenList *tokens) {
 	TokenListStack *branch_stack = split_operator(tokens);
-	// if (g_debug){
-	// 	printf(C_RED"----------BEFORE-------------"C_RESET"\n");
-	// 	tokenListToStringAll(branch_stack); //Debug
-	// }
+	if (g_debug){
+		printf(C_RED"----------BEFORE-------------"C_RESET"\n");
+		tokenListToStringAll(branch_stack); //Debug
+	}
 	TokenListStack *branch_queue = branch_stack_to_rpn(branch_stack);
-	// if (g_debug){
-	// 	printf(C_RED"----------AFTER-------------"C_RESET"\n");
-	// 	tokenListToStringAll(branch_queue); //Debug
-	// }
+	if (g_debug){
+		printf(C_RED"----------AFTER-------------"C_RESET"\n");
+		tokenListToStringAll(branch_queue); //Debug
+	}
 	Node *AST = generateTree(branch_queue);
 	if (g_debug) {
 		printf("------\n");
