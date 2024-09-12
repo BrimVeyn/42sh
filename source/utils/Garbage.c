@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/12 15:24:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/12 17:31:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,10 @@ void gc_init(int n) {
 	gc[n].garbage = ft_calloc(10, sizeof(void *));
 	if (!gc[n].garbage)
 		exit(EXIT_FAILURE);
+}
+
+Garbage *gc_get(void) {
+	return gc;
 }
 
 void *gc_add(void *ptr, int n) {

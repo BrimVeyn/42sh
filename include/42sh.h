@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/12 14:07:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/12 17:32:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,13 +39,6 @@ typedef enum {
 	GC_SUBSHELL,
 	GC_ALL,
 } type_of_garbage;
-
-//----------------Garbage-------------------//
-void			gc_init(int n);
-void			*gc_add(void *ptr, int n);
-void			gc_cleanup(int n);
-void			gc_free(void *addr, int n);
-void			gc_addcharchar(char **str, int n);
 
 //----------------Utils--------------------//
 void			free_charchar(char **s);
@@ -92,5 +85,13 @@ typedef enum {
 #ifndef REGEX_H
 	#include "../source/regex/regex.h"
 #endif // !REGEX_H
+
+//----------------Garbage-------------------//
+Garbage			*gc_get(void);
+void			gc_init(int n);
+void			*gc_add(void *ptr, int n);
+void			gc_cleanup(int n);
+void			gc_free(void *addr, int n);
+void			gc_addcharchar(char **str, int n);
 
 #endif
