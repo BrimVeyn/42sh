@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/03 13:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/10 10:14:50 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/12 10:12:40 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/12 10:13:47 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,21 +124,6 @@ bool has_higher_precedence(TokenListStack *operator, TokenList *current) {
 	return false;
 }
 
-bool has_equal_precedence(TokenListStack *operator, TokenList *current) {
-	const TokenList *last_el = operator->data[operator->size - 1];
-	const int zero = 0;
-
-	if (is_or_or_and(current, &zero) && is_or_or_and(last_el, &zero)) 
-		return true;
-	if (is_semi_or_bg(current, &zero) && is_semi_or_bg(last_el, &zero)) 
-		return true;
-	return false;
-}
-
-bool is_stack_empty(TokenListStack *stack) {
-	return (stack->size == 0);
-}
-
 TokenListStack *branch_stack_to_rpn(TokenListStack *list) {
 	TokenListStack *output = token_list_stack_init();
 	TokenListStack *operator = token_list_stack_init();
@@ -168,10 +153,10 @@ Node *ast_build(TokenList *tokens) {
 		tokenListToStringAll(branch_stack); //Debug
 	}
 	TokenListStack *branch_queue = branch_stack_to_rpn(branch_stack);
-	if (g_debug){
-		printf(C_RED"----------AFTER-------------"C_RESET"\n");
-		tokenListToStringAll(branch_queue); //Debug
-	}
+	// if (g_debug){
+	// 	printf(C_RED"----------AFTER-------------"C_RESET"\n");
+	// 	tokenListToStringAll(branch_queue); //Debug
+	// }
 	Node *AST = generateTree(branch_queue);
 	// printf("------\n");
 	// printTree(AST);

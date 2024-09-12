@@ -5,13 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/03 14:06:26 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/12 10:04:54 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/12 10:11:53 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/12 10:12:14 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include <unistd.h>
 
 int ast_execute(Node *node, char **env) {
 	if (node->tag == N_OPERATOR) {
@@ -59,8 +58,6 @@ int ast_execute(Node *node, char **env) {
 		// printf("executing ---------------------------\n");
 		// printTree(node);
 		int exit_status = exec_node(node, env);
-		const char *salope = "salut";
-		(char *) 
 		// printf("exit status = %d -----------------------------\n", exit_status);
 		return exit_status;
 	}
