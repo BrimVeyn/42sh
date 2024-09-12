@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 15:21:37 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/10 14:08:50 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,20 +34,27 @@ extern int g_debug;
 #include <readline/readline.h>
 #include <readline/history.h>
 
+typedef enum {
+	GC_GENERAL,
+	GC_SUBSHELL,
+	GC_ALL,
+} type_of_garbage;
+
 //----------------Garbage-------------------//
-void			gc_init(void);
-void			*gc_add(void *ptr);
-void			gc_cleanup(void);
-void			gc_free(void *addr);
-void			gc_addcharchar(char **str);
+void			gc_init(int n);
+void			*gc_add(void *ptr, int n);
+void			gc_cleanup(int n);
+void			gc_free(void *addr, int n);
+void			gc_addcharchar(char **str, int n);
 
 //----------------Utils--------------------//
 void			free_charchar(char **s);
 void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
-int				ft_strlenlen(char **strstr);
-char			**ft_strdupdup(char **env);
+int				ft_strlenlen(const char **strstr);
+char			**ft_strdupdup(const char **env);
 int				there_is_star(char *str);
 int				there_is_slash(char *str);
+char			*replace_char_greedy(char *str, char c, char by);
 
 typedef enum {
 	SIG_PROMPT,

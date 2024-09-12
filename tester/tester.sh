@@ -31,35 +31,39 @@ mkdir ./outfiles
 mkdir ./42sh_outfiles
 mkdir ./bash_outfiles
 
+chmod 000 infiles/no_perms
+
 i=0
 ok=0
 
 for file in "${test_lists[@]}"
 do
+	printf "\n$RED ========$file========\n\n"
 	while IFS= read -r line
 	do
+		
 		((i++))
 
 		rm -rf ./outfiles/*
 		rm -rf ./42sh_outfiles/*
 
 		EXEC_OUTPUT=$(echo -e "$line" | $EXEC_PATH 2>/dev/null | $REMOVE_COLORS | $REMOVE_EXIT)
+		EXEC_COPY=$(cp ./outfiles/* ./42sh_outfiles &>/dev/null || echo "There is no file to copy")
 		EXEC_ERROR=$(echo -e "$line" | $EXEC_PATH 2>&1 1>/dev/null | $REMOVE_COLORS | $REMOVE_EXIT | rev | cut -d':' -f1 | rev)
-		EXEC_EXITNO=$(echo -e "$line\nexit\n" | $EXEC_PATH 2>/dev/null | $REMOVE_COLORS | grep -o '[0-9]*$')
-		cp ./outfiles/* ./42sh_outfiles &>/dev/null
+		EXEC_EXITNO=$(echo -e "$EXEC_PATH\n$line\necho ${?}\nexit\n" | $EXEC_PATH 2>/dev/null | $REMOVE_COLORS | grep -o '[0-9]*$' | tail -n1)
 
 		rm -rf ./outfiles/*
 		rm -rf ./bash_outfiles/*
 		BASH_OUTPUT=$(echo -e "$line" | bash 2>/dev/null)
+		BASH_COPY=$(cp ./outfiles/* ./bash_outfiles &>/dev/null || echo "There is no file to copy")
 		BASH_ERROR=$(echo -e "$line" | bash 2>&1 1>/dev/null | rev | cut -d':' -f1 | rev)
 		BASH_EXITNO=$(echo ${?})
-		cp ./outfiles/* ./bash_outfiles &>/dev/null
 
 		FILE_DIFF=$(diff -q ./42sh_outfiles ./bash_outfiles)
 
 		printf "$BLUE$BOLD Test %3s:" $i
 		
-		if [[ "$EXEC_OUTPUT" == "$BASH_OUTPUT" && !$FILE_DIFF ]]; then
+		if [[ "$EXEC_OUTPUT" == "$BASH_OUTPUT" && $FILE_DIFF == "" && "$EXEC_EXITNO" == "$BASH_EXITNO" && "$EXEC_COPY" == "$BASH_COPY" ]]; then
 			printf "  ✅"
 			if [[ "$EXEC_ERROR" != "$BASH_ERROR" ]]; then
 				printf "⚠️ "
@@ -78,13 +82,19 @@ do
 			printf "42sh error: %s\n" "$EXEC_ERROR"
 			printf "bash error: %s\n" "$BASH_ERROR"
 		fi
-		# if [[ "$EXEC_EXITNO" != "$BASH_EXITNO" ]]; then
-		# 	printf "42sh exitno: %s\n" "$EXEC_EXITNO"
-		# 	printf "bash exitno: %s\n" "$BASH_EXITNO"
-		# fi
+		if [[ "$EXEC_EXITNO" != "$BASH_EXITNO" ]]; then
+			printf "42sh exitno: %s\n" "$EXEC_EXITNO"
+			printf "bash exitno: %s\n" "$BASH_EXITNO"
+		fi
+		if [[ "$EXEC_COPY" != "$BASH_COPY" ]]; then
+			printf "42sh file copy: %s\n" "$EXEC_COPY"
+			printf "bash file copy: %s\n" "$BASH_COPY"
+		fi
 		if [[ "$FILE_DIFF" ]];then
 			echo $FILE_DIFF
+			printf "42sh files:\n"
 			cat 42sh_outfiles/*
+			printf "\nbash files:\n"
 			cat bash_outfiles/*
 		fi
 
@@ -98,6 +108,7 @@ if [[ "${i}" == "${ok}" ]]; then
 	printf "${GREEN}Congrats !${RESET}\n";
 fi
 
-rm -rf ./outfiles
-rm -rf ./42sh_outfiles
-rm -rf ./bash_outfiles
+# rm -rf ./outfiles
+# rm -rf ./42sh_outfiles
+# rm -rf ./bash_outfiles
+chmod 777 infiles/no_perms

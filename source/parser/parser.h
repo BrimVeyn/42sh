@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:49 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 09:50:25 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/12 09:37:00 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ typedef struct SimpleCommand {
 	struct SimpleCommand	*next;
 } SimpleCommand;
 
-SimpleCommand *parser_parse_current(TokenList *tl);
+SimpleCommand *parser_parse_current(TokenList *tl, char **env);
 bool heredoc_detector(TokenList *data);
 
 //-----------------Redirection List----------------//

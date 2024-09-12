@@ -5,13 +5,14 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/05 09:53:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 15:50:42 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/06 13:35:08 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/12 09:41:26 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "../../include/42sh.h"
+#include <fcntl.h>
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -87,16 +88,17 @@ char *find_bin_location(char *bin, char **env){
 		if (ft_strncmp(env[i], "PATH=", 5) == 0){
 			char **path = ft_split(env[i] + sizeof("PATH="), ':');
 			for (int i = 0; path[i]; i++){
-				char *bin_with_path = ft_strjoin(path[i], (char *)gc_add(ft_strjoin("/",bin)));
+				char *bin_with_path = ft_strjoin(path[i], (char *)gc_add(ft_strjoin("/",bin), GC_GENERAL));
 
 				struct stat file_stat;
 				if (stat(bin_with_path, &file_stat) != -1){
 					if (file_stat.st_mode & S_IXUSR){
 						free_charchar(path);
-						return (char *)gc_add(bin_with_path);
+						return (char *)gc_add(bin_with_path, GC_GENERAL);
 					}
 				}
 				free(bin_with_path);
+				bin_with_path = NULL;
 			}
 			free_charchar(path);
 		}
@@ -106,20 +108,22 @@ char *find_bin_location(char *bin, char **env){
 	return NULL;
 }
 
-void exec_simple_command(SimpleCommand *command) {
+void exec_simple_command(const SimpleCommand *command, char **env) {
 	if (apply_all_redirect(command->redir_list)) {
 		if (!command->bin) {
-			gc_cleanup();
+			gc_cleanup(GC_ALL);
 			exit(EXIT_SUCCESS);
 		}
-		char *path = find_bin_location(command->bin, __environ);
+		char *path = find_bin_location(command->bin, env);
+		// char *path = NULL;
 		if (path != NULL){
-			secure_execve(path, command->args, __environ);
+			// printf("BIN = %s\n", command->bin);
+			secure_execve(path, command->args, env);
 		}
-		gc_cleanup();
+		gc_cleanup(GC_ALL);
 	}
 	else
-		gc_cleanup();
+		gc_cleanup(GC_ALL);
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
@@ -128,6 +132,9 @@ void exec_simple_command(SimpleCommand *command) {
 
 int exec_builtin(SimpleCommand *command, char **env){
 	(void)env;
+	if (!command->bin){
+		return 0;
+	}
 	if (!ft_strcmp(command->bin, "exit")){
 		exit(g_exitno);
 	}
@@ -157,25 +164,34 @@ int exec_executer(Executer *executer, char **env) {
 			secure_dup2(pipefd[1], STDOUT_FILENO);
             close(pipefd[1]);
 		}
+		
 
 		if (current->data_tag == DATA_NODE) {
-			id[i] = secure_fork();
-			if (id[i] == 0) {
-				gc_addcharchar(env);
+			pid_t id = secure_fork();
+			if (id == 0) {
+				// printf("-------SUBSHELL START---------\n");
+				// printTree(current->n_data);
+				// gc_init(GC_GENERAL);
+				// gc_addcharchar(env, GC_SUBSHELL);
 				g_exitno = ast_execute(current->n_data, env);
+				// printf("-------SUB EXITNO = %d\n", g_exitno);
+				// printf("-------SUBSHELL END---------\n");
+				// printf("END-OF EXECUTER STATUS = %d\n", g_exitno);
+				//LE BUG VENAIT DE LA LARBIN
 				close(STDIN_SAVE); close(STDOUT_SAVE); close(STDERR_SAVE);
 				close(STDIN_FILENO); close(STDOUT_FILENO); close(STDERR_FILENO);
-				gc_cleanup();
+				//MERDE !
+				gc_cleanup(GC_SUBSHELL);
 				exit (g_exitno);
 			}
-			int exitn = 0;
-			waitpid(id[i], &exitn, 0);
-			g_exitno = WEXITSTATUS(exitn);
+			int status = 0;
+			waitpid(id, &status, 0);
+			g_exitno = WEXITSTATUS(status);
 		}
 
 		if (current->data_tag == DATA_TOKENS) {
 			{
-				SimpleCommand *command = parser_parse_current(current->s_data);
+				SimpleCommand *command = parser_parse_current(current->s_data, env);
 				if (!command && pipefd[0] == -1){
 					close(STDIN_SAVE);
 					close(STDOUT_SAVE);
@@ -187,11 +203,12 @@ int exec_executer(Executer *executer, char **env) {
 				}
 				id[i] = secure_fork();
 				if (id[i] == 0) {
-					gc_addcharchar(env);
+
+					gc_addcharchar(env, GC_GENERAL);
 					close(STDIN_SAVE);
 					close(STDOUT_SAVE);
 					close(STDERR_SAVE);
-					exec_simple_command(command);
+					exec_simple_command(command, env);
 				}
 			}
 		}
@@ -200,24 +217,23 @@ int exec_executer(Executer *executer, char **env) {
 		secure_dup2(STDOUT_SAVE, STDOUT_FILENO);
 		secure_dup2(STDERR_SAVE, STDERR_FILENO);
 		
-		i++;
+		i += !(current->data_tag == DATA_NODE);
 		current = current->next;
 	}
 	close(STDIN_SAVE);
 	close(STDOUT_SAVE);
 	close(STDERR_SAVE);
-	for (int j = 0; j < i; j++){
-		int exitn = 0;
-		waitpid(id[j], &exitn, 0);
-		g_exitno = WEXITSTATUS(exitn);
+	for (int j = 0; j < i; j++) {
+		int status = 0;
+		waitpid(id[j], &status, 0);
+		g_exitno = WEXITSTATUS(status);
+		// printf("exitno = %d\n", status);
 	}
 	return true;
 }
 
 int exec_node(Node *node, char **env) {
-	(void) env;
-
-	ExecuterList *list = build_executer_list(node->value.operand);
+	const ExecuterList *list = build_executer_list(node->value.operand);
 
 	for (int it = 0; it < list->size; it++) {
 		Executer *executer = list->data[it];
@@ -227,3 +243,5 @@ int exec_node(Node *node, char **env) {
 	}
 	return g_exitno;
 }
+
+//Faire une global avec le GC actuel

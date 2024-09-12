@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_syntax.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 13:28:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 16:20:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/09 15:44:43 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ bool lexer_syntax_error(TokenList *tokens) {
 				return true;
 			}
 		}
-		if (is_redirection(tokens, &it)) {
+		if (is_redirection(tokens, &it)){
 			const Token *redir = is_redirection_tag(tokens, &it) ? tokens->t[it] : tokens->t[it]->w_postfix;
 			if (tokens->t[it]->e != ERROR_NONE) {
 				dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagStr(redir->r_type));
@@ -65,15 +65,15 @@ bool lexer_syntax_error(TokenList *tokens) {
 	return false;
 }
 
-bool is_redirection(const TokenList *tokens, const int *it) {
+bool is_redirection(const TokenList *tokens, const int *it){
 	return is_redirection_tag(tokens, it) || (is_word(tokens, it) && tokens->t[*it]->w_postfix->tag == T_REDIRECTION);
 }
 
-bool is_binary_operator(const TokenList *tokens, const int *it) {
+bool is_binary_operator(const TokenList *tokens, const int *it){
 	return is_and(tokens, it) || is_or(tokens, it) || is_pipe(tokens, it);
 }
 
-bool is_unary_operator(const TokenList *tokens, const int *it) {
+bool is_unary_operator(const TokenList *tokens, const int *it){
 	return is_semi(tokens, it) || is_bg(tokens, it); 
 }
 

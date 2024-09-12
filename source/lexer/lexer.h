@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/29 12:55:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/05 09:50:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/11 10:40:57 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,8 @@ void			token_word_init(Token *token);
 TokenList		*token_list_init(void);
 void			token_list_add(TokenList *tl, Token *token);
 void			token_list_add_list(TokenList *t1, TokenList *t2);
+void			token_list_insert(TokenList *tl, Token *token, int index);
+void			token_list_remove(TokenList *tl, int index);
 
 
 //----------------Syntax----------------//

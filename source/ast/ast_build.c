@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ast_build.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 13:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 15:08:50 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/10 10:14:50 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include "ast.h"
 
 Node *gen_operator_node(TokenList *tok, Node *left, Node *right) {
-	Node *self = gc_add(ft_calloc(1, sizeof(Node)));
+	Node *self = gc_add(ft_calloc(1, sizeof(Node)), GC_SUBSHELL);
 	self->tag = N_OPERATOR;
 	self->left = left;
 	self->right = right;
@@ -23,7 +23,7 @@ Node *gen_operator_node(TokenList *tok, Node *left, Node *right) {
 }
 
 Node *gen_operand_node(TokenList *list) {
-	Node *self = gc_add(ft_calloc(1, sizeof(Node)));
+	Node *self = gc_add(ft_calloc(1, sizeof(Node)), GC_SUBSHELL);
 	self->tag = N_OPERAND;
 	self->left = NULL;
 	self->right = NULL;
@@ -163,20 +163,20 @@ TokenListStack *branch_stack_to_rpn(TokenListStack *list) {
 
 Node *ast_build(TokenList *tokens) {
 	TokenListStack *branch_stack = split_operator(tokens);
-	// if (g_debug){
-	// 	printf(C_RED"----------BEFORE-------------"C_RESET"\n");
-	// 	tokenListToStringAll(branch_stack); //Debug
-	// }
+	if (g_debug){
+		printf(C_RED"----------BEFORE-------------"C_RESET"\n");
+		tokenListToStringAll(branch_stack); //Debug
+	}
 	TokenListStack *branch_queue = branch_stack_to_rpn(branch_stack);
-	// if (g_debug){
-	// 	printf(C_RED"----------AFTER-------------"C_RESET"\n");
-	// 	tokenListToStringAll(branch_queue); //Debug
-	// }
+	if (g_debug){
+		printf(C_RED"----------AFTER-------------"C_RESET"\n");
+		tokenListToStringAll(branch_queue); //Debug
+	}
 	Node *AST = generateTree(branch_queue);
+	// printf("------\n");
+	// printTree(AST);
+	// printf("-----\n");
 	if (g_debug) {
-		printf("------\n");
-		printTree(AST);
-		printf("-----\n");
 		// gc_cleanup();
 		// exit(EXIT_FAILURE);
 	}

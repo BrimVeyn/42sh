@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/04 15:34:39 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/10 17:33:55 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ int matchmetachar(char c, const char* str)
     case 's': return  matchwhitespace(c);
     case 'S': return !matchwhitespace(c);
 	case '$': return c == '$';
+	case 'n': return c == '\n';
     default:  return (c == str[0]);
   }
 }
@@ -73,21 +74,27 @@ match_result regex_match(char *regexp, char *text) {
 }
 
 int regex_matchstar(char c, char *regexp, char *text, int *text_pos) {
- //    printf("Regex matchstar\n");
-	// printf("comparing regexp: %c\ntext: %c\n", c, *text);
-	while (*text != '\0' && ((*text == c )|| c == '.')) {
-		// printf("comparing regexp: %c\ntext: %c\n", c, *text);
+    char *start = text;
+    while (*text != '\0' && ((*text == c) || c == '.')) {
         (*text_pos)++;
         text++;
     }
 
-    if (*regexp == '\0') {
-        return 1;
-    }
+    do {
+        if (regexp[0] == '$' && *text == '\0') {
+            return 1;
+        }
 
-    return regex_matchhere(regexp, text, text_pos);
+        if (regex_matchhere(regexp, text, text_pos)) {
+            return 1;
+        }
+
+        (*text_pos)--;
+        text--;
+    } while (text >= start);
+
+    return 0;
 }
-
 int regex_is_range_match(char *regexp, char c) {
     char start = regexp[0];
     char end = regexp[2];
@@ -116,7 +123,7 @@ int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found
 	}
 
     while(*regexp != ']') {
-        // implemente litteral charactere here (&& regexp[0] != '//')
+        // implemente litteral charactere here (&& regexp[0] != '\\')
         // +2 to skip current char and -
         if (regexp[1] == '-' && (regexp += 2) && regex_is_range_match(regexp - 2, *text)){
             matched = 1;

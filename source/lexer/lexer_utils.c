@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_utils.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 10:19:29 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/04 13:10:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/10 10:16:23 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ char *get_word(Lexer_p l, type_mode mode) {
 		}
 	}
 	const uint16_t end = l->position;
-	return (char *) gc_add(ft_substr(l->input, start, end - start));
+	return (char *) gc_add(ft_substr(l->input, start, end - start), GC_SUBSHELL);
 }
 
 void eat_whitespace(Lexer_p l) {

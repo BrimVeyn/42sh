@@ -6,11 +6,12 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:00:15 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 15:23:35 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/10 14:14:04 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/42sh.h"
+#include "regex/regex.h"
 #include <unistd.h>
 
 int g_debug = 0;
@@ -51,7 +52,15 @@ char *init_prompt_and_signals(void) {
 }
 
 void get_history() {
-    int fd = open(".cache/history.log", O_RDWR | O_CREAT, 0644);
+	DIR *dir_history = opendir("/tmp/42sh");
+	if (dir_history == NULL)
+	{
+		if (mkdir("/tmp/42sh", 0755) == -1){
+			perror("Can't create cache directory");
+		}
+	}
+	closedir(dir_history);
+    int fd = open("/tmp/42sh/history.log", O_RDWR | O_CREAT, 0644);
     if (fd == -1) {
         perror("Can't open history file");
         exit(EXIT_FAILURE);
@@ -110,7 +119,7 @@ void get_history() {
 
 void add_input_to_history(char *input){
 	add_history(input);
-	int history_fd = open(".cache/history.log", O_RDWR | O_APPEND, 0644);
+	int history_fd = open("/tmp/42sh/history.log", O_RDWR | O_APPEND, 0644);
 	if (history_fd == -1) {
 		perror("Can't open history file");
 		exit(EXIT_FAILURE);
@@ -119,7 +128,7 @@ void add_input_to_history(char *input){
 	close(history_fd);
 }
 
-int main(int ac, char *av[], char *env[]) {
+int main(const int ac, const char *av[], const char *env[]) {
 	//Basic redirection test
 	(void) ac;
 	(void) av;
@@ -129,18 +138,24 @@ int main(int ac, char *av[], char *env[]) {
 		g_debug = 1;
 	}
 
+	gc_init(GC_GENERAL);
+	gc_init(GC_SUBSHELL);
 	char **dup_env = ft_strdupdup(env);
-	(void) dup_env;
-	gc_init();
 	g_signal = 0;
-	
+
 	char *input = NULL;
-	get_history();
+
+	if (isatty(STDIN_FILENO))
+		get_history();
 
 	while ((input = init_prompt_and_signals()) != NULL) {
 		if (*input) 
 		{
-			add_input_to_history(input);
+			if (isatty(STDIN_FILENO)){
+				add_input_to_history(input);
+			}
+			input = replace_char_greedy(input, '\n', ';');
+			// printf("input: %s\n", input);
 			Lexer_p lexer = lexer_init(input);
 			TokenList *tokens = lexer_lex_all(lexer);
 			if (lexer_syntax_error(tokens)) continue; 
@@ -151,11 +166,13 @@ int main(int ac, char *av[], char *env[]) {
 			if (g_debug){
 				printTree(AST);
 			}
+			// gc_cleanup(GC_SUBSHELL);
+			// gc_init(GC_GENERAL);
 		}
 	}
 	free_charchar(dup_env);
 	rl_clear_history();
-	gc_cleanup();
+	gc_cleanup(GC_ALL);
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
