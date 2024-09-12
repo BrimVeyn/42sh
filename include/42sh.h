@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   42sh.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/10 14:08:50 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/12 14:07:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ char			**ft_strdupdup(const char **env);
 int				there_is_star(char *str);
 int				there_is_slash(char *str);
 char			*replace_char_greedy(char *str, char c, char by);
+char			*gnl(int fd);
 
 typedef enum {
 	SIG_PROMPT,

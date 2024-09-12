@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:38:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 10:02:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/12 10:31:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@ int main(int ac, char *av[]) {
 	//Basic redirection test
 	(void) ac;
 	(void) av;
-	gc_init();
+	gc_init(GC_GENERAL);
+	gc_init(GC_SUBSHELL);
 	Token *none_token __attribute__((unused)) = token_none_init();
 	
 	char *input = NULL;
@@ -33,6 +34,6 @@ int main(int ac, char *av[]) {
 	}
 
 	rl_clear_history();
-	gc_cleanup();
+	gc_cleanup(GC_GENERAL);
 	return (0);
 }

@@ -3,15 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_get_next_token.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:00:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/10 10:08:30 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/12 10:15:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include "lexer.h"
 
 TokenList *lexer_lex_all(Lexer_p l) {
 	TokenList *self = token_list_init();

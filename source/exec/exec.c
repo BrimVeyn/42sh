@@ -3,19 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 10:11:40 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/12 17:24:08 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "../../include/42sh.h"
-#include <fcntl.h>
-#include <stdlib.h>
-#include <sys/wait.h>
-#include <unistd.h>
 
 int g_exitno;
 
@@ -108,26 +104,18 @@ char *find_bin_location(char *bin, char **env){
 	return NULL;
 }
 
-void exec_simple_command(const SimpleCommand *command, char **env) {
+bool exec_simple_command(const SimpleCommand *command, char **env) {
 	if (apply_all_redirect(command->redir_list)) {
 		if (!command->bin) {
-			gc_cleanup(GC_ALL);
-			exit(EXIT_SUCCESS);
+			g_exitno = EXIT_SUCCESS;
+			return false;
 		}
 		char *path = find_bin_location(command->bin, env);
-		// char *path = NULL;
-		if (path != NULL){
-			// printf("BIN = %s\n", command->bin);
-			secure_execve(path, command->args, env);
-		}
-		gc_cleanup(GC_ALL);
+		if (!path) return false;
+		secure_execve(path, command->args, env);
 	}
-	else
-		gc_cleanup(GC_ALL);
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
-	exit(g_exitno);
+	else return false;
+	return true;
 }
 
 int exec_builtin(SimpleCommand *command, char **env){
@@ -141,16 +129,38 @@ int exec_builtin(SimpleCommand *command, char **env){
 	return 0;
 }
 
+void close_saved_fds(int *saved_fds) {
+	if (saved_fds[STDIN_FILENO] != -1) {
+		close(saved_fds[STDIN_FILENO]);
+		saved_fds[STDIN_FILENO] = -1;
+	}	
+	if (saved_fds[STDOUT_FILENO] != -1) {
+		close(saved_fds[STDOUT_FILENO]);
+		saved_fds[STDOUT_FILENO] = -1;
+	}
+	if (saved_fds[STDERR_FILENO] != -1) {
+		close(saved_fds[STDERR_FILENO]);
+		saved_fds[STDERR_FILENO] = -1;
+	}
+}
+
+void close_std_fds(void) {
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
+}
+
 int exec_executer(Executer *executer, char **env) {
 	Executer *current = executer;
 	int pipefd[2] = {-1 , -1};
 	bool prev_pipe = false;
 	pid_t pids[1024];
 	int i = 0;
+	int saved_fds[3] = {-1, -1, -1};
 
-	const int STDIN_SAVE = dup(STDIN_FILENO);
-	const int STDOUT_SAVE = dup(STDOUT_FILENO);
-	const int STDERR_SAVE = dup(STDERR_FILENO);
+	saved_fds[STDIN_FILENO] = dup(STDIN_FILENO);
+	saved_fds[STDOUT_FILENO]= dup(STDOUT_FILENO);
+	saved_fds[STDERR_FILENO] = dup(STDERR_FILENO);
 
 	while (current) {
 
@@ -165,66 +175,54 @@ int exec_executer(Executer *executer, char **env) {
             close(pipefd[1]);
 		}
 		
-
 		if (current->data_tag == DATA_NODE) {
 			pids[i] = secure_fork();
 			if (pids[i] == 0) {
-				// printf("-------SUBSHELL START---------\n");
-				// printTree(current->n_data);
-				// gc_init(GC_GENERAL);
-				// gc_addcharchar(env, GC_SUBSHELL);
+				close_saved_fds(saved_fds);
 				g_exitno = ast_execute(current->n_data, env);
-				// printf("-------SUB EXITNO = %d\n", g_exitno);
-				// printf("-------SUBSHELL END---------\n");
-				// printf("END-OF EXECUTER STATUS = %d\n", g_exitno);
 				//LE BUG VENAIT DE LA LARBIN
-				close(STDIN_SAVE); close(STDOUT_SAVE); close(STDERR_SAVE);
-				close(STDIN_FILENO); close(STDOUT_FILENO); close(STDERR_FILENO);
-				//MERDE !
 				gc_cleanup(GC_SUBSHELL);
+				//MERDE !
+				close_std_fds();
 				exit (g_exitno);
 			}
 		}
 
 		if (current->data_tag == DATA_TOKENS) {
-			{
-				SimpleCommand *command = parser_parse_current(current->s_data, env);
-				if (!command && pipefd[0] == -1){
-					close(STDIN_SAVE);
-					close(STDOUT_SAVE);
-					close(STDERR_SAVE);
-					return false;
-				}
-				if (pipefd[0] == -1 && exec_builtin(command, env)){
-					break;
-				}
-				pids[i] = secure_fork();
-				if (pids[i] == 0) {
-					gc_addcharchar(env, GC_GENERAL);
-					close(STDIN_SAVE);
-					close(STDOUT_SAVE);
-					close(STDERR_SAVE);
-					exec_simple_command(command, env);
+			SimpleCommand *command = parser_parse_current(current->s_data, env, saved_fds);
+			if (!command && pipefd[0] == -1){
+				close_saved_fds(saved_fds);
+				return false;
+			}
+			if (pipefd[0] == -1 && exec_builtin(command, env)){
+				break;
+			}
+			pids[i] = secure_fork();
+			if (pids[i] == 0) {
+				gc_addcharchar(env, GC_GENERAL);
+				close_saved_fds(saved_fds);
+				if (!exec_simple_command(command, env)) {
+					gc_cleanup(GC_ALL);
+					exit(g_exitno);
 				}
 			}
 		}
 
-		secure_dup2(STDIN_SAVE, STDIN_FILENO);
-		secure_dup2(STDOUT_SAVE, STDOUT_FILENO);
-		secure_dup2(STDERR_SAVE, STDERR_FILENO);
+		dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
+		dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
+		dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
 		
 		i += 1;
 		current = current->next;
 	}
+
 	for (int j = 0; j < i; j++) {
 		int status = 0;
 		waitpid(pids[j], &status, 0);
-		g_exitno = WEXITSTATUS(status);  // <-- Correct handling of status
-		// printf("exitno = %d\n", g_exitno);
+		g_exitno = WEXITSTATUS(status);
 	}
-	close(STDIN_SAVE);
-	close(STDOUT_SAVE);
-	close(STDERR_SAVE);
+
+	close_saved_fds(saved_fds);
 	return true;
 }
 
