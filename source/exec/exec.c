@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 17:24:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/12 17:33:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,7 +181,9 @@ int exec_executer(Executer *executer, char **env) {
 				close_saved_fds(saved_fds);
 				g_exitno = ast_execute(current->n_data, env);
 				//LE BUG VENAIT DE LA LARBIN
+				gc_addcharchar(env, GC_SUBSHELL);
 				gc_cleanup(GC_SUBSHELL);
+				free(gc_get()[GC_GENERAL].garbage);
 				//MERDE !
 				close_std_fds();
 				exit (g_exitno);
