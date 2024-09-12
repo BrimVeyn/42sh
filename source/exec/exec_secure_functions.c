@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_secure_functions.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:52:42 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/04 12:53:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/09 14:50:35 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ bool secure_dup2(int from, int to) {
 void secure_pipe2(int pipefd[2], int flags){
 	if (pipe2(pipefd, flags) == -1){
 		perror("Fatal error pipe2: ");
-    gc_cleanup();
+    gc_cleanup(GC_ALL);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -38,7 +38,7 @@ void secure_pipe2(int pipefd[2], int flags){
 void secure_execve(const char *pathname, char *const argv[], char *const envp[]){
 	if (execve(pathname, argv, envp) == -1){
 		printf("%s: command not found\n", argv[0]);
-		gc_cleanup();
+		gc_cleanup(GC_ALL);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -47,7 +47,7 @@ int secure_fork(void){
 	int id = fork();
 	if (id == -1){
 		perror("Fatal error execve: ");
-    gc_cleanup();
+    gc_cleanup(GC_ALL);
 		exit(EXIT_FAILURE);
 	}
 	return id;

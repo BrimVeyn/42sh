@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 13:14:29 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/04 15:31:09 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/10 17:17:48 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,8 @@ int main(int ac, char **av) {
 		regex_test("\\${[^}]*$", "${vide");
 		regex_test("\\${[^}]*$", "${dsadas}");
 		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*}", "${PA${PATH}");
+		regex_test(".*d", "Hello World");
+		regex_test(".*l$", "Hello World");
     }
     return 0;
 }

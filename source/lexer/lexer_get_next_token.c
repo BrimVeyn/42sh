@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_get_next_token.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:00:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 15:47:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/10 10:08:30 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void init_token_from_tag(Token *token) {
 
 //Extract next token from the input
 Token *lexer_get_next_token(Lexer_p l, bool recursive_call, type_mode mode) {
-	Token *token = gc_add(ft_calloc(1, sizeof(Token)));
+	Token *token = gc_add(ft_calloc(1, sizeof(Token)), GC_SUBSHELL);
 
 	eat_whitespace(l);
 

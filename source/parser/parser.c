@@ -5,12 +5,13 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/05 09:53:22 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 15:21:15 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/05 15:39:49 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/12 09:36:32 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+#include <dirent.h>
 
 bool is_operator(type_of_separator s) {
 	return s == S_BG || s == S_EOF || s == S_OR || s == S_AND || s == S_SEMI_COLUMN || s == S_NEWLINE || s == S_PIPE;
@@ -29,7 +30,7 @@ char *here_doc(char *eof){
 		dprintf(file_fd, "%s\n", input);
 	}
 	close(file_fd);
-	return gc_add(ft_strdup(filename));
+	return gc_add(ft_strdup(filename), GC_GENERAL);
 }
 
 bool heredoc_detector(TokenList *data) {
@@ -54,7 +55,7 @@ RedirectionList *parser_get_redirection(TokenList *tl) {
 			(el->tag == T_WORD && el->w_postfix->tag == T_REDIRECTION))
 		{
 			const Token *next = (el->tag == T_WORD && el->w_postfix->tag == T_REDIRECTION) ? el->w_postfix : el;
-			Redirection *current_redir = (Redirection *) gc_add(ft_calloc(1, sizeof(Redirection)));
+			Redirection *current_redir = (Redirection *) gc_add(ft_calloc(1, sizeof(Redirection)), GC_GENERAL);
 
 			current_redir->prefix_fd = (next != el) ? ft_atoi(el->w_infix) : -1;
 			current_redir->r_type = next->r_type;
@@ -74,7 +75,7 @@ RedirectionList *parser_get_redirection(TokenList *tl) {
 }
 
 SimpleCommand *parser_get_command(TokenList *tl) {
-	SimpleCommand *curr_command = (SimpleCommand *) gc_add(ft_calloc(1, sizeof(SimpleCommand)));
+	SimpleCommand *curr_command = (SimpleCommand *) gc_add(ft_calloc(1, sizeof(SimpleCommand)), GC_SUBSHELL);
 
 	size_t count = 0;
 	for (uint16_t it = 0; it < tl->size; it++) {
@@ -82,7 +83,7 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 		count += (el->tag == T_WORD && el->w_postfix->tag != T_REDIRECTION);
 	}
 
-	curr_command->args = (char **) gc_add(ft_calloc(count + 1, sizeof(char *)));
+	curr_command->args = (char **) gc_add(ft_calloc(count + 1, sizeof(char *)), GC_SUBSHELL);
 
 	size_t i = 0;
 	for (uint16_t it = 0; it < tl->size; it++) {
@@ -99,24 +100,21 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 	return curr_command;
 }
 
-char *parser_get_variable_value(char *name){
-	char **env = __environ;
-
+char *parser_get_variable_value(char *name, char **env){
 	for (int i = 0; env[i]; i++){
-		if (ft_strncmp(env[i], gc_add(ft_strjoin(name, "=")), ft_strlen(name) + 1) == 0){
+		if (ft_strncmp(env[i], gc_add(ft_strjoin(name, "="), GC_GENERAL), ft_strlen(name) + 1) == 0){
 			return ft_strdup(env[i] + ft_strlen(name) + 1);
 		}
 	}
 	return ft_strdup("");
 }
 
-bool parser_parameter_expansion(TokenList *tl){
+bool parser_parameter_expansion(TokenList *tl, char **env){
 	for (uint16_t i = 0; i < tl->size; i++){
 		Token *el = tl->t[i];
 
 		if (el->tag == T_WORD){
 			match_result result;
-			int count = 0;
 			char *value = NULL;
 			int pos = -1;
 
@@ -133,7 +131,8 @@ bool parser_parameter_expansion(TokenList *tl){
 
 				if (regex_match("\\${}", el->w_infix).start == pos || //match ${} 
 					regex_match("\\${[^}]*$", el->w_infix).start == pos || //if missing }
-					(regex_match("\\${[^}]*}", el->w_infix).start == pos && regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", el->w_infix).start != pos)){ //check if first char is a number
+					(regex_match("\\${[^}]*}", el->w_infix).start == pos && regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", el->w_infix).start != pos &&
+					regex_match("\\${?}", el->w_infix).start != pos)){ //check if first char is a number
 					dprintf(2, "${}: bad substitution\n");
 					g_exitno = 1;
 					return false;
@@ -145,19 +144,18 @@ bool parser_parameter_expansion(TokenList *tl){
 				else{
 					result = regex_match ("\\${[0-9a-zA-Z_]*}", el->w_infix);
 					if (result.start != -1)
-						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.start + 2, result.end - result.start - 3)));
+						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.start + 2, result.end - result.start - 3), GC_GENERAL), env);
 					else
 						break;
 				}
 				
-				count++;
 				char *start = ft_substr(el->w_infix, 0, result.start);
 				char *end = ft_substr(el->w_infix, result.end, ft_strlen(el->w_infix));
 				if (start &&
 				value){}
 				char *tmp = ft_strjoin(start, value);
 
-				el->w_infix = gc_add(ft_strjoin(tmp, end));
+				el->w_infix = gc_add(ft_strjoin(tmp, end), GC_GENERAL);
 				free(tmp); free(start); free(end); free(value);
 
 			} while(regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", el->w_infix).start != -1);
@@ -239,10 +237,10 @@ TokenList *extract_tokens(TokenList *list, int *i) {
 }
 
 ExecuterList *build_executer_list(TokenList *list) {
-	if (g_debug > 2){
-		printf(C_RED"----------Before EXECUTER-------------"C_RESET"\n");
-		tokenToStringAll(list); //Debug
-	}
+	// if (true){
+	// 	printf(C_RED"----------Before EXECUTER-------------"C_RESET"\n");
+	// 	tokenToStringAll(list); //Debug
+	// }
 	ExecuterList *self = executer_list_init();
 	int i = 0;
 	while (i < list->size) {
@@ -306,15 +304,28 @@ ExecuterList *build_executer_list(TokenList *list) {
 // }
 
 char *parser_bash_to_regexp(char *str){
+
+	char *tmp_str = ft_calloc(ft_strlen(str) + 3, sizeof(char));
+	if (str[0] != '*'){
+		sprintf(tmp_str, "^%s", str);
+		str = tmp_str;
+	}
+	if (str[ft_strlen(str)] != '*'){
+		sprintf(tmp_str, "%s$", str);
+		str = tmp_str;
+	}
+	
 	char *new_str = NULL;
 	for (int i = 0; str[i]; i++){
 		if (str[i] == '*'){
 			char *start = (i == 0) ? ft_strdup("") : ft_substr(str, 0, i);
 			char *end = (i == (int)ft_strlen(str)) ? ft_strdup("") : ft_substr(str, i + 1, ft_strlen(str) - i);
-			free(new_str);
-			new_str = ft_calloc(ft_strlen(str) + 2, sizeof(char));
+			
+			new_str = ft_calloc(ft_strlen(str) + 300, sizeof(char));
 			sprintf(new_str, "%s.*%s", start, end);
-			free(str);
+
+			free(start); free(end);
+
 			str = new_str;
 			i += 2;
 		}
@@ -331,7 +342,7 @@ int parser_filename_expansion(TokenList *tl){
 		//need to handle /*
 		if ((el->tag == T_WORD || el->tag == T_REDIRECTION) && there_is_star(str)) {
 			struct dirent *entry;
-			DIR *dir;
+			DIR *dir = NULL;
 			(void)entry;
 			(void)dir;
 
@@ -342,14 +353,32 @@ int parser_filename_expansion(TokenList *tl){
 			}
 
 			char *regexp = parser_bash_to_regexp(str);
-			
-			// while ((entry = readdir(dir)) != NULL) {
-			// 	if (regex_match(regexp, str))
-			// 	printf("%s\n", entry->d_name);
-			// }
+			printf("regexp: %s\n", regexp);
+			int j = 0;
+			while ((entry = readdir(dir)) != NULL){
+				if (regex_match(regexp, entry->d_name).start != -1){
+					if (j > 1){
+						Token *new_token = token_empty_init();
+						token_word_init(new_token);
+
+						new_token->tag = T_WORD;
+						new_token->w_infix = ft_strdup(entry->d_name);
+						token_list_insert(tl, new_token, i);
+					}
+					else {
+						tl->t[i]->w_infix = ft_strdup(entry->d_name);
+					}
+					j++;
+				}
+			}
+			if (j == 0){
+				token_list_remove(tl, i);
+			}
+			closedir(dir);
 			free(regexp);
 		}
 	}
+	// tokenToStringAll(tl);
 	return true;
 }
 
@@ -371,18 +400,21 @@ int there_is_star(char *str){
 	return 0;
 }
 
-SimpleCommand *parser_parse_current(TokenList *tl) {
+SimpleCommand *parser_parse_current(TokenList *tl, char **env) {
 	
 	// parser_brace_expansion();
 	// parser_tilde_expansion();
-	if (!parser_parameter_expansion(tl)){
+	if (!parser_parameter_expansion(tl, env)){
 		return NULL;
 	}
 	// parser_command_substitution();
 	// parser_arithmetic_expansion();
 	// parser_word_splitting();
-	// parser_filename_expansion();
-	// parser_quote_removal();
+	// if (!parser_filename_expansion(tl)){
+	// 	return NULL;
+	// }
+	// tokenToStringAll(tl);
+	// parser_quote_remioval();
 	RedirectionList *redirs = parser_get_redirection(tl);
 	SimpleCommand *command = parser_get_command(tl);
 	command->redir_list = redirs;
