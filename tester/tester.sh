@@ -12,6 +12,7 @@ else
 		"test"
 		"syntax"
 		"expand"
+		"subshell"
 	)
 fi
 

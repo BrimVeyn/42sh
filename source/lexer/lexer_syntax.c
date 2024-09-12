@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 13:28:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 16:20:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/12 09:23:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,15 +41,11 @@ bool lexer_syntax_error(TokenList *tokens) {
 				dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagStr(tokens->t[it]->s_type));
 				return true;
 			}
-			if (is_binary_operator(tokens, &it) && it == tokens->size - 2) {
+			if ((is_logical_operator(tokens, &it) || is_pipe(tokens, &it)) && it == tokens->size - 2) {
 				dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagStr(tokens->t[it]->s_type));
 				return true;
 			}
-			if (is_unary_operator(tokens, &it) && is_binary_operator(tokens, &(int){it - 1})) {
-				dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagStr(tokens->t[it]->s_type));
-				return true;
-			}
-			if (is_binary_operator(tokens, &it) && is_unary_operator(tokens, &(int){(it - 1)})) {
+			if (is_separator(tokens, &it) && is_separator(tokens, &(int){it - 1})) {
 				dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagStr(tokens->t[it]->s_type));
 				return true;
 			}
@@ -69,11 +65,15 @@ bool is_redirection(const TokenList *tokens, const int *it) {
 	return is_redirection_tag(tokens, it) || (is_word(tokens, it) && tokens->t[*it]->w_postfix->tag == T_REDIRECTION);
 }
 
-bool is_binary_operator(const TokenList *tokens, const int *it) {
-	return is_and(tokens, it) || is_or(tokens, it) || is_pipe(tokens, it);
+bool is_separator(const TokenList *tokens, const int *it) {
+	return is_logical_operator(tokens, it) || is_break_seperator(tokens, it) || is_pipe(tokens, it);
 }
 
-bool is_unary_operator(const TokenList *tokens, const int *it) {
+bool is_logical_operator(const TokenList *tokens, const int *it) {
+	return is_and(tokens, it) || is_or(tokens, it);
+}
+
+bool is_break_seperator(const TokenList *tokens, const int *it) {
 	return is_semi(tokens, it) || is_bg(tokens, it); 
 }
 
@@ -83,10 +83,6 @@ bool is_word(const TokenList *list, const int *it) {
 
 bool is_redirection_tag(const TokenList *list, const int *it) {
 	return (list->t[*it]->tag == T_REDIRECTION);
-}
-
-bool is_separator(const TokenList *tokens, const int *it) {
-	return is_unary_operator(tokens, it) || is_binary_operator(tokens, it);
 }
 
 bool is_pipe(const TokenList *list, const int *i) {
