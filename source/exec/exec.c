@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 15:39:59 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 17:40:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/12 10:01:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,7 @@ int exec_executer(Executer *executer, char **env) {
 	Executer *current = executer;
 	int pipefd[2] = {-1 , -1};
 	bool prev_pipe = false;
-	pid_t id[1024];
+	pid_t pids[1024];
 	int i = 0;
 
 	const int STDIN_SAVE = dup(STDIN_FILENO);
@@ -160,8 +160,8 @@ int exec_executer(Executer *executer, char **env) {
 		}
 
 		if (current->data_tag == DATA_NODE) {
-			pid_t id = secure_fork();
-			if (id == 0) {
+			pids[i] = secure_fork();
+			if (pids[i] == 0) {
 				gc_addcharchar(env);
 				// printf("-------SUBSHELL START---------\n");
 				// printTree(current->n_data);
@@ -176,9 +176,6 @@ int exec_executer(Executer *executer, char **env) {
 				// gc_cleanup();
 				exit (g_exitno);
 			}
-			int status = 0;
-			waitpid(id, &status, 0);
-			g_exitno = WEXITSTATUS(status);
 		}
 
 		if (current->data_tag == DATA_TOKENS) {
@@ -193,8 +190,8 @@ int exec_executer(Executer *executer, char **env) {
 				if (pipefd[0] == -1 && exec_builtin(command, env)){
 					break;
 				}
-				id[i] = secure_fork();
-				if (id[i] == 0) {
+				pids[i] = secure_fork();
+				if (pids[i] == 0) {
 					gc_addcharchar(env);
 					close(STDIN_SAVE);
 					close(STDOUT_SAVE);
@@ -208,18 +205,18 @@ int exec_executer(Executer *executer, char **env) {
 		secure_dup2(STDOUT_SAVE, STDOUT_FILENO);
 		secure_dup2(STDERR_SAVE, STDERR_FILENO);
 		
-		i += !(current->data_tag == DATA_NODE);
+		i += 1;
 		current = current->next;
+	}
+	for (int j = 0; j < i; j++) {
+		int status = 0;
+		waitpid(pids[j], &status, 0);
+		g_exitno = WEXITSTATUS(status);  // <-- Correct handling of status
+		// printf("exitno = %d\n", g_exitno);
 	}
 	close(STDIN_SAVE);
 	close(STDOUT_SAVE);
 	close(STDERR_SAVE);
-	for (int j = 0; j < i; j++) {
-		int status = 0;
-		waitpid(id[j], &status, 0);
-		g_exitno = WEXITSTATUS(status);  // <-- Correct handling of status
-		// printf("exitno = %d\n", status);
-	}
 	return true;
 }
 

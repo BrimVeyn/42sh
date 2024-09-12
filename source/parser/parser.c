@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 15:39:49 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 15:39:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/12 08:34:59 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,9 +196,6 @@ void skip_subshell(TokenList *newlist, TokenList *list, int *i) {
 			(*i)++;
 		}
 	}
-	if (*i < list->size && is_end_sub(list, i))
-		token_list_add(newlist, list->t[*i]);
-	(*i)++;
 }
 
 TokenList *extract_subshell_rec(TokenList *list, int *i) {

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:00:15 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 15:49:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/12 08:29:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,7 @@ int main(int ac, char *av[], char *env[]) {
 	g_signal = 0;
 	
 	char *input = NULL;
-	get_history();
+	// get_history();
 
 	while ((input = init_prompt_and_signals()) != NULL) {
 		if (*input) 

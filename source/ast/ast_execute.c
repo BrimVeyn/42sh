@@ -6,12 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:06:26 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 17:41:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/12 08:21:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include <unistd.h>
 
 int ast_execute(Node *node, char **env) {
 	if (node->tag == N_OPERATOR) {
