@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 10:10:06 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/12 16:17:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -397,14 +397,16 @@ int there_is_star(char *str){
 	return 0;
 }
 
-SimpleCommand *parser_parse_current(TokenList *tl, char **env) {
+SimpleCommand *parser_parse_current(TokenList *tl, char **env, int *saved_fds) {
 	
 	// parser_brace_expansion();
 	// parser_tilde_expansion();
 	if (!parser_parameter_expansion(tl, env)){
 		return NULL;
 	}
-	// parser_command_substitution();
+	if (!parser_command_substitution(tl, env, saved_fds)) {
+		return NULL;
+	}
 	// parser_arithmetic_expansion();
 	// parser_word_splitting();
 	// if (!parser_filename_expansion(tl)){

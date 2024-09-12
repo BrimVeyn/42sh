@@ -3,27 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:09:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 10:09:52 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/12 16:09:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/42sh.h"
-#include "regex/regex.h"
-#include <unistd.h>
 
 int g_debug = 0;
 
-char *gnl() {
+char *gnl(int fd) {
 	char buffer[2];
 	char *line = NULL;
 	size_t len = 0;
 
 	buffer[1] = '\0';
 
-	while (read(STDIN_FILENO, buffer, 1) > 0 && buffer[0] != '\n') {
+	while (read(fd, buffer, 1) > 0 && buffer[0] != '\n') {
 		char *tmp = realloc(line, len + 2);
 		if (!tmp) {
 			free(line);
@@ -47,7 +45,7 @@ char *init_prompt_and_signals(void) {
 	if (isatty(STDIN_FILENO))
 		input = readline("42sh > ");
 	else
-		input = gnl();
+		input = gnl(STDIN_FILENO);
 	return input;
 }
 
