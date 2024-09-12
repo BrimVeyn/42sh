@@ -6,11 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:38:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/04 12:58:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/12 10:02:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+int g_debug = 0;
 
 int main(int ac, char *av[]) {
 	//Basic redirection test
@@ -25,10 +26,7 @@ int main(int ac, char *av[]) {
 		{
 			Lexer_p l = lexer_init(input);
 			TokenList *l1 = lexer_lex_all(l);
-			if (!l1) {
-				printf("catched !\n");
-				continue;
-			}
+			if (!l1) continue;
 			tokenToStringAll(l1);
 			add_history(input);
 		}

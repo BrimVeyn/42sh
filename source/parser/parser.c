@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/05 15:39:49 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/12 09:36:32 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/12 10:10:05 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/12 10:10:06 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,9 +194,6 @@ void skip_subshell(TokenList *newlist, TokenList *list, int *i) {
 			(*i)++;
 		}
 	}
-	if (*i < list->size && is_end_sub(list, i))
-		token_list_add(newlist, list->t[*i]);
-	(*i)++;
 }
 
 TokenList *extract_subshell_rec(TokenList *list, int *i) {

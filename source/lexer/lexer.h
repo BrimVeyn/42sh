@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/29 12:55:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/11 10:40:57 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/12 10:12:51 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/12 10:12:51 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,8 +101,8 @@ bool 	is_end_sub(const TokenList *list, const int *i);
 bool 	is_or(const TokenList *list, const int *i);
 bool 	is_bg(const TokenList *list, const int *i);
 bool 	is_and(const TokenList *list, const int *i);
-bool 	is_binary_operator(const TokenList *tokens, const int *it);
-bool 	is_unary_operator(const TokenList *tokens, const int *it);
+bool 	is_logical_operator(const TokenList *tokens, const int *it);
+bool is_break_seperator(const TokenList *tokens, const int *it);
 bool 	is_separator(const TokenList *tokens, const int *it);
 bool is_word(const TokenList *list, const int *it);
 bool is_redirection_tag(const TokenList *list, const int *it);
