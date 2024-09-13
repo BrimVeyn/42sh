@@ -2,3 +2,7 @@ echo ${}
 echo ${PATH}
 echo ${8PATH}
 echo ${PATH${salut}}
+echo ${?}
+echo ${PATH}
+echo ${PATH-no environement variable with this name}
+echo ${PATHDSADAS-no_environement_variable_with_this_name}

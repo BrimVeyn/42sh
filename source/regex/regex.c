@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/10 17:33:55 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/12 16:21:38 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ int matchmetachar(char c, const char* str)
     case 's': return  matchwhitespace(c);
     case 'S': return !matchwhitespace(c);
 	case '$': return c == '$';
-	case 'n': return c == '\n';
+	case '-': return c == '-';
     default:  return (c == str[0]);
   }
 }
