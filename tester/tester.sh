@@ -29,9 +29,9 @@ BLUE="\033[0;36m"
 RED="\e[0;31m"
 RESET="\033[0m"
 
-mkdir ./outfiles
-mkdir ./42sh_outfiles
-mkdir ./bash_outfiles
+mkdir -p ./outfiles
+mkdir -p ./42sh_outfiles
+mkdir -p ./bash_outfiles
 
 chmod 000 infiles/no_perms
 
@@ -110,7 +110,7 @@ if [[ "${i}" == "${ok}" ]]; then
 	printf "${GREEN}Congrats !${RESET}\n";
 fi
 
-# rm -rf ./outfiles
-# rm -rf ./42sh_outfiles
-# rm -rf ./bash_outfiles
+rm -rf ./outfiles 2>/dev/null
+rm -rf ./42sh_outfiles 2>/dev/null
+rm -rf ./bash_outfiles 2>/dev/null
 chmod 777 infiles/no_perms

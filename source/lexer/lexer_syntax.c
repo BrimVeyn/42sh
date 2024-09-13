@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_syntax.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:20 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 10:12:34 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/13 16:52:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,18 @@ bool is_subshell_closed(TokenList *tokens, int *it) {
 	return true;
 }
 
+bool is_whitespace_only(TokenList *tokens) {
+	for (int i = 0; i < tokens->size; i++) {
+		if (!is_newline(tokens, &i) && !is_eof(tokens, &i)) {
+			return false;
+		}
+	}
+	return true;
+}
+
 bool lexer_syntax_error(TokenList *tokens) {
+	if (is_whitespace_only(tokens)) 
+		return true;
 	for (int it = 0; it < tokens->size; it++) {
 		if (is_subshell(tokens, &it) && !is_subshell_closed(tokens, &it)) {
 			dprintf(2, UNCLOSED_SUBSHELL_STR"`%s\'\n", tagStr((type_of_separator) S_SUB_CLOSE));
@@ -61,6 +72,7 @@ bool lexer_syntax_error(TokenList *tokens) {
 	return false;
 }
 
+
 bool is_redirection(const TokenList *tokens, const int *it){
 	return is_redirection_tag(tokens, it) || (is_word(tokens, it) && tokens->t[*it]->w_postfix->tag == T_REDIRECTION);
 }
@@ -83,6 +95,10 @@ bool is_word(const TokenList *list, const int *it) {
 
 bool is_redirection_tag(const TokenList *list, const int *it) {
 	return (list->t[*it]->tag == T_REDIRECTION);
+}
+
+bool is_newline(const TokenList *list, const int *i) {
+	return (list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_NEWLINE);
 }
 
 bool is_pipe(const TokenList *list, const int *i) {
