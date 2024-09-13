@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 15:01:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/13 15:16:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,7 +178,6 @@ int exec_executer(Executer *executer, char **env) {
             close(pipefd[0]);
 		}
 		if (current->next) {
-			// dprintf(2, "je suis la !\n");
 			prev_pipe = true;
 			secure_pipe2(pipefd, O_CLOEXEC);
 			secure_dup2(pipefd[1], STDOUT_FILENO);

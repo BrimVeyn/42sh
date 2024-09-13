@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:09:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 11:08:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/13 16:46:01 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,11 +130,12 @@ int main(const int ac, const char *av[], const char *env[]) {
 			if (isatty(STDIN_FILENO)){
 				add_input_to_history(input);
 			}
-			input = replace_char_greedy(input, '\n', ';');
+			// input = replace_char_greedy(input, '\n', ';');
 			// printf("input: %s\n", input);
 			Lexer_p lexer = lexer_init(input);
 			TokenList *tokens = lexer_lex_all(lexer);
-			if (lexer_syntax_error(tokens)) continue; 
+			if (lexer_syntax_error(tokens))
+				continue; 
 			heredoc_detector(tokens);
 			signal_manager(SIG_EXEC);
 			Node *AST = ast_build(tokens);

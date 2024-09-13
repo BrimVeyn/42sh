@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 13:23:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/13 16:42:08 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ void token_list_insert_list(TokenList *dest, TokenList *src, const int index);
 
 //----------------Syntax----------------//
 bool	is_pipe(const TokenList *list, const int *i);
+bool	is_newline(const TokenList *list, const int *i);
 bool 	is_eof(const TokenList *list, const int *i);
 bool 	is_semi(const TokenList *list, const int *i);
 bool 	is_subshell(const TokenList *list, const int *i);

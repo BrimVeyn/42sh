@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 15:00:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/13 15:19:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,7 +256,6 @@ ExecuterList *build_executer_list(TokenList *list) {
 		if (next_separator(list, &i) == S_PIPE) {
 			Executer *executer = NULL;
 			while (next_separator(list, &i) == S_PIPE) {
-				dprintf(2, "je sui la !\n");
 				if (is_subshell(list, &i)) {
 					Executer *new = executer_init(extract_subshell(list, &i), NULL);
 					executer_push_back(&executer, new);

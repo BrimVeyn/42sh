@@ -97,3 +97,4 @@
 (echo FirstLayer | (false || (echo SecondLayer && echo ThirdLayer) && (echo FourthLayer || false) | echo FifthLayer))
 ((echo EntryOne && false || echo EntryTwo) && (echo EntryThree || (echo EntryFour | false && echo EntryFive)) && echo EndEntry)
 (echo salut; ls) | echo hey
+((echo EntryOne && false | echo EntryTwo) | (echo EntryThree || (echo EntryFour | false && echo EntryFive)) && echo EndEntry)

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/13 11:08:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/13 17:33:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,14 @@ typedef enum {
 	GC_SUBSHELL,
 	GC_ALL,
 } type_of_garbage;
+
+#define FREE_POINTERS(...) \
+    void *ptrs[] = { __VA_ARGS__ }; \
+    for (size_t i = 0; i < sizeof(ptrs)/sizeof(ptrs[0]); i++) { \
+        if (ptrs[i] != NULL) { \
+            free(ptrs[i]); \
+        } \
+    } \
 
 //----------------Utils--------------------//
 void			free_charchar(char **s);
