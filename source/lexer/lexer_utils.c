@@ -6,11 +6,12 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 10:19:29 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/10 10:16:23 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/13 11:29:04 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+#include "lexer.h"
 
 void lexer_read_char(Lexer_p l) {
 	if (l->read_position >= l->input_len) {
@@ -28,10 +29,37 @@ void lexer_read_x_char(Lexer_p l, uint16_t n) {
 	}
 }
 
+static void skip_command_sub(Lexer_p l) {
+	lexer_read_char(l);
+	while (l->ch && l->ch != ')') {
+		if (l->ch == '(') {
+			skip_command_sub(l);
+		}
+		lexer_read_char(l);
+	}
+}
+
+static void skip_command_exp(Lexer_p l) {
+	lexer_read_char(l);
+	while (l->ch && l->ch != '}') {
+		if (l->ch == '{') {
+			skip_command_exp(l);
+		}
+		lexer_read_char(l);
+	}
+}
 
 char *get_word(Lexer_p l, type_mode mode) {
 	const uint16_t start = l->position;
 	while (l->ch != '\0') {
+		if (!ft_strncmp(&l->input[l->position], "$(", 2)) {
+			lexer_read_char(l);
+			skip_command_sub(l);
+		}
+		if (!ft_strncmp(&l->input[l->position], "${", 2)) {
+			lexer_read_char(l);
+			skip_command_exp(l);
+		}
 		lexer_read_char(l);
 		if (is_delimiter(mode, l->ch)) {
 			break;
@@ -76,7 +104,7 @@ bool is_delimiter(type_mode mode, char c) {
 	if (mode == DEFAULT) {
 		return ft_strchr("|&<>();\n \t", c) || c == '\0';
 	} else {
-		return ft_strchr("\"$", c) || c == '\0';
+		return ft_strchr("$", c) || c == '\0';
 	}
 }
 

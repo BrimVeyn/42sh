@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 11:41:08 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/03 16:45:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/12 16:17:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,5 +28,7 @@ void secure_pipe2(int pipefd[2], int flags);
 void secure_execve(const char *pathname, char *const argv[], char *const envp[]);
 int exec_node(Node *node, char **env);
 char *find_bin_location(char *bin, char **env);
+void close_saved_fds(int *saved_fds);
+void close_std_fds(void);
 
 #endif

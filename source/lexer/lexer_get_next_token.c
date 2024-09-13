@@ -5,13 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/03 14:00:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/13 11:20:00 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/13 11:20:57 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/13 11:21:25 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include "lexer.h"
 
 TokenList *lexer_lex_all(Lexer_p l) {
 	TokenList *self = token_list_init();

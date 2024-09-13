@@ -1,0 +1,26 @@
+echo ${
+echo ${UNDEFINED:=assigned_value}
+echo ${PATH:=/default/path} | rev
+echo ${UNDEFINED:=another_value}
+echo ${SHELL:=/bin/sh} | cat
+echo ${USER:=default_user}
+echo ${UNDEFINED:?error} | rev
+echo ${HOME:?error}
+echo ${SHELL:?missing_value} | cat
+echo ${USER:?no_user}
+echo ${UNDEFINED:?error_message} | rev
+echo ${UNDEFINED:+defined_value}
+echo ${PATH:+exists} | rev
+echo ${HOME:+home_exists}
+echo ${USER:+user_defined} | cat
+echo ${SHELL:+shell_defined}
+echo ${#PATH} | rev
+echo ${#USER}
+echo ${#HOME} | cat
+echo ${#SHELL}
+echo ${#UNDEFINED} | rev
+echo ${PATH%:*}
+echo ${HOME%/*} | rev
+echo ${SHELL%/*}
+echo ${USER%:*} | cat
+echo ${PATH%bin*} | rev

@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/12 10:10:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 11:18:36 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/13 11:21:18 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/13 14:09:06 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,135 +100,6 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 	return curr_command;
 }
 
-char *handle_format(char metachar, char * second_world){
-	switch (metachar){
-		case '-':
-			return (second_world);
-		default:
-			return ft_strdup("");
-	}
-}
-
-char *parser_get_variable_value(char *name, char **env){
-
-	char metachar_tab[2] = "-";
-	char metachar = 0;
-	int end_of_name = 0;
-	char *second_world = NULL;
-	
-
-	//use get_format_pos function bc repetition
-	for (int i = 0; name[i]; i++){
-		if (ft_strchr(metachar_tab, name[i])){
-			metachar = name[i];
-			second_world = gc_add(ft_substr(name, i + 1, ft_strlen(name) - i), GC_GENERAL);
-			end_of_name = i;
-			break;
-		}
-	}
-	
-	if (metachar){
-		ft_memset(name + end_of_name, '\0', ft_strlen(name) - end_of_name);
-	}
-	
-	for (int i = 0; env[i]; i++){
-		if (ft_strncmp(env[i], gc_add(ft_strjoin(name, "="), GC_GENERAL), ft_strlen(name) + 1) == 0){
-			return ft_strdup(env[i] + ft_strlen(name) + 1);
-		}
-	}
-	
-
-	return handle_format(metachar, second_world);
-}
-
-static int get_format_pos(char *str){
-	char metachar_tab[3] = "-?";
-
-	for (int i = 0; str[i]; i++){
-		if (ft_strchr(metachar_tab, str[i])){
-			return i;
-		}
-	}
-	return -1;
-}
-
-static bool is_bad_substitution(Token *el, int pos){
-	int format_pos = get_format_pos(el->w_infix);
-	char *before_format = NULL;
-	if (format_pos == -1){
-		before_format = ft_strdup(el->w_infix);
-	} else {
-		char *tmp = ft_substr(el->w_infix, 0, format_pos);
-		before_format = ft_strjoin(tmp, &el->w_infix[ft_strlen(el->w_infix) - 1]);
-		free(tmp);
-	}
-	printf("str: %s\n", before_format);
-
-	if (regex_match("\\${}", before_format).start == pos || //match ${} 
-		regex_match("\\${[^}]*$", before_format).start == pos || //if missing }
-		(regex_match("\\${[^}]*}", before_format).start == pos && regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", before_format).start != pos &&
-		regex_match("\\${?}", before_format).start != pos))
-	{ //check if first char is a number
-		dprintf(2, "${}: bad substitution\n");
-		g_exitno = 1;
-		free(before_format);
-		return true;
-	}
-	free(before_format);
-	return false;
-}
-
-bool parser_parameter_expansion(TokenList *tl, char **env){
-	for (uint16_t i = 0; i < tl->size; i++){
-		Token *el = tl->t[i];
-
-		if (el->tag == T_WORD){
-			match_result result;
-			int pos = -1;
-			char *value = NULL;
-
-			do{
-				for (int i = 0; el->w_infix[i]; i++){
-					if (el->w_infix[i] == '$'){
-						pos = i;
-						break;
-					}
-				}
-				if (pos == -1){
-					break;
-				}
-				
-				if (is_bad_substitution(el, pos) == true){
-					return false;
-				}
-
-
-				
-				result = regex_match("\\${?}", el->w_infix);
-				if (result.start != -1)
-					value = ft_itoa(g_exitno);
-				else{
-					result = regex_match ("\\${[0-9a-zA-Z-_]*}", el->w_infix);
-					if (result.start != -1)
-						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.start + 2, result.end - result.start - 3), GC_GENERAL), env);
-					else
-						break;
-				}
-				
-				char *start = ft_substr(el->w_infix, 0, result.start);
-				char *end = ft_substr(el->w_infix, result.end, ft_strlen(el->w_infix));
-				if (start &&
-				value){}
-				char *tmp = ft_strjoin(start, value);
-
-				el->w_infix = gc_add(ft_strjoin(tmp, end), GC_GENERAL);
-				free(tmp); free(start); free(end); free(value);
-
-			} while(regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", el->w_infix).start != -1);
-		}
-	}
-	return true;
-}
 
 //echo 0 ; echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
 //echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
@@ -344,37 +215,16 @@ ExecuterList *build_executer_list(TokenList *list) {
 	return self;
 }
 
-// int main() {
-//     const char *dossier = ".";  // Par exemple, le répertoire courant
-//     struct dirent *entry;       // Pointeur pour les entrées du répertoire
-//     DIR *dir = opendir(dossier);  // Ouvre le répertoire
-//
-//     if (dir == NULL) {
-//         // Si le répertoire n'a pas pu être ouvert
-//         perror("opendir");
-//         return EXIT_FAILURE;
-//     }
-//
-//     // Tant qu'il y a des entrées dans le répertoire
-//     while ((entry = readdir(dir)) != NULL) {
-//         // Affiche le nom de l'entrée (fichier ou dossier)
-//         printf("%s\n", entry->d_name);
-//     }
-//
-//     // Ferme le répertoire
-//     closedir(dir);
-//     return EXIT_SUCCESS;
-// }
-
-
-SimpleCommand *parser_parse_current(TokenList *tl, char **env) {
+SimpleCommand *parser_parse_current(TokenList *tl, char **env, int *saved_fds) {
 	
 	// parser_brace_expansion();
 	// parser_tilde_expansion();
 	if (!parser_parameter_expansion(tl, env)){
 		return NULL;
 	}
-	// parser_command_substitution();
+	if (!parser_command_substitution(tl, env, saved_fds)) {
+		return NULL;
+	}
 	// parser_arithmetic_expansion();
 	// parser_word_splitting();
 	// if (!parser_filename_expansion(tl)){

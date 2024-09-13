@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 10:12:51 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/13 14:31:01 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,13 @@ typedef struct {
 	uint16_t size;
 	uint16_t capacity;
 } Garbage;
+
+typedef struct StringList {
+	char		**value;
+	char		**id;
+	uint16_t	size;
+	uint16_t	capacity;
+} StringList;
 
 //-----------------Lexer------------------//
 TokenList		*lexer_lex_all(Lexer_p l);
@@ -91,6 +98,10 @@ void			token_list_add_list(TokenList *t1, TokenList *t2);
 void			token_list_insert(TokenList *tl, Token *token, int index);
 void			token_list_remove(TokenList *tl, int index);
 
+//----------------StringList----------------//
+StringList *string_list_init(void);
+void string_list_add_or_update(StringList *sl, char *id, char *value);
+void string_list_remove(StringList *sl, char *id);
 
 //----------------Syntax----------------//
 bool	is_pipe(const TokenList *list, const int *i);
