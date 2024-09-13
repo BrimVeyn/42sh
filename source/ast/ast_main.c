@@ -6,22 +6,38 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 11:47:59 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 12:52:54 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/13 11:13:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+#include <readline/history.h>
+int g_debug = 0;
 
-int main(void) {
-	gc_init();
+int main(int ac, char *av[]) {
+	//Basic redirection test
+	(void) ac;
+	(void) av;
+	gc_init(GC_GENERAL);
+	gc_init(GC_SUBSHELL);
+	Token *none_token __attribute__((unused)) = token_none_init();
+	
+	char *input = NULL;
+	while ((input = readline("> ")) != NULL) {
+		if (*input) 
+		{
+			Lexer_p lexer = lexer_init(input);
+			TokenList *tokens = lexer_lex_all(lexer);
+			if (lexer_syntax_error(tokens)) continue; 
+			heredoc_detector(tokens);
+			signal_manager(SIG_EXEC);
+			Node *AST = ast_build(tokens);
+			printTree(AST);
+			add_history(input);
+		}
+	}
 
-	Lexer_p l1 = lexer_init("echo nathan | (echo bryan && echo yoann) | rev && cat");
-	TokenList *tokens = lexer_lex_all_test(l1, S_EOF, DEFAULT);
-	TokenListStack *branch_list = split_operator(tokens);
-	tokenListToStringAll(branch_list); //Debug
-	branch_list_to_rpn(branch_list);
-	Node *AST = generateTree(branch_list);
-	printTree(AST);
-
-	gc_cleanup();
+	rl_clear_history();
+	gc_cleanup(GC_GENERAL);
+	return (0);
 }

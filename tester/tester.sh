@@ -13,6 +13,7 @@ else
 		"syntax"
 		"expand"
 		"subshell"
+		"command_sub"
 	)
 fi
 

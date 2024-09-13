@@ -96,3 +96,4 @@
 ((echo StartPath && (false || echo MidPathOne && echo MidPathTwo)) || (echo FailPath && echo AltPath) && echo EndPath)
 (echo FirstLayer | (false || (echo SecondLayer && echo ThirdLayer) && (echo FourthLayer || false) | echo FifthLayer))
 ((echo EntryOne && false || echo EntryTwo) && (echo EntryThree || (echo EntryFour | false && echo EntryFive)) && echo EndEntry)
+(echo salut; ls) | echo hey

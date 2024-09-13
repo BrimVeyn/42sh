@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/12 17:32:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/13 11:08:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,5 +93,8 @@ void			*gc_add(void *ptr, int n);
 void			gc_cleanup(int n);
 void			gc_free(void *addr, int n);
 void			gc_addcharchar(char **str, int n);
+int ft_strstr(char *haystack, char *needle);
+int ft_strrstr(char *haystack, char *needle);
+
 
 #endif

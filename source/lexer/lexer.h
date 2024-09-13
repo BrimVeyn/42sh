@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 10:12:51 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/13 13:23:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,8 +88,9 @@ void			token_word_init(Token *token);
 TokenList		*token_list_init(void);
 void			token_list_add(TokenList *tl, Token *token);
 void			token_list_add_list(TokenList *t1, TokenList *t2);
-void			token_list_insert(TokenList *tl, Token *token, int index);
 void			token_list_remove(TokenList *tl, int index);
+void			token_list_insert(TokenList *tl, Token *token, const int index);
+void token_list_insert_list(TokenList *dest, TokenList *src, const int index);
 
 
 //----------------Syntax----------------//
@@ -102,11 +103,11 @@ bool 	is_or(const TokenList *list, const int *i);
 bool 	is_bg(const TokenList *list, const int *i);
 bool 	is_and(const TokenList *list, const int *i);
 bool 	is_logical_operator(const TokenList *tokens, const int *it);
-bool is_break_seperator(const TokenList *tokens, const int *it);
+bool	is_break_seperator(const TokenList *tokens, const int *it);
 bool 	is_separator(const TokenList *tokens, const int *it);
-bool is_word(const TokenList *list, const int *it);
-bool is_redirection_tag(const TokenList *list, const int *it);
-bool is_redirection(const TokenList *tokens, const int *it);
+bool	is_word(const TokenList *list, const int *it);
+bool	is_redirection_tag(const TokenList *list, const int *it);
+bool	is_redirection(const TokenList *tokens, const int *it);
 
 
 #endif // !LEXER_H
