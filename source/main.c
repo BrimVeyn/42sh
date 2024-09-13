@@ -6,24 +6,24 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:09:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 10:09:52 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/13 15:03:40 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/42sh.h"
-#include "regex/regex.h"
-#include <unistd.h>
+#include "lexer/lexer.h"
+#include <stdint.h>
 
 int g_debug = 0;
 
-char *gnl() {
+char *gnl(int fd) {
 	char buffer[2];
 	char *line = NULL;
 	size_t len = 0;
 
 	buffer[1] = '\0';
 
-	while (read(STDIN_FILENO, buffer, 1) > 0 && buffer[0] != '\n') {
+	while (read(fd, buffer, 1) > 0 && buffer[0] != '\n') {
 		char *tmp = realloc(line, len + 2);
 		if (!tmp) {
 			free(line);
@@ -47,7 +47,7 @@ char *init_prompt_and_signals(void) {
 	if (isatty(STDIN_FILENO))
 		input = readline("42sh > ");
 	else
-		input = gnl();
+		input = gnl(STDIN_FILENO);
 	return input;
 }
 
@@ -128,6 +128,13 @@ void add_input_to_history(char *input){
 	close(history_fd);
 }
 
+void env_to_string_list(StringList env_list, const char **env){
+	for (uint16_t i = 0; env[i]; i++){
+		equal_pos = ft_strstr();
+		string_list_add_or_update(env_list, ft_substr(env[i], 0, ), char *value)
+	}
+}
+
 int main(const int ac, const char *av[], const char *env[]) {
 	//Basic redirection test
 	(void) ac;
@@ -140,6 +147,9 @@ int main(const int ac, const char *av[], const char *env[]) {
 
 	gc_init(GC_GENERAL);
 	gc_init(GC_SUBSHELL);
+	StringList *env_list = string_list_init();
+	env_to_string_list(env_list, env);
+
 	char **dup_env = ft_strdupdup(env);
 	g_signal = 0;
 

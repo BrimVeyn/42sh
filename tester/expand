@@ -3,6 +3,8 @@ echo ${PATH}
 echo ${8PATH}
 echo ${PATH${salut}}
 echo ${?}
-echo ${PATH}
-echo ${PATH-no environement variable with this name}
-echo ${PATHDSADAS-no_environement_variable_with_this_name}
+echo ${UNDEFINED:-default_value} | rev
+echo ${PATH:-/default/path}
+echo ${UNDEFINED:-NoValue} | cat
+echo ${HOME:-/home/unknown}
+echo ${PATH:-/tmp} | rev
