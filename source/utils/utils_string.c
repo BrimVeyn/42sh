@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils_string.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 13:14:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/09 14:30:13 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/13 11:09:01 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,4 +36,27 @@ char **ft_strdupdup(const char **env){
 		strstr[i] = ft_strdup(env[i]);
 	}
 	return strstr;
+}
+
+char *gnl(int fd) {
+	char buffer[2];
+	char *line = NULL;
+	size_t len = 0;
+
+	buffer[1] = '\0';
+
+	while (read(fd, buffer, 1) > 0 && buffer[0] != '\n') {
+		char *tmp = realloc(line, len + 2);
+		if (!tmp) {
+			free(line);
+			return NULL;
+		}
+		line = tmp;
+		line[len] = buffer[0];
+		len++;
+	}
+	if (line) {
+		line[len] = '\0';
+	}
+	return line;
 }

@@ -6,12 +6,15 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 17:33:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/13 15:01:13 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "../../include/42sh.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 int g_exitno;
 
@@ -144,6 +147,12 @@ void close_saved_fds(int *saved_fds) {
 	}
 }
 
+void close_all_fds(void) {
+	for (uint16_t i = 3; i < 1024; i++) {
+		close(i);
+	}
+}
+
 void close_std_fds(void) {
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
@@ -169,6 +178,7 @@ int exec_executer(Executer *executer, char **env) {
             close(pipefd[0]);
 		}
 		if (current->next) {
+			// dprintf(2, "je suis la !\n");
 			prev_pipe = true;
 			secure_pipe2(pipefd, O_CLOEXEC);
 			secure_dup2(pipefd[1], STDOUT_FILENO);
@@ -178,7 +188,8 @@ int exec_executer(Executer *executer, char **env) {
 		if (current->data_tag == DATA_NODE) {
 			pids[i] = secure_fork();
 			if (pids[i] == 0) {
-				close_saved_fds(saved_fds);
+				// close_saved_fds(saved_fds);
+				close_all_fds();
 				g_exitno = ast_execute(current->n_data, env);
 				//LE BUG VENAIT DE LA LARBIN
 				gc_addcharchar(env, GC_SUBSHELL);
@@ -186,14 +197,15 @@ int exec_executer(Executer *executer, char **env) {
 				free(gc_get()[GC_GENERAL].garbage);
 				//MERDE !
 				close_std_fds();
-				exit (g_exitno);
+				exit(g_exitno);
 			}
 		}
 
 		if (current->data_tag == DATA_TOKENS) {
 			SimpleCommand *command = parser_parse_current(current->s_data, env, saved_fds);
+			// printCommand(command);
 			if (!command && pipefd[0] == -1){
-				close_saved_fds(saved_fds);
+				close_all_fds();
 				return false;
 			}
 			if (pipefd[0] == -1 && exec_builtin(command, env)){
@@ -202,7 +214,7 @@ int exec_executer(Executer *executer, char **env) {
 			pids[i] = secure_fork();
 			if (pids[i] == 0) {
 				gc_addcharchar(env, GC_GENERAL);
-				close_saved_fds(saved_fds);
+				close_all_fds();
 				if (!exec_simple_command(command, env)) {
 					gc_cleanup(GC_ALL);
 					exit(g_exitno);

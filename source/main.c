@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:09:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 16:09:20 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/13 11:08:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,28 +14,6 @@
 
 int g_debug = 0;
 
-char *gnl(int fd) {
-	char buffer[2];
-	char *line = NULL;
-	size_t len = 0;
-
-	buffer[1] = '\0';
-
-	while (read(fd, buffer, 1) > 0 && buffer[0] != '\n') {
-		char *tmp = realloc(line, len + 2);
-		if (!tmp) {
-			free(line);
-			return NULL;
-		}
-		line = tmp;
-		line[len] = buffer[0];
-		len++;
-	}
-	if (line) {
-		line[len] = '\0';
-	}
-	return line;
-}
 
 char *init_prompt_and_signals(void) {
 	signal_manager(SIG_PROMPT);
