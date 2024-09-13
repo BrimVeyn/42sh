@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:49 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/12 09:37:00 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/12 13:43:01 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,5 +54,7 @@ bool heredoc_detector(TokenList *data);
 RedirectionList *redirection_list_init(void);
 void redirection_list_add(RedirectionList *rl, Redirection *redirection);
 void redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
+
+int parser_filename_expansion(TokenList *tl);
 
 #endif // !PARSER_H

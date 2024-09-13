@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 10:10:06 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/13 11:18:36 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,13 +100,82 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 	return curr_command;
 }
 
+char *handle_format(char metachar, char * second_world){
+	switch (metachar){
+		case '-':
+			return (second_world);
+		default:
+			return ft_strdup("");
+	}
+}
+
 char *parser_get_variable_value(char *name, char **env){
+
+	char metachar_tab[2] = "-";
+	char metachar = 0;
+	int end_of_name = 0;
+	char *second_world = NULL;
+	
+
+	//use get_format_pos function bc repetition
+	for (int i = 0; name[i]; i++){
+		if (ft_strchr(metachar_tab, name[i])){
+			metachar = name[i];
+			second_world = gc_add(ft_substr(name, i + 1, ft_strlen(name) - i), GC_GENERAL);
+			end_of_name = i;
+			break;
+		}
+	}
+	
+	if (metachar){
+		ft_memset(name + end_of_name, '\0', ft_strlen(name) - end_of_name);
+	}
+	
 	for (int i = 0; env[i]; i++){
 		if (ft_strncmp(env[i], gc_add(ft_strjoin(name, "="), GC_GENERAL), ft_strlen(name) + 1) == 0){
 			return ft_strdup(env[i] + ft_strlen(name) + 1);
 		}
 	}
-	return ft_strdup("");
+	
+
+	return handle_format(metachar, second_world);
+}
+
+static int get_format_pos(char *str){
+	char metachar_tab[3] = "-?";
+
+	for (int i = 0; str[i]; i++){
+		if (ft_strchr(metachar_tab, str[i])){
+			return i;
+		}
+	}
+	return -1;
+}
+
+static bool is_bad_substitution(Token *el, int pos){
+	int format_pos = get_format_pos(el->w_infix);
+	char *before_format = NULL;
+	if (format_pos == -1){
+		before_format = ft_strdup(el->w_infix);
+	} else {
+		char *tmp = ft_substr(el->w_infix, 0, format_pos);
+		before_format = ft_strjoin(tmp, &el->w_infix[ft_strlen(el->w_infix) - 1]);
+		free(tmp);
+	}
+	printf("str: %s\n", before_format);
+
+	if (regex_match("\\${}", before_format).start == pos || //match ${} 
+		regex_match("\\${[^}]*$", before_format).start == pos || //if missing }
+		(regex_match("\\${[^}]*}", before_format).start == pos && regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", before_format).start != pos &&
+		regex_match("\\${?}", before_format).start != pos))
+	{ //check if first char is a number
+		dprintf(2, "${}: bad substitution\n");
+		g_exitno = 1;
+		free(before_format);
+		return true;
+	}
+	free(before_format);
+	return false;
 }
 
 bool parser_parameter_expansion(TokenList *tl, char **env){
@@ -115,8 +184,8 @@ bool parser_parameter_expansion(TokenList *tl, char **env){
 
 		if (el->tag == T_WORD){
 			match_result result;
-			char *value = NULL;
 			int pos = -1;
+			char *value = NULL;
 
 			do{
 				for (int i = 0; el->w_infix[i]; i++){
@@ -128,21 +197,18 @@ bool parser_parameter_expansion(TokenList *tl, char **env){
 				if (pos == -1){
 					break;
 				}
-
-				if (regex_match("\\${}", el->w_infix).start == pos || //match ${} 
-					regex_match("\\${[^}]*$", el->w_infix).start == pos || //if missing }
-					(regex_match("\\${[^}]*}", el->w_infix).start == pos && regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", el->w_infix).start != pos &&
-					regex_match("\\${?}", el->w_infix).start != pos)){ //check if first char is a number
-					dprintf(2, "${}: bad substitution\n");
-					g_exitno = 1;
+				
+				if (is_bad_substitution(el, pos) == true){
 					return false;
 				}
+
+
 				
 				result = regex_match("\\${?}", el->w_infix);
 				if (result.start != -1)
 					value = ft_itoa(g_exitno);
 				else{
-					result = regex_match ("\\${[0-9a-zA-Z_]*}", el->w_infix);
+					result = regex_match ("\\${[0-9a-zA-Z-_]*}", el->w_infix);
 					if (result.start != -1)
 						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.start + 2, result.end - result.start - 3), GC_GENERAL), env);
 					else
@@ -300,102 +366,6 @@ ExecuterList *build_executer_list(TokenList *list) {
 //     return EXIT_SUCCESS;
 // }
 
-char *parser_bash_to_regexp(char *str){
-
-	char *tmp_str = ft_calloc(ft_strlen(str) + 3, sizeof(char));
-	if (str[0] != '*'){
-		sprintf(tmp_str, "^%s", str);
-		str = tmp_str;
-	}
-	if (str[ft_strlen(str)] != '*'){
-		sprintf(tmp_str, "%s$", str);
-		str = tmp_str;
-	}
-	
-	char *new_str = NULL;
-	for (int i = 0; str[i]; i++){
-		if (str[i] == '*'){
-			char *start = (i == 0) ? ft_strdup("") : ft_substr(str, 0, i);
-			char *end = (i == (int)ft_strlen(str)) ? ft_strdup("") : ft_substr(str, i + 1, ft_strlen(str) - i);
-			
-			new_str = ft_calloc(ft_strlen(str) + 300, sizeof(char));
-			sprintf(new_str, "%s.*%s", start, end);
-
-			free(start); free(end);
-
-			str = new_str;
-			i += 2;
-		}
-	}
-	return new_str;
-}
-
-int parser_filename_expansion(TokenList *tl){
-	
-	for (uint16_t i = 0; i < tl->size; i++) {
-		const Token *el = tl->t[i];
-		char *str = el->w_infix;
-	
-		//need to handle /*
-		if ((el->tag == T_WORD || el->tag == T_REDIRECTION) && there_is_star(str)) {
-			struct dirent *entry;
-			DIR *dir = NULL;
-			(void)entry;
-			(void)dir;
-
-			if (!there_is_slash(str)){
-				dir = opendir(".");
-			} else {
-				printf("Bon, la j'ai la flemme je le ferais plus tard\n");
-			}
-
-			char *regexp = parser_bash_to_regexp(str);
-			printf("regexp: %s\n", regexp);
-			int j = 0;
-			while ((entry = readdir(dir)) != NULL){
-				if (regex_match(regexp, entry->d_name).start != -1){
-					if (j > 1){
-						Token *new_token = token_empty_init();
-						token_word_init(new_token);
-
-						new_token->tag = T_WORD;
-						new_token->w_infix = ft_strdup(entry->d_name);
-						token_list_insert(tl, new_token, i);
-					}
-					else {
-						tl->t[i]->w_infix = ft_strdup(entry->d_name);
-					}
-					j++;
-				}
-			}
-			if (j == 0){
-				token_list_remove(tl, i);
-			}
-			closedir(dir);
-			free(regexp);
-		}
-	}
-	// tokenToStringAll(tl);
-	return true;
-}
-
-int there_is_slash(char *str){
-	for (int i = 0; str[i]; i++){
-		if (str[i] == '/'){
-			return 1;
-		}
-	}
-	return 0;
-}
-
-int there_is_star(char *str){
-	for (int i = 0; str[i]; i++){
-		if (str[i] == '*'){
-			return 1;
-		}
-	}
-	return 0;
-}
 
 SimpleCommand *parser_parse_current(TokenList *tl, char **env) {
 	

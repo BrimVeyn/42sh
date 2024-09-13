@@ -6,16 +6,11 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 10:11:40 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/12 10:31:13 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "exec.h"
 #include "../../include/42sh.h"
-#include <fcntl.h>
-#include <stdlib.h>
-#include <sys/wait.h>
-#include <unistd.h>
 
 int g_exitno;
 
