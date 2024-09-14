@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 13:14:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 16:39:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 20:57:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ char *replace_char_greedy(char *str, char c, char by){
 				sprintf(newstr, "%s%s", start, end);
 			else
 				sprintf(newstr, "%s;%s", start, end);
-			free(start); free(end);
+			FREE_POINTERS(start, end);
 			return replace_char_greedy(gc_add(newstr, GC_GENERAL), c, by);
 		}
 	}

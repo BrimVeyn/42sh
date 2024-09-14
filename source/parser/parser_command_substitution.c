@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:38:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 17:10:28 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 22:26:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ char *parser_get_variable_value2(char *name, char **env){
 	return ft_strdup("");
 }
 
-TokenList *ft_token_split(char *str, const char *ifs) {
+TokenList *ft_token_split(const char *str, const char *ifs) {
 	TokenList *tl = token_list_init();
 	const uint16_t str_len = ft_strlen(str);
 
@@ -60,21 +60,24 @@ TokenList *ft_token_split(char *str, const char *ifs) {
 		Token *word = (Token *) gc_add(token_empty_init(), GC_SUBSHELL);
 		word->tag = T_WORD;
 		token_word_init(word);
+
 		const int start = i;
 		while (i < str_len && !ft_strchr(ifs, str[i])) {
 			i++;
 		}
 		const int end = i;
-		if (start == end) {
+
+		if (start == end)
 			word->w_infix = gc_add(ft_strdup(""), GC_SUBSHELL);
-		}
-		word->w_infix = gc_add(ft_substr(str, start, end - start), GC_SUBSHELL);
+		else
+			word->w_infix = gc_add(ft_substr(str, start, end - start), GC_SUBSHELL);
+
 		token_list_add(tl, word);
 	}
 	return tl;
 }
 
-TokenList *word_splitter(char *str, char **env) {
+TokenList *word_splitter(const char *str, char **env) {
 	char *IFS_value = parser_get_variable_value2("IFS", env);
 	if (!ft_strcmp("", IFS_value)) {
 		free(IFS_value);
@@ -90,13 +93,13 @@ TokenList *word_splitter(char *str, char **env) {
 		token_list_add(list, word);
 	}
 	free(IFS_value);
-	// tokenToStringAll(list);
 	return list;
 }
 
 bool parser_command_substitution(TokenList *tl, char **env) {
 	static int COMMAND_SUB_NO = 0;
 	int i = 0;
+
 	while(i < tl->size) {
 		Token *elem = tl->t[i];
 		if (elem->tag == T_WORD) {
@@ -117,7 +120,8 @@ bool parser_command_substitution(TokenList *tl, char **env) {
 			// dprintf(2, "INFIX: %s\n", infix);
 
 			char file_name[MAX_FILENAME_LEN] = {0};
-			sprintf(file_name, "/tmp/command_sub_%d", COMMAND_SUB_NO++);
+			ft_sprintf(file_name, "/tmp/command_sub_%d", COMMAND_SUB_NO++);
+
 			int output_fd = open(file_name, O_CREAT | O_TRUNC | O_WRONLY | O_CLOEXEC, 0644);
 			if (output_fd == -1) {
 				printf("failed\n");
@@ -130,7 +134,7 @@ bool parser_command_substitution(TokenList *tl, char **env) {
 
 			Lexer_p lexer = lexer_init(infix);
 			TokenList *tokens = lexer_lex_all(lexer);
-			// tokenToStringAll(tokens);
+			// tokenListToString(tokens);
 			if (lexer_syntax_error(tokens)) continue; 
 			heredoc_detector(tokens);
 			Node *AST = ast_build(tokens);
@@ -151,28 +155,31 @@ bool parser_command_substitution(TokenList *tl, char **env) {
 
 			TokenList *word_splitted_result = word_splitter(result, env);
 			free(result);
-			// tokenToStringAll(word_splitted_result);
+			// tokenListToString(word_splitted_result);
 			token_list_remove(tl, i);
 			token_list_insert_list(tl, word_splitted_result, i);
 
 			char *prefix = ft_substr(elem->w_infix, 0, range.start);
 			char *postfix = ft_substr(elem->w_infix, range.end + 1, ft_strlen(elem->w_infix) - range.end);
 
-			char *old_word_start = tl->t[i]->w_infix;
-			char *old_word_end = tl->t[i + word_splitted_result->size - 1]->w_infix;
+			const Range new_word = {
+				.start = i,
+				.end = i + word_splitted_result->size - 1,
+			};
 
-			tl->t[i]->w_infix = (char *) gc_add(ft_strjoin(prefix, tl->t[i]->w_infix), GC_SUBSHELL);
-			tl->t[i + word_splitted_result->size - 1]->w_infix = (char *) gc_add(ft_strjoin(tl->t[i + word_splitted_result->size -1]->w_infix, postfix), GC_SUBSHELL);
+			char *old_word_start = tl->t[new_word.start]->w_infix;
+			char *old_word_end = tl->t[new_word.end]->w_infix;
+
+			tl->t[new_word.start]->w_infix = (char *) gc_add(ft_strjoin(prefix, tl->t[new_word.start]->w_infix), GC_SUBSHELL);
+			tl->t[new_word.end]->w_infix = (char *) gc_add(ft_strjoin(tl->t[new_word.end]->w_infix, postfix), GC_SUBSHELL);
 
 			gc_free(old_word_start, GC_SUBSHELL);
 			gc_free(old_word_end, GC_SUBSHELL);
-
 			FREE_POINTERS(prefix, postfix);
 			// dprintf(2, "s: %s\n", tl->t[i]->w_infix);
 			// dprintf(2, "e: %s\n", tl->t[i + word_splitted_result->size - 1]->w_infix);
-		} else {
+		} else
 			i += 1;
-		}
 	}
 	return true;
 }

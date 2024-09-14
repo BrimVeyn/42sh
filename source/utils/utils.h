@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 16:37:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 16:51:41 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 22:18:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ int				there_is_slash(char *str);
 char			*replace_char_greedy(char *str, char c, char by);
 int				ft_strstr(char *haystack, char *needle);
 int				ft_strrstr(char *haystack, char *needle);
+void			ft_sprintf(char *buffer, char *fmt, ...);
 
 //----------------File Utils--------------------//
 char			*get_next_line(int fd);

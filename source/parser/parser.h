@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:49 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 16:43:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 21:30:13 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,6 @@ typedef struct SimpleCommand {
 	RedirectionList			*redir_list;
 	char					*bin;
 	char					**args;
-	struct SimpleCommand	*next;
 } SimpleCommand;
 
 typedef struct {
@@ -54,7 +53,7 @@ typedef struct {
 } Range;
 
 //-------------------SimpleCommand-----------------------//
-SimpleCommand		*parser_parse_current(TokenList *tl, char **env, int *saved_fds);
+SimpleCommand		*parser_parse_current(TokenList *tl, char **env);
 
 //-------------------Here_doc-----------------------//
 bool				heredoc_detector(TokenList *data);

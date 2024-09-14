@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 16:40:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 22:18:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,24 +16,23 @@
 extern int g_signal;
 extern int g_exitno;
 extern int g_debug;
+
 /*_.-=-._.-=-._.-=-._.-=-._.- Includes -._.-=-._.-=-._.-=-._.-=-._.-=-._*/
 #include "../libftprintf/header/libft.h"
 #include "../include/colors.h"
 #include <readline/readline.h>
+#include <readline/history.h>
 #include <stdio.h>
 #include <sys/cdefs.h>
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <errno.h>
-#include<sys/stat.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
-
 #include <stdint.h>
 #include <stdbool.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-
+#include <stdarg.h>
 
 #define FREE_POINTERS(...) \
     void *ptrs[] = { __VA_ARGS__ }; \
@@ -42,13 +41,6 @@ extern int g_debug;
             free(ptrs[i]); \
         } \
     } \
-
-
-typedef enum {
-	SIG_PROMPT,
-	SIG_HERE_DOC,
-	SIG_EXEC,
-} type_of_signals;
 
 #ifndef UTILS_H
 	#include "../source/utils/utils.h"
@@ -63,7 +55,7 @@ typedef enum {
 #endif // !LEXER_H
 
 #ifndef AST_H
-#include "../source/ast/ast.h"
+	#include "../source/ast/ast.h"
 #endif // !AST_H
 
 #ifndef EXEC_H

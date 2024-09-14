@@ -6,17 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/14 15:51:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 21:29:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include <dirent.h>
-#include <stdio.h>
-
-bool is_operator(type_of_separator s) {
-	return s == S_BG || s == S_EOF || s == S_OR || s == S_AND || s == S_SEMI_COLUMN || s == S_NEWLINE || s == S_PIPE;
-}
 
 char *here_doc(char *eof){
 	char *input = NULL;
@@ -48,7 +42,7 @@ bool heredoc_detector(TokenList *data) {
 	return true;
 }
 
-RedirectionList *parser_get_redirection(TokenList *tl) {
+RedirectionList *parser_get_redirection(const TokenList *tl) {
 	RedirectionList *redir_list = redirection_list_init();
 	for (uint16_t it = 0; it < tl->size; it++) {
 		const Token *el = tl->t[it];
@@ -75,7 +69,7 @@ RedirectionList *parser_get_redirection(TokenList *tl) {
 	return redir_list;
 }
 
-SimpleCommand *parser_get_command(TokenList *tl) {
+SimpleCommand *parser_get_command(const TokenList *tl) {
 	SimpleCommand *curr_command = (SimpleCommand *) gc_add(ft_calloc(1, sizeof(SimpleCommand)), GC_SUBSHELL);
 
 	size_t count = 0;
@@ -97,7 +91,6 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 		}
 	}
 	curr_command->args[i] = NULL;
-	curr_command->next = NULL;
 	return curr_command;
 }
 
@@ -157,18 +150,13 @@ bool parser_parameter_expansion(TokenList *tl, char **env){
 				char *tmp = ft_strjoin(start, value);
 
 				el->w_infix = gc_add(ft_strjoin(tmp, end), GC_GENERAL);
-				free(tmp); free(start); free(end); free(value);
+				FREE_POINTERS(tmp, start, end, value);
 
 			} while(regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", el->w_infix).start != -1);
 		}
 	}
 	return true;
 }
-
-//echo 0 ; echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
-//echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
-//echo 1 | (echo 2 && echo 3) | echo 4
-//echo -2 | echo -1 | echo 0; echo 1 | echo 2
 
 void skip_subshell_parser(TokenList *list, int *j) {
 	(*j)++;
@@ -229,7 +217,7 @@ Node *extract_subshell(TokenList *list, int *i) {
 	(*i) += 1;
 	if (g_debug > 2) {
 		printf("============================================\n");
-		tokenToStringAll(newlist);
+		tokenListToString(newlist);
 		printf("============================================\n");
 	}
 	return ast_build(newlist);
@@ -245,72 +233,43 @@ TokenList *extract_tokens(TokenList *list, int *i) {
 	return newlist;
 }
 
+void create_executer_and_push(Executer **executer, TokenList *list, int *i) {
+	Executer *new = NULL;
+
+	if (is_subshell(list, i))
+		new = executer_init(extract_subshell(list, i), NULL);
+	else
+		new = executer_init(NULL, extract_tokens(list, i));
+
+	executer_push_back(executer, new);
+}
+
 ExecuterList *build_executer_list(TokenList *list) {
 	// if (true){
 	// 	printf(C_RED"----------Before EXECUTER-------------"C_RESET"\n");
-	// 	tokenToStringAll(list); //Debug
+	// 	tokenListToString(list); //Debug
 	// }
 	ExecuterList *self = executer_list_init();
 	int i = 0;
 	while (i < list->size) {
-		if (next_separator(list, &i) == S_PIPE) {
-			Executer *executer = NULL;
+		Executer *executer = NULL;
+		type_of_separator next_sep = next_separator(list, &i);
+
+		if (next_sep == S_PIPE) {
 			while (next_separator(list, &i) == S_PIPE) {
-				if (is_subshell(list, &i)) {
-					Executer *new = executer_init(extract_subshell(list, &i), NULL);
-					executer_push_back(&executer, new);
-				} else {
-					Executer *new = executer_init(NULL, extract_tokens(list, &i));
-					executer_push_back(&executer, new);
-				}
+				create_executer_and_push(&executer, list, &i);
 			}
 			if (i < list->size) {
-				if (is_subshell(list, &i)) {
-					Executer *new = executer_init(extract_subshell(list, &i), NULL);
-					executer_push_back(&executer, new);
-				} else {
-					Executer *new = executer_init(NULL, extract_tokens(list, &i));
-					executer_push_back(&executer, new);
-				}
+				create_executer_and_push(&executer, list, &i);
 			}
-			executer_list_push(self, executer);
 		}
-		if (i < list->size && (next_separator(list, &i) == S_EOF || next_separator(list, &i) == S_SEMI_COLUMN)) {
-			Executer *executer = NULL;
-			if (is_subshell(list, &i)) {
-				Executer *new = executer_init(extract_subshell(list, &i), NULL);
-				executer_push_back(&executer, new);
-			} else {
-				Executer *new = executer_init(NULL, extract_tokens(list, &i));
-				executer_push_back(&executer, new);
-			}
-			executer_list_push(self, executer);
+		if (i < list->size && (next_sep == S_EOF || next_sep == S_SEMI_COLUMN)) {
+			create_executer_and_push(&executer, list, &i);
 		}
+		executer_list_push(self, executer);
 	}
 	return self;
 }
-
-// int main() {
-//     const char *dossier = ".";  // Par exemple, le répertoire courant
-//     struct dirent *entry;       // Pointeur pour les entrées du répertoire
-//     DIR *dir = opendir(dossier);  // Ouvre le répertoire
-//
-//     if (dir == NULL) {
-//         // Si le répertoire n'a pas pu être ouvert
-//         perror("opendir");
-//         return EXIT_FAILURE;
-//     }
-//
-//     // Tant qu'il y a des entrées dans le répertoire
-//     while ((entry = readdir(dir)) != NULL) {
-//         // Affiche le nom de l'entrée (fichier ou dossier)
-//         printf("%s\n", entry->d_name);
-//     }
-//
-//     // Ferme le répertoire
-//     closedir(dir);
-//     return EXIT_SUCCESS;
-// }
 
 char *parser_bash_to_regexp(char *str){
 
@@ -332,8 +291,7 @@ char *parser_bash_to_regexp(char *str){
 			
 			new_str = ft_calloc(ft_strlen(str) + 300, sizeof(char));
 			sprintf(new_str, "%s.*%s", start, end);
-
-			free(start); free(end);
+			FREE_POINTERS(start, end);
 
 			str = new_str;
 			i += 2;
@@ -387,10 +345,12 @@ int parser_filename_expansion(TokenList *tl){
 			free(regexp);
 		}
 	}
-	// tokenToStringAll(tl);
+	// tokenListToString(tl);
 	return true;
 }
 
+//LARBIN ft_strchr("/", str); ??
+//et ca se moque de cyprien :(
 int there_is_slash(char *str){
 	for (int i = 0; str[i]; i++){
 		if (str[i] == '/'){
@@ -400,6 +360,7 @@ int there_is_slash(char *str){
 	return 0;
 }
 
+//LARBIN ft_strchr("*", str); ??
 int there_is_star(char *str){
 	for (int i = 0; str[i]; i++){
 		if (str[i] == '*'){
@@ -409,9 +370,7 @@ int there_is_star(char *str){
 	return 0;
 }
 
-SimpleCommand *parser_parse_current(TokenList *tl, char **env, int *saved_fds) {
-	
-	(void) saved_fds;
+SimpleCommand *parser_parse_current(TokenList *tl, char **env) {
 	// parser_brace_expansion();
 	// parser_tilde_expansion();
 	if (!parser_parameter_expansion(tl, env)){
@@ -425,7 +384,7 @@ SimpleCommand *parser_parse_current(TokenList *tl, char **env, int *saved_fds) {
 	// if (!parser_filename_expansion(tl)){
 	// 	return NULL;
 	// }
-	// tokenToStringAll(tl);
+	// tokenListToString(tl);
 	// parser_quote_remioval();
 	RedirectionList *redirs = parser_get_redirection(tl);
 	SimpleCommand *command = parser_get_command(tl);

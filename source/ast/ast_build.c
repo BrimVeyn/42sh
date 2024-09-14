@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 10:13:47 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/14 20:41:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,10 +79,10 @@ TokenListStack *split_operator(TokenList *list) {
 	return self;
 }
 
-void tokenListToStringAll(TokenListStack *cont) {
-	for (uint16_t i = 0; i < cont->size; i++) {
+void tokenListToStringAll(TokenListStack *list) {
+	for (uint16_t i = 0; i < list->size; i++) {
 		printf(C_BRIGHT_YELLOW"------------%d---------"C_RESET"\n", i);
-		tokenToStringAll(cont->data[i]);
+		tokenListToString(list->data[i]);
 	}
 	printf(C_BRIGHT_YELLOW"-----------------------------"C_RESET"\n");
 }
