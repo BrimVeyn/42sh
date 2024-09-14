@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:09:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/14 16:44:14 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 21:06:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,10 +104,6 @@ void add_input_to_history(char *input){
 }
 
 int main(const int ac, const char *av[], const char *env[]) {
-	//Basic redirection test
-	(void) ac;
-	(void) av;
-	(void) env;
 
 	if (ac != 1 && !ft_strcmp("-d", av[1])){
 		g_debug = 1;
@@ -116,8 +112,8 @@ int main(const int ac, const char *av[], const char *env[]) {
 	gc_init(GC_GENERAL);
 	gc_init(GC_SUBSHELL);
 	char **dup_env = ft_strdupdup(env);
-	g_signal = 0;
 
+	g_signal = 0;
 	char *input = NULL;
 
 	if (isatty(STDIN_FILENO))
@@ -149,8 +145,6 @@ int main(const int ac, const char *av[], const char *env[]) {
 	free_charchar(dup_env);
 	rl_clear_history();
 	gc_cleanup(GC_ALL);
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
+	close_std_fds();
 	return (0);
 }

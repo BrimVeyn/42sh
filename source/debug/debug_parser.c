@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:50:32 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/13 11:20:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 21:26:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,12 +40,9 @@ void printCharChar(char **tab) {
 
 void printCommand(SimpleCommand *command) {
 	SimpleCommand *curr = command;
-	while (curr != NULL) {
-		printRedirList(curr->redir_list);
-		dprintf(2,C_GOLD"------ "C_LIGHT_YELLOW"Command"C_RESET C_GOLD"-------\n"C_RESET);
-		dprintf(2,"bin: %s\n", command->bin);
-		printCharChar(curr->args);
-		dprintf(2,C_GOLD"---------...---------"C_RESET"\n");
-		curr = curr->next;
-	}
+	printRedirList(curr->redir_list);
+	dprintf(2,C_GOLD"------ "C_LIGHT_YELLOW"Command"C_RESET C_GOLD"-------\n"C_RESET);
+	dprintf(2,"bin: %s\n", command->bin);
+	printCharChar(curr->args);
+	dprintf(2,C_GOLD"---------...---------"C_RESET"\n");
 }

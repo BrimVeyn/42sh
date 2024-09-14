@@ -6,12 +6,11 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 13:38:32 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/10 15:46:54 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/14 20:40:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include "ast.h"
 
 TokenListStack *token_list_stack_init(void) {
 	TokenListStack *self = gc_add(ft_calloc(1, sizeof(TokenListStack)), GC_SUBSHELL);

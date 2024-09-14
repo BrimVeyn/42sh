@@ -6,15 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 15:16:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 21:31:34 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "exec.h"
 #include "../../include/42sh.h"
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
 int g_exitno;
 
@@ -162,14 +158,15 @@ void close_std_fds(void) {
 int exec_executer(Executer *executer, char **env) {
 	Executer *current = executer;
 	int pipefd[2] = {-1 , -1};
-	bool prev_pipe = false;
+	int saved_fds[3] = {-1, -1, -1};
 	pid_t pids[1024];
 	int i = 0;
-	int saved_fds[3] = {-1, -1, -1};
 
 	saved_fds[STDIN_FILENO] = dup(STDIN_FILENO);
 	saved_fds[STDOUT_FILENO]= dup(STDOUT_FILENO);
 	saved_fds[STDERR_FILENO] = dup(STDERR_FILENO);
+
+	bool prev_pipe = false;
 
 	while (current) {
 
@@ -201,7 +198,7 @@ int exec_executer(Executer *executer, char **env) {
 		}
 
 		if (current->data_tag == DATA_TOKENS) {
-			SimpleCommand *command = parser_parse_current(current->s_data, env, saved_fds);
+			SimpleCommand *command = parser_parse_current(current->s_data, env);
 			// printCommand(command);
 			if (!command && pipefd[0] == -1){
 				close_all_fds();
@@ -250,5 +247,3 @@ int exec_node(Node *node, char **env) {
 	}
 	return g_exitno;
 }
-
-//Faire une global avec le GC actuel
