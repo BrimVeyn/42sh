@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/13 17:33:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 16:40:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,11 +34,6 @@ extern int g_debug;
 #include <readline/readline.h>
 #include <readline/history.h>
 
-typedef enum {
-	GC_GENERAL,
-	GC_SUBSHELL,
-	GC_ALL,
-} type_of_garbage;
 
 #define FREE_POINTERS(...) \
     void *ptrs[] = { __VA_ARGS__ }; \
@@ -48,15 +43,6 @@ typedef enum {
         } \
     } \
 
-//----------------Utils--------------------//
-void			free_charchar(char **s);
-void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
-int				ft_strlenlen(const char **strstr);
-char			**ft_strdupdup(const char **env);
-int				there_is_star(char *str);
-int				there_is_slash(char *str);
-char			*replace_char_greedy(char *str, char c, char by);
-char			*gnl(int fd);
 
 typedef enum {
 	SIG_PROMPT,
@@ -64,6 +50,9 @@ typedef enum {
 	SIG_EXEC,
 } type_of_signals;
 
+#ifndef UTILS_H
+	#include "../source/utils/utils.h"
+#endif // !UTILS_H
 
 #ifndef LEXER_H
 	#include "../source/lexer/lexer.h"
@@ -89,20 +78,8 @@ typedef enum {
 	#include "../source/signals/signals.h"
 #endif // !SIGNAL_H
 
-
 #ifndef REGEX_H
 	#include "../source/regex/regex.h"
 #endif // !REGEX_H
-
-//----------------Garbage-------------------//
-Garbage			*gc_get(void);
-void			gc_init(int n);
-void			*gc_add(void *ptr, int n);
-void			gc_cleanup(int n);
-void			gc_free(void *addr, int n);
-void			gc_addcharchar(char **str, int n);
-int ft_strstr(char *haystack, char *needle);
-int ft_strrstr(char *haystack, char *needle);
-
 
 #endif

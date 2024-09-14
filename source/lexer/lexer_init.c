@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:45:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/10 10:23:05 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/14 17:13:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,9 @@ Lexer_p lexer_init(char *input) {
 
 //Allocate a empty token_ptr
 Token *token_empty_init(void) {
-	Token *self = (Token *) ft_calloc(2, sizeof(Token));
-	if (!self) exit(EXIT_FAILURE);
+	Token *self = (Token *) ft_calloc(1, sizeof(Token));
+	if (!self)
+		exit(EXIT_FAILURE);
 	self->tag = T_NONE;
 	return self;
 }

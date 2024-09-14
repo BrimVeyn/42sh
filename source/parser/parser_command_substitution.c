@@ -6,27 +6,23 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:38:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/13 17:30:11 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 17:10:28 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 
-typedef struct {
-	int start;
-	int end;
-} Range;
+static int get_command_sub_range_end(char *str, int i) {
+	const int str_len = ft_strlen(str);
 
-int ft_strstr(char *haystack, char *needle) {
-	if (!haystack || !needle) {
-		return -1;
-	}
-	
-	const int needle_len = ft_strlen(needle);
-	int i = 0;
-
-	while (haystack[i]) {
-		if (!ft_strncmp(&haystack[i], needle, needle_len)) {
+	i += 2;
+	while (i < str_len && str[i]) {
+		if (!ft_strncmp(&str[i], "$(", 2)) {
+			i = get_command_sub_range_end(str, i);
+			if (i == -1) return i;
+			else i += 1;
+		}
+		if (str[i] == ')') {
 			return i;
 		}
 		i += 1;
@@ -34,54 +30,17 @@ int ft_strstr(char *haystack, char *needle) {
 	return -1;
 }
 
-int ft_strrstr(char *haystack, char *needle) {
-	if (!haystack || !needle) {
-		return -1;
-	}
-	
-	const int needle_len = ft_strlen(needle);
-	int i = ft_strlen(haystack) - 1;
-
-	while (i >= 0) {
-		if (!ft_strncmp(&haystack[i], needle, needle_len)) {
-			return i;
-		}
-		i -= 1;
-	}
-	return -1;
-}
-
-Range get_command_sub_range(char *str) {
-	return (const Range) {
-		.start = ft_strstr(str, "$("),
-		.end = ft_strrstr(str, ")"),
+static Range get_command_sub_range(char *str) {
+	Range self = {
+		.start = -1,
+		.end = -1,
 	};
-}
 
-char *read_whole_file(int fd) {
-	size_t buffer_size = 10;
-	char buffer[10] = {0};
+	self.start = ft_strstr(str, "$(");
+	if (self.start != -1)
+		self.end = get_command_sub_range_end(str, self.start);
 
-	size_t result_size = 0;
-	size_t result_capacity = 10;
-	size_t bytes_read = 0;
-	char *result = ft_calloc(buffer_size, sizeof(char));
-
-	while ((bytes_read = read(fd, buffer, buffer_size)) != 0) {
-		buffer[bytes_read] = '\0';
-		if (result_size + bytes_read >= result_capacity) {
-			result_capacity *= 2;
-			char *tmp = result;
-			result = ft_realloc(result, result_size, result_capacity, sizeof(char));
-			free(tmp);
-		}
-		ft_memcpy(result + result_size, buffer, bytes_read);
-		result_size += bytes_read;
-		result[result_size] = '\0';
-	}
-	if (result_size != 0 && result[result_size - 1] == '\n')
-		result[result_size - 1] = '\0';
-	return result;
+	return self;
 }
 
 char *parser_get_variable_value2(char *name, char **env){
@@ -93,7 +52,7 @@ char *parser_get_variable_value2(char *name, char **env){
 	return ft_strdup("");
 }
 
-TokenList *ft_token_split(char *str, char *ifs) {
+TokenList *ft_token_split(char *str, const char *ifs) {
 	TokenList *tl = token_list_init();
 	const uint16_t str_len = ft_strlen(str);
 
@@ -127,7 +86,7 @@ TokenList *word_splitter(char *str, char **env) {
 		Token *word = (Token *) gc_add(token_empty_init(), GC_SUBSHELL);
 		word->tag = T_WORD;
 		token_word_init(word);
-		word->w_infix = gc_add(ft_strdup(""), GC_SUBSHELL);
+		word->w_infix = (char *) gc_add(ft_strdup(""), GC_SUBSHELL);
 		token_list_add(list, word);
 	}
 	free(IFS_value);
@@ -135,21 +94,29 @@ TokenList *word_splitter(char *str, char **env) {
 	return list;
 }
 
-
 bool parser_command_substitution(TokenList *tl, char **env) {
 	static int COMMAND_SUB_NO = 0;
-	for (int i = 0; i < tl->size; i++) {
+	int i = 0;
+	while(i < tl->size) {
 		Token *elem = tl->t[i];
 		if (elem->tag == T_WORD) {
 			const Range range = get_command_sub_range(elem->w_infix);
+
 			if (range.start == -1 || range.end == -1) {
+				if (range.start != -1 && range.end == -1) {
+					dprintf(2, UNCLOSED_COMMAND_SUB_STR);
+					g_exitno = 126;
+					return false;
+				}
+				i += 1;
 				continue;
 			}
 
-			char infix[4096] = {0};
+			char infix[MAX_WORD_LEN] = {0};
 			ft_memcpy(infix, &elem->w_infix[range.start + 1], range.end - range.start);
+			// dprintf(2, "INFIX: %s\n", infix);
 
-			char file_name[1024] = {0};
+			char file_name[MAX_FILENAME_LEN] = {0};
 			sprintf(file_name, "/tmp/command_sub_%d", COMMAND_SUB_NO++);
 			int output_fd = open(file_name, O_CREAT | O_TRUNC | O_WRONLY | O_CLOEXEC, 0644);
 			if (output_fd == -1) {
@@ -181,30 +148,30 @@ bool parser_command_substitution(TokenList *tl, char **env) {
 			char *result = read_whole_file(output_fd);
 			close(output_fd);
 			unlink(file_name);
-			// if (*result == 0) {
-			//
-			// }
+
 			TokenList *word_splitted_result = word_splitter(result, env);
 			free(result);
 			// tokenToStringAll(word_splitted_result);
 			token_list_remove(tl, i);
 			token_list_insert_list(tl, word_splitted_result, i);
 
-
 			char *prefix = ft_substr(elem->w_infix, 0, range.start);
 			char *postfix = ft_substr(elem->w_infix, range.end + 1, ft_strlen(elem->w_infix) - range.end);
 
-			tl->t[i]->w_infix = gc_add(ft_strjoin(prefix, tl->t[i]->w_infix), GC_SUBSHELL);
-			tl->t[i + word_splitted_result->size - 1]->w_infix = gc_add(ft_strjoin(tl->t[i + word_splitted_result->size -1]->w_infix, postfix), GC_SUBSHELL);
+			char *old_word_start = tl->t[i]->w_infix;
+			char *old_word_end = tl->t[i + word_splitted_result->size - 1]->w_infix;
+
+			tl->t[i]->w_infix = (char *) gc_add(ft_strjoin(prefix, tl->t[i]->w_infix), GC_SUBSHELL);
+			tl->t[i + word_splitted_result->size - 1]->w_infix = (char *) gc_add(ft_strjoin(tl->t[i + word_splitted_result->size -1]->w_infix, postfix), GC_SUBSHELL);
+
+			gc_free(old_word_start, GC_SUBSHELL);
+			gc_free(old_word_end, GC_SUBSHELL);
 
 			FREE_POINTERS(prefix, postfix);
 			// dprintf(2, "s: %s\n", tl->t[i]->w_infix);
 			// dprintf(2, "e: %s\n", tl->t[i + word_splitted_result->size - 1]->w_infix);
-			// gc_free(word_splitted_result, GC_SUBSHELL);
-
-			// (void) prefix;
-			// (void) postfix;
-			COMMAND_SUB_NO += 1;
+		} else {
+			i += 1;
 		}
 	}
 	return true;

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:49 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/13 17:13:55 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 16:43:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,10 @@
 #define PARSER_H
 
 #include "../../include/42sh.h"
+
 #define UNEXPECTED_TOKEN_STR "42sh: syntax error near unexpected token "
 #define UNCLOSED_SUBSHELL_STR "42sh: syntax error: unclosed subshell, expected "
+#define UNCLOSED_COMMAND_SUB_STR "42sh: syntax error: unclosed command substitution, expected `)\n"
 #define UNCLOSED_QUOTES_STR "42sh: syntax error: unclosed quotes, expected "
 
 typedef enum {
@@ -46,10 +48,16 @@ typedef struct SimpleCommand {
 	struct SimpleCommand	*next;
 } SimpleCommand;
 
-SimpleCommand *parser_parse_current(TokenList *tl, char **env, int *saved_fds);
+typedef struct {
+	int start;
+	int end;
+} Range;
+
+//-------------------SimpleCommand-----------------------//
+SimpleCommand		*parser_parse_current(TokenList *tl, char **env, int *saved_fds);
 
 //-------------------Here_doc-----------------------//
-bool	heredoc_detector(TokenList *data);
+bool				heredoc_detector(TokenList *data);
 
 //-----------------Redirection List----------------//
 RedirectionList		*redirection_list_init(void);
@@ -57,6 +65,6 @@ void				redirection_list_add(RedirectionList *rl, Redirection *redirection);
 void				redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
 
 //-------------------Command substitution-------------//
-bool		parser_command_substitution(TokenList *tl, char **env);
+bool				parser_command_substitution(TokenList *tl, char **env);
 
 #endif // !PARSER_H

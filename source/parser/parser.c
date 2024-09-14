@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 15:19:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 15:51:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -411,12 +411,13 @@ int there_is_star(char *str){
 
 SimpleCommand *parser_parse_current(TokenList *tl, char **env, int *saved_fds) {
 	
+	(void) saved_fds;
 	// parser_brace_expansion();
 	// parser_tilde_expansion();
 	if (!parser_parameter_expansion(tl, env)){
 		return NULL;
 	}
-	if (!parser_command_substitution(tl, env, saved_fds)) {
+	if (!parser_command_substitution(tl, env)) {
 		return NULL;
 	}
 	// parser_arithmetic_expansion();

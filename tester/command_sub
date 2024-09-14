@@ -41,3 +41,5 @@ echo $(echo $(echo $(uname)))suffix
 echo status:$(ls /etc | grep $(whoami) | wc -l)processes running
 echo result:$(mkdir testdir && echo created || echo failed)directory
 echo result:$(echo $(ls /usr | grep lib))libraries found
+echo FirstPrefix$(echo salut)FirstSuffix$(echo salut)EndSuffix
+echo $(echo FirstPrefix$(echo $(echo hey))FirstSuffix$(echo salut)EndSuffix)

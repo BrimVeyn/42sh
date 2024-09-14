@@ -6,14 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:09:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 16:46:01 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 16:44:14 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/42sh.h"
 
 int g_debug = 0;
-
 
 char *init_prompt_and_signals(void) {
 	signal_manager(SIG_PROMPT);
@@ -23,7 +22,7 @@ char *init_prompt_and_signals(void) {
 	if (isatty(STDIN_FILENO))
 		input = readline("42sh > ");
 	else
-		input = gnl(STDIN_FILENO);
+		input = get_next_line(STDIN_FILENO);
 	return input;
 }
 
