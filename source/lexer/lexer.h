@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 16:42:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 17:14:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ typedef struct {
 	uint16_t	position;
 	uint16_t	read_position;
 	char		ch;
-
 } Lexer;
 
 typedef Lexer * Lexer_p;
@@ -43,15 +42,10 @@ typedef struct TokenList {
 	uint16_t	capacity;
 } TokenList;
 
-typedef struct {
-	void **garbage;
-	uint16_t size;
-	uint16_t capacity;
-} Garbage;
 
 //-----------------Lexer------------------//
 TokenList		*lexer_lex_all(Lexer_p l);
-Token			*lexer_get_next_token(Lexer_p l, bool recursive_call, type_mode mode);
+Token			*lexer_get_next_token(Lexer_p l,type_mode mode);
 Lexer_p			lexer_init(char *input);
 void			lexer_debug(Lexer_p lexer);
 void			lexer_deinit(Lexer_p lexer);
@@ -90,7 +84,7 @@ void			token_list_add(TokenList *tl, Token *token);
 void			token_list_add_list(TokenList *t1, TokenList *t2);
 void			token_list_remove(TokenList *tl, int index);
 void			token_list_insert(TokenList *tl, Token *token, const int index);
-void token_list_insert_list(TokenList *dest, TokenList *src, const int index);
+void			token_list_insert_list(TokenList *dest, TokenList *src, const int index);
 
 
 //----------------Syntax----------------//

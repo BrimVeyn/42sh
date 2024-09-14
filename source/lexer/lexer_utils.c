@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 10:19:29 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 10:35:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 16:34:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,10 +62,12 @@ void eat_whitespace(Lexer_p l) {
 }
 
 bool is_fdable_redirection(Lexer_p l) {
+	if (l->ch == '\0') return false;
 	const char *input_ptr = &l->input[l->position];
-	if (!ft_strncmp(input_ptr, ">&", 2) ||
-		!ft_strncmp(input_ptr, "<&", 2) ||
-		ft_strchr("<>", l->ch)) {
+	const size_t input_len = ft_strlen(input_ptr);
+
+	if ((!ft_strncmp(input_ptr, ">&", 2) || !ft_strncmp(input_ptr, "<&", 2)) ||
+		(input_len >= 1 && ft_strchr("<>", l->ch))) {
 		return true;
 	}
 	return false;
