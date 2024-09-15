@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:45:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 17:13:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/15 14:22:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,15 +45,5 @@ void token_word_init(Token *token) {
 
 //initialise token redir struct
 void token_redirection_init(Token *token) {
-	token->r_postfix = (Token *) gc_add(token_empty_init(), GC_GENERAL);
-}
-
-//Generate generic empty token
-Token *token_none_init(void) {
-	Token *tok = (Token *) gc_add(ft_calloc(1, sizeof(Token)), GC_GENERAL);
-	Token self = {
-		.tag = T_NONE,
-	};
-	*tok = self;
-	return tok;
+	token->r_postfix = (Token *) gc_add(token_empty_init(), GC_SUBSHELL);
 }

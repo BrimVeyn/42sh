@@ -14,6 +14,7 @@ else
 		"expand"
 		"subshell"
 		"command_sub"
+		"command_group"
 	)
 fi
 

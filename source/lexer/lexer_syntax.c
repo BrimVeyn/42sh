@@ -6,13 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:20 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 16:52:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/15 13:25:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include "lexer.h"
-#include "lexer_enum.h"
 
 bool is_subshell_closed(TokenList *tokens, int *it) {
 	(*it)++;
@@ -77,6 +75,10 @@ bool is_redirection(const TokenList *tokens, const int *it){
 	return is_redirection_tag(tokens, it) || (is_word(tokens, it) && tokens->t[*it]->w_postfix->tag == T_REDIRECTION);
 }
 
+bool is_redirection_tag(const TokenList *list, const int *it) {
+	return (list->t[*it]->tag == T_REDIRECTION);
+}
+
 bool is_separator(const TokenList *tokens, const int *it) {
 	return is_logical_operator(tokens, it) || is_break_seperator(tokens, it) || is_pipe(tokens, it);
 }
@@ -91,10 +93,6 @@ bool is_break_seperator(const TokenList *tokens, const int *it) {
 
 bool is_word(const TokenList *list, const int *it) {
 	return (list->t[*it]->tag == T_WORD);
-}
-
-bool is_redirection_tag(const TokenList *list, const int *it) {
-	return (list->t[*it]->tag == T_REDIRECTION);
 }
 
 bool is_newline(const TokenList *list, const int *i) {
@@ -131,4 +129,16 @@ bool is_subshell(const TokenList *list, const int *i) {
 
 bool is_end_sub(const TokenList *list, const int *i) {
 	return list->t[*i]->tag == T_SEPARATOR && list->t[*i]->s_type == S_SUB_CLOSE;
+}
+
+bool is_semi_or_bg(const TokenList *list, const int *it) {
+	return is_semi(list, it) || is_bg(list, it);
+}
+
+bool is_or_or_and(const TokenList *list, const int *it) {
+	return is_or(list, it) || is_and(list, it);
+}
+
+bool is_ast_operator(const TokenList *list, const int *it) {
+	return is_semi_or_bg(list, it) || is_or_or_and(list, it);
 }

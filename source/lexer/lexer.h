@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/14 17:14:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/15 16:30:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,10 @@ bool 	is_separator(const TokenList *tokens, const int *it);
 bool	is_word(const TokenList *list, const int *it);
 bool	is_redirection_tag(const TokenList *list, const int *it);
 bool	is_redirection(const TokenList *tokens, const int *it);
+bool	is_semi_or_bg(const TokenList *list, const int *it);
+bool	is_or_or_and(const TokenList *list, const int *it);
+bool	is_ast_operator(const TokenList *list, const int *it);
+bool	is_command_group(const TokenList *list, const int *i);
 
 
 #endif // !LEXER_H

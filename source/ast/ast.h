@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:53:28 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 16:46:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/15 13:31:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,18 @@ typedef enum {
 	N_OPERATOR,
 } type_of_node;
 
+typedef enum {
+	TREE_SUBSHELL,
+	TREE_COMMAND_GROUP,
+	TREE_DEFAULT,
+} type_of_tree;
+
 typedef struct Node {
 	type_of_node	tag;
+	type_of_tree	tree_tag;
+	RedirectionList *redirs;
 	union {
-		TokenList			*operand;
+		TokenList *operand;
 		type_of_separator	operator;
 	} value;
 	struct Node		*left;
