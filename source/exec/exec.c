@@ -6,15 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/14 21:31:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/15 14:28:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-
 int g_exitno;
 
-bool apply_redirect(const Redirection redirect){
+bool apply_redirect(const Redirection redirect) {
 	int fd = redirect.fd;
 	const int open_flag = (redirect.r_type == R_INPUT) * (O_RDONLY)
 		+ (redirect.r_type == R_OUTPUT || redirect.r_type == R_DUP_BOTH) * (O_WRONLY | O_TRUNC | O_CREAT)
@@ -27,16 +26,17 @@ bool apply_redirect(const Redirection redirect){
 		dup_on = redirect.prefix_fd;
 	}
 
-	if (redirect.su_type == R_FILENAME && (fd = open(redirect.filename, open_flag, 0664)) == -1){
+	if (redirect.su_type == R_FILENAME && (fd = open(redirect.filename, open_flag, 0664)) == -1) {
+		//LARBIN nope
 		perror(strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
-	if (redirect.r_type == R_DUP_BOTH || redirect.r_type == R_DUP_BOTH_APPEND){
+	if (redirect.r_type == R_DUP_BOTH || redirect.r_type == R_DUP_BOTH_APPEND) {
 		if (!secure_dup2(fd, STDOUT_FILENO)) return false;
 		if (!secure_dup2(fd, STDERR_FILENO)) return false;
 	}
-	else{
+	else {
 		if (!secure_dup2(fd, dup_on)) return false;
 	}
 	if (redirect.su_type == R_FILENAME){
@@ -45,8 +45,8 @@ bool apply_redirect(const Redirection redirect){
 	return true;
 }
 
-bool apply_all_redirect(RedirectionList *redirections){
-	for (int i = 0; redirections->r[i]; i++){
+bool apply_all_redirect(RedirectionList *redirections) {
+	for (int i = 0; redirections->r[i]; i++) {
 		if (!apply_redirect(*redirections->r[i])) {
 			return false;
 		}
@@ -54,16 +54,16 @@ bool apply_all_redirect(RedirectionList *redirections){
 	return true;
 }
 
-char *find_bin_location(char *bin, char **env){
+char *find_bin_location(char *bin, char **env) {
 	struct stat file_stat;
-	if (stat(bin, &file_stat) != -1){
+	if (stat(bin, &file_stat) != -1) {
 
-		if (S_ISDIR(file_stat.st_mode)){
+		if (S_ISDIR(file_stat.st_mode)) {
 			dprintf(2, "%s: Is a directory\n", bin);
 			g_exitno = 126;
 			return (NULL);
 		}
-		if (file_stat.st_mode & S_IXUSR){
+		if (file_stat.st_mode & S_IXUSR) {
 			return bin;
 		}
 		else {
@@ -73,20 +73,20 @@ char *find_bin_location(char *bin, char **env){
 		}
 
 	}
-	else if (stat(bin, &file_stat) == -1 && there_is_slash(bin)){
+	else if (stat(bin, &file_stat) == -1 && there_is_slash(bin)) {
 		dprintf(2, "%s: No such file or directory\n", bin);
 		g_exitno = 127;
 		return (NULL);
 	}
 
 	for (int i = 0; env[i]; i++){
-		if (ft_strncmp(env[i], "PATH=", 5) == 0){
+		if (ft_strncmp(env[i], "PATH=", 5) == 0) {
 			char **path = ft_split(env[i] + sizeof("PATH="), ':');
 			for (int i = 0; path[i]; i++){
 				char *bin_with_path = ft_strjoin(path[i], (char *)gc_add(ft_strjoin("/",bin), GC_GENERAL));
 
 				struct stat file_stat;
-				if (stat(bin_with_path, &file_stat) != -1){
+				if (stat(bin_with_path, &file_stat) != -1) {
 					if (file_stat.st_mode & S_IXUSR){
 						free_charchar(path);
 						return (char *)gc_add(bin_with_path, GC_GENERAL);
@@ -184,8 +184,11 @@ int exec_executer(Executer *executer, char **env) {
 		if (current->data_tag == DATA_NODE) {
 			pids[i] = secure_fork();
 			if (pids[i] == 0) {
-				// close_saved_fds(saved_fds);
 				close_all_fds();
+				if (current->n_data->redirs != NULL) {
+					// dprintf(2, "redirection found !\n");
+					apply_all_redirect(current->n_data->redirs);
+				}
 				g_exitno = ast_execute(current->n_data, env);
 				//LE BUG VENAIT DE LA LARBIN
 				gc_addcharchar(env, GC_SUBSHELL);

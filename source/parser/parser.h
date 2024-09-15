@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:49 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 21:30:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/15 11:01:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,8 +62,11 @@ bool				heredoc_detector(TokenList *data);
 RedirectionList		*redirection_list_init(void);
 void				redirection_list_add(RedirectionList *rl, Redirection *redirection);
 void				redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
+void				add_redirection_from_token(RedirectionList **redir_list, const Token *el);
 
 //-------------------Command substitution-------------//
 bool				parser_command_substitution(TokenList *tl, char **env);
+void				parser_skip_subshell(TokenList *list, int *it);
+
 
 #endif // !PARSER_H

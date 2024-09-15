@@ -6,16 +6,17 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/14 20:41:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/15 16:45:38 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include "ast.h"
 
 Node *gen_operator_node(TokenList *tok, Node *left, Node *right) {
 	Node *self = gc_add(ft_calloc(1, sizeof(Node)), GC_SUBSHELL);
 	self->tag = N_OPERATOR;
+	self->tree_tag = TREE_DEFAULT;
+	self->redirs = NULL;
 	self->left = left;
 	self->right = right;
 	self->value.operator = tok->t[0]->s_type;
@@ -25,22 +26,12 @@ Node *gen_operator_node(TokenList *tok, Node *left, Node *right) {
 Node *gen_operand_node(TokenList *list) {
 	Node *self = gc_add(ft_calloc(1, sizeof(Node)), GC_SUBSHELL);
 	self->tag = N_OPERAND;
+	self->tree_tag = TREE_DEFAULT;
+	self->redirs = NULL;
 	self->left = NULL;
 	self->right = NULL;
 	self->value.operand = list;
 	return self;
-}
-
-bool is_semi_or_bg(const TokenList *list, const int *it) {
-	return is_semi(list, it) || is_bg(list, it);
-}
-
-bool is_or_or_and(const TokenList *list, const int *it) {
-	return is_or(list, it) || is_and(list, it);
-}
-
-bool is_ast_operator(const TokenList *list, const int *it) {
-	return is_semi_or_bg(list, it) || is_or_or_and(list, it);
 }
 
 TokenList *extract_command(TokenList *list, int *i) {
@@ -48,11 +39,13 @@ TokenList *extract_command(TokenList *list, int *i) {
 	while (*i < list->size && !is_ast_operator(list, i)) {
 		if (is_subshell(list, i)) {
 			skip_subshell(self, list, i);
+		} else if (is_command_group(list, i)) {
+			// printf("yes !\n");
 		}
-		if (*i < list->size && !is_ast_operator(list, i)) {
+		if (*i < list->size && !is_ast_operator(list, i) && !is_eof(list, i)) {
 			token_list_add(self, list->t[*i]);
-			(*i)++;
 		}
+		(*i)++;
 	}
 	return self;
 }
@@ -77,14 +70,6 @@ TokenListStack *split_operator(TokenList *list) {
 		} else i++;
 	}
 	return self;
-}
-
-void tokenListToStringAll(TokenListStack *list) {
-	for (uint16_t i = 0; i < list->size; i++) {
-		printf(C_BRIGHT_YELLOW"------------%d---------"C_RESET"\n", i);
-		tokenListToString(list->data[i]);
-	}
-	printf(C_BRIGHT_YELLOW"-----------------------------"C_RESET"\n");
 }
 
 bool is_op (TokenList *list) {
@@ -148,14 +133,16 @@ TokenListStack *branch_stack_to_rpn(TokenListStack *list) {
 
 Node *ast_build(TokenList *tokens) {
 	TokenListStack *branch_stack = split_operator(tokens);
-	if (g_debug){
-		printf(C_RED"----------BEFORE-------------"C_RESET"\n");
-		tokenListToStringAll(branch_stack); //Debug
-	}
-	TokenListStack *branch_queue = branch_stack_to_rpn(branch_stack);
 	// if (g_debug){
-	// 	printf(C_RED"----------AFTER-------------"C_RESET"\n");
-	// 	tokenListToStringAll(branch_queue); //Debug
+		// dprintf(2, C_RED"----------BEFORE-------------"C_RESET"\n");
+		// tokenListToString(branch_stack); //Debug
+		// dprintf(2, C_RED"-----------------------------"C_RESET"\n");
+	// }
+	TokenListStack *branch_queue = branch_stack_to_rpn(branch_stack);
+	// for (size_t i = 0; i < branch_queue->size; i++) {
+	// 	dprintf(2, "--------%zu------\n", i);
+	// 	tokenListToString(branch_queue->data[i]);
+	// 	dprintf(2, "-----------------\n");
 	// }
 	Node *AST = generateTree(branch_queue);
 	// printf("------\n");

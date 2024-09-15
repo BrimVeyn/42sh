@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:53:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 20:41:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/15 09:42:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,8 @@ void tokenToString(Token *t, size_t offset) {
 			dprintf(2, C_PURPLE"T_SEPARATOR"C_RESET" {\n");
 			printOffset(offset + 4);
 			dprintf(2, "Type: "C_VIOLET"%s\n"C_RESET, tagName(t->s_type));
+			printOffset(offset);
+			dprintf(2, "}\n");
 			break;
 		default:
 			dprintf(2, "Format not handled\n");
