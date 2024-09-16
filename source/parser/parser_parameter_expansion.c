@@ -6,11 +6,12 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:08:25 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 14:09:59 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/16 14:20:48 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+#include <readline/readline.h>
 
 char *handle_format(char metachar, char * second_world){
 	switch (metachar){
@@ -23,20 +24,7 @@ char *handle_format(char metachar, char * second_world){
 	}
 }
 
-char *parser_get_env_variable_value(char *name, char **env){
-	printf("string %s\n", name);
-	for (int i = 0; env[i]; i++){
-		char *tmp = ft_strjoin(name, "=");
-		if (ft_strncmp(env[i], tmp, ft_strlen(name) + 1) == 0){
-			free(tmp);
-			return ft_strdup(env[i] + ft_strlen(name) + 1);
-		}
-		free(tmp);
-	}
-	return NULL;
-}
-
-char *parser_get_variable_value(char *name, char **env){
+char *parser_get_variable_value(char *name, StringList *env){
 
 	char metachar = 0;
 	int end_of_name = 0;
@@ -46,21 +34,24 @@ char *parser_get_variable_value(char *name, char **env){
 	for (int i = 0; name[i]; i++){
 		if (name[i] == ':'){
 			metachar = name[i + 1];
-			second_world = gc_add(ft_substr(name, i + 2, ft_strlen(name) - i), GC_GENERAL);
+			second_world = ft_substr(name, i + 2, ft_strlen(name) - i);
 			end_of_name = i;
 			break;
 		}
 	}
-	
+
 	if (metachar){
 		ft_memset(name + end_of_name, '\0', ft_strlen(name) - end_of_name);
 	}
 	
-	char *tmp = parser_get_env_variable_value(name, env);
+	char *tmp = string_list_get_value_with_id(env, name);
 	if (tmp){
-		return tmp;
+		free(second_world);
+		char variable_name[4096] = {0};
+		get_env_variable_value(variable_name, tmp);
+		return ft_strdup(variable_name);
 	}
-	free(tmp);
+
 	return handle_format(metachar, second_world);
 }
 
@@ -99,7 +90,7 @@ static bool is_bad_substitution(Token *el, int pos){
 	return false;
 }
 
-bool parser_parameter_expansion(TokenList *tl, char **env){
+bool parser_parameter_expansion(TokenList *tl, StringList *env){
 	for (uint16_t i = 0; i < tl->size; i++){
 		Token *el = tl->t[i];
 
@@ -130,11 +121,11 @@ bool parser_parameter_expansion(TokenList *tl, char **env){
 
 					result = regex_match ("\\${.*}", el->w_infix);
 					if (result.start != -1)
-						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.start + 2, result.end - result.start - 3), GC_GENERAL), env);
+						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.start + 2, result.end - result.start - 3), GC_SUBSHELL), env);
 					else
 						break;
 				}
-				
+					
 				char *start = ft_substr(el->w_infix, 0, result.start);
 				char *end = ft_substr(el->w_infix, result.end, ft_strlen(el->w_infix));
 				char *tmp = ft_strjoin(start, value);

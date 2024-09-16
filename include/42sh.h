@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   42sh.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/12 17:32:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/13 15:27:35 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ typedef enum {
 void			free_charchar(char **s);
 void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
 int				ft_strlenlen(const char **strstr);
-char			**ft_strdupdup(const char **env);
+// char			**ft_strdupdup(char **env);
 int				there_is_star(char *str);
 int				there_is_slash(char *str);
 char			*replace_char_greedy(char *str, char c, char by);
@@ -93,5 +93,8 @@ void			*gc_add(void *ptr, int n);
 void			gc_cleanup(int n);
 void			gc_free(void *addr, int n);
 void			gc_addcharchar(char **str, int n);
+int ft_strstr(const char *haystack, const char *needle);
+int ft_strrstr(const char *haystack, const char *needle);
+
 
 #endif

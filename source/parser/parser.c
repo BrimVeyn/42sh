@@ -5,13 +5,14 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/13 11:21:18 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 14:09:06 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/13 15:05:05 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/16 13:15:40 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 #include <dirent.h>
+#include <stdio.h>
 
 bool is_operator(type_of_separator s) {
 	return s == S_BG || s == S_EOF || s == S_OR || s == S_AND || s == S_SEMI_COLUMN || s == S_NEWLINE || s == S_PIPE;
@@ -106,12 +107,23 @@ SimpleCommand *parser_get_command(TokenList *tl) {
 //echo 1 | (echo 2 && echo 3) | echo 4
 //echo -2 | echo -1 | echo 0; echo 1 | echo 2
 
+void skip_subshell_parser(TokenList *list, int *j) {
+	(*j)++;
+	while (!is_end_sub(list, j)) {
+		if (is_subshell(list, j)) {
+			skip_subshell_parser(list, j);
+		}
+		(*j)++;
+	}
+}
+
 type_of_separator next_separator(TokenList *list, int *i) {
 	int j = *i;
 	while (j < list->size) {
-		if (list->t[j]->tag == T_SEPARATOR && 
-			(list->t[j]->s_type == S_SEMI_COLUMN ||
-			list->t[j]->s_type == S_PIPE)) {
+		if (is_subshell(list, &j)) {
+			skip_subshell_parser(list, &j);
+		}
+		if (is_semi(list, &j) || is_eof(list, &j) || is_pipe(list, &j)) {
 			return list->t[j]->s_type;
 		}
 		(j)++;
@@ -181,6 +193,7 @@ ExecuterList *build_executer_list(TokenList *list) {
 		if (next_separator(list, &i) == S_PIPE) {
 			Executer *executer = NULL;
 			while (next_separator(list, &i) == S_PIPE) {
+				// dprintf(2, "je sui la !\n");
 				if (is_subshell(list, &i)) {
 					Executer *new = executer_init(extract_subshell(list, &i), NULL);
 					executer_push_back(&executer, new);
@@ -215,10 +228,12 @@ ExecuterList *build_executer_list(TokenList *list) {
 	return self;
 }
 
-SimpleCommand *parser_parse_current(TokenList *tl, char **env, int *saved_fds) {
+SimpleCommand *parser_parse_current(TokenList *tl, StringList *env, int *saved_fds) {
 	
 	// parser_brace_expansion();
 	// parser_tilde_expansion();
+
+	//AU BOULOT
 	if (!parser_parameter_expansion(tl, env)){
 		return NULL;
 	}

@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/12 10:09:38 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 15:03:40 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/13 15:04:50 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/16 13:19:32 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,28 +16,6 @@
 
 int g_debug = 0;
 
-char *gnl(int fd) {
-	char buffer[2];
-	char *line = NULL;
-	size_t len = 0;
-
-	buffer[1] = '\0';
-
-	while (read(fd, buffer, 1) > 0 && buffer[0] != '\n') {
-		char *tmp = realloc(line, len + 2);
-		if (!tmp) {
-			free(line);
-			return NULL;
-		}
-		line = tmp;
-		line[len] = buffer[0];
-		len++;
-	}
-	if (line) {
-		line[len] = '\0';
-	}
-	return line;
-}
 
 char *init_prompt_and_signals(void) {
 	signal_manager(SIG_PROMPT);
@@ -128,11 +106,11 @@ void add_input_to_history(char *input){
 	close(history_fd);
 }
 
-void env_to_string_list(StringList env_list, const char **env){
+void env_to_string_list(StringList *env_list, const char **env){
 	for (uint16_t i = 0; env[i]; i++){
-		equal_pos = ft_strstr();
-		string_list_add_or_update(env_list, ft_substr(env[i], 0, ), char *value)
+		string_list_add_or_update(env_list, gc_add(ft_strdup(env[i]), GC_GENERAL));
 	}
+	// string_list_add_or_update(env_list, NULL);
 }
 
 int main(const int ac, const char *av[], const char *env[]) {
@@ -149,8 +127,8 @@ int main(const int ac, const char *av[], const char *env[]) {
 	gc_init(GC_SUBSHELL);
 	StringList *env_list = string_list_init();
 	env_to_string_list(env_list, env);
+	// for(int i = 0; env_list->value[i]; i++){printf("%s", env_list->value[i]);}
 
-	char **dup_env = ft_strdupdup(env);
 	g_signal = 0;
 
 	char *input = NULL;
@@ -172,7 +150,7 @@ int main(const int ac, const char *av[], const char *env[]) {
 			heredoc_detector(tokens);
 			signal_manager(SIG_EXEC);
 			Node *AST = ast_build(tokens);
-			ast_execute(AST, dup_env);
+			ast_execute(AST, env_list);
 			if (g_debug){
 				printTree(AST);
 			}
@@ -180,7 +158,6 @@ int main(const int ac, const char *av[], const char *env[]) {
 			// gc_init(GC_GENERAL);
 		}
 	}
-	free_charchar(dup_env);
 	rl_clear_history();
 	gc_cleanup(GC_ALL);
 	close(STDIN_FILENO);

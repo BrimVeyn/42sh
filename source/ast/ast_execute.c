@@ -6,13 +6,13 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:11:53 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 10:12:14 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/13 15:25:47 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 
-int ast_execute(Node *node, char **env) {
+int ast_execute(Node *node, StringList *env) {
 	if (node->tag == N_OPERATOR) {
 		if (node->value.operator == S_AND) {
 			int exit_lhs = ast_execute(node->left, env);

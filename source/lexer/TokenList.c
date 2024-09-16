@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   TokenList.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 13:37:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/11 11:09:30 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/13 13:23:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+#include <stdint.h>
 
 TokenList *token_list_init(void) {
 	TokenList *self = gc_add(ft_calloc(1, sizeof(TokenList)), GC_SUBSHELL);
@@ -41,7 +42,7 @@ void token_list_add_list(TokenList *t1, TokenList *t2) {
 	}
 }
 
-void token_list_insert(TokenList *tl, Token *token, int index){
+void token_list_insert(TokenList *tl, Token *token, const int index){
 	if (tl->size >= tl->capacity) {
 		tl->capacity *= 2;
 		Token **tmp = tl->t;
@@ -57,17 +58,16 @@ void token_list_insert(TokenList *tl, Token *token, int index){
     tl->t[index] = token;
 }
 
+void token_list_insert_list(TokenList *dest, TokenList *src, const int index) {
+	for (int i = src->size - 1; i >= 0; i--) {
+		token_list_insert(dest, src->t[i], index);
+	}
+}
+
 void token_list_remove(TokenList *tl, int index){
-
-    // if (index < 0 || index >= tl->size) {
-    //     fprintf(stderr, "Invalid index: %d\n", index);
-    //     return;
-    // }
-
     for (int i = index; i < tl->size - 1; i++) {
         tl->t[i] = tl->t[i + 1];
     }
-
     tl->t[tl->size - 1] = NULL;
 
     tl->size--;
