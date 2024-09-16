@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/30 10:19:29 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 11:29:04 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/16 16:20:37 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/16 16:20:37 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,10 +76,12 @@ void eat_whitespace(Lexer_p l) {
 }
 
 bool is_fdable_redirection(Lexer_p l) {
+	if (l->ch == '\0') return false;
 	const char *input_ptr = &l->input[l->position];
-	if (!ft_strncmp(input_ptr, ">&", 2) ||
-		!ft_strncmp(input_ptr, "<&", 2) ||
-		ft_strchr("<>", l->ch)) {
+	const size_t input_len = ft_strlen(input_ptr);
+
+	if ((!ft_strncmp(input_ptr, ">&", 2) || !ft_strncmp(input_ptr, "<&", 2)) ||
+		(input_len >= 1 && ft_strchr("<>", l->ch))) {
 		return true;
 	}
 	return false;

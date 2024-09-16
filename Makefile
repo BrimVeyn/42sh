@@ -5,8 +5,8 @@
 #                                                     +:+ +:+         +:+      #
 #    By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/09/04 15:58:56 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/09/16 14:47:49 by nbardavi         ###   ########.fr        #
+#    Created: 2024/09/16 16:15:35 by nbardavi          #+#    #+#              #
+#    Updated: 2024/09/16 16:15:43 by nbardavi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,6 +17,7 @@ CC 				:= gcc
 LDFLAGS			:= -lreadline -lncurses
 CFLAGS 			:= -Wall -Werror -Wextra -g3 
 SANFLAGS		:= -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
+
 LEXER_SRC 		:= $(filter-out source/lexer/lexer_main.c, $(wildcard source/lexer/*.c))
 EXEC_SRC 		:= $(filter-out source/exec/exec_main.c, $(wildcard source/exec/*.c))
 AST_SRC			:= $(filter-out source/ast/ast_main.c, $(wildcard source/ast/*.c))
@@ -28,10 +29,10 @@ UTILS_SRC		:= $(wildcard source/utils/*.c)
 SIGNALS_SRC		:= $(wildcard source/signals/*.c)
 
 
-SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC) $(REGEX_SRC)
+SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) \
+				   $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC) $(REGEX_SRC)
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
-# TEST
 
 AST_TEST		:= ast_test
 AST_TEST_SRC	:= source/ast/ast_main.c $(filter-out source/main.c, $(SRC))

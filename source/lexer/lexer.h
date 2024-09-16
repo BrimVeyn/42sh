@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/13 15:05:10 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 17:01:38 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/16 16:17:51 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/16 16:17:52 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ typedef struct {
 	uint16_t	position;
 	uint16_t	read_position;
 	char		ch;
-
 } Lexer;
 
 typedef Lexer * Lexer_p;
@@ -43,11 +42,6 @@ typedef struct TokenList {
 	uint16_t	capacity;
 } TokenList;
 
-typedef struct {
-	void **garbage;
-	uint16_t size;
-	uint16_t capacity;
-} Garbage;
 
 typedef struct StringList {
 	char		**value;
@@ -57,7 +51,7 @@ typedef struct StringList {
 
 //-----------------Lexer------------------//
 TokenList		*lexer_lex_all(Lexer_p l);
-Token			*lexer_get_next_token(Lexer_p l, bool recursive_call, type_mode mode);
+Token			*lexer_get_next_token(Lexer_p l,type_mode mode);
 Lexer_p			lexer_init(char *input);
 void			lexer_debug(Lexer_p lexer);
 void			lexer_deinit(Lexer_p lexer);
@@ -96,7 +90,7 @@ void			token_list_add(TokenList *tl, Token *token);
 void			token_list_add_list(TokenList *t1, TokenList *t2);
 void			token_list_remove(TokenList *tl, int index);
 void			token_list_insert(TokenList *tl, Token *token, const int index);
-void token_list_insert_list(TokenList *dest, TokenList *src, const int index);
+void			token_list_insert_list(TokenList *dest, TokenList *src, const int index);
 
 //----------------StringList----------------//
 void get_env_variable_id(char *buffer, char *variable);
@@ -109,6 +103,7 @@ char *string_list_get_value_with_id(StringList *sl, char *id);
 
 //----------------Syntax----------------//
 bool	is_pipe(const TokenList *list, const int *i);
+bool	is_newline(const TokenList *list, const int *i);
 bool 	is_eof(const TokenList *list, const int *i);
 bool 	is_semi(const TokenList *list, const int *i);
 bool 	is_subshell(const TokenList *list, const int *i);
@@ -122,6 +117,12 @@ bool 	is_separator(const TokenList *tokens, const int *it);
 bool	is_word(const TokenList *list, const int *it);
 bool	is_redirection_tag(const TokenList *list, const int *it);
 bool	is_redirection(const TokenList *tokens, const int *it);
+bool	is_semi_or_bg(const TokenList *list, const int *it);
+bool	is_or_or_and(const TokenList *list, const int *it);
+bool	is_ast_operator(const TokenList *list, const int *it);
+Range is_command_group(const TokenList *list, const int *i);
+bool	is_cmdgrp_start(const TokenList *list, const int *i);
+bool	is_cmdgrp_end(const TokenList *list, const int *i);
 
 
 #endif // !LEXER_H

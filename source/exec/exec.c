@@ -5,19 +5,16 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/13 15:04:55 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 15:58:31 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/16 16:20:10 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/16 16:26:30 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-
 int g_exitno;
 
-bool apply_redirect(const Redirection redirect){
+//LARBIN add FD validity check (>1023)
+bool apply_redirect(const Redirection redirect) {
 	int fd = redirect.fd;
 	const int open_flag = (redirect.r_type == R_INPUT) * (O_RDONLY)
 		+ (redirect.r_type == R_OUTPUT || redirect.r_type == R_DUP_BOTH) * (O_WRONLY | O_TRUNC | O_CREAT)
@@ -29,7 +26,6 @@ bool apply_redirect(const Redirection redirect){
 	if (redirect.prefix_fd != -1){
 		dup_on = redirect.prefix_fd;
 	}
-
 
 	if (redirect.su_type == R_FILENAME && (fd = open(redirect.filename, open_flag, 0664)) == -1){
 		return false;
@@ -44,11 +40,11 @@ bool apply_redirect(const Redirection redirect){
 		return false;
 	}
 
-	if (redirect.r_type == R_DUP_BOTH || redirect.r_type == R_DUP_BOTH_APPEND){
+	if (redirect.r_type == R_DUP_BOTH || redirect.r_type == R_DUP_BOTH_APPEND) {
 		if (!secure_dup2(fd, STDOUT_FILENO)) return false;
 		if (!secure_dup2(fd, STDERR_FILENO)) return false;
 	}
-	else{
+	else {
 		if (!secure_dup2(fd, dup_on)) return false;
 	}
 	if (redirect.su_type == R_FILENAME){
@@ -57,8 +53,8 @@ bool apply_redirect(const Redirection redirect){
 	return true;
 }
 
-bool apply_all_redirect(RedirectionList *redirections){
-	for (int i = 0; redirections->r[i]; i++){
+bool apply_all_redirect(RedirectionList *redirections) {
+	for (int i = 0; redirections->r[i]; i++) {
 		if (!apply_redirect(*redirections->r[i])) {
 			return false;
 		}
@@ -68,14 +64,14 @@ bool apply_all_redirect(RedirectionList *redirections){
 
 char *find_bin_location(char *bin, StringList *env){
 	struct stat file_stat;
-	if (stat(bin, &file_stat) != -1){
+	if (stat(bin, &file_stat) != -1) {
 
-		if (S_ISDIR(file_stat.st_mode)){
+		if (S_ISDIR(file_stat.st_mode)) {
 			dprintf(2, "%s: Is a directory\n", bin);
 			g_exitno = 126;
 			return (NULL);
 		}
-		if (file_stat.st_mode & S_IXUSR){
+		if (file_stat.st_mode & S_IXUSR) {
 			return bin;
 		}
 		else {
@@ -85,13 +81,12 @@ char *find_bin_location(char *bin, StringList *env){
 		}
 
 	}
-	else if (stat(bin, &file_stat) == -1 && there_is_slash(bin)){
+	else if (stat(bin, &file_stat) == -1 && there_is_slash(bin)) {
 		dprintf(2, "%s: No such file or directory\n", bin);
 		g_exitno = 127;
 		return (NULL);
 	}
 
-	
 	char **path = ft_split(string_list_get_value_with_id(env, "PATH"), ':');
 	for (int i = 0; path[i]; i++){
 		char *bin_with_path = ft_strjoin(path[i], (char *)gc_add(ft_strjoin("/",bin), GC_GENERAL));
@@ -167,14 +162,15 @@ void close_std_fds(void) {
 int exec_executer(Executer *executer, StringList *env) {
 	Executer *current = executer;
 	int pipefd[2] = {-1 , -1};
-	bool prev_pipe = false;
+	int saved_fds[3] = {-1, -1, -1};
 	pid_t pids[1024];
 	int i = 0;
-	int saved_fds[3] = {-1, -1, -1};
 
 	saved_fds[STDIN_FILENO] = dup(STDIN_FILENO);
 	saved_fds[STDOUT_FILENO]= dup(STDOUT_FILENO);
 	saved_fds[STDERR_FILENO] = dup(STDERR_FILENO);
+
+	bool prev_pipe = false;
 
 	while (current) {
 
@@ -183,7 +179,6 @@ int exec_executer(Executer *executer, StringList *env) {
             close(pipefd[0]);
 		}
 		if (current->next) {
-			// dprintf(2, "je suis la !\n");
 			prev_pipe = true;
 			secure_pipe2(pipefd, O_CLOEXEC);
 			secure_dup2(pipefd[1], STDOUT_FILENO);
@@ -191,23 +186,31 @@ int exec_executer(Executer *executer, StringList *env) {
 		}
 		
 		if (current->data_tag == DATA_NODE) {
-			pids[i] = secure_fork();
-			if (pids[i] == 0) {
-				// close_saved_fds(saved_fds);
-				close_all_fds();
+			if (current->n_data->tree_tag == TREE_COMMAND_GROUP) {
+				if (current->n_data->redirs != NULL) {
+					apply_all_redirect(current->n_data->redirs);
+				}
 				g_exitno = ast_execute(current->n_data, env);
-				//LE BUG VENAIT DE LA LARBIN
-				// gc_addcharchar(env, GC_SUBSHELL);
-				gc_cleanup(GC_SUBSHELL);
-				free(gc_get()[GC_GENERAL].garbage);
-				//MERDE !
-				close_std_fds();
-				exit(g_exitno);
+			} else if (current->n_data->tree_tag == TREE_SUBSHELL) {
+				pids[i] = secure_fork();
+				if (pids[i] == 0) {
+					close_all_fds();
+					if (current->n_data->redirs != NULL) {
+						apply_all_redirect(current->n_data->redirs);
+					}
+					g_exitno = ast_execute(current->n_data, env);
+					//LE BUG VENAIT DE LA LARBIN
+					gc_cleanup(GC_SUBSHELL);
+					free(gc_get()[GC_GENERAL].garbage);
+					//MERDE !
+					close_std_fds();
+					exit(g_exitno);
+				}
 			}
 		}
 
 		if (current->data_tag == DATA_TOKENS) {
-			SimpleCommand *command = parser_parse_current(current->s_data, env, saved_fds);
+			SimpleCommand *command = parser_parse_current(current->s_data, env);
 			// printCommand(command);
 			if (!command && pipefd[0] == -1){
 				close_all_fds();
@@ -230,7 +233,8 @@ int exec_executer(Executer *executer, StringList *env) {
 		dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
 		dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
 		
-		i += 1;
+		//increment pid only if it isnt a command group
+		i += !(current->data_tag == DATA_NODE && current->n_data->tree_tag == TREE_COMMAND_GROUP);
 		current = current->next;
 	}
 
@@ -255,5 +259,3 @@ int exec_node(Node *node, StringList *env) {
 	}
 	return g_exitno;
 }
-
-//Faire une global avec le GC actuel
