@@ -3,38 +3,33 @@ cat < ./infiles/file1 > ./outfiles/test2.txt
 ls non_existing_file &> ./outfiles/test3.txt
 ls non_existing_file &>> ./outfiles/test4.txt; echo Command completed &>> ./outfiles/test4.txt
 echo a > ./outfiles/test5.txt; ls non_existing_file &>> ./outfiles/test5.txt
-echo a > ./outfiles/test6.txt | echo b >> ./outfiles/test6.txt
 cat < ./infiles/empty | echo b > ./outfiles/test7.txt
-echo a &> ./outfiles/test8.txt | echo b &>> ./outfiles/test8.txt
 ls non_existing_file &> ./outfiles/test9.txt | echo Error handled &>> ./outfiles/test9.txt
 echo a > ./outfiles/test10.txt; echo b < ./infiles/file1 >> ./outfiles/test10.txt
 cat < ./infiles/no_perms > ./outfiles/test11.txt; echo Perm issue &>> ./outfiles/test11.txt
-ls non_existing_file &> ./outfiles/test12.txt | echo b &>> ./outfiles/test12.txt
-echo a > ./outfiles/test13.txt | ls non_existing_file &>> ./outfiles/test13.txt
 cat < ./infiles/file1 | echo b > ./outfiles/test14.txt
 echo a > ./outfiles/test15.txt; cat < ./infiles/empty >> ./outfiles/test15.txt
 ls non_existing_file &>> ./outfiles/test16.txt; echo b &>> ./outfiles/test16.txt
 echo a > ./outfiles/test17.txt | ls non_existing_file &>> ./outfiles/test17.txt
 echo a > ./outfiles/test18.txt; echo b >> ./outfiles/test18.txt | ls non_existing_file &>> ./outfiles/test18.txt
-cat < ./infiles/file1 &> ./outfiles/test19.txt | echo a >> ./outfiles/test19.txt
 echo a &>> ./outfiles/test20.txt; echo b &>> ./outfiles/test20.txt
 ls non_existing_file &>> ./outfiles/test21.txt; echo Handled &>> ./outfiles/test21.txt
 echo a > ./outfiles/test22.txt | ls non_existing_file &>> ./outfiles/test22.txt
-cat < ./infiles/file1 > ./outfiles/test23.txt | echo b >> ./outfiles/test23.txt
 ls non_existing_file &> ./outfiles/test24.txt | echo error check &>> ./outfiles/test24.txt
 echo a > ./outfiles/test25.txt; cat < ./infiles/file1 >> ./outfiles/test25.txt
-echo a > ./outfiles/test26.txt | echo b >> ./outfiles/test26.txt
-ls non_existing_file &>> ./outfiles/test27.txt | echo b &>> ./outfiles/test27.txt
 echo a > ./outfiles/test28.txt | ls non_existing_file &>> ./outfiles/test28.txt
-echo a > ./outfiles/test29.txt 2>&1 | echo b &>> ./outfiles/test29.txt
 echo a > ./outfiles/test30.txt; echo b > ./outfiles/test30.txt 2>&1
-cat < ./infiles/file1 > ./outfiles/test31.txt 2>&1 | echo c &>> ./outfiles/test31.txt
 echo a 2>&1 > ./outfiles/test32.txt | echo b &>> ./outfiles/test32.txt
-echo a > ./outfiles/test33.txt 2>&1 | ls non_existing_file &>> ./outfiles/test33.txt
 echo a &> ./outfiles/test34.txt; echo b <&1 &>> ./outfiles/test34.txt
 cat < ./infiles/file1 >&2 > ./outfiles/test35.txt
-echo a > ./outfiles/test36.txt | echo b <&2 >> ./outfiles/test36.txt
-ls non_existing_file &> ./outfiles/test37.txt | echo a <&1 &>> ./outfiles/test37.txt
 echo a < ./infiles/file1 >&1 > ./outfiles/test38.txt
 cat < ./infiles/empty >&1 > ./outfiles/test39.txt
-echo a > ./outfiles/test40.txt | echo b >&2 >> ./outfiles/test40.txt
+echo errors
+cat < ./infiles/file1 300>&1 > ./outfiles/test58.txt | echo c >&5 >> ./outfiles/test58.txt
+ls non_existing_file 1024>&2 > ./outfiles/test59.txt | echo File not found 512>&1 >> ./outfiles/test59.txt
+echo a > ./outfiles/test60.txt -10>&2 | ls non_existing_file -20>&1 >> ./outfiles/test60.txt
+cat < ./infiles/file1 10000>&1 > ./outfiles/test61.txt | echo error 5000>&2 >> ./outfiles/test61.txt
+ls non_existing_file 3>&1 > ./outfiles/test62.txt 4>&2 | echo handled >&99 >> ./outfiles/test62.txt
+echo a > ./outfiles/test63.txt 77>&1 | ls non_existing_file 88>&2 >> ./outfiles/test63.txt
+echo a > ./outfiles/test65.txt 3333>&1 | ls non_existing_file 4444>&2 >> ./outfiles/test65.txt
+cat < ./infiles/file1 -2>&1 > ./outfiles/test66.txt | echo invalid -3>&2 >> ./outfiles/test66.txt

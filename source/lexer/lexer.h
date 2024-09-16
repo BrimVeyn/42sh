@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/12 10:12:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 14:31:01 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/13 15:05:10 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/13 17:01:38 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,6 @@ typedef struct {
 
 typedef struct StringList {
 	char		**value;
-	char		**id;
 	uint16_t	size;
 	uint16_t	capacity;
 } StringList;
@@ -95,13 +94,18 @@ void			token_word_init(Token *token);
 TokenList		*token_list_init(void);
 void			token_list_add(TokenList *tl, Token *token);
 void			token_list_add_list(TokenList *t1, TokenList *t2);
-void			token_list_insert(TokenList *tl, Token *token, int index);
 void			token_list_remove(TokenList *tl, int index);
+void			token_list_insert(TokenList *tl, Token *token, const int index);
+void token_list_insert_list(TokenList *dest, TokenList *src, const int index);
 
 //----------------StringList----------------//
+void get_env_variable_id(char *buffer, char *variable);
+void get_env_variable_value(char *buffer, char *variable);
+int get_env_variable_index(StringList *sl, char *variable);
 StringList *string_list_init(void);
-void string_list_add_or_update(StringList *sl, char *id, char *value);
-void string_list_remove(StringList *sl, char *id);
+void string_list_add_or_update(StringList *sl, char *variable);
+void string_list_remove(StringList *sl, char *variable);
+char *string_list_get_value_with_id(StringList *sl, char *id);
 
 //----------------Syntax----------------//
 bool	is_pipe(const TokenList *list, const int *i);
@@ -113,11 +117,11 @@ bool 	is_or(const TokenList *list, const int *i);
 bool 	is_bg(const TokenList *list, const int *i);
 bool 	is_and(const TokenList *list, const int *i);
 bool 	is_logical_operator(const TokenList *tokens, const int *it);
-bool is_break_seperator(const TokenList *tokens, const int *it);
+bool	is_break_seperator(const TokenList *tokens, const int *it);
 bool 	is_separator(const TokenList *tokens, const int *it);
-bool is_word(const TokenList *list, const int *it);
-bool is_redirection_tag(const TokenList *list, const int *it);
-bool is_redirection(const TokenList *tokens, const int *it);
+bool	is_word(const TokenList *list, const int *it);
+bool	is_redirection_tag(const TokenList *list, const int *it);
+bool	is_redirection(const TokenList *tokens, const int *it);
 
 
 #endif // !LEXER_H

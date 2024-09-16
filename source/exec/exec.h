@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 11:41:08 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 16:17:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/13 15:25:47 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@ int secure_fork(void);
 bool secure_dup2(int from, int to);
 void secure_pipe2(int pipefd[2], int flags);
 void secure_execve(const char *pathname, char *const argv[], char *const envp[]);
-int exec_node(Node *node, char **env);
-char *find_bin_location(char *bin, char **env);
+int exec_node(Node *node, StringList *env);
+char *find_bin_location(char *bin, StringList *env);
 void close_saved_fds(int *saved_fds);
 void close_std_fds(void);
 

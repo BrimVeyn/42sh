@@ -6,7 +6,7 @@
 #    By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/04 15:58:56 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/09/11 15:49:30 by nbardavi         ###   ########.fr        #
+#    Updated: 2024/09/16 14:47:49 by nbardavi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,8 +15,8 @@ NAME			:= 42sh
 LIBFT			:= libftprintf/libftprintf.a
 CC 				:= gcc
 LDFLAGS			:= -lreadline -lncurses
-CFLAGS 			:= -Wall -Werror -Wextra -g3 #-fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
-
+CFLAGS 			:= -Wall -Werror -Wextra -g3 
+SANFLAGS		:= -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
 LEXER_SRC 		:= $(filter-out source/lexer/lexer_main.c, $(wildcard source/lexer/*.c))
 EXEC_SRC 		:= $(filter-out source/exec/exec_main.c, $(wildcard source/exec/*.c))
 AST_SRC			:= $(filter-out source/ast/ast_main.c, $(wildcard source/ast/*.c))
@@ -49,6 +49,8 @@ EXEC_TEST		:= exec_test
 EXEC_TEST_SRC	:= source/exec/exec_main.c $(filter-out source/main.c, $(SRC))
 EXEC_TEST_OBJ	:= $(EXEC_TEST_SRC:source/%.c=objects/%.o)
 
+SAN 			:= san
+
 OBJDIR 			:= objects
 DIRS			:= $(patsubst source/%,objects/%,$(dir $(wildcard source/*/*)))
 
@@ -63,6 +65,12 @@ CYAN			:= \033[0;96m
 WHITE			:= \033[0;97m
 
 all: $(NAME)
+
+$(SAN): $(LIBFT) $(OBJDIR) $(OBJ)
+	@echo "$(GREEN)Making binary with sanitizer: $(NAME)"
+	@printf "$(MAGENTA)"
+	$(CC) $(OBJ) $(LIBFT) $(CFLAGS) $(LDFLAGS) $(SANFLAGS) -o $(NAME)
+	@printf "Done with sanitizer !$(DEF_COLOR)\n"
 
 $(LEXER_TEST): $(LIBFT) $(LEXER_OBJ)
 	@echo "$(RED)Making test binary: $(LEXER_TEST)"
@@ -121,4 +129,4 @@ $(LIBFT) :
 
 re: fclean all
 	
-.PHONY: all clean fclean re regex_test lexer_test exec_test
+.PHONY: all clean fclean re regex_test lexer_test exec_test san

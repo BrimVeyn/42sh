@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 13:14:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/09 14:30:13 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/13 15:27:30 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,13 +27,36 @@ int ft_strlenlen(const char **strstr){
 	return i;
 }
 
-char **ft_strdupdup(const char **env){
-	char **strstr = ft_calloc(ft_strlenlen(env) + 1, sizeof(char *));
-	if (!strstr){
-		return NULL;
+// char **ft_strdupdup(const StringList *env){
+// 	char **strstr = ft_calloc(ft_strlenlen(env) + 1, sizeof(char *));
+// 	if (!strstr){
+// 		return NULL;
+// 	}
+// 	for (int i = 0; env[i]; i++){
+// 		strstr[i] = ft_strdup(env[i]);
+// 	}
+// 	return strstr;
+// }
+
+char *gnl(int fd) {
+	char buffer[2];
+	char *line = NULL;
+	size_t len = 0;
+
+	buffer[1] = '\0';
+
+	while (read(fd, buffer, 1) > 0 && buffer[0] != '\n') {
+		char *tmp = realloc(line, len + 2);
+		if (!tmp) {
+			free(line);
+			return NULL;
+		}
+		line = tmp;
+		line[len] = buffer[0];
+		len++;
 	}
-	for (int i = 0; env[i]; i++){
-		strstr[i] = ft_strdup(env[i]);
+	if (line) {
+		line[len] = '\0';
 	}
-	return strstr;
+	return line;
 }

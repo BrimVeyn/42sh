@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ast.h                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:53:28 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/05 17:17:50 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/13 15:25:47 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ typedef struct {
 //----------------AST-----------------//
 Node		*ast_build(TokenList *tokens);
 Node		*generateTree(TokenListStack *list);
-int			ast_execute(Node *AST, char **env);
+int			ast_execute(Node *AST, StringList *env);
 
 //----------------Token List Stack------------------//
 TokenListStack		*token_list_stack_init(void);

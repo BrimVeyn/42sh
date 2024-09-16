@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 11:21:10 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 14:09:50 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/13 15:25:47 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,9 +47,9 @@ typedef struct SimpleCommand {
 	struct SimpleCommand	*next;
 } SimpleCommand;
 
-SimpleCommand *parser_parse_current(TokenList *tl, char **env, int *saved_fds);
+SimpleCommand *parser_parse_current(TokenList *tl, StringList *env, int *saved_fds);
 bool heredoc_detector(TokenList *data);
-char *parser_get_env_variable_value(char *name, char **env);
+char *parser_get_env_variable_value(char *name, StringList *env);
 
 //-----------------Redirection List----------------//
 RedirectionList *redirection_list_init(void);
@@ -59,9 +59,9 @@ void redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
 int parser_filename_expansion(TokenList *tl);
 
 //-------------------Command substitution-------------//
-bool parser_command_substitution(TokenList *tl, char **env, int *saved_fds);
+bool parser_command_substitution(TokenList *tl, StringList *env, int *saved_fds);
 
 //-------------------Parameter Expansion-------------//
-bool parser_parameter_expansion(TokenList *tl, char **env);
+bool parser_parameter_expansion(TokenList *tl, StringList *env);
 
 #endif // !PARSER_H
