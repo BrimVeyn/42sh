@@ -6,11 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:20 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/15 13:25:48 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/16 16:14:38 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+#include "lexer.h"
+#include <stdio.h>
 
 bool is_subshell_closed(TokenList *tokens, int *it) {
 	(*it)++;
@@ -44,6 +46,14 @@ bool lexer_syntax_error(TokenList *tokens) {
 		if (is_subshell(tokens, &it) && !is_subshell_closed(tokens, &it)) {
 			dprintf(2, UNCLOSED_SUBSHELL_STR"`%s\'\n", tagStr((type_of_separator) S_SUB_CLOSE));
 			return true;
+		}
+		if (it == 0 && is_cmdgrp_end(tokens, &it)) {
+			dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tokens->t[it]->w_infix);
+			return true;
+		}
+		if (it != 0 && is_semi(tokens, &(int){it - 1}) && is_cmdgrp_end(tokens, &it)) {
+			// if (check_cmdgrp_syntax_rec())
+			// dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tokens->t[it]->w_infix);
 		}
 		if (is_separator(tokens, &it)) {
 			if (it == 0) {

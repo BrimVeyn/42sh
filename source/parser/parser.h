@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:01:49 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/15 11:01:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/16 12:15:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,11 +46,6 @@ typedef struct SimpleCommand {
 	char					*bin;
 	char					**args;
 } SimpleCommand;
-
-typedef struct {
-	int start;
-	int end;
-} Range;
 
 //-------------------SimpleCommand-----------------------//
 SimpleCommand		*parser_parse_current(TokenList *tl, char **env);

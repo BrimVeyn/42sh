@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ast_build.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/15 16:45:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/16 14:00:49 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,18 +35,38 @@ Node *gen_operand_node(TokenList *list) {
 }
 
 TokenList *extract_command(TokenList *list, int *i) {
+	// dprintf(2, "-------------START----------\n");
+	// tokenListToString(list);
+	// dprintf(2, "----------------------------\n");
 	TokenList *self = token_list_init();
+	if (is_cmdgrp_start(list, i)) {
+		token_list_add(self, list->t[*i]);
+		(*i)++; //skip '{'
+		Range cmdgrp_range = is_command_group(list, i);
+		if (cmdgrp_range.end == -1) {
+			dprintf(2, UNCLOSED_SUBSHELL_STR);
+			exit(EXIT_FAILURE);
+		}
+		while (*i <= cmdgrp_range.end || is_redirection(list, i)) {
+			token_list_add(self, list->t[*i]);
+			(*i)++;
+		}
+		// dprintf(2, "start : %d, end: %d\n", cmdgrp_range.start, cmdgrp_range.end);
+		// dprintf(2, "i = %d\n", *i);
+		return self;
+	}
 	while (*i < list->size && !is_ast_operator(list, i)) {
 		if (is_subshell(list, i)) {
 			skip_subshell(self, list, i);
-		} else if (is_command_group(list, i)) {
-			// printf("yes !\n");
 		}
 		if (*i < list->size && !is_ast_operator(list, i) && !is_eof(list, i)) {
 			token_list_add(self, list->t[*i]);
 		}
 		(*i)++;
 	}
+	// dprintf(2, "-------------START----------\n");
+	// tokenListToString(self);
+	// dprintf(2, "----------------------------\n");
 	return self;
 }
 
@@ -57,6 +77,9 @@ TokenList *extract_operator(TokenList *list, int *i) {
 }
 
 TokenListStack *split_operator(TokenList *list) {
+	// dprintf(2, "-------------PLOUF----------\n");
+	// tokenListToString(list);
+	// dprintf(2, "----------------------------\n");
 	TokenListStack *self = token_list_stack_init();
 	int i = 0;
 	while (i < list->size) {
@@ -64,7 +87,7 @@ TokenListStack *split_operator(TokenList *list) {
 			i++;
 			continue;
 		}
-		token_list_stack_push(self, extract_command(list, &i));
+			token_list_stack_push(self, extract_command(list, &i));
 		if (i < list->size && is_ast_operator(list, &i)) {
 			token_list_stack_push(self, extract_operator(list, &i));
 		} else i++;

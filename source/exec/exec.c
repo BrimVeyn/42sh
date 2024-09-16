@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/15 14:28:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/16 15:15:40 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 int g_exitno;
 
+//LARBIN add FD validity check (>1023)
 bool apply_redirect(const Redirection redirect) {
 	int fd = redirect.fd;
 	const int open_flag = (redirect.r_type == R_INPUT) * (O_RDONLY)
@@ -182,21 +183,27 @@ int exec_executer(Executer *executer, char **env) {
 		}
 		
 		if (current->data_tag == DATA_NODE) {
-			pids[i] = secure_fork();
-			if (pids[i] == 0) {
-				close_all_fds();
+			if (current->n_data->tree_tag == TREE_COMMAND_GROUP) {
 				if (current->n_data->redirs != NULL) {
-					// dprintf(2, "redirection found !\n");
 					apply_all_redirect(current->n_data->redirs);
 				}
 				g_exitno = ast_execute(current->n_data, env);
-				//LE BUG VENAIT DE LA LARBIN
-				gc_addcharchar(env, GC_SUBSHELL);
-				gc_cleanup(GC_SUBSHELL);
-				free(gc_get()[GC_GENERAL].garbage);
-				//MERDE !
-				close_std_fds();
-				exit(g_exitno);
+			} else if (current->n_data->tree_tag == TREE_SUBSHELL) {
+				pids[i] = secure_fork();
+				if (pids[i] == 0) {
+					close_all_fds();
+					if (current->n_data->redirs != NULL) {
+						apply_all_redirect(current->n_data->redirs);
+					}
+					g_exitno = ast_execute(current->n_data, env);
+					//LE BUG VENAIT DE LA LARBIN
+					gc_addcharchar(env, GC_SUBSHELL);
+					gc_cleanup(GC_SUBSHELL);
+					free(gc_get()[GC_GENERAL].garbage);
+					//MERDE !
+					close_std_fds();
+					exit(g_exitno);
+				}
 			}
 		}
 
@@ -225,7 +232,8 @@ int exec_executer(Executer *executer, char **env) {
 		dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
 		dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
 		
-		i += 1;
+		//increment pid only if it isnt a command group
+		i += !(current->data_tag == DATA_NODE && current->n_data->tree_tag == TREE_COMMAND_GROUP);
 		current = current->next;
 	}
 

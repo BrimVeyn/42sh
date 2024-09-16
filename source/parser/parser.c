@@ -6,11 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:10:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/15 16:45:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/16 16:13:36 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+#include <stdio.h>
 
 char *here_doc(char *eof){
 	char *input = NULL;
@@ -200,7 +201,7 @@ void skip_subshell(TokenList *newlist, TokenList *list, int *i) {
 
 RedirectionList *eat_redirections(TokenList *list, type_of_tree tag, int start) {
 	if (tag == TREE_DEFAULT) return NULL;
-	if (tag == TREE_SUBSHELL) {
+	if (tag == TREE_SUBSHELL || tag == TREE_COMMAND_GROUP) {
 		int i = start;
 
 		if (i >= list->size) 
@@ -248,6 +249,35 @@ TokenList *extract_tokens(TokenList *list, int *i) {
 	return newlist;
 }
 
+Node *extract_command_group(TokenList *list, int *i) {
+	TokenList *newlist = token_list_init();
+	(*i)++; //skip '{'
+	while (*i < list->size) {
+		token_list_add(newlist, list->t[*i]);
+		(*i)++;
+	}
+	*i = list->size - 1;
+	// dprintf(2, "i = %d\n", *i);
+	while (!(is_semi(list, &((int){*i - 1})) && is_cmdgrp_end(list, i))) {
+		token_list_remove(newlist, *i);
+		(*i)--;
+	}
+	token_list_remove(newlist, *i);
+
+	// printf("============================================\n");
+	// tokenListToString(newlist);
+	// printf("============================================\n");
+	Node *AST = ast_build(newlist);
+	AST->tree_tag = TREE_COMMAND_GROUP;
+	AST->redirs = eat_redirections(list, TREE_COMMAND_GROUP, *i);
+	// if (AST->redirs)
+	// 	dprintf(2, "redir size = %d\n", AST->redirs->size);
+	// printf("==================AFTER==========================\n");
+	// tokenListToString(list);
+	// printf("============================================\n");
+	return AST;
+}
+
 Node *extract_subshell(TokenList *list, int *i) {
 	TokenList *newlist = extract_subshell_rec(list, i);
 	// printf("============================================\n");
@@ -265,11 +295,6 @@ Node *extract_subshell(TokenList *list, int *i) {
 	// return ast_build(newlist);
 }
 
-Node *extract_command_group(TokenList *list, int *i) {
-	(void) list; (void) i;
-	return NULL;
-}
-
 bool is_cmdgrp_start(const TokenList *list, const int *i) {
 	return (list->t[*i]->tag == T_WORD && !ft_strcmp(list->t[*i]->w_infix, "{"));
 }
@@ -278,31 +303,47 @@ bool is_cmdgrp_end(const TokenList *list, const int *i) {
 	return (list->t[*i]->tag == T_WORD && !ft_strcmp(list->t[*i]->w_infix, "}"));
 }
 
-bool is_command_group(const TokenList *list, const int *i) {
-	if (is_cmdgrp_start(list, i)) {
-		// dprintf(2, "start ok !\n");
-		int it = *i + 1;
-		int it_next = *i + 2;
-		
-		while (it < list->size - 2) {
-			if (is_semi(list, &it) && is_cmdgrp_end(list, &it_next)) {
-				// dprintf(2, "end ok !\n");
-				return true;
-			}
+Range is_command_group(const TokenList *list, const int *i) {
+	int it_prev = *i - 1;
+	int it = *i;
+	int it_next = *i + 1;
+
+	Range self = {
+		.start = it,
+		.end = -1,
+	};
+
+	while (it_next < list->size) {
+		if (is_cmdgrp_start(list, &it) && (is_ast_operator(list, &it_prev) || is_pipe(list, &it_prev))) {
 			it++;
-			it_next++;
+			Range nested = is_command_group(list, &it);
+			// dprintf(2, "nested.end = %d\n", nested.end);
+			it_prev = nested.end - 1;
+			it = nested.end;
+			it_next = nested.end + 1;
+			if (nested.end == -1) {
+				return nested;
+			}
+			continue;
 		}
+		if (is_semi(list, &it) && is_cmdgrp_end(list, &it_next)) {
+			self.end = it_next;
+			return self;
+		}
+		it_prev++;
+		it++;
+		it_next++;
 	}
-	return false;
+	return self;
 }
 
 void create_executer_and_push(Executer **executer, TokenList *list, int *i) {
 	Executer *new = NULL;
 
-	if (is_command_group(list, i)) {
-		// new = executer_init(extract_command_group(list, i), NULL);
+	if (is_cmdgrp_start(list, i)) {
+		new = executer_init(extract_command_group(list, i), NULL);
 	}
-	if (is_subshell(list, i))
+	else if (is_subshell(list, i))
 		new = executer_init(extract_subshell(list, i), NULL);
 	else
 		new = executer_init(NULL, extract_tokens(list, i));

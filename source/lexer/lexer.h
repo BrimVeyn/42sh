@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/15 16:30:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/16 12:14:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,9 @@ bool	is_redirection(const TokenList *tokens, const int *it);
 bool	is_semi_or_bg(const TokenList *list, const int *it);
 bool	is_or_or_and(const TokenList *list, const int *it);
 bool	is_ast_operator(const TokenList *list, const int *it);
-bool	is_command_group(const TokenList *list, const int *i);
+Range is_command_group(const TokenList *list, const int *i);
+bool	is_cmdgrp_start(const TokenList *list, const int *i);
+bool	is_cmdgrp_end(const TokenList *list, const int *i);
 
 
 #endif // !LEXER_H
