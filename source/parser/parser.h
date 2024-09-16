@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/13 11:21:10 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 15:25:47 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/16 16:34:57 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,11 @@
 #define PARSER_H
 
 #include "../../include/42sh.h"
+
 #define UNEXPECTED_TOKEN_STR "42sh: syntax error near unexpected token "
 #define UNCLOSED_SUBSHELL_STR "42sh: syntax error: unclosed subshell, expected "
+#define UNCLOSED_COMMAND_SUB_STR "42sh: syntax error: unclosed command substitution, expected `)\n"
 #define UNCLOSED_QUOTES_STR "42sh: syntax error: unclosed quotes, expected "
-
 
 typedef enum {
 	R_FD,
@@ -44,24 +45,28 @@ typedef struct SimpleCommand {
 	RedirectionList			*redir_list;
 	char					*bin;
 	char					**args;
-	struct SimpleCommand	*next;
 } SimpleCommand;
 
-SimpleCommand *parser_parse_current(TokenList *tl, StringList *env, int *saved_fds);
-bool heredoc_detector(TokenList *data);
 char *parser_get_env_variable_value(char *name, StringList *env);
+//-------------------SimpleCommand-----------------------//
+SimpleCommand		*parser_parse_current(TokenList *tl, StringList *env);
+
+//-------------------Here_doc-----------------------//
+bool				heredoc_detector(TokenList *data);
 
 //-----------------Redirection List----------------//
-RedirectionList *redirection_list_init(void);
-void redirection_list_add(RedirectionList *rl, Redirection *redirection);
-void redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
+RedirectionList		*redirection_list_init(void);
+void				redirection_list_add(RedirectionList *rl, Redirection *redirection);
+void				redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
+void				add_redirection_from_token(RedirectionList **redir_list, const Token *el);
 
 int parser_filename_expansion(TokenList *tl);
 
 //-------------------Command substitution-------------//
-bool parser_command_substitution(TokenList *tl, StringList *env, int *saved_fds);
+bool parser_command_substitution(TokenList *tl, StringList *env);
 
 //-------------------Parameter Expansion-------------//
-bool parser_parameter_expansion(TokenList *tl, StringList *env);
+bool				parser_parameter_expansion(TokenList *tl, StringList *env);
+void				parser_skip_subshell(TokenList *list, int *it);
 
 #endif // !PARSER_H

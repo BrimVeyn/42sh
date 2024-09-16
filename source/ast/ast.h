@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/05 09:53:28 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/13 15:25:47 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/16 16:17:44 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/16 16:18:03 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,18 @@ typedef enum {
 	N_OPERATOR,
 } type_of_node;
 
+typedef enum {
+	TREE_SUBSHELL,
+	TREE_COMMAND_GROUP,
+	TREE_DEFAULT,
+} type_of_tree;
+
 typedef struct Node {
 	type_of_node	tag;
+	type_of_tree	tree_tag;
+	RedirectionList *redirs;
 	union {
-		TokenList			*operand;
+		TokenList *operand;
 		type_of_separator	operator;
 	} value;
 	struct Node		*left;

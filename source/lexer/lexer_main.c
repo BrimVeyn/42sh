@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:38:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 11:08:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/15 14:22:08 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ int main(int ac, char *av[]) {
 	(void) av;
 	gc_init(GC_GENERAL);
 	gc_init(GC_SUBSHELL);
-	Token *none_token __attribute__((unused)) = token_none_init();
 	
 	char *input = NULL;
 	while ((input = readline("> ")) != NULL) {
@@ -28,7 +27,7 @@ int main(int ac, char *av[]) {
 			Lexer_p l = lexer_init(input);
 			TokenList *l1 = lexer_lex_all(l);
 			if (!l1) continue;
-			tokenToStringAll(l1);
+			tokenListToString(l1);
 			add_history(input);
 		}
 	}

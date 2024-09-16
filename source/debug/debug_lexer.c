@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:53:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/13 14:09:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/15 09:42:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void lexer_debug(Lexer_p lexer) {
 	dprintf(2, "-------------------\n");
 }
 
-void tokenToStringAll(TokenList *t) {
+void tokenListToString(TokenList *t) {
 	for (uint16_t i = 0; i < t->size; i++) {
 		tokenToString(t->t[i], 0);
 	}
@@ -64,6 +64,8 @@ void tokenToString(Token *t, size_t offset) {
 			dprintf(2, C_PURPLE"T_SEPARATOR"C_RESET" {\n");
 			printOffset(offset + 4);
 			dprintf(2, "Type: "C_VIOLET"%s\n"C_RESET, tagName(t->s_type));
+			printOffset(offset);
+			dprintf(2, "}\n");
 			break;
 		default:
 			dprintf(2, "Format not handled\n");

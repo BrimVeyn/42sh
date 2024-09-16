@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/12 17:31:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/14 16:40:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,25 +76,3 @@ void gc_addcharchar(char **str, int n) {
 	gc_add(str, n);
 }
 
-char *replace_char_greedy(char *str, char c, char by){
-	int j = 0;
-	
-	for (int i = 0; str[i]; i++){
-		while(str[i] && str[i] == c){
-			i++;
-			j++;
-		}
-		if (j != 0){
-			char *start = ft_substr(str, 0, i - j);
-			char *end = ft_substr(str, i, ft_strlen(str));
-			char *newstr = ft_calloc(ft_strlen(start) + ft_strlen(end) + 2, sizeof(char));
-			if (str[i - j - 1] == ';') // if there is already semi
-				sprintf(newstr, "%s%s", start, end);
-			else
-				sprintf(newstr, "%s;%s", start, end);
-			free(start); free(end);
-			return replace_char_greedy(gc_add(newstr, GC_GENERAL), c, by);
-		}
-	}
-	return str;
-}

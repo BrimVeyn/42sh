@@ -1,0 +1,4 @@
+{ echo salut && { echo mec ;} ; } && { echo salut ;}
+{ echo salut; } >./outfiles/test
+echo {
+echo { echo salut ;}

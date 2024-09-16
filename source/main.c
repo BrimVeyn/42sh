@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/13 15:04:50 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 13:19:32 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/16 16:17:05 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/16 16:17:19 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 
 int g_debug = 0;
 
-
 char *init_prompt_and_signals(void) {
 	signal_manager(SIG_PROMPT);
 	rl_event_hook = rl_event_dummy;
@@ -25,7 +24,7 @@ char *init_prompt_and_signals(void) {
 	if (isatty(STDIN_FILENO))
 		input = readline("42sh > ");
 	else
-		input = gnl(STDIN_FILENO);
+		input = get_next_line(STDIN_FILENO);
 	return input;
 }
 
@@ -114,10 +113,6 @@ void env_to_string_list(StringList *env_list, const char **env){
 }
 
 int main(const int ac, const char *av[], const char *env[]) {
-	//Basic redirection test
-	(void) ac;
-	(void) av;
-	(void) env;
 
 	if (ac != 1 && !ft_strcmp("-d", av[1])){
 		g_debug = 1;
@@ -130,7 +125,6 @@ int main(const int ac, const char *av[], const char *env[]) {
 	// for(int i = 0; env_list->value[i]; i++){printf("%s", env_list->value[i]);}
 
 	g_signal = 0;
-
 	char *input = NULL;
 
 	if (isatty(STDIN_FILENO))
@@ -142,11 +136,12 @@ int main(const int ac, const char *av[], const char *env[]) {
 			if (isatty(STDIN_FILENO)){
 				add_input_to_history(input);
 			}
-			input = replace_char_greedy(input, '\n', ';');
+			// input = replace_char_greedy(input, '\n', ';');
 			// printf("input: %s\n", input);
 			Lexer_p lexer = lexer_init(input);
 			TokenList *tokens = lexer_lex_all(lexer);
-			if (lexer_syntax_error(tokens)) continue; 
+			if (lexer_syntax_error(tokens))
+				continue; 
 			heredoc_detector(tokens);
 			signal_manager(SIG_EXEC);
 			Node *AST = ast_build(tokens);
@@ -160,8 +155,6 @@ int main(const int ac, const char *av[], const char *env[]) {
 	}
 	rl_clear_history();
 	gc_cleanup(GC_ALL);
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
+	close_std_fds();
 	return (0);
 }
