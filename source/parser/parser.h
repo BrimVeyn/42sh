@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 16:34:57 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/17 17:09:13 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,5 +68,9 @@ bool parser_command_substitution(TokenList *tl, StringList *env);
 //-------------------Parameter Expansion-------------//
 bool				parser_parameter_expansion(TokenList *tl, StringList *env);
 void				parser_skip_subshell(TokenList *list, int *it);
+void			skip_cmdgrp(TokenList *self, TokenList *list, int *i);
+bool is_end_cmdgrp(const TokenList *list, const int *it);
+int get_command_sub_range_end(char *str, int *i);
+int skip_subshell_str(char *str, int *i);
 
 #endif // !PARSER_H
