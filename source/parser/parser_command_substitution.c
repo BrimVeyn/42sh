@@ -3,31 +3,32 @@
 /*                                                        :::      ::::::::   */
 /*   parser_command_substitution.c                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 16:33:08 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/17 17:20:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+#include <stdio.h>
 
-static int get_command_sub_range_end(char *str, int i) {
-	const int str_len = ft_strlen(str);
-
-	i += 2;
-	while (i < str_len && str[i]) {
-		if (!ft_strncmp(&str[i], "$(", 2)) {
-			i = get_command_sub_range_end(str, i);
-			if (i == -1) return i;
-			else i += 1;
+int get_command_sub_range_end(char *str, int *i) {
+	(*i) += 2; // skip '$('
+	
+	while (str[*i] != ')') {
+		if (!ft_strncmp("$(", &str[*i], 2)) {
+			get_command_sub_range_end(str, i);
+			if (*i == -1) return -1;
 		}
-		if (str[i] == ')') {
-			return i;
+		if (str[*i] == '(') {
+			get_command_sub_range_end(str, i);
+			if (*i == -1) return -1;
 		}
-		i += 1;
+		(*i)++;
 	}
-	return -1;
+	if (str[*i] != ')') return -1;
+	return *i;
 }
 
 static Range get_command_sub_range(char *str) {
@@ -37,8 +38,10 @@ static Range get_command_sub_range(char *str) {
 	};
 
 	self.start = ft_strstr(str, "$(");
-	if (self.start != -1)
-		self.end = get_command_sub_range_end(str, self.start);
+	if (self.start != -1) {
+		int start_copy = self.start;
+		self.end = get_command_sub_range_end(str, &start_copy);
+	}
 
 	return self;
 }
@@ -106,7 +109,7 @@ bool parser_command_substitution(TokenList *tl, StringList *env) {
 
 			char infix[MAX_WORD_LEN] = {0};
 			ft_memcpy(infix, &elem->w_infix[range.start + 1], range.end - range.start);
-			// dprintf(2, "INFIX: %s\n", infix);
+			dprintf(2, "INFIX: %s\n", infix);
 
 			char file_name[MAX_FILENAME_LEN] = {0};
 			ft_sprintf(file_name, "/tmp/command_sub_%d", COMMAND_SUB_NO++);
@@ -124,7 +127,9 @@ bool parser_command_substitution(TokenList *tl, StringList *env) {
 			Lexer_p lexer = lexer_init(infix);
 			TokenList *tokens = lexer_lex_all(lexer);
 			// tokenListToString(tokens);
-			if (lexer_syntax_error(tokens)) continue; 
+			if (lexer_syntax_error(tokens))  {
+				i+= 1; continue; 
+			}
 			heredoc_detector(tokens);
 			Node *AST = ast_build(tokens);
 			ast_execute(AST, env);
@@ -142,6 +147,7 @@ bool parser_command_substitution(TokenList *tl, StringList *env) {
 			close(output_fd);
 			unlink(file_name);
 
+			dprintf(2, "result = %s\n", result);
 			TokenList *word_splitted_result = word_splitter(result, env);
 			free(result);
 			// tokenListToString(word_splitted_result);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 16:17:52 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/17 15:12:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,13 +93,13 @@ void			token_list_insert(TokenList *tl, Token *token, const int index);
 void			token_list_insert_list(TokenList *dest, TokenList *src, const int index);
 
 //----------------StringList----------------//
-void get_env_variable_id(char *buffer, char *variable);
-void get_env_variable_value(char *buffer, char *variable);
-int get_env_variable_index(StringList *sl, char *variable);
-StringList *string_list_init(void);
-void string_list_add_or_update(StringList *sl, char *variable);
-void string_list_remove(StringList *sl, char *variable);
-char *string_list_get_value_with_id(StringList *sl, char *id);
+void			get_env_variable_id(char *buffer, char *variable);
+void			get_env_variable_value(char *buffer, char *variable);
+int				get_env_variable_index(StringList *sl, char *variable);
+StringList		*string_list_init(void);
+void			string_list_add_or_update(StringList *sl, char *variable);
+void			string_list_remove(StringList *sl, char *variable);
+char			*string_list_get_value_with_id(StringList *sl, char *id);
 
 //----------------Syntax----------------//
 bool	is_pipe(const TokenList *list, const int *i);
@@ -120,9 +120,9 @@ bool	is_redirection(const TokenList *tokens, const int *it);
 bool	is_semi_or_bg(const TokenList *list, const int *it);
 bool	is_or_or_and(const TokenList *list, const int *it);
 bool	is_ast_operator(const TokenList *list, const int *it);
-Range is_command_group(const TokenList *list, const int *i);
 bool	is_cmdgrp_start(const TokenList *list, const int *i);
 bool	is_cmdgrp_end(const TokenList *list, const int *i);
+bool	is_end_cmdgrp(const TokenList *list, const int *it);
 
 
 #endif // !LEXER_H

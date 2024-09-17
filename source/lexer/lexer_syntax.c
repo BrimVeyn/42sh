@@ -6,13 +6,20 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:20 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 16:14:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/17 16:12:04 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include "lexer.h"
-#include <stdio.h>
+
+bool is_whitespace_only(TokenList *tokens) {
+	for (int i = 0; i < tokens->size; i++) {
+		if (!is_newline(tokens, &i) && !is_eof(tokens, &i)) {
+			return false;
+		}
+	}
+	return true;
+}
 
 bool is_subshell_closed(TokenList *tokens, int *it) {
 	(*it)++;
@@ -30,13 +37,36 @@ bool is_subshell_closed(TokenList *tokens, int *it) {
 	return true;
 }
 
-bool is_whitespace_only(TokenList *tokens) {
-	for (int i = 0; i < tokens->size; i++) {
-		if (!is_newline(tokens, &i) && !is_eof(tokens, &i)) {
-			return false;
+bool check_cmdgrp_closed(TokenList *tokens, int *it) {
+	(*it) -= 2; //pass ';' '}'
+	
+	while (*it >= 0) {
+		if (is_end_cmdgrp(tokens, it)) {
+			if (!check_cmdgrp_closed(tokens, it))
+				return false;
+			(*it) -= 1;
+			continue;
 		}
+		if (is_cmdgrp_start(tokens, it)) {
+				return true;
+		}
+		(*it) -= 1;
 	}
-	return true;
+	(*it) -= 1;
+	return false;
+}
+
+bool cmdgrp_parity(TokenList *tokens, int it) {
+	size_t total[2] = {0, 0};
+
+	while (it < tokens->size) {
+		if (is_cmdgrp_end(tokens, &it))
+			total[0]++;
+		if (is_cmdgrp_start(tokens, &it))
+			total[1]++;
+		(it)++;
+	}
+	return (total[0] != total[1]);
 }
 
 bool lexer_syntax_error(TokenList *tokens) {
@@ -51,9 +81,13 @@ bool lexer_syntax_error(TokenList *tokens) {
 			dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tokens->t[it]->w_infix);
 			return true;
 		}
-		if (it != 0 && is_semi(tokens, &(int){it - 1}) && is_cmdgrp_end(tokens, &it)) {
-			// if (check_cmdgrp_syntax_rec())
-			// dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tokens->t[it]->w_infix);
+		if (it != 0 && is_end_cmdgrp(tokens, &it)) {
+			int it_save = it;
+			if (!check_cmdgrp_closed(tokens, &it)) {
+				dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tokens->t[it_save]->w_infix);
+				return true;
+            }
+			it = it_save;
 		}
 		if (is_separator(tokens, &it)) {
 			if (it == 0) {
@@ -77,9 +111,12 @@ bool lexer_syntax_error(TokenList *tokens) {
 			}
 		}
 	}
+	if (cmdgrp_parity(tokens, 0)) {
+		dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", "}");
+		return true;
+	}
 	return false;
 }
-
 
 bool is_redirection(const TokenList *tokens, const int *it){
 	return is_redirection_tag(tokens, it) || (is_word(tokens, it) && tokens->t[*it]->w_postfix->tag == T_REDIRECTION);
@@ -151,4 +188,24 @@ bool is_or_or_and(const TokenList *list, const int *it) {
 
 bool is_ast_operator(const TokenList *list, const int *it) {
 	return is_semi_or_bg(list, it) || is_or_or_and(list, it);
+}
+
+bool is_cmdgrp_start(const TokenList *list, const int *i) {
+	if (*i == 0 && list->t[*i]->tag == T_WORD && !ft_strcmp(list->t[*i]->w_infix, "{")) {
+		return true;
+	} else if (*i > 0 && list->t[*i]->tag == T_WORD && !ft_strcmp(list->t[*i]->w_infix, "{")
+		&& (is_separator(list, &(int){*i - 1}) || is_cmdgrp_start(list, &(int){*i -1}))) {
+		 return true;
+	} else {
+		return false;
+	}
+}
+
+bool is_end_cmdgrp(const TokenList *list, const int *it) {
+	if (*it == 0) return false;
+	return (is_cmdgrp_end(list, it) && is_semi(list, &(int){*it - 1}));
+}
+
+bool is_cmdgrp_end(const TokenList *list, const int *i) {
+	return (list->t[*i]->tag == T_WORD && !ft_strcmp(list->t[*i]->w_infix, "}"));
 }
