@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/17 17:09:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/18 15:47:34 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ void				redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
 void				add_redirection_from_token(RedirectionList **redir_list, const Token *el);
 
 int parser_filename_expansion(TokenList *tl);
+bool parser_arithmetic_expansion(TokenList *tokens, StringList *env);
 
 //-------------------Command substitution-------------//
 bool parser_command_substitution(TokenList *tl, StringList *env);

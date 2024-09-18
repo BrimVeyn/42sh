@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 16:37:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/16 12:15:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/18 16:14:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 
 
 #define BUFFER_SIZE 1024
-#define MAX_WORD_LEN 4096
+#define MAX_WORD_LEN 65536
 #define MAX_FILENAME_LEN 1024
 
 typedef struct {

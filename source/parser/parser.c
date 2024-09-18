@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/17 16:07:25 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/18 16:14:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,9 @@ SimpleCommand *parser_parse_current(TokenList *tl, StringList *env) {
 	if (!parser_command_substitution(tl, env)) {
 		return NULL;
 	}
-	// parser_arithmetic_expansion();
+	if (!parser_arithmetic_expansion(tl, env)) {
+		return NULL;
+	}
 	// if (!parser_filename_expansion(tl)){
 	// 	return NULL;
 	// }
