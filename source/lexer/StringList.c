@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 14:14:00 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/18 11:20:58 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ int get_env_variable_index(StringList *sl, char *variable){
 	get_env_variable_id(id, variable);
 
 	for (; i < sl->size; i++){
-		char tmp_id[4096] = {0};
+		char tmp_id[POSIX_MAX_ID_LEN] = {0};
 		get_env_variable_id(id, sl->value[i]);
 		if (!ft_strcmp(id, tmp_id)){
 			break;
@@ -52,9 +52,9 @@ int get_env_variable_index(StringList *sl, char *variable){
 }
 
 StringList *string_list_init(void) {
-	StringList *self = gc_add(ft_calloc(1, sizeof(StringList)), GC_GENERAL);
+	StringList *self = gc_add(ft_calloc(1, sizeof(StringList)), GC_SUBSHELL);
 	StringList tl = {
-		.value = (char **) gc_add(ft_calloc(10, sizeof(char *)), GC_GENERAL),
+		.value = (char **) gc_add(ft_calloc(10, sizeof(char *)), GC_SUBSHELL),
 		.size = 0,
 		.capacity = 10,
 	};
@@ -97,17 +97,18 @@ void string_list_remove(StringList *sl, char *variable){
 		sl->value[sl->size - 1] = NULL;
 		sl->size--;
 	}
-
 }
 
 char *string_list_get_value_with_id(StringList *sl, char *id){
 	uint16_t i = 0;
 	for (; i < sl->size; i++){
 
-		char tmp_id[4096];
+		char tmp_id[POSIX_MAX_ID_LEN] = {0};
 		get_env_variable_id(tmp_id, sl->value[i]);
 		if (!ft_strcmp(id, tmp_id)){
-			return sl->value[i];
+			char *value = gc_add(ft_calloc(ft_strlen(sl->value[i]), sizeof(char)), GC_GENERAL);
+			get_env_variable_value(value, sl->value[i]);
+			return value;
 		}
 		ft_memset(tmp_id, 0, ft_strlen(tmp_id) * sizeof(char));
 	}

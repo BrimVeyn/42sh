@@ -6,12 +6,13 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 16:17:19 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/17 13:04:37 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/42sh.h"
 #include "lexer/lexer.h"
+#include <fcntl.h>
 #include <stdint.h>
 
 int g_debug = 0;
@@ -29,15 +30,15 @@ char *init_prompt_and_signals(void) {
 }
 
 void get_history() {
-	DIR *dir_history = opendir("/tmp/42sh");
-	if (dir_history == NULL)
-	{
-		if (mkdir("/tmp/42sh", 0755) == -1){
-			perror("Can't create cache directory");
-		}
-	}
-	closedir(dir_history);
-    int fd = open("/tmp/42sh/history.log", O_RDWR | O_CREAT, 0644);
+	// DIR *dir_history = opendir("~.42history");
+	// if (dir_history == NULL)
+	// {
+	// 	if (mkdir("/tmp/42sh", 0755) == -1){
+	// 		perror("Can't create cache directory");
+	// 	}
+	// }
+	// closedir(dir_history);
+    int fd = open("/home/nbardavi/.42sh.history", O_RDWR | O_CREAT, 0644);
     if (fd == -1) {
         perror("Can't open history file");
         exit(EXIT_FAILURE);
@@ -96,7 +97,7 @@ void get_history() {
 
 void add_input_to_history(char *input){
 	add_history(input);
-	int history_fd = open("/tmp/42sh/history.log", O_RDWR | O_APPEND, 0644);
+    int history_fd = open("/home/nbardavi/.42sh.history", O_APPEND | O_WRONLY | O_CREAT, 0644);
 	if (history_fd == -1) {
 		perror("Can't open history file");
 		exit(EXIT_FAILURE);
@@ -107,7 +108,7 @@ void add_input_to_history(char *input){
 
 void env_to_string_list(StringList *env_list, const char **env){
 	for (uint16_t i = 0; env[i]; i++){
-		string_list_add_or_update(env_list, gc_add(ft_strdup(env[i]), GC_GENERAL));
+		string_list_add_or_update(env_list, gc_add(ft_strdup(env[i]), GC_SUBSHELL));
 	}
 	// string_list_add_or_update(env_list, NULL);
 }

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:00:03 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 16:00:03 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/17 10:50:21 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ t_list				*ft_lstmap(t_list *lst, void *(*f)(void *),
 
 // Fonctions d'affichages
 void				ft_putnbr_fd(int n, int fd);
-void				ft_putstr_fd(char *s, int fd);
+void				ft_putstr_fd(const char *s, int fd);
 void				ft_putnbr_fd(int n, int fd);
 void				ft_putendl_fd(char *s, int fd);
 void				ft_putchar_fd(char c, int fd);

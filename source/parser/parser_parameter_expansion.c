@@ -6,53 +6,88 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:08:25 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 14:20:48 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/18 16:24:20 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 #include <readline/readline.h>
+#include <stdlib.h>
 
-char *handle_format(char metachar, char * second_world){
-	switch (metachar){
-		case '-':
-			return (second_world);
-		// case '?':
-		// 	return ();
-		default:
-			return ft_strdup("");
-	}
-}
-
-char *parser_get_variable_value(char *name, StringList *env){
-
-	char metachar = 0;
-	int end_of_name = 0;
-	char *second_world = NULL;
-	
-	//use get_format_pos function bc repetition
-	for (int i = 0; name[i]; i++){
-		if (name[i] == ':'){
-			metachar = name[i + 1];
-			second_world = ft_substr(name, i + 2, ft_strlen(name) - i);
-			end_of_name = i;
-			break;
+char *handle_format(char metachar[3], char *id, char *word, StringList *env){
+	// printf("id: %s\nword: %s\nmetachar: %s\n", id, word, metachar);
+	char *value = string_list_get_value_with_id(env, id);
+	if (!value){
+		if (!ft_strcmp(metachar, ":-")){
+			return (word);
+		}
+		else if (!ft_strcmp(metachar, ":=")){
+			char *variable = gc_add(ft_calloc(ft_strlen(word) + ft_strlen(id) + 3, sizeof(char)), GC_GENERAL);
+			ft_sprintf(variable, "%s=%s", id, word);
+			string_list_add_or_update(env, variable);
+			return (word);
+		}
+		else if (!ft_strcmp(metachar, ":?")){
+			ft_dprintf(2, " %s\n", word);
+			gc_cleanup(GC_ALL);
+			close_all_fds();
+			exit(EXIT_FAILURE);
 		}
 	}
+	if (string_list_get_value_with_id(env, id) == NULL)
+		return ft_strdup("");
+	if (metachar[0] == '#' || metachar[0] == '%'){
+		char *value = ft_strdup(string_list_get_value_with_id(env, id));
+		char *regexp = NULL;
 
-	if (metachar){
-		ft_memset(name + end_of_name, '\0', ft_strlen(name) - end_of_name);
+		if (metachar[0] == '#'){
+			regexp = ft_strjoin("^", word);
+		} else {
+			regexp = ft_strjoin(word, "$");
+		}
+		
+		match_result result = regex_match(regexp, value);
+		if (result.start != -1){
+			char *new_value = NULL;
+			if (metachar[0] == '#')
+				new_value = ft_substr(value, result.end, ft_strlen(value) - result.end);
+			else{
+				new_value = ft_substr(value, 0, result.start);
+			}
+			free(value);
+			value = new_value;
+			new_value = NULL;
+		}
+		free(regexp);
+		gc_add(value, GC_GENERAL);
+		return value;
+	}
+	return ft_strdup(value);
+}
+
+char *parser_get_variable_value(char *to_expand, StringList *env){
+
+	char metachar[3] = {0};
+	char *word = NULL;
+	char name[POSIX_MAX_ID_LEN] = {0};
+	
+
+	if (to_expand[0] == '#'){
+		return gc_add(ft_itoa(ft_strlen(to_expand)), GC_GENERAL);
+	}
+
+	match_result find_format = regex_match("[:#%]", to_expand);
+	int lenght_meta = (regex_match("[:#%][=?#%\\-]", to_expand).start != -1) ? 2:1;
+	if (find_format.start != -1){
+		memcpy(name, to_expand, find_format.start);
+		word = ft_substr(to_expand, find_format.end + lenght_meta - 1, ft_strlen(to_expand) - find_format.end);
+		//adapt memcpy size
+		ft_memcpy(metachar, &to_expand[find_format.start], sizeof(char) * lenght_meta);
+		return handle_format(metachar, name, word, env);
 	}
 	
-	char *tmp = string_list_get_value_with_id(env, name);
-	if (tmp){
-		free(second_world);
-		char variable_name[4096] = {0};
-		get_env_variable_value(variable_name, tmp);
-		return ft_strdup(variable_name);
-	}
-
-	return handle_format(metachar, second_world);
+	char *value = string_list_get_value_with_id(env, to_expand);
+	return value ? value : gc_add(ft_strdup(""), GC_GENERAL);
 }
 
 static int get_format_pos(char *str){
@@ -78,7 +113,7 @@ static bool is_bad_substitution(Token *el, int pos){
 
 	if (regex_match("\\${}", before_format).start == pos || //match ${} 
 		regex_match("\\${[^}]*$", before_format).start == pos || //if missing }
-		(regex_match("\\${[^}]*}", before_format).start == pos && regex_match("\\${[A-Za-z_][A-Za-z0-9_:]*}", before_format).start != pos &&
+		(regex_match("\\${[^}]*}", before_format).start == pos && regex_match("\\${[#A-Za-z_][A-Za-z0-9_]*[#:%]*.*}", before_format).start != pos &&
 		regex_match("\\${?}", before_format).start != pos))
 	{ //check if first char is a number
 		dprintf(2, "${}: bad substitution\n");
@@ -131,7 +166,7 @@ bool parser_parameter_expansion(TokenList *tl, StringList *env){
 				char *tmp = ft_strjoin(start, value);
 				
 				el->w_infix = gc_add(ft_strjoin(tmp, end), GC_GENERAL);
-				free(tmp); free(start); free(end); free(value);
+				free(tmp); free(start); free(end);
 
 			} while(regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", el->w_infix).start != -1);
 		}

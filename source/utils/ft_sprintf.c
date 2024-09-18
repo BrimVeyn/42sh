@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_sprintf.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 22:18:12 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 22:21:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/18 13:52:19 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,32 @@ static size_t ft_itoa_buffer(char *buffer, int number) {
 	return i;
 }
 
+void ft_dprintf(int fd, char *fmt, ...){
+	va_list			args;
+	va_start(args, fmt);
+
+	const size_t fmt_lem = ft_strlen(fmt);
+
+	for (size_t i = 0; i < fmt_lem; i++) {
+		if (!ft_strncmp(&fmt[i], "%s", 2)) {
+			const char *str = va_arg(args, char *);
+			ft_putstr_fd(str, fd);
+			i += 2;
+		}
+		if (!ft_strncmp(&fmt[i], "%d", 2)) {
+			const int number = va_arg(args, int);
+			ft_putnbr_fd(number, fd);
+			i += 2;
+		}
+		write(fd, &fmt[i], 1);
+	}
+	va_end(args);
+}
+
 void ft_sprintf(char *buffer, char *fmt, ...) {
 	va_list			args;
 	va_start(args, fmt);
+	printf("COUCOU\n");
 
 	const size_t fmt_lem = ft_strlen(fmt);
 

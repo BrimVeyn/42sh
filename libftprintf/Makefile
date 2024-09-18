@@ -3,18 +3,6 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror -g3
 SRCS = sources/custom_utils/ft_strcmp.c \
 sources/custom_utils/ft_strjoin_free.c \
-sources/ft_printf/ft_exec_d.c \
-sources/ft_printf/ft_exec_flags.c \
-sources/ft_printf/ft_fcustoms.c \
-sources/ft_printf/ft_flags.c \
-sources/ft_printf/ft_fsource.c \
-sources/ft_printf/ft_itoa_u.c \
-sources/ft_printf/fd_printf.c \
-sources/ft_printf/ft_printf.c \
-sources/ft_printf/ft_sprintf.c \
-sources/ft_printf/ft_tohexa.c \
-sources/ft_printf/ft_tools2.c \
-sources/ft_printf/ft_tools.c \
 sources/libft/ft_atoi.c \
 sources/libft/ft_bzero.c \
 sources/libft/ft_calloc.c \

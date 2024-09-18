@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 16:21:38 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/18 16:15:42 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,9 +125,10 @@ int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found
     while(*regexp != ']') {
         // implemente litteral charactere here (&& regexp[0] != '\\')
         // +2 to skip current char and -
+		if (regexp[0] == '\\' && matchmetachar(*text, regexp + 1)){
+			matched = 1;
+		}
         if (regexp[1] == '-' && (regexp += 2) && regex_is_range_match(regexp - 2, *text)){
-            matched = 1;
-        } else if (regexp[0] == '\\' && matchmetachar(*text, regexp + 1)){
             matched = 1;
         } else if (*regexp == *text){
             matched = 1;
@@ -147,18 +148,17 @@ int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found
     }
     
     if (has_star) {
-        /*printf("Not found but there is a star\n");*/
         if (previous_found)
             return regex_matchhere(regexp + 2, text, text_pos);
-        return regex_matchhere(regexp + 1, text, text_pos);
-        // if text_pos
+		// printf("Not found but there is a star\n");
+        return regex_matchhere(regexp + 2, text, text_pos);
     }
 
     return 0;
 }
 
 int regex_matchhere(char *regexp, char *text, int *text_pos) {
-	// printf("regexp char: %c | text char: %c | text_pos: %d\n", *regexp, *text, *text_pos);
+	// printf("regexp char: %c regexp:%25s | text char: %c | text_pos: %d\n", *regexp, regexp, *text, *text_pos);
     if (regexp[0] == '\0' || (*text == '\0' && (regexp[0] == '*' && (regexp[1] == '$' || regexp[1] == '\0')))) {
         return 1;
     }
