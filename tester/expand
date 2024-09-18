@@ -8,3 +8,11 @@ echo ${PATH:-/default/path}
 echo ${UNDEFINED:-NoValue} | cat
 echo ${HOME:-/home/unknown}
 echo ${PATH:-/tmp} | rev
+echo ${HOME:=salut}; echo ${HOME}
+echo ${UNDEFINED:=salut}; echo ${UNDEFINED}
+echo ${HOME:?salut}; echo ${HOME}
+echo ${UNDEFINED:? variable is not set or has no value}; echo ${UNDEFINED}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#/home}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##/home}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%/home}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%/home}

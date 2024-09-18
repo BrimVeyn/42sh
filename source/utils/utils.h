@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 16:37:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/16 12:15:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/17 10:57:15 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ char			*replace_char_greedy(char *str, char c, char by);
 int				ft_strstr(char *haystack, char *needle);
 int				ft_strrstr(char *haystack, char *needle);
 void			ft_sprintf(char *buffer, char *fmt, ...);
+void			ft_dprintf(int fd, char *fmt, ...);
 
 //----------------File Utils--------------------//
 char			*get_next_line(int fd);

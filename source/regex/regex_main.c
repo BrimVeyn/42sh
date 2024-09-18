@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 13:14:29 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 16:22:40 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/18 16:24:17 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,8 @@ int main(int ac, char **av) {
 		regex_test(".*l$", "Hello World");
 		//crotte sous le tapis pour le '-'
 		regex_test("\\${[A-Za-z_][A-Za-z0-9-?_]*}", "${PWD-hello}");
+		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*[:#%].*}", "${PWD##/hel**lo}");
+		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*[:#%]*.*}", "${PWD}");
     }
     return 0;
 }

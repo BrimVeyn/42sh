@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:15:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 16:17:30 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/17 11:15:19 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,10 @@ extern int g_debug;
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdarg.h>
+
+#ifndef POSIX_MAX_ID_LEN
+# define POSIX_MAX_ID_LEN 255
+#endif
 
 #define FREE_POINTERS(...) \
     void *ptrs[] = { __VA_ARGS__ }; \

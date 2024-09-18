@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 15:59:55 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/08/28 15:59:55 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/18 13:49:31 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,13 +87,13 @@ char		*to_hexa_p(unsigned long long nbr);
 
 /*_.-=-._.-=-._.-=-._.-=-._.- Main -._.-=-._.-=-._.-=-._.-=-._.-=-._*/
 
-int			fd_printf(int fd, const char *txt, ...);
-char		*check_p(const char *txt, unsigned int i, va_list args);
-int			ft_printf(const char *txt, ...);
-char		*ft_sprintf(char *txt, ...);
-char		*exec_flags(const char *txt, int i, va_list args);
-char		*exec_flags2(const char *txt, int i, va_list args,
-				t_trigger trigger);
+// int			fd_printf(int fd, const char *txt, ...);
+// char		*check_p(const char *txt, unsigned int i, va_list args);
+// int			ft_printf(const char *txt, ...);
+// char		*ft_sprintf(char *txt, ...);
+// char		*exec_flags(const char *txt, int i, va_list args);
+// char		*exec_flags2(const char *txt, int i, va_list args,
+// 				t_trigger trigger);
 
 /*_.-=-._.-=-._.-=-._.-=-._.- Free_utils -._.-=-._.-=-._.-=-._.-=-._.-=-._*/
 
