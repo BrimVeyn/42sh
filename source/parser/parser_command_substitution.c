@@ -6,12 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/17 17:20:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/18 16:26:59 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include <stdio.h>
 
 int get_command_sub_range_end(char *str, int *i) {
 	(*i) += 2; // skip '$('
@@ -82,7 +81,7 @@ TokenList *word_splitter(char *str, StringList *env) {
 		Token *word = (Token *) gc_add(token_empty_init(), GC_SUBSHELL);
 		word->tag = T_WORD;
 		token_word_init(word);
-		word->w_infix = (char *) gc_add(ft_strdup(""), GC_SUBSHELL);
+		word->w_infix = (char *) gc_add(ft_strdup(""), GC_SUBSHELL); //must be NULL
 		token_list_add(list, word);
 	}
 	return list;
@@ -109,7 +108,7 @@ bool parser_command_substitution(TokenList *tl, StringList *env) {
 
 			char infix[MAX_WORD_LEN] = {0};
 			ft_memcpy(infix, &elem->w_infix[range.start + 1], range.end - range.start);
-			dprintf(2, "INFIX: %s\n", infix);
+			// dprintf(2, "INFIX: %s\n", infix);
 
 			char file_name[MAX_FILENAME_LEN] = {0};
 			ft_sprintf(file_name, "/tmp/command_sub_%d", COMMAND_SUB_NO++);
@@ -147,7 +146,7 @@ bool parser_command_substitution(TokenList *tl, StringList *env) {
 			close(output_fd);
 			unlink(file_name);
 
-			dprintf(2, "result = %s\n", result);
+			// dprintf(2, "result = %s\n", result);
 			TokenList *word_splitted_result = word_splitter(result, env);
 			free(result);
 			// tokenListToString(word_splitted_result);

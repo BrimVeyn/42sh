@@ -3,15 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   parser_parameter_expansion.c                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:08:25 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 14:20:48 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/18 11:00:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include <readline/readline.h>
 
 char *handle_format(char metachar, char * second_world){
 	switch (metachar){
