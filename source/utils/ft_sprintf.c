@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 22:18:12 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/18 13:52:19 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/19 09:38:53 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,6 @@ void ft_dprintf(int fd, char *fmt, ...){
 void ft_sprintf(char *buffer, char *fmt, ...) {
 	va_list			args;
 	va_start(args, fmt);
-	printf("COUCOU\n");
 
 	const size_t fmt_lem = ft_strlen(fmt);
 
