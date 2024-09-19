@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils_string.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 16:17:39 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/19 10:03:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,13 @@ int ft_strlenlen(const char **strstr){
 	int i = 0;
 	for (; strstr[i]; i++){}
 	return i;
+}
+
+void free_charchar(char **s){
+	for (int i = 0; s[i]; i++){
+		free(s[i]);
+	}
+	free(s);
 }
 
 // char **ft_strdupdup(const StringList *env){

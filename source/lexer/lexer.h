@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/17 15:12:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/19 10:06:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,6 @@
 #ifndef MAXISH_H
 	#include "../../include/42sh.h"
 #endif // !MAXI_SH
-
-typedef enum {
-	DEFAULT,
-	DQUOTE,
-} type_mode;
 
 typedef struct {
 	char		*input;
@@ -51,7 +46,7 @@ typedef struct StringList {
 
 //-----------------Lexer------------------//
 TokenList		*lexer_lex_all(Lexer_p l);
-Token			*lexer_get_next_token(Lexer_p l,type_mode mode);
+Token			*lexer_get_next_token(Lexer_p l);
 Lexer_p			lexer_init(char *input);
 void			lexer_debug(Lexer_p lexer);
 void			lexer_deinit(Lexer_p lexer);
@@ -61,15 +56,14 @@ bool			lexer_syntax_error(TokenList *tokens);
 
 //-----------------Utils------------------//
 bool			is_whitespace(char c);
-bool			is_redirection_char(char c);
 bool			is_number(char *str);
 bool			next_token_is_redirection(Lexer_p l);
 bool			is_fdable_redirection(Lexer_p l);
 bool			is_fdable_redirection(Lexer_p l);
-bool			is_delimiter(type_mode mode, char c);
+bool			is_delimiter(const char c);
 void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
 void			eat_whitespace(Lexer_p l);
-char			*get_word(Lexer_p l, type_mode mode);
+char			*get_word(Lexer_p l);
 
 //-----------------Typing------------------//
 type_of_token		get_token_tag(Lexer_p l);

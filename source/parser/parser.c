@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/19 09:37:23 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/19 14:40:49 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+#include <stdio.h>
 
 char *here_doc(char *eof){
 	char *input = NULL;
@@ -106,9 +107,9 @@ SimpleCommand *parser_parse_current(TokenList *tl, StringList *env) {
 	if (!parser_command_substitution(tl, env)) {
 		return NULL;
 	}
-	// if (!parser_arithmetic_expansion(tl, env)) {
-	// 	return NULL;
-	// }
+	if (!parser_arithmetic_expansion(tl, env)) {
+		return NULL;
+	}
 	// if (!parser_filename_expansion(tl)){
 	// 	return NULL;
 	// }

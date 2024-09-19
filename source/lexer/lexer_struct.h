@@ -3,27 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_struct.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 15:33:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/13 14:31:18 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/19 10:01:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LEXER_STRUCT_H
 #define LEXER_STRUCT_H
 
-//All tag enums
-#include <stdint.h>
-
 #ifndef LEXER_H
 	#include "lexer_enum.h"
 	#include "lexer.h"
-
 #endif // !LEXER_H
 
-#define DELIMITERS_DEFAULT "|$;\0\n"
-#define DELIMITERS_DQUOTE "$\0"
 
 typedef struct Token {
 	type_of_token tag;
@@ -44,13 +38,5 @@ typedef struct Token {
 		}; //word
 	};
 } Token;
-
-
-
-
-typedef struct {
-	type_of_error	error;
-	char			*error_message;
-} Error;
 
 #endif // !LEXER_STRUCT_H

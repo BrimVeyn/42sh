@@ -6,11 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/19 09:54:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/19 10:55:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/42sh.h"
+#include <readline/history.h>
 #include <stdio.h>
 
 int g_debug = 0;
@@ -29,7 +30,7 @@ char *init_prompt_and_signals(void) {
 
 void get_history() {
 	char *home = getenv("HOME");
-	char history_filename[1024];
+	char history_filename[1024] = {0};
 	ft_sprintf(history_filename, "%s/.42sh_history", home);
     int fd = open(history_filename, O_RDWR | O_CREAT, 0644);
     if (fd == -1) {
@@ -91,7 +92,7 @@ void get_history() {
 void add_input_to_history(char *input){
 	add_history(input);
 	char *home = getenv("HOME");
-	char history_filename[1024];
+	char history_filename[1024] = {0};
 	ft_sprintf(history_filename, "%s/.42sh_history", home);
     int history_fd = open(history_filename, O_APPEND | O_WRONLY | O_CREAT, 0644);
 	if (history_fd == -1) {
