@@ -6,12 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:20:37 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/18 16:11:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/19 15:12:25 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include <stdio.h>
 
 void lexer_read_char(Lexer_p l) {
 	if (l->read_position >= l->input_len) {
@@ -56,11 +55,9 @@ static void skip_arithmetic_exp(Lexer_p l) {
 	lexer_read_x_char(l, 3);
 	while (l->ch) {
 		if (!ft_strncmp(&l->input[l->position], "$((", 3)) {
-			dprintf(2, "un de plus ! \n");
 			skip_arithmetic_exp(l);
 		}
 		if (!ft_strncmp(&l->input[l->position], "))", 2)) {
-			dprintf(2, "found !\n");
 			lexer_read_x_char(l, 2);
 			return ;
 		}
@@ -68,7 +65,7 @@ static void skip_arithmetic_exp(Lexer_p l) {
 	}
 }
 
-char *get_word(Lexer_p l, type_mode mode) {
+char *get_word(Lexer_p l) {
 	const uint16_t start = l->position;
 	while (l->ch != '\0') {
 		if (!ft_strncmp(&l->input[l->position], "$((", 3))
@@ -80,7 +77,7 @@ char *get_word(Lexer_p l, type_mode mode) {
 
 		lexer_read_char(l);
 
-		if (is_delimiter(mode, l->ch))
+		if (is_delimiter(l->ch))
 			break;
 	}
 	const uint16_t end = l->position;
@@ -109,10 +106,6 @@ bool is_whitespace(char c) {
 	return (c == ' ' || c == '\t');
 }
 
-bool is_redirection_char(char c) {
-	return (c == '>' || c == '<');
-}
-
 bool is_number(char *str) {
 	for (uint16_t i = 0; str[i]; i++) {
 		if (!ft_isdigit(str[i])) return false;
@@ -120,17 +113,7 @@ bool is_number(char *str) {
 	return true;
 }
 
-bool is_delimiter(type_mode mode, char c) {
-	if (mode == DEFAULT) {
-		return ft_strchr("|&<>();\n \t", c) || c == '\0';
-	} else {
-		return ft_strchr("$", c) || c == '\0';
-	}
+bool is_delimiter(const char c) {
+	return ft_strchr("|&<>();\n \t", c) || c == '\0';
 }
 
-void free_charchar(char **s){
-	for (int i = 0; s[i]; i++){
-		free(s[i]);
-	}
-	free(s);
-}

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:20 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/17 16:12:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/19 11:31:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,9 +73,13 @@ bool lexer_syntax_error(TokenList *tokens) {
 	if (is_whitespace_only(tokens)) 
 		return true;
 	for (int it = 0; it < tokens->size; it++) {
-		if (is_subshell(tokens, &it) && !is_subshell_closed(tokens, &it)) {
-			dprintf(2, UNCLOSED_SUBSHELL_STR"`%s\'\n", tagStr((type_of_separator) S_SUB_CLOSE));
-			return true;
+		if (is_subshell(tokens, &it)) {
+			int it_save = it;
+			if (!is_subshell_closed(tokens, &it)) {
+				dprintf(2, UNCLOSED_SUBSHELL_STR"`%s\'\n", tagStr((type_of_separator) S_SUB_CLOSE));
+				return true;
+			}
+			it = it_save;
 		}
 		if (it == 0 && is_cmdgrp_end(tokens, &it)) {
 			dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tokens->t[it]->w_infix);

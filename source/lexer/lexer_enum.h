@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 14:04:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 17:10:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/19 10:01:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,9 @@
 #define LEXER_ENUM_H
 
 typedef enum {
-	T_COMMAND,
-	//---------------
-	T_REDIRECTION, //ok
-	//---------------
-	T_GROUPING,
-	//---------------
 	T_WORD, // generic word ?
-	//---------------
+	T_REDIRECTION, //ok
 	T_SEPARATOR,
-	//---------------
 	T_NONE, // Generic none token when no prefix/suffix
 } type_of_token;
 
@@ -45,10 +38,8 @@ typedef enum {
 	S_BG, // &
 	S_NEWLINE, // \n
 	S_EOF, // \0
-	S_CMD_SUB, // $(
 	S_SUB_OPEN, // (
 	S_SUB_CLOSE, // )
-	S_DQ, //"
 	S_DEFAULT,
 } type_of_separator;
 
@@ -62,10 +53,5 @@ typedef enum {
 	R_DUP_BOTH, //&>[ex|n]
 	R_DUP_BOTH_APPEND, //&>>[ex]
 } type_of_redirection;
-
-typedef enum {
-	C_BUILTIN, //echo, etc...
-	C_SHELL, //grep, etc...
-} type_of_command;
 
 #endif // !LEXER_ENUM_H
