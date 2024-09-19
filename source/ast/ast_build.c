@@ -6,73 +6,69 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 14:00:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/17 16:47:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 
-Node *gen_operator_node(TokenList *tok, Node *left, Node *right) {
-	Node *self = gc_add(ft_calloc(1, sizeof(Node)), GC_SUBSHELL);
-	self->tag = N_OPERATOR;
-	self->tree_tag = TREE_DEFAULT;
-	self->redirs = NULL;
-	self->left = left;
-	self->right = right;
-	self->value.operator = tok->t[0]->s_type;
-	return self;
+void skip_cmdgrp(TokenList *self, TokenList *list, int *i) {
+	token_list_add(self, list->t[*i]);
+	(*i)++;
+
+	while (*i < list->size && !is_end_cmdgrp(list, i)) {
+		if (is_cmdgrp_start(list, i))
+			skip_cmdgrp(self, list, i);
+		if (*i < list->size) {
+			token_list_add(self, list->t[*i]);
+			(*i)++;
+		}
+	}
 }
 
-Node *gen_operand_node(TokenList *list) {
-	Node *self = gc_add(ft_calloc(1, sizeof(Node)), GC_SUBSHELL);
-	self->tag = N_OPERAND;
-	self->tree_tag = TREE_DEFAULT;
-	self->redirs = NULL;
-	self->left = NULL;
-	self->right = NULL;
-	self->value.operand = list;
+void skip_subshell(TokenList *newlist, TokenList *list, int *i) {
+	token_list_add(newlist, list->t[*i]);
+	(*i)++;
+	while (*i < list->size && !is_end_sub(list, i)) {
+		if (is_subshell(list, i)) {
+			skip_subshell(newlist, list, i);
+		}
+		if (*i < list->size) {
+			token_list_add(newlist, list->t[*i]);
+			(*i)++;
+		}
+	}
+}
+
+TokenList *extract_operator(TokenList *list, int *i) {
+	TokenList *self = token_list_init();
+	token_list_add(self, list->t[(*i)++]);
 	return self;
 }
 
 TokenList *extract_command(TokenList *list, int *i) {
 	// dprintf(2, "-------------START----------\n");
+	// dprintf(2, "i = %d\n", *i);
 	// tokenListToString(list);
 	// dprintf(2, "----------------------------\n");
 	TokenList *self = token_list_init();
-	if (is_cmdgrp_start(list, i)) {
-		token_list_add(self, list->t[*i]);
-		(*i)++; //skip '{'
-		Range cmdgrp_range = is_command_group(list, i);
-		if (cmdgrp_range.end == -1) {
-			dprintf(2, UNCLOSED_SUBSHELL_STR);
-			exit(EXIT_FAILURE);
-		}
-		while (*i <= cmdgrp_range.end || is_redirection(list, i)) {
-			token_list_add(self, list->t[*i]);
-			(*i)++;
-		}
-		// dprintf(2, "start : %d, end: %d\n", cmdgrp_range.start, cmdgrp_range.end);
-		// dprintf(2, "i = %d\n", *i);
-		return self;
-	}
 	while (*i < list->size && !is_ast_operator(list, i)) {
+		if (is_cmdgrp_start(list , i)) {
+			skip_cmdgrp(self, list, i);
+			continue;
+		}
 		if (is_subshell(list, i)) {
 			skip_subshell(self, list, i);
+			continue;
 		}
 		if (*i < list->size && !is_ast_operator(list, i) && !is_eof(list, i)) {
 			token_list_add(self, list->t[*i]);
 		}
 		(*i)++;
 	}
-	// dprintf(2, "-------------START----------\n");
+	// dprintf(2, "-------------AFTER EXTRACT COMMAND----------\n");
 	// tokenListToString(self);
 	// dprintf(2, "----------------------------\n");
-	return self;
-}
-
-TokenList *extract_operator(TokenList *list, int *i) {
-	TokenList *self = token_list_init();
-	token_list_add(self, list->t[(*i)++]);
 	return self;
 }
 
@@ -87,7 +83,7 @@ TokenListStack *split_operator(TokenList *list) {
 			i++;
 			continue;
 		}
-			token_list_stack_push(self, extract_command(list, &i));
+		token_list_stack_push(self, extract_command(list, &i));
 		if (i < list->size && is_ast_operator(list, &i)) {
 			token_list_stack_push(self, extract_operator(list, &i));
 		} else i++;
@@ -95,28 +91,6 @@ TokenListStack *split_operator(TokenList *list) {
 	return self;
 }
 
-bool is_op (TokenList *list) {
-	return (list->size == 1 && list->t[0]->tag == T_SEPARATOR);
-}
-
-Node *generateTree(TokenListStack *list) {
-	NodeStack *self = node_stack_init();
-	for (uint16_t i = 0; i < list->size; i++) {
-		if (!is_op(list->data[i])) {
-			node_stack_push(self, gen_operand_node(list->data[i]));
-		} else {
-			if (self->size == 1) {
-				Node *left = node_stack_pop(self);
-				node_stack_push(self, gen_operator_node(list->data[i], left, NULL));
-			} else {
-				Node *right = node_stack_pop(self);
-				Node *left = node_stack_pop(self);
-				node_stack_push(self, gen_operator_node(list->data[i], left, right));
-			}
-		}
-	}
-	return node_stack_pop(self);
-}
 
 // || and && have same precedence {1}
 // & and ; have same precedence {2}
@@ -156,10 +130,11 @@ TokenListStack *branch_stack_to_rpn(TokenListStack *list) {
 
 Node *ast_build(TokenList *tokens) {
 	TokenListStack *branch_stack = split_operator(tokens);
-	// if (g_debug){
-		// dprintf(2, C_RED"----------BEFORE-------------"C_RESET"\n");
-		// tokenListToString(branch_stack); //Debug
-		// dprintf(2, C_RED"-----------------------------"C_RESET"\n");
+	// dprintf(2, C_RED"----------BEFORE-------------"C_RESET"\n");
+	// for (size_t i = 0; i < branch_stack->size; i++) {
+	// 	dprintf(2, "--------%zu------\n", i);
+	// 	tokenListToString(branch_stack->data[i]);
+	// 	dprintf(2, "-----------------\n");
 	// }
 	TokenListStack *branch_queue = branch_stack_to_rpn(branch_stack);
 	// for (size_t i = 0; i < branch_queue->size; i++) {
@@ -167,7 +142,7 @@ Node *ast_build(TokenList *tokens) {
 	// 	tokenListToString(branch_queue->data[i]);
 	// 	dprintf(2, "-----------------\n");
 	// }
-	Node *AST = generateTree(branch_queue);
+	Node *AST = generate_tree(branch_queue);
 	// printf("------\n");
 	// printTree(AST);
 	// printf("-----\n");

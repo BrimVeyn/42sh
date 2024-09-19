@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:20:10 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 16:26:30 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/17 13:37:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+#include <stdio.h>
 int g_exitno;
 
 //LARBIN add FD validity check (>1023)
@@ -88,7 +89,7 @@ char *find_bin_location(char *bin, StringList *env){
 	}
 
 	char **path = ft_split(string_list_get_value_with_id(env, "PATH"), ':');
-	for (int i = 0; path[i]; i++){
+	for (int i = 0; path[i]; i++) {
 		char *bin_with_path = ft_strjoin(path[i], (char *)gc_add(ft_strjoin("/",bin), GC_GENERAL));
 
 		struct stat file_stat;
@@ -188,15 +189,21 @@ int exec_executer(Executer *executer, StringList *env) {
 		if (current->data_tag == DATA_NODE) {
 			if (current->n_data->tree_tag == TREE_COMMAND_GROUP) {
 				if (current->n_data->redirs != NULL) {
-					apply_all_redirect(current->n_data->redirs);
+					if (apply_all_redirect(current->n_data->redirs)) {
+						g_exitno = ast_execute(current->n_data, env);
+					}
+				} else {
+					g_exitno = ast_execute(current->n_data, env);
 				}
-				g_exitno = ast_execute(current->n_data, env);
 			} else if (current->n_data->tree_tag == TREE_SUBSHELL) {
 				pids[i] = secure_fork();
 				if (pids[i] == 0) {
 					close_all_fds();
 					if (current->n_data->redirs != NULL) {
-						apply_all_redirect(current->n_data->redirs);
+						if (!apply_all_redirect(current->n_data->redirs)) {
+							gc_cleanup(GC_SUBSHELL);
+							exit(g_exitno);
+						}
 					}
 					g_exitno = ast_execute(current->n_data, env);
 					//LE BUG VENAIT DE LA LARBIN

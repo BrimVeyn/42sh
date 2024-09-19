@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/14 16:37:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/17 10:57:15 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/19 09:02:06 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 
 
 #define BUFFER_SIZE 1024
-#define MAX_WORD_LEN 4096
+#define MAX_WORD_LEN 65536
 #define MAX_FILENAME_LEN 1024
 
 typedef struct {

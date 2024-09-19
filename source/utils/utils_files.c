@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 16:35:28 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 16:51:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/18 11:03:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,9 +42,16 @@ char *read_whole_file(int fd) {
 	size_t result_size = 0;
 	size_t result_capacity = BUFFER_SIZE;
 	size_t bytes_read = 0;
-	char *result = malloc(BUFFER_SIZE * sizeof(char));
+	char *result = ft_calloc(BUFFER_SIZE, sizeof(char));
+	if (!result) {
+		gc_cleanup(GC_ALL);
+		close_all_fds();
+		close_std_fds();
+		exit(EXIT_FAILURE);
+	}
 
 	while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) != 0) {
+		// dprintf(2, "salut !\n");
 		buffer[bytes_read] = '\0';
 		if (result_size + bytes_read >= result_capacity) {
 			result_capacity *= 2;
