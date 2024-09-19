@@ -5,14 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/13 14:08:25 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/18 16:24:20 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/09/19 09:02:17 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/09/19 09:02:28 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include <readline/readline.h>
-#include <stdlib.h>
 
 char *handle_format(char metachar[3], char *id, char *word, StringList *env){
 	// printf("id: %s\nword: %s\nmetachar: %s\n", id, word, metachar);

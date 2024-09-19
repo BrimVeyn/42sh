@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_utils.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:20:37 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/16 16:20:37 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/18 16:11:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include "lexer.h"
+#include <stdio.h>
 
 void lexer_read_char(Lexer_p l) {
 	if (l->read_position >= l->input_len) {
@@ -29,21 +29,40 @@ void lexer_read_x_char(Lexer_p l, uint16_t n) {
 	}
 }
 
-static void skip_command_sub(Lexer_p l) {
-	lexer_read_char(l);
+static void skip_command_sub(Lexer_p l, int x) {
+	lexer_read_x_char(l, x);
 	while (l->ch && l->ch != ')') {
+		if (!ft_strncmp(&l->input[l->position], "$(", 2)) {
+			skip_command_sub(l, 2);
+		}
 		if (l->ch == '(') {
-			skip_command_sub(l);
+			skip_command_sub(l, 1);
 		}
 		lexer_read_char(l);
 	}
 }
 
-static void skip_command_exp(Lexer_p l) {
-	lexer_read_char(l);
+static void skip_parameter_exp(Lexer_p l) {
+	lexer_read_x_char(l, 2);
 	while (l->ch && l->ch != '}') {
-		if (l->ch == '{') {
-			skip_command_exp(l);
+		if (!ft_strncmp(&l->input[l->position], "${", 2)) {
+			skip_parameter_exp(l);
+		}
+		lexer_read_char(l);
+	}
+}
+
+static void skip_arithmetic_exp(Lexer_p l) {
+	lexer_read_x_char(l, 3);
+	while (l->ch) {
+		if (!ft_strncmp(&l->input[l->position], "$((", 3)) {
+			dprintf(2, "un de plus ! \n");
+			skip_arithmetic_exp(l);
+		}
+		if (!ft_strncmp(&l->input[l->position], "))", 2)) {
+			dprintf(2, "found !\n");
+			lexer_read_x_char(l, 2);
+			return ;
 		}
 		lexer_read_char(l);
 	}
@@ -52,18 +71,17 @@ static void skip_command_exp(Lexer_p l) {
 char *get_word(Lexer_p l, type_mode mode) {
 	const uint16_t start = l->position;
 	while (l->ch != '\0') {
-		if (!ft_strncmp(&l->input[l->position], "$(", 2)) {
-			lexer_read_char(l);
-			skip_command_sub(l);
-		}
-		if (!ft_strncmp(&l->input[l->position], "${", 2)) {
-			lexer_read_char(l);
-			skip_command_exp(l);
-		}
+		if (!ft_strncmp(&l->input[l->position], "$((", 3))
+			skip_arithmetic_exp(l);
+		if (!ft_strncmp(&l->input[l->position], "$(", 2))
+			skip_command_sub(l, 2);
+		if (!ft_strncmp(&l->input[l->position], "${", 2))
+			skip_parameter_exp(l);
+
 		lexer_read_char(l);
-		if (is_delimiter(mode, l->ch)) {
+
+		if (is_delimiter(mode, l->ch))
 			break;
-		}
 	}
 	const uint16_t end = l->position;
 	return (char *) gc_add(ft_substr(l->input, start, end - start), GC_SUBSHELL);
