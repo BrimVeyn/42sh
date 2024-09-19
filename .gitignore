@@ -7,3 +7,5 @@ compile_commands.json
 .cache
 .clangd
 objects/
+objets/
+*.a
