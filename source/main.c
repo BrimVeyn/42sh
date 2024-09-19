@@ -3,17 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/19 09:32:22 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/19 09:54:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/42sh.h"
-#include "lexer/lexer.h"
-#include <fcntl.h>
-#include <stdint.h>
+#include <stdio.h>
 
 int g_debug = 0;
 
@@ -30,15 +28,10 @@ char *init_prompt_and_signals(void) {
 }
 
 void get_history() {
-	// DIR *dir_history = opendir("~.42history");
-	// if (dir_history == NULL)
-	// {
-	// 	if (mkdir("/tmp/42sh", 0755) == -1){
-	// 		perror("Can't create cache directory");
-	// 	}
-	// }
-	// closedir(dir_history);
-    int fd = open("/home/nbardavi/.42sh.history", O_RDWR | O_CREAT, 0644);
+	char *home = getenv("HOME");
+	char history_filename[1024];
+	ft_sprintf(history_filename, "%s/.42sh_history", home);
+    int fd = open(history_filename, O_RDWR | O_CREAT, 0644);
     if (fd == -1) {
         perror("Can't open history file");
         exit(EXIT_FAILURE);
@@ -97,7 +90,10 @@ void get_history() {
 
 void add_input_to_history(char *input){
 	add_history(input);
-    int history_fd = open("/home/nbardavi/.42sh.history", O_APPEND | O_WRONLY | O_CREAT, 0644);
+	char *home = getenv("HOME");
+	char history_filename[1024];
+	ft_sprintf(history_filename, "%s/.42sh_history", home);
+    int history_fd = open(history_filename, O_APPEND | O_WRONLY | O_CREAT, 0644);
 	if (history_fd == -1) {
 		perror("Can't open history file");
 		exit(EXIT_FAILURE);
