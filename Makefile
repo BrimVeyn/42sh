@@ -65,8 +65,9 @@ MAGENTA			:= \033[0;95m
 CYAN			:= \033[0;96m
 WHITE			:= \033[0;97m
 
-define on_err_reset_color
-	echo -n "$(DEF_COLOR)" && exit 1
+# Wrapper to exec command in order to handle the reset color if an error occured
+define cmd_wrapper
+	$1 || { echo -n "$(DEF_COLOR)"; exit 1; }
 endef
 
 all: $(NAME)
@@ -74,43 +75,43 @@ all: $(NAME)
 $(SAN): $(LIBFT) $(OBJDIR) $(OBJ)
 	@echo "$(GREEN)Making binary with sanitizer: $(NAME)"
 	@printf "$(MAGENTA)"
-	$(CC) $(OBJ) $(LIBFT) $(CFLAGS) $(LDFLAGS) $(SANFLAGS) -o $(NAME)
+	@$(call cmd_wrapper, $(CC) $(OBJ) $(LIBFT) $(CFLAGS) $(LDFLAGS) $(SANFLAGS) -o $(NAME))
 	@printf "Done with sanitizer !$(DEF_COLOR)\n"
 
 $(LEXER_TEST): $(LIBFT) $(LEXER_OBJ)
 	@echo "$(RED)Making test binary: $(LEXER_TEST)"
 	@printf "$(MAGENTA)"
-	$(CC) $(LEXER_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(LEXER_TEST) || $(call on_err_reset_color)
+	@$(call cmd_wrapper, $(CC) $(LEXER_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(LEXER_TEST))	
 	@printf "$(LEXER_TEST) done !$(DEF_COLOR)\n"
 
 $(EXEC_TEST): $(LIBFT) $(EXEC_OBJ)
 	@echo "$(RED)Making test binary: $(EXEC_TEST)"
 	@printf "$(MAGENTA)"
-	$(CC) $(EXEC_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(EXEC_TEST) || $(call on_err_reset_color)
+	@$(call cmd_wrapper, $(CC) $(EXEC_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(EXEC_TEST))
 	@printf "$(EXEC_TEST) done !$(DEF_COLOR)\n"
 
 $(AST_TEST): $(LIBFT) $(AST_TEST_OBJ)
 	@echo "$(RED)Making test binary: $(AST_TEST)"
 	@printf "$(MAGENTA)"
-	$(CC) $(AST_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(AST_TEST) || $(call on_err_reset_color)
+	@$(call cmd_wrapper, $(CC) $(AST_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(AST_TEST))
 	@printf "$(AST_TEST) done !$(DEF_COLOR)\n"
 
 $(REGEX_TEST): $(LIBFT) $(REGEX_OBJ)
 	@echo "$(RED)Making test binary: $(REGEX_TEST)"
 	@printf "$(MAGENTA)"
-	$(CC) $(REGEX_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(REGEX_TEST) || $(call on_err_reset_color)
+	@$(call cmd_wrapper, $(CC) $(REGEX_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(REGEX_TEST))
 	@printf "$(REGEX_TEST) done !$(DEF_COLOR)\n"
 
 $(NAME): $(LIBFT) $(OBJDIR) $(OBJ)
 	@echo "$(GREEN)Making binary: $(NAME)"
 	@printf "$(MAGENTA)"
-	@$(CC) $(OBJ) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(NAME) || $(call on_err_reset_color)
+	@$(call cmd_wrapper, $(CC) $(OBJ) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(NAME))
 	@printf "Done !$(DEF_COLOR)\n"
 
 $(OBJDIR)/%.o: source/%.c
 	@printf '$(YELLOW)Compiling : %-45s $(CYAN)-->	$(YELLOW)%-30s\n' "$<" "$@";
 	@printf "$(BLUE)"
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(call cmd_wrapper, $(CC) $(CFLAGS) -c $< -o $@)
 	@printf "$(DEF_COLOR)"
 
 clean:
