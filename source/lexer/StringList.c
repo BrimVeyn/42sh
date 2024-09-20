@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   StringList.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/18 11:20:58 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/20 15:31:40 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
+#include <stdio.h>
 
 /**
  * @brief Extracts the name from an environment variable string.
@@ -37,12 +38,12 @@ void get_env_variable_value(char *buffer, char *variable){
 int get_env_variable_index(StringList *sl, char *variable){
 	int i = 0;
 
-	char id[4096] = {0};
+	char id[POSIX_MAX_ID_LEN] = {0};
 	get_env_variable_id(id, variable);
 
 	for (; i < sl->size; i++){
 		char tmp_id[POSIX_MAX_ID_LEN] = {0};
-		get_env_variable_id(id, sl->value[i]);
+		get_env_variable_id(tmp_id, sl->value[i]);
 		if (!ft_strcmp(id, tmp_id)){
 			break;
 		}
@@ -113,4 +114,10 @@ char *string_list_get_value_with_id(StringList *sl, char *id){
 		ft_memset(tmp_id, 0, ft_strlen(tmp_id) * sizeof(char));
 	}
 	return NULL;
+}
+
+void string_list_print(const StringList *list) {
+	for (int i = 0; i < list->size; i++) {
+		printf("%s\n", list->value[i]);
+	}
 }

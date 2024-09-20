@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+         #
+#    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/16 16:15:35 by nbardavi          #+#    #+#              #
-#    Updated: 2024/09/19 09:29:27 by nbardavi         ###   ########.fr        #
+#    Updated: 2024/09/20 16:05:29 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,10 +27,12 @@ PARSER_SRC		:= $(wildcard source/parser/*.c)
 STRING_SRC		:= $(wildcard source/string/*.c)
 UTILS_SRC		:= $(wildcard source/utils/*.c)
 SIGNALS_SRC		:= $(wildcard source/signals/*.c)
+BUILTINS_SRC		:= $(wildcard source/builtins/*.c)
 
 
 SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) \
-				   $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC) $(REGEX_SRC)
+				   $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC) \
+				   $(REGEX_SRC) $(BUILTINS_SRC)
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
 
@@ -80,7 +82,7 @@ $(SAN): $(LIBFT) $(OBJDIR) $(OBJ)
 $(LEXER_TEST): $(LIBFT) $(LEXER_OBJ)
 	@echo "$(RED)Making test binary: $(LEXER_TEST)"
 	@printf "$(MAGENTA)"
-	$(CC) $(LEXER_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(LEXER_TEST) || $(call on_err_reset_color)
+	$(CC) $(LEXER_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(LEXER_TEST) 
 	@printf "$(LEXER_TEST) done !$(DEF_COLOR)\n"
 
 $(EXEC_TEST): $(LIBFT) $(EXEC_OBJ)
@@ -92,7 +94,7 @@ $(EXEC_TEST): $(LIBFT) $(EXEC_OBJ)
 $(AST_TEST): $(LIBFT) $(AST_TEST_OBJ)
 	@echo "$(RED)Making test binary: $(AST_TEST)"
 	@printf "$(MAGENTA)"
-	$(CC) $(AST_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(AST_TEST) || $(call on_err_reset_color)
+	$(CC) $(AST_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(AST_TEST)
 	@printf "$(AST_TEST) done !$(DEF_COLOR)\n"
 
 $(REGEX_TEST): $(LIBFT) $(REGEX_OBJ)

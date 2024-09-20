@@ -6,12 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/19 14:40:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/20 16:04:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include <stdio.h>
 
 char *here_doc(char *eof){
 	char *input = NULL;
@@ -96,27 +95,60 @@ SimpleCommand *parser_get_command(const TokenList *tl) {
 	return curr_command;
 }
 
-SimpleCommand *parser_parse_current(TokenList *tl, StringList *env) {
+TokenList *parser_eat_variables(TokenList *tokens) {
+	TokenList *self = token_list_init();
+	int i = 0;
+
+	while (i < tokens->size) {
+		Token *elem = tokens->t[i];
+		if (!is_word(tokens, &i) || (is_word(tokens, &i) && is_redirection(tokens, &i))) {
+			i += 1;
+			continue;
+		}
+
+		char *word = elem->w_infix;
+
+		if (regex_match("^[_a-zA-Z][a-zA-Z1-9_]*=", word).start == -1) {
+			i += 1;
+			continue;
+        }
+		token_list_add(self, elem);
+		token_list_remove(tokens, i);
+	}
+	return self;
+}
+
+void add_vars_to_set(Vars *shell_vars, TokenList *vars) {
+	StringList *set = shell_vars->set;
+	for (int i = 0; i < vars->size; i++) {
+		string_list_add_or_update(set, vars->t[i]->w_infix);
+	}
+}
+
+SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
 	// parser_brace_expansion();
 	// parser_tilde_expansion();
 
 	//AU BOULOT
-	if (!parser_parameter_expansion(tl, env)){
+	if (!parser_parameter_expansion(tl, shell_vars)){
 		return NULL;
 	}
-	if (!parser_command_substitution(tl, env)) {
+	if (!parser_command_substitution(tl, shell_vars)) {
 		return NULL;
 	}
-	if (!parser_arithmetic_expansion(tl, env)) {
-		return NULL;
-	}
+	// if (!parser_arithmetic_expansion(tl, shell_vars)) {
+	// 	return NULL;
+	// }
 	// if (!parser_filename_expansion(tl)){
 	// 	return NULL;
 	// }
-	// parser_quote_removal();
+	TokenList *command_vars = parser_eat_variables(tl);
 	RedirectionList *redirs = parser_get_redirection(tl);
 	SimpleCommand *command = parser_get_command(tl);
+
+	if (command->bin == NULL)
+		add_vars_to_set(shell_vars, command_vars);
+
 	command->redir_list = redirs;
-	
 	return command;
 }

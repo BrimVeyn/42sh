@@ -1,21 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   TokenList.c                                        :+:      :+:    :+:   */
+/*   ATokenList.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 13:37:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/20 15:01:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/20 11:02:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 
-TokenList *token_list_init(void) {
-	TokenList *self = gc_add(ft_calloc(1, sizeof(TokenList)), GC_SUBSHELL);
-	TokenList tl = {
-		.t = (Token **) gc_add(ft_calloc(10, sizeof(Token *)), GC_SUBSHELL),
+ATokenList *atoken_list_init(void) {
+	ATokenList *self = gc_add(ft_calloc(1, sizeof(ATokenList)), GC_SUBSHELL);
+	ATokenList tl = {
+		.data = (AToken **) gc_add(ft_calloc(10, sizeof(AToken *)), GC_SUBSHELL),
 		.size = 0,
 		.capacity = 10,
 	};
@@ -23,51 +23,51 @@ TokenList *token_list_init(void) {
 	return self;
 }
 
-void token_list_add(TokenList *tl, Token *token) {
+void atoken_list_add(ATokenList *tl, AToken *token) {
 	if (tl->size >= tl->capacity) {
 		tl->capacity *= 2;
-		Token **tmp = tl->t;
-		tl->t = ft_realloc(tl->t, tl->size, tl->capacity, sizeof(Token *));
+		AToken **tmp = tl->data;
+		tl->data = ft_realloc(tl->data, tl->size, tl->capacity, sizeof(AToken *));
 		gc_free(tmp, GC_GENERAL);
-		gc_add(tl->t, GC_SUBSHELL);
+		gc_add(tl->data, GC_SUBSHELL);
 	}
-	tl->t[tl->size] = token;
+	tl->data[tl->size] = token;
 	tl->size += 1;
 }
 
-void token_list_add_list(TokenList *t1, TokenList *t2) {
+void atoken_list_add_list(ATokenList *t1, ATokenList *t2) {
 	for (uint16_t i = 0; i < t2->size; i++) {
-		token_list_add(t1, t2->t[i]);
+		atoken_list_add(t1, t2->data[i]);
 	}
 }
 
-void token_list_insert(TokenList *tl, Token *token, const int index){
+void atoken_list_insert(ATokenList *tl, AToken *token, const int index){
 	if (tl->size >= tl->capacity) {
 		tl->capacity *= 2;
-		Token **tmp = tl->t;
-		tl->t = ft_realloc(tl->t, tl->size, tl->capacity, sizeof(Token *));
+		AToken **tmp = tl->data;
+		tl->data = ft_realloc(tl->data, tl->size, tl->capacity, sizeof(AToken *));
 		gc_free(tmp, GC_GENERAL);
-		gc_add(tl->t, GC_SUBSHELL);
+		gc_add(tl->data, GC_SUBSHELL);
 	}
     tl->size += 1;
 
     for (int i = tl->size - 1; i > index; i--) {
-        tl->t[i] = tl->t[i - 1];
+        tl->data[i] = tl->data[i - 1];
     }
-    tl->t[index] = token;
+    tl->data[index] = token;
 }
 
-void token_list_insert_list(TokenList *dest, TokenList *src, const int index) {
+void atoken_list_insert_list(ATokenList *dest, ATokenList *src, const int index) {
 	for (int i = src->size - 1; i >= 0; i--) {
-		token_list_insert(dest, src->t[i], index);
+		atoken_list_insert(dest, src->data[i], index);
 	}
 }
 
-void token_list_remove(TokenList *tl, int index){
+void atoken_list_remove(ATokenList *tl, int index){
     for (int i = index; i < tl->size - 1; i++) {
-        tl->t[i] = tl->t[i + 1];
+        tl->data[i] = tl->data[i + 1];
     }
-    tl->t[tl->size - 1] = NULL;
+    tl->data[tl->size - 1] = NULL;
 
     tl->size--;
 }

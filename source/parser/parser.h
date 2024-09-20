@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/19 15:16:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/20 14:06:37 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ typedef struct SimpleCommand {
 
 char				*parser_get_env_variable_value(char *name, StringList *env);
 //-------------------SimpleCommand-----------------------//
-SimpleCommand		*parser_parse_current(TokenList *tl, StringList *env);
+SimpleCommand		*parser_parse_current(TokenList *tl, Vars *shell_vars);
 
 //-------------------Here_doc-----------------------//
 bool				heredoc_detector(TokenList *data);
@@ -62,11 +62,11 @@ void				redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
 void				add_redirection_from_token(RedirectionList **redir_list, const Token *el);
 
 //-------------------Parser modules------------//
-bool				parser_parameter_expansion(TokenList *tl, StringList *env);
-bool				parser_command_substitution(TokenList *tl, StringList *env);
-bool				parser_arithmetic_expansion(TokenList *tokens, StringList *env);
+bool				parser_parameter_expansion(TokenList *tl, Vars *shell_vars);
+bool				parser_command_substitution(TokenList *tl, Vars *shell_vars);
+bool				parser_arithmetic_expansion(TokenList *tokens, Vars *shell_vars);
 int					parser_filename_expansion(TokenList *tl);
-bool parser_word_split(TokenList *dest, StringList *env, char *prefix, char *infix, char *postfix, int index);
+bool parser_word_split(TokenList *dest, Vars *shell_vars, char *prefix, char *infix, char *postfix, int index);
 
 //-------------------Parameter Expansion-------------//
 void				parser_skip_subshell(TokenList *list, int *it);

@@ -6,11 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/19 10:55:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/20 13:55:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/42sh.h"
+#include "lexer/lexer.h"
+#include "utils/utils.h"
 #include <readline/history.h>
 #include <stdio.h>
 
@@ -110,6 +112,17 @@ void env_to_string_list(StringList *env_list, const char **env){
 	// string_list_add_or_update(env_list, NULL);
 }
 
+Vars *vars_init(const char **env) {
+	Vars *self = gc_add(ft_calloc(1, sizeof(Vars)), GC_SUBSHELL);
+
+	self->env = string_list_init();
+	self->set = string_list_init();
+	env_to_string_list(self->env, env);
+	env_to_string_list(self->set, env);
+
+	return self;
+}
+
 int main(const int ac, const char *av[], const char *env[]) {
 
 	if (ac != 1 && !ft_strcmp("-d", av[1])){
@@ -118,8 +131,7 @@ int main(const int ac, const char *av[], const char *env[]) {
 
 	gc_init(GC_GENERAL);
 	gc_init(GC_SUBSHELL);
-	StringList *env_list = string_list_init();
-	env_to_string_list(env_list, env);
+	Vars *shell_vars = vars_init(env);
 	// for(int i = 0; env_list->value[i]; i++){printf("%s", env_list->value[i]);}
 
 	g_signal = 0;
@@ -143,7 +155,7 @@ int main(const int ac, const char *av[], const char *env[]) {
 			heredoc_detector(tokens);
 			signal_manager(SIG_EXEC);
 			Node *AST = ast_build(tokens);
-			ast_execute(AST, env_list);
+			ast_execute(AST, shell_vars);
 			if (g_debug){
 				printTree(AST);
 			}

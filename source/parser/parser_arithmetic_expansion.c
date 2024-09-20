@@ -6,24 +6,25 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/19 15:20:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/20 16:00:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include "parser.h"
 
-int get_arithmetic_exp_range_end(char *str, int *i) {
-	(*i) += 3;
+int get_arithmetic_exp_range_end(char *str, int *i, Range *range) {
+	(*i) += 3; //skip '$(('
 
 	while (str[*i] && ft_strncmp("))", &str[*i], 2)) {
 		if (!ft_strncmp("$((", &str[*i], 3)) {
-			get_arithmetic_exp_range_end(str, i);
+			range->start = *i;
+			return get_arithmetic_exp_range_end(str, i, range);
 			if (*i == -1) return -1;
 		}
 		(*i)++;
 	}
 	if (ft_strncmp(&str[*i], "))", 2)) return -1;
+	(*i) += 1;
 	return *i;
 }
 
@@ -36,14 +37,14 @@ Range get_arithmetic_exp_range(char *str) {
 	self.start = ft_strstr(str, "$((");
 	if (self.start != -1) {
 		int start_copy = self.start;
-		self.end = get_arithmetic_exp_range_end(str, &start_copy);
+		self.end = get_arithmetic_exp_range_end(str, &start_copy, &self);
 	}
 	return self;
 }
 
-bool parser_arithmetic_expansion(TokenList *tokens, StringList *env) {
+bool parser_arithmetic_expansion(TokenList *tokens, Vars *shell_vars) {
 	(void) tokens;
-	(void) env;
+	(void) shell_vars;
 
 	int i = 0;
 
@@ -56,18 +57,22 @@ bool parser_arithmetic_expansion(TokenList *tokens, StringList *env) {
 		}
 
 		const Range range = get_arithmetic_exp_range(elem->w_infix);
+		// dprintf(2, "r.start: %d, r.end: %d\n", range.start, range.end);
 		if (is_a_match(range)) {
 			if (!is_range_valid(range, UNCLOSED_ARITMETIC_EXP_STR)) {
 				g_exitno = 126;
 				return false;
 			} else i += 1; continue;
 		}
-		dprintf(2, "r.start: %d, r.end: %d\n", range.start, range.end);
 
 		char infix[MAX_WORD_LEN] = {0};
-		ft_memcpy(infix, &elem->w_infix[range.start + 3], (range.end - range.start) - 3);
+		ft_memcpy(infix, &elem->w_infix[range.start + 3], (range.end - range.start) - 4);
 
-		dprintf(2, "infix = %s\n", infix);
+		Lexer_p lexer = lexer_init(infix);
+		ATokenList *tokens = lexer_arithmetic_exp_lex_all(lexer);
+		aTokenListToString(tokens);
+
+		// dprintf(2, "infix = %s\n", infix);
 
 		i++;
 	}
