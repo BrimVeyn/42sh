@@ -3,21 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   ast_execute.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:11:53 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/13 15:25:47 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/20 13:55:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 
-int ast_execute(Node *node, StringList *env) {
+int ast_execute(Node *node, Vars *shell_vars) {
 	if (node->tag == N_OPERATOR) {
 		if (node->value.operator == S_AND) {
-			int exit_lhs = ast_execute(node->left, env);
+			int exit_lhs = ast_execute(node->left, shell_vars);
 			if (exit_lhs == EXIT_SUCCESS) {
-				int exit_rhs = ast_execute(node->right, env);
+				int exit_rhs = ast_execute(node->right, shell_vars);
 				// printf(C_GREEN);
 				// printTree(node->left);
 				// printTree(node->right);
@@ -29,7 +29,7 @@ int ast_execute(Node *node, StringList *env) {
 				return exit_lhs;
 		}
 		if (node->value.operator == S_OR) {
-			int exit_lhs = ast_execute(node->left, env);
+			int exit_lhs = ast_execute(node->left, shell_vars);
 			// printf(C_GREEN);
 			// printTree(node->left);
 			// printTree(node->right);
@@ -37,7 +37,7 @@ int ast_execute(Node *node, StringList *env) {
 			// printf("PID = %d\n", getpid());
 			// printf(C_RESET"\n");
 			if (exit_lhs != EXIT_SUCCESS) {
-				int exit_rhs = ast_execute(node->right, env);
+				int exit_rhs = ast_execute(node->right, shell_vars);
 				return exit_rhs;
 			}
 			else
@@ -46,10 +46,10 @@ int ast_execute(Node *node, StringList *env) {
 		if (node->value.operator == S_SEMI_COLUMN || node->value.operator == S_BG) {
 			int last_exit;
 			if (node->left) {
-				last_exit = ast_execute(node->left, env);
+				last_exit = ast_execute(node->left, shell_vars);
 			}
 			if (node->right) {
-				last_exit = ast_execute(node->right, env);
+				last_exit = ast_execute(node->right, shell_vars);
 			}
 			return last_exit;
 		}
@@ -57,7 +57,7 @@ int ast_execute(Node *node, StringList *env) {
 	if (node->tag == N_OPERAND) {
 		// printf("executing ---------------------------\n");
 		// printTree(node);
-		int exit_status = exec_node(node, env);
+		int exit_status = exec_node(node, shell_vars);
 		// printf("exit status = %d -----------------------------\n", exit_status);
 		return exit_status;
 	}

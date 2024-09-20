@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:20:10 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/17 13:37:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/20 16:03:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,29 +108,36 @@ char *find_bin_location(char *bin, StringList *env){
 	return NULL;
 }
 
-bool exec_simple_command(const SimpleCommand *command, StringList *env) {
+bool exec_simple_command(const SimpleCommand *command, Vars *shell_vars) {
 	if (apply_all_redirect(command->redir_list)) {
 		if (!command->bin) {
 			g_exitno = EXIT_SUCCESS;
 			return false;
 		}
-		char *path = find_bin_location(command->bin, env);
+		char *path = find_bin_location(command->bin, shell_vars->env);
 		if (!path) return false;
-		secure_execve(path, command->args, env->value);
+		secure_execve(path, command->args, shell_vars->env->value);
 	}
 	else return false;
 	return true;
 }
 
-int exec_builtin(SimpleCommand *command, StringList *env){
-	(void)env;
+bool exec_builtin(SimpleCommand *command, Vars *shell_vars){
 	if (!command->bin){
-		return 0;
+		return false;
 	}
 	if (!ft_strcmp(command->bin, "exit")){
 		exit(g_exitno);
 	}
-	return 0;
+	if (!ft_strcmp(command->bin, "env")) {
+		builtin_env(shell_vars);
+		return true;
+	}
+	if (!ft_strcmp(command->bin, "set")) {
+		builtin_set(shell_vars);
+		return true;
+	}
+	return false;
 }
 
 void close_saved_fds(int *saved_fds) {
@@ -160,7 +167,7 @@ void close_std_fds(void) {
 	close(STDERR_FILENO);
 }
 
-int exec_executer(Executer *executer, StringList *env) {
+int exec_executer(Executer *executer, Vars *shell_vars) {
 	Executer *current = executer;
 	int pipefd[2] = {-1 , -1};
 	int saved_fds[3] = {-1, -1, -1};
@@ -190,10 +197,10 @@ int exec_executer(Executer *executer, StringList *env) {
 			if (current->n_data->tree_tag == TREE_COMMAND_GROUP) {
 				if (current->n_data->redirs != NULL) {
 					if (apply_all_redirect(current->n_data->redirs)) {
-						g_exitno = ast_execute(current->n_data, env);
+						g_exitno = ast_execute(current->n_data, shell_vars);
 					}
 				} else {
-					g_exitno = ast_execute(current->n_data, env);
+					g_exitno = ast_execute(current->n_data, shell_vars);
 				}
 			} else if (current->n_data->tree_tag == TREE_SUBSHELL) {
 				pids[i] = secure_fork();
@@ -205,7 +212,7 @@ int exec_executer(Executer *executer, StringList *env) {
 							exit(g_exitno);
 						}
 					}
-					g_exitno = ast_execute(current->n_data, env);
+					g_exitno = ast_execute(current->n_data, shell_vars);
 					//LE BUG VENAIT DE LA LARBIN
 					gc_cleanup(GC_SUBSHELL);
 					free(gc_get()[GC_GENERAL].garbage);
@@ -217,19 +224,19 @@ int exec_executer(Executer *executer, StringList *env) {
 		}
 
 		if (current->data_tag == DATA_TOKENS) {
-			SimpleCommand *command = parser_parse_current(current->s_data, env);
+			SimpleCommand *command = parser_parse_current(current->s_data, shell_vars);
 			// printCommand(command);
 			if (!command && pipefd[0] == -1){
 				close_all_fds();
 				return false;
 			}
-			if (pipefd[0] == -1 && exec_builtin(command, env)){
+			if (pipefd[0] == -1 && exec_builtin(command, shell_vars)){
 				break;
 			}
 			pids[i] = secure_fork();
 			if (pids[i] == 0) {
 				close_all_fds();
-				if (!exec_simple_command(command, env)) {
+				if (!exec_simple_command(command, shell_vars)) {
 					gc_cleanup(GC_ALL);
 					exit(g_exitno);
 				}
@@ -255,12 +262,12 @@ int exec_executer(Executer *executer, StringList *env) {
 	return true;
 }
 
-int exec_node(Node *node, StringList *env) {
+int exec_node(Node *node, Vars *shell_vars) {
 	const ExecuterList *list = build_executer_list(node->value.operand);
 
 	for (int it = 0; it < list->size; it++) {
 		Executer *executer = list->data[it];
-		if (exec_executer(executer, env) == false) {
+		if (exec_executer(executer, shell_vars) == false) {
 			break;
 		}
 	}

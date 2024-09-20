@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   42sh.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:15:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/17 11:15:19 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/20 15:52:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,9 +66,6 @@ extern int g_debug;
 	#include "../source/exec/exec.h"
 #endif // !EXEC_H
 
-#ifndef DEBUG_H
-	#include "../source/debug/debug.h"
-#endif // !DEBUG_H
 
 #ifndef SIGNAL_H
 	#include "../source/signals/signals.h"
@@ -77,5 +74,13 @@ extern int g_debug;
 #ifndef REGEX_H
 	#include "../source/regex/regex.h"
 #endif // !REGEX_H
+//
+#ifndef ARITHMETIC_H
+	#include "../source/parser/arithmetic.h"
+#endif // !REGEX_H
+
+#ifndef DEBUG_H
+#include "../source/debug/debug.h"
+#endif // !DEBUG_H
 
 #endif

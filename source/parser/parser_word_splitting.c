@@ -6,12 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 10:08:43 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/19 14:37:48 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/20 14:07:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
-#include <stdio.h>
 
 static TokenList *ft_token_split(const char *str, const char *ifs) {
 	TokenList *tl = token_list_init();
@@ -38,8 +37,8 @@ static TokenList *ft_token_split(const char *str, const char *ifs) {
 	return tl;
 }
 
-static TokenList *word_splitter(char *str, StringList *env) {
-	char *IFS_value = string_list_get_value_with_id(env, "IFS");
+static TokenList *word_splitter(char *str, Vars *shell_vars) {
+	char *IFS_value = string_list_get_value_with_id(shell_vars->env, "IFS");
 	if (!IFS_value) {
 		IFS_value = "\n\t ";
 	}
@@ -55,11 +54,11 @@ static TokenList *word_splitter(char *str, StringList *env) {
 	return list;
 }
 
-bool parser_word_split(TokenList *dest, StringList *env, char *prefix, char *infix, char *postfix, int index) {
+bool parser_word_split(TokenList *dest, Vars *shell_vars, char *prefix, char *infix, char *postfix, int index) {
 	// dprintf(2, "prefix = %s\n", prefix);
 	// dprintf(2, "infix = %s\n", infix);
 	// dprintf(2, "postfix = %s\n", postfix);
-	TokenList *words = word_splitter(infix, env);
+	TokenList *words = word_splitter(infix, shell_vars);
 	token_list_remove(dest, index);
 	token_list_insert_list(dest, words, index);
 

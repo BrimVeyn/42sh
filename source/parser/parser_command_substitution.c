@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/19 15:19:41 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/20 14:06:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ bool is_range_valid(const Range range, char *str) {
 	return true;
 }
 
-static bool execute_command_sub(char *input, StringList *env) {
+static bool execute_command_sub(char *input, Vars *shell_vars) {
 	Lexer_p lexer = lexer_init(input);
 	TokenList *tokens = lexer_lex_all(lexer);
 	if (lexer_syntax_error(tokens))  {
@@ -73,12 +73,12 @@ static bool execute_command_sub(char *input, StringList *env) {
 
 	heredoc_detector(tokens);
 	Node *AST = ast_build(tokens);
-	ast_execute(AST, env);
+	ast_execute(AST, shell_vars);
 
 	return true;
 }
 
-bool parser_command_substitution(TokenList *tokens, StringList *env) {
+bool parser_command_substitution(TokenList *tokens, Vars *shell_vars) {
 	static int COMMAND_SUB_NO = 0;
 	int i = 0;
 
@@ -116,7 +116,7 @@ bool parser_command_substitution(TokenList *tokens, StringList *env) {
 		int STDOUT_SAVE = dup(STDOUT_FILENO);
 
 		dup2(output_fd, STDOUT_FILENO); close(output_fd);
-		execute_command_sub(infix, env);
+		execute_command_sub(infix, shell_vars);
 		dup2(STDOUT_SAVE, STDOUT_FILENO); close(STDOUT_SAVE);
 
 
@@ -132,7 +132,7 @@ bool parser_command_substitution(TokenList *tokens, StringList *env) {
 		char *prefix = ft_substr(elem->w_infix, 0, range.start);
 		char *postfix = ft_substr(elem->w_infix, range.end + 1, ft_strlen(elem->w_infix) - range.end);
 
-		parser_word_split(tokens, env, prefix, result, postfix, i);
+		parser_word_split(tokens, shell_vars, prefix, result, postfix, i);
 		FREE_POINTERS(prefix, postfix, result);
 	}
 	return true;

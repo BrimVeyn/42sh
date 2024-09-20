@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:50:32 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 21:26:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/20 15:51:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,4 +45,24 @@ void printCommand(SimpleCommand *command) {
 	dprintf(2,"bin: %s\n", command->bin);
 	printCharChar(curr->args);
 	dprintf(2,C_GOLD"---------...---------"C_RESET"\n");
+}
+
+void aTokenToString(AToken *token) {
+	switch (token->tag) {
+		case A_OPERAND:
+			dprintf(2, "OPERAND\n");
+			break;
+		case A_OPERATOR:
+			dprintf(2, "OPERATOR\n");
+			break;
+		default:
+			dprintf(2, "UNHANDLED FORMAT !\n");
+			break;
+	}
+}
+
+void aTokenListToString(ATokenList *tokens) {
+	for (int i = 0; i < tokens->size; i++) {
+		aTokenToString(tokens->data[i]);
+	}
 }
