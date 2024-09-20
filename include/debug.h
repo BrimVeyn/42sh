@@ -13,7 +13,11 @@
 #ifndef DEBUG_H
 # define DEBUG_H
 
-#include "../../include/42sh.h"
+#include "ast.h"
+#include "parser.h"
+#include "lexer.h"
+
+extern int g_debug;
 
 //----------------Tagname---------------------//
 const char *get_tag_name_token(type_of_token type);

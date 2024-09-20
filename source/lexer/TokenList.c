@@ -10,8 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
-#include <stdint.h>
+#include "lexer.h"
+#include "utils.h"
+#include "libft.h"
 
 TokenList *token_list_init(void) {
 	TokenList *self = gc_add(ft_calloc(1, sizeof(TokenList)), GC_SUBSHELL);

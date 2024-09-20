@@ -10,7 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "ast.h"
+#include "exec.h"
+
+#include <stdlib.h>
+#include <stdio.h>
 
 int ast_execute(Node *node, StringList *env) {
 	if (node->tag == N_OPERATOR) {

@@ -10,7 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "ast.h"
+#include "libft.h"
+#include "utils.h"
 
 TokenListStack *token_list_stack_init(void) {
 	TokenListStack *self = gc_add(ft_calloc(1, sizeof(TokenListStack)), GC_SUBSHELL);

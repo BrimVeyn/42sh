@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "debug.h"
 
 const char *get_tag_str_separator(type_of_separator type) {
 	switch(type) {

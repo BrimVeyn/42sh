@@ -10,8 +10,20 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/42sh.h"
+#include "utils.h"
+#include "signals.h"
+#include "debug.h"
+#include "lexer.h"
+#include "ast.h"
+#include "libft.h"
+#include "exec.h"
+
 #include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 int g_debug = 0;
 

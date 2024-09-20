@@ -13,14 +13,23 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#ifndef MAXISH_H
-	#include "../../include/42sh.h"
-#endif // !MAXISH_H
+#include <stdint.h>
+#include <stddef.h>
 
+extern int g_exitno;
 
 #define BUFFER_SIZE 1024
 #define MAX_WORD_LEN 65536
 #define MAX_FILENAME_LEN 1024
+#define POSIX_MAX_ID_LEN 255
+
+#define FREE_POINTERS(...) \
+    void *ptrs[] = { __VA_ARGS__ }; \
+    for (size_t i = 0; i < sizeof(ptrs)/sizeof(ptrs[0]); i++) { \
+        if (ptrs[i] != NULL) { \
+            free(ptrs[i]); \
+        } \
+    } \
 
 typedef struct {
 	int start;
