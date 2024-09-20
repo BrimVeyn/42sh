@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser_parameter_expansion.c                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:17 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/19 09:02:28 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/20 14:05:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,7 @@ static bool is_bad_substitution(Token *el, int pos){
 	return false;
 }
 
-bool parser_parameter_expansion(TokenList *tl, StringList *env){
+bool parser_parameter_expansion(TokenList *tl, Vars *shell_vars){
 	for (uint16_t i = 0; i < tl->size; i++){
 		Token *el = tl->t[i];
 
@@ -158,7 +158,7 @@ bool parser_parameter_expansion(TokenList *tl, StringList *env){
 
 					result = regex_match ("\\${.*}", el->w_infix);
 					if (result.start != -1)
-						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.start + 2, result.end - result.start - 3), GC_SUBSHELL), env);
+						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.start + 2, result.end - result.start - 3), GC_SUBSHELL), shell_vars->env);
 					else
 						break;
 				}

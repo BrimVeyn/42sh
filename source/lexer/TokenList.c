@@ -6,13 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 13:37:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/13 17:16:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/20 16:27:36 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lexer.h"
-#include "utils.h"
-#include "libft.h"
+#include "../../include/lexer.h"
+#include "../../include/utils.h"
+#include "../../libftprintf/header/libft.h"
 
 TokenList *token_list_init(void) {
 	TokenList *self = gc_add(ft_calloc(1, sizeof(TokenList)), GC_SUBSHELL);

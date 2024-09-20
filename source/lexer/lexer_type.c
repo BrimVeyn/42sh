@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 13:01:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 14:09:40 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/19 10:01:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,10 +40,6 @@ type_of_separator get_separator_type(Lexer_p l) {
 		lexer_read_char(l);
 		return S_NEWLINE;
 	}
-	else if (!ft_strncmp("$(", &l->input[l->position], 2)) {
-		lexer_read_x_char(l, 2);
-		return S_CMD_SUB;
-	}
 	else if (!ft_strncmp("&&", &l->input[l->position], 2)) {
 		lexer_read_x_char(l, 2);
 		return S_AND;
@@ -67,10 +63,6 @@ type_of_separator get_separator_type(Lexer_p l) {
 	else if (l->ch == '(') {
 		lexer_read_char(l);
 		return S_SUB_OPEN;
-	}
-	else if (l->ch == '\"') {
-		lexer_read_char(l);
-		return S_DQ;
 	}
 	else if (l->ch == '&'){
 		lexer_read_char(l);
