@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:20:10 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/17 13:37:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/19 10:02:50 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,18 +146,6 @@ void close_saved_fds(int *saved_fds) {
 		close(saved_fds[STDERR_FILENO]);
 		saved_fds[STDERR_FILENO] = -1;
 	}
-}
-
-void close_all_fds(void) {
-	for (uint16_t i = 3; i < 1024; i++) {
-		close(i);
-	}
-}
-
-void close_std_fds(void) {
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
 }
 
 int exec_executer(Executer *executer, StringList *env) {

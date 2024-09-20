@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 13:14:29 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/18 16:24:17 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/20 15:43:42 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ int main(int ac, char **av) {
 		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*}", "${PATH}");
 		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*}", "${8PATH}");
 		regex_test("\\${[^}]*}", "${9PATH}");
-		regex_test("\\${[^}]*$", "${vide");
+		regex_test("\\${[^}]*}", "${vide");
 		regex_test("\\${[^}]*$", "${dsadas}");
 		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*}", "${PA${PATH}");
 		regex_test(".*d", "Hello World");
@@ -59,6 +59,16 @@ int main(int ac, char **av) {
 		regex_test("\\${[A-Za-z_][A-Za-z0-9-?_]*}", "${PWD-hello}");
 		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*[:#%].*}", "${PWD##/hel**lo}");
 		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*[:#%]*.*}", "${PWD}");
+		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*[:#%]*[^\\$]*}", "${PW${PWD}D}");
+		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*[:#%]*[^$}]*}", "${PWD}");
+		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*[:#%]*[^$}]*}", "echo ${PWD}");
+		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*[:#%]*[^$}]*}", "echo ${PWD:=/home/coucou}");
+		regex_test("\\${[A-Za-z_][A-Za-z0-9_]*[:#%]*[^$}]*}", "echo ${UNDEFINED:-NoValue}");
+		regex_test("\\${[^$]*}", "echo ${UNDEFINED:-${NoValue}");
+		regex_test("\\${[^$]*}", "echo ${DEFINED_VAR:-${NESTED_VARIABLE:-fallback}}");
+		regex_test("\\${[^$]*}", "echo ${UND}");
+		regex_test("{[^$]*}", "${PWD}0123456");
+		regex_test("{[a-z}]*}", "${sffs}dasd");
     }
     return 0;
 }

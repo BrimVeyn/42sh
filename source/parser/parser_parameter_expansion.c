@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:17 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/19 09:02:28 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/20 15:01:49 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,6 @@ char *parser_get_variable_value(char *to_expand, StringList *env){
 	if (find_format.start != -1){
 		memcpy(name, to_expand, find_format.start);
 		word = ft_substr(to_expand, find_format.end + lenght_meta - 1, ft_strlen(to_expand) - find_format.end);
-		//adapt memcpy size
 		ft_memcpy(metachar, &to_expand[find_format.start], sizeof(char) * lenght_meta);
 		return handle_format(metachar, name, word, env);
 	}
@@ -89,9 +88,13 @@ char *parser_get_variable_value(char *to_expand, StringList *env){
 }
 
 static int get_format_pos(char *str){
+	const char metachars[] = ":%#";
 	for (int i = 3; str[i]; i++){
-		if (str[i] == ':'){
-			return i + 1;
+		if (i == 2 && str[i] == '#'){
+			i++;
+		}
+		if (ft_strchr(metachars, str[i])){
+			return i;
 		}
 	}
 	return -1;
@@ -100,6 +103,7 @@ static int get_format_pos(char *str){
 static bool is_bad_substitution(Token *el, int pos){
 	int format_pos = get_format_pos(el->w_infix);
 	char *before_format = NULL;
+
 	if (format_pos == -1){
 		before_format = ft_strdup(el->w_infix);
 	} else {
@@ -107,11 +111,15 @@ static bool is_bad_substitution(Token *el, int pos){
 		before_format = ft_strjoin(tmp, &el->w_infix[ft_strlen(el->w_infix) - 1]);
 		free(tmp);
 	}
-	// printf("str: %s\n", before_format);
 
+	// printf("hello %s\n", el->w_infix);
+	// regex_test("\\$[^$]*}", el->w_infix);
+	
 	if (regex_match("\\${}", before_format).start == pos || //match ${} 
 		regex_match("\\${[^}]*$", before_format).start == pos || //if missing }
-		(regex_match("\\${[^}]*}", before_format).start == pos && regex_match("\\${[#A-Za-z_][A-Za-z0-9_]*[#:%]*.*}", before_format).start != pos &&
+		// regex_match("\\${[^$]*}", el->w_infix).start != pos ||
+		regex_match("\\${.*:}", el->w_infix).start == pos ||
+		(regex_match("\\${[^}]*}", before_format).start == pos && regex_match("\\${[#A-Za-z_][A-Za-z0-9_]*}", before_format).start != pos && 
 		regex_match("\\${?}", before_format).start != pos))
 	{ //check if first char is a number
 		dprintf(2, "${}: bad substitution\n");
@@ -129,21 +137,16 @@ bool parser_parameter_expansion(TokenList *tl, StringList *env){
 
 		if (el->tag == T_WORD){
 			match_result result;
-			int pos = -1;
 			char *value = NULL;
 
 			do{
-				for (int i = 0; el->w_infix[i]; i++){
-					if (el->w_infix[i] == '$'){
-						pos = i;
-						break;
-					}
-				}
-				if (pos == -1){
+				printf("Salut\n");
+				result = regex_match ("\\${[^$]*}", el->w_infix);
+				if (result.start == -1){
 					break;
 				}
 				
-				if (is_bad_substitution(el, pos) == true){
+				if (is_bad_substitution(el, result.start) == true){
 					return false;
 				}
 
@@ -151,8 +154,7 @@ bool parser_parameter_expansion(TokenList *tl, StringList *env){
 				if (result.start != -1)
 					value = ft_itoa(g_exitno);
 				else{
-
-					result = regex_match ("\\${.*}", el->w_infix);
+					result = regex_match ("\\${[^$]*}", el->w_infix);
 					if (result.start != -1)
 						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.start + 2, result.end - result.start - 3), GC_SUBSHELL), env);
 					else
@@ -165,8 +167,10 @@ bool parser_parameter_expansion(TokenList *tl, StringList *env){
 				
 				el->w_infix = gc_add(ft_strjoin(tmp, end), GC_GENERAL);
 				free(tmp); free(start); free(end);
+				printf("string: %s\n\n", el->w_infix);
+				regex_test("\\${[^$]*}", el->w_infix);
 
-			} while(regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", el->w_infix).start != -1);
+			} while(regex_match("\\${[^$]*}", el->w_infix).start != -1);
 		}
 	}
 	return true;
