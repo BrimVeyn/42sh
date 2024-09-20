@@ -3,15 +3,27 @@
 /*                                                        :::      ::::::::   */
 /*   utils_files.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 16:35:28 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/18 11:03:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/19 10:02:47 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/42sh.h"
 #include "utils.h"
+
+void close_all_fds(void) {
+	for (uint16_t i = 3; i < 1024; i++) {
+		close(i);
+	}
+}
+
+void close_std_fds(void) {
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
+}
 
 char *get_next_line(int fd) {
 	char buffer[2];

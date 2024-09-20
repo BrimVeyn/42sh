@@ -6,7 +6,7 @@
 #    By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/16 16:15:35 by nbardavi          #+#    #+#              #
-#    Updated: 2024/09/19 09:29:27 by nbardavi         ###   ########.fr        #
+#    Updated: 2024/09/19 14:50:18 by nbardavi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME			:= 42sh
 LIBFT			:= libftprintf/libftprintf.a
 CC 				:= gcc
 LDFLAGS			:= -lreadline -lncurses
-CFLAGS 			:= -Wall -Werror -Wextra -g3 
+CFLAGS 			:= -Wall -Werror -Wextra -g3 #-fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
 SANFLAGS		:= -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
 
 LEXER_SRC 		:= $(filter-out source/lexer/lexer_main.c, $(wildcard source/lexer/*.c))
@@ -80,31 +80,31 @@ $(SAN): $(LIBFT) $(OBJDIR) $(OBJ)
 $(LEXER_TEST): $(LIBFT) $(LEXER_OBJ)
 	@echo "$(RED)Making test binary: $(LEXER_TEST)"
 	@printf "$(MAGENTA)"
-	$(CC) $(LEXER_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(LEXER_TEST) || $(call on_err_reset_color)
+	$(CC) $(LEXER_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(LEXER_TEST)
 	@printf "$(LEXER_TEST) done !$(DEF_COLOR)\n"
 
 $(EXEC_TEST): $(LIBFT) $(EXEC_OBJ)
 	@echo "$(RED)Making test binary: $(EXEC_TEST)"
 	@printf "$(MAGENTA)"
-	$(CC) $(EXEC_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(EXEC_TEST) || $(call on_err_reset_color)
+	$(CC) $(EXEC_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(EXEC_TEST)
 	@printf "$(EXEC_TEST) done !$(DEF_COLOR)\n"
 
 $(AST_TEST): $(LIBFT) $(AST_TEST_OBJ)
 	@echo "$(RED)Making test binary: $(AST_TEST)"
 	@printf "$(MAGENTA)"
-	$(CC) $(AST_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(AST_TEST) || $(call on_err_reset_color)
+	$(CC) $(AST_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(AST_TEST)
 	@printf "$(AST_TEST) done !$(DEF_COLOR)\n"
 
 $(REGEX_TEST): $(LIBFT) $(REGEX_OBJ)
 	@echo "$(RED)Making test binary: $(REGEX_TEST)"
 	@printf "$(MAGENTA)"
-	$(CC) $(REGEX_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(REGEX_TEST) || $(call on_err_reset_color)
+	$(CC) $(REGEX_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(REGEX_TEST)
 	@printf "$(REGEX_TEST) done !$(DEF_COLOR)\n"
 
 $(NAME): $(LIBFT) $(OBJDIR) $(OBJ)
 	@echo "$(GREEN)Making binary: $(NAME)"
 	@printf "$(MAGENTA)"
-	@$(CC) $(OBJ) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(NAME) || $(call on_err_reset_color)
+	@$(CC) $(OBJ) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(NAME)
 	@printf "Done !$(DEF_COLOR)\n"
 
 $(OBJDIR)/%.o: source/%.c

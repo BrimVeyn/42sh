@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/19 09:54:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/19 10:50:05 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,9 +130,9 @@ int main(const int ac, const char *av[], const char *env[]) {
 	while ((input = init_prompt_and_signals()) != NULL) {
 		if (*input) 
 		{
-			if (isatty(STDIN_FILENO)){
-				add_input_to_history(input);
-			}
+			// if (isatty(STDIN_FILENO)){
+			// 	add_input_to_history(input);
+			// }
 			// input = replace_char_greedy(input, '\n', ';');
 			// printf("input: %s\n", input);
 			Lexer_p lexer = lexer_init(input);
