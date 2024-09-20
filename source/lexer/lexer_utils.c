@@ -10,8 +10,12 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "lexer.h"
+#include "utils.h"
+#include "libft.h"
+
 #include <stdio.h>
+#include <stdlib.h>
 
 void lexer_read_char(Lexer_p l) {
 	if (l->read_position >= l->input_len) {

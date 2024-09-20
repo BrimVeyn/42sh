@@ -1,31 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser_arithmetic_expansion.c                      :+:      :+:    :+:   */
+/*   exec_main.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/18 16:26:00 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/08/29 13:01:15 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/08/29 13:47:29 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "parser.h"
+#include "exec.h"
+#include "utils.h"
 
-void string_arithmetic_expansion(char *str) {
-	(void) str;
-}
+#include <stdio.h>
 
-bool parser_arithmetic_expansion(TokenList *tokens, StringList *env) {
-	(void) tokens;
-	(void) env;
-
-	int i = 0;
-
-	while (i < tokens->size) {
-		;
-	}
-
-
-	return true;
+int main(void){
+	gc_init(GC_GENERAL);
+	printf("%s\n", find_bin_location("ls", NULL));
+	gc_cleanup(GC_GENERAL);
 }

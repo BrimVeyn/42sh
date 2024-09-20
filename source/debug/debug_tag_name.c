@@ -10,7 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "debug.h"
+#include "colors.h"
 
 const char *get_tag_name_token(type_of_token type) {
 	switch(type) {

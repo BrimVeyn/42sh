@@ -10,7 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "ast.h"
+#include "debug.h"
 
 void skip_cmdgrp(TokenList *self, TokenList *list, int *i) {
 	token_list_add(self, list->t[*i]);

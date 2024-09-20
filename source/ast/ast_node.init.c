@@ -10,7 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "ast.h"
+#include "libft.h"
+#include "utils.h"
 
 Node *gen_operator_node(TokenList *tok, Node *left, Node *right) {
 	Node *self = gc_add(ft_calloc(1, sizeof(Node)), GC_SUBSHELL);

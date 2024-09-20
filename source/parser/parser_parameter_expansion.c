@@ -10,7 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "parser.h"
+#include "libft.h"
+#include "utils.h"
+#include "exec.h"
+#include "regex.h"
 
 char *handle_format(char metachar[3], char *id, char *word, StringList *env){
 	// printf("id: %s\nword: %s\nmetachar: %s\n", id, word, metachar);

@@ -10,7 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "utils.h"
+#include "libft.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 
 void *ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize) {
 	void *new_ptr = malloc(nbEl * elSize);

@@ -10,8 +10,17 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "exec.h"
+#include "utils.h"
+#include "libft.h"
+
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+
 int g_exitno;
 
 //LARBIN add FD validity check (>1023)

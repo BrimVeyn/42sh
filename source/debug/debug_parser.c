@@ -10,7 +10,10 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "debug.h"
+#include "colors.h"
+
+#include <stdio.h>
 
 void printRedirList(RedirectionList *rl) {
 	dprintf(2,C_BRONZE"------ "C_LIGHT_BROWN"Redir list"C_BRONZE"----\n"C_RESET);

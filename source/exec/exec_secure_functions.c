@@ -10,7 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "exec.h"
+#include "utils.h"
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 int is_valid_fd(int fd) {
 	return fcntl(fd, F_GETFL) != -1;

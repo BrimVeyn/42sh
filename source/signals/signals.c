@@ -10,7 +10,12 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "signals.h"
+
+#include <stdio.h>
+#include <signal.h>
+#include <readline/readline.h>
+
 int g_signal;
 
 void signal_sigint_prompt(__attribute__((unused)) int code) {

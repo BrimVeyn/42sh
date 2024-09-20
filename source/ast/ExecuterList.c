@@ -10,8 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
 #include "ast.h"
+#include "utils.h"
+#include "libft.h"
 
 ExecuterList *executer_list_init(void) {
 	ExecuterList *self = gc_add(ft_calloc(1, sizeof(ExecuterList)), GC_SUBSHELL);

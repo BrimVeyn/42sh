@@ -10,7 +10,10 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "lexer.h"
+#include "parser.h"
+#include "debug.h"
+#include "libft.h"
 
 bool is_whitespace_only(TokenList *tokens) {
 	for (int i = 0; i < tokens->size; i++) {

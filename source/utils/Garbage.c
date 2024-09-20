@@ -10,7 +10,10 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "utils.h"
+#include "libft.h"
+
+#include <stdlib.h>
 
 //garbage collector
 static Garbage gc[10] = {{NULL, 0, 0}};

@@ -10,7 +10,10 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "debug.h"
+#include "colors.h"
+
+#include <stdio.h>
 
 void lexer_debug(Lexer_p lexer) {
 	dprintf(2, "--- Lexer state ---\n");
