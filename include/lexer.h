@@ -13,9 +13,67 @@
 #ifndef LEXER_H
 # define LEXER_H
 
-#ifndef MAXISH_H
-	#include "../../include/42sh.h"
-#endif // !MAXI_SH
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+
+#define DELIMITERS_DEFAULT "|$;\0\n"
+#define DELIMITERS_DQUOTE "$\0"
+
+typedef enum {
+	T_COMMAND,
+	//---------------
+	T_REDIRECTION, //ok
+	//---------------
+	T_GROUPING,
+	//---------------
+	T_WORD, // generic word ?
+	//---------------
+	T_SEPARATOR,
+	//---------------
+	T_NONE, // Generic none token when no prefix/suffix
+} type_of_token;
+
+typedef enum {
+	ERROR_NONE, //error free 
+	ERROR_UNEXPECTED_TOKEN, //<> ||| <<<< <<<>
+	ERROR_UNCLOSED_SQ, //'....\0
+	ERROR_UNCLOSED_DQ, //'....\0
+	ERROR_UNCLOSED_CG, //".....\0
+	ERROR_BAD_SUBSTITUTION, // cf invalid identifier
+	ERROR_ESCAPED_SQ, //'..\'..'
+} type_of_error;
+
+typedef enum {
+	S_AND,// &&
+	S_OR, // ||
+	S_PIPE, // |
+	S_SEMI_COLUMN, // ;
+	S_BG, // &
+	S_NEWLINE, // \n
+	S_EOF, // \0
+	S_CMD_SUB, // $(
+	S_SUB_OPEN, // (
+	S_SUB_CLOSE, // )
+	S_DQ, //"
+	S_DEFAULT,
+} type_of_separator;
+
+typedef enum {
+	R_OUTPUT, //>[ex|n]
+	R_APPEND, //>>[ex|n]
+	R_INPUT, //[?n]<[ex|n]
+	R_HERE_DOC, //[?n]<<[delimiter]
+	R_DUP_IN, //[?n]<&[ex|n]
+	R_DUP_OUT, //[?n]>&[ex|n]
+	R_DUP_BOTH, //&>[ex|n]
+	R_DUP_BOTH_APPEND, //&>>[ex]
+} type_of_redirection;
+
+typedef enum {
+	C_BUILTIN, //echo, etc...
+	C_SHELL, //grep, etc...
+} type_of_command;
 
 typedef enum {
 	DEFAULT,
@@ -32,9 +90,31 @@ typedef struct {
 
 typedef Lexer * Lexer_p;
 
-#pragma once
-#include "lexer_enum.h"
-#include "lexer_struct.h"
+typedef struct StringList {
+	char		**value;
+	uint16_t	size;
+	uint16_t	capacity;
+} StringList;
+
+typedef struct Token {
+	type_of_token tag;
+	type_of_error e;
+	union {
+		struct {
+			type_of_separator s_type;
+		}; //separator
+
+		struct {
+			type_of_redirection r_type;
+			struct Token *r_postfix;
+		};  //redirection
+
+		struct {
+			char			*w_infix;
+			struct Token	*w_postfix;
+		}; //word
+	};
+} Token;
 
 typedef struct TokenList {
 	Token		**t;
@@ -42,12 +122,11 @@ typedef struct TokenList {
 	uint16_t	capacity;
 } TokenList;
 
+typedef struct {
+	type_of_error	error;
+	char			*error_message;
+} Error;
 
-typedef struct StringList {
-	char		**value;
-	uint16_t	size;
-	uint16_t	capacity;
-} StringList;
 
 //-----------------Lexer------------------//
 TokenList		*lexer_lex_all(Lexer_p l);

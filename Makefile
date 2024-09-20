@@ -28,11 +28,13 @@ STRING_SRC		:= $(wildcard source/string/*.c)
 UTILS_SRC		:= $(wildcard source/utils/*.c)
 SIGNALS_SRC		:= $(wildcard source/signals/*.c)
 
+INC       := -I./include -I./libftprintf/header
 
 SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) \
 				   $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC) $(REGEX_SRC)
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
+DEPS 			:= $(OBJ:%.o=%.d)
 
 AST_TEST		:= ast_test
 AST_TEST_SRC	:= source/ast/ast_main.c $(filter-out source/main.c, $(SRC))
@@ -108,10 +110,11 @@ $(NAME): $(LIBFT) $(OBJDIR) $(OBJ)
 	@$(call cmd_wrapper, $(CC) $(OBJ) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(NAME))
 	@printf "Done !$(DEF_COLOR)\n"
 
+-include $(DEPS)
 $(OBJDIR)/%.o: source/%.c
 	@printf '$(YELLOW)Compiling : %-45s $(CYAN)-->	$(YELLOW)%-30s\n' "$<" "$@";
 	@printf "$(BLUE)"
-	@$(call cmd_wrapper, $(CC) $(CFLAGS) -c $< -o $@)
+	@$(call cmd_wrapper, $(CC) $(CFLAGS) $(INC) -MMD -c $< -o $@)
 	@printf "$(DEF_COLOR)"
 
 clean:

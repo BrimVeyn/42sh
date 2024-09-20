@@ -10,8 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
 #include "debug.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 char *getKind(Node *node) {
 	switch(node->tag) {

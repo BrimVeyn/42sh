@@ -13,7 +13,7 @@
 #ifndef SIGNAL_H
 #define SIGNAL_H
 
-#include "../../include/42sh.h"
+extern int g_signal;
 
 typedef enum {
 	SIG_PROMPT,

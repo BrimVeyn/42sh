@@ -10,7 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "parser.h"
+#include "libft.h"
+#include "utils.h"
 
 RedirectionList *redirection_list_init(void) {
 	RedirectionList *self = gc_add(ft_calloc(1, sizeof(RedirectionList)), GC_SUBSHELL);

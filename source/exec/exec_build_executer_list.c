@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "exec.h"
 
 void parser_skip_subshell(TokenList *list, int *j) {
 	(*j)++;

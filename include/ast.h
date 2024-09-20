@@ -13,7 +13,8 @@
 #ifndef AST_H
 #define AST_H
 
-#include "../../include/42sh.h"
+#include "lexer.h"
+#include "parser.h"
 
 typedef struct {
 	TokenList **data;

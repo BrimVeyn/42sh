@@ -10,7 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "lexer.h"
+#include "utils.h"
+#include "libft.h"
+
+#include <stdlib.h>
 
 Lexer_p lexer_init(char *input) {
 	Lexer_p lexer = gc_add(ft_calloc(1, sizeof(Lexer)), GC_SUBSHELL);

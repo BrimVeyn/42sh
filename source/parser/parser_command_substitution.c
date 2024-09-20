@@ -10,7 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "parser.h"
+#include "libft.h" 
+#include "utils.h" 
+#include "ast.h" 
+
+#include <unistd.h>
+#include <fcntl.h>
 
 int get_command_sub_range_end(char *str, int *i) {
 	(*i) += 2; // skip '$('

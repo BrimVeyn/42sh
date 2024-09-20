@@ -13,7 +13,9 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "../../include/42sh.h"
+#include <stdint.h>
+
+#include "lexer.h"
 
 #define UNEXPECTED_TOKEN_STR "42sh: syntax error near unexpected token "
 #define UNCLOSED_SUBSHELL_STR "42sh: syntax error: unclosed subshell, expected "

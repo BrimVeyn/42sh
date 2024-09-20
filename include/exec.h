@@ -13,9 +13,8 @@
 #ifndef EXEC_H
 # define EXEC_H
 
-#ifndef MAXISH_H
-	#include "../../include/42sh.h"
-#endif // !MAXISH_H
+#include "ast.h"
+#include <stdbool.h>
 
 typedef enum {
 	E_ISDIR = 1,

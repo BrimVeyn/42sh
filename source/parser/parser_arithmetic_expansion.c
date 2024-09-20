@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "parser.h"
 
 void string_arithmetic_expansion(char *str) {
 	(void) str;
