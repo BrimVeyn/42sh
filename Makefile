@@ -18,11 +18,11 @@ LDFLAGS			:= -lreadline -lncurses
 CFLAGS 			:= -Wall -Werror -Wextra -g3 
 SANFLAGS		:= -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
 
-LEXER_SRC 		:= $(filter-out source/lexer/lexer_main.c, $(wildcard source/lexer/*.c))
-EXEC_SRC 		:= $(filter-out source/exec/exec_main.c, $(wildcard source/exec/*.c))
-AST_SRC			:= $(filter-out source/ast/ast_main.c, $(wildcard source/ast/*.c))
+LEXER_SRC 		:= $(wildcard source/lexer/*.c)
+EXEC_SRC 		:= $(wildcard source/exec/*.c)
+AST_SRC			:= $(wildcard source/ast/*.c)
 DEBUG_SRC		:= $(wildcard source/debug/*.c)
-REGEX_SRC		:= $(filter-out source/regex/regex_main.c, $(wildcard source/regex/*.c))
+REGEX_SRC		:= $(wildcard source/regex/*.c)
 PARSER_SRC		:= $(wildcard source/parser/*.c)
 STRING_SRC		:= $(wildcard source/string/*.c)
 UTILS_SRC		:= $(wildcard source/utils/*.c)
@@ -32,25 +32,27 @@ INC       := -I./include -I./libftprintf/header
 
 SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) \
 				   $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC) $(REGEX_SRC)
-
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
+
+SRC_NO_MAIN := $(filter-out source/main.c, $(SRC))
+OBJ_NO_MAIN := $(SRC_NO_MAIN:source/%.c=objects/%.o) 
+
 DEPS 			:= $(OBJ:%.o=%.d)
 
+
+BIN_TEST		:= $(wildcard tester/bin/*.c)
+
 AST_TEST		:= ast_test
-AST_TEST_SRC	:= source/ast/ast_main.c $(filter-out source/main.c, $(SRC))
-AST_TEST_OBJ	:= $(AST_TEST_SRC:source/%.c=objects/%.o)
+AST_MAIN		:= $(filter %/ast_main.c, $(BIN_TEST))
 
-LEXER_TEST		:= lexer_test
-LEXER_TEST_SRC	:= source/lexer/lexer_main.c $(filter-out source/main.c, $(SRC))
-LEXER_TEST_OBJ	:= $(LEXER_TEST_SRC:source/%.c=objects/%.o)
+LEXER_TEST	:= lexer_test
+LEXER_MAIN	:= $(filter %/lexer_main.c, $(BIN_TEST))
 
-REGEX_TEST		:= regex_test
-REGEX_TEST_SRC	:= source/regex/regex_main.c $(REGEX_SRC) $(UTILS_SRC)
-REGEX_TEST_OBJ	:= $(REGEX_TEST_SRC:source/%.c=objects/%.o)
+REGEX_TEST	:= regex_test
+REGEX_MAIN	:= $(filter %/regex_main.c, $(BIN_TEST))
 
 EXEC_TEST		:= exec_test
-EXEC_TEST_SRC	:= source/exec/exec_main.c $(filter-out source/main.c, $(SRC))
-EXEC_TEST_OBJ	:= $(EXEC_TEST_SRC:source/%.c=objects/%.o)
+EXEC_MAIN	:= $(filter %/exec_main.c, $(BIN_TEST))
 
 SAN 			:= san
 
@@ -80,28 +82,28 @@ $(SAN): $(LIBFT) $(OBJDIR) $(OBJ)
 	@$(call cmd_wrapper, $(CC) $(OBJ) $(LIBFT) $(CFLAGS) $(LDFLAGS) $(SANFLAGS) -o $(NAME))
 	@printf "Done with sanitizer !$(DEF_COLOR)\n"
 
-$(LEXER_TEST): $(LIBFT) $(LEXER_OBJ)
+$(LEXER_TEST): $(LIBFT) $(OBJDIR) $(OBJ_NO_MAIN)
 	@echo "$(RED)Making test binary: $(LEXER_TEST)"
 	@printf "$(MAGENTA)"
-	@$(call cmd_wrapper, $(CC) $(LEXER_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(LEXER_TEST))	
+	@$(call cmd_wrapper, $(CC) $(OBJ_NO_MAIN) $(LEXER_MAIN) $(INC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(LEXER_TEST))	
 	@printf "$(LEXER_TEST) done !$(DEF_COLOR)\n"
 
-$(EXEC_TEST): $(LIBFT) $(EXEC_OBJ)
+$(EXEC_TEST): $(LIBFT) $(OBJDIR) $(OBJ_NO_MAIN)
 	@echo "$(RED)Making test binary: $(EXEC_TEST)"
 	@printf "$(MAGENTA)"
-	@$(call cmd_wrapper, $(CC) $(EXEC_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(EXEC_TEST))
+	@$(call cmd_wrapper, $(CC) $(OBJ_NO_MAIN) $(EXEC_MAIN) $(INC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(EXEC_TEST))
 	@printf "$(EXEC_TEST) done !$(DEF_COLOR)\n"
 
-$(AST_TEST): $(LIBFT) $(AST_TEST_OBJ)
+$(AST_TEST): $(LIBFT) $(OBJDIR) $(OBJ_NO_MAIN)
 	@echo "$(RED)Making test binary: $(AST_TEST)"
 	@printf "$(MAGENTA)"
-	@$(call cmd_wrapper, $(CC) $(AST_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(AST_TEST))
+	@$(call cmd_wrapper, $(CC) $(OBJ_NO_MAIN) $(AST_MAIN) $(INC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(AST_TEST))
 	@printf "$(AST_TEST) done !$(DEF_COLOR)\n"
 
-$(REGEX_TEST): $(LIBFT) $(REGEX_OBJ)
+$(REGEX_TEST): $(LIBFT) $(OBJDIR) $(OBJ_NO_MAIN)
 	@echo "$(RED)Making test binary: $(REGEX_TEST)"
 	@printf "$(MAGENTA)"
-	@$(call cmd_wrapper, $(CC) $(REGEX_TEST_SRC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(REGEX_TEST))
+	@$(call cmd_wrapper, $(CC) $(OBJ_NO_MAIN) $(REGEX_MAIN) $(INC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(REGEX_TEST))
 	@printf "$(REGEX_TEST) done !$(DEF_COLOR)\n"
 
 $(NAME): $(LIBFT) $(OBJDIR) $(OBJ)
@@ -123,7 +125,7 @@ clean:
 	@printf "$(RED)Objects deleted !$(DEF_COLOR)\n"
 
 fclean: clean
-	@rm -rf $(NAME)
+	@rm -rf $(NAME) $(AST_TEST) $(REGEX_TEST) $(EXEC_TEST) $(LEXER_TEST)
 	@make --no-print-directory -C libftprintf/ fclean
 	@printf "$(RED)Binary deleted !$(DEF_COLOR)\n"
 

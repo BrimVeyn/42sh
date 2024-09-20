@@ -10,7 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "lexer.h"
+#include "utils.h"
+#include "debug.h"
+
+#include <readline/readline.h>
+#include <readline/history.h>
+
 int g_debug = 0;
 
 int main(int ac, char *av[]) {

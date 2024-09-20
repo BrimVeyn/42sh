@@ -11,9 +11,12 @@
 /* ************************************************************************** */
 
 #include "exec.h"
+#include "utils.h"
+
+#include <stdio.h>
 
 int main(void){
-	gc_init();
-	printf("%s\n", find_bin_location("ls"));
-	gc_cleanup();
+	gc_init(GC_GENERAL);
+	printf("%s\n", find_bin_location("ls", NULL));
+	gc_cleanup(GC_GENERAL);
 }
