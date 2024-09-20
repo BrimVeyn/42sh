@@ -10,7 +10,12 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "lexer.h"
+#include "utils.h"
+#include "libft.h"
+
+#include <stdlib.h>
+#include <stdio.h>
 
 TokenList *lexer_lex_all(Lexer_p l) {
 	TokenList *self = token_list_init();

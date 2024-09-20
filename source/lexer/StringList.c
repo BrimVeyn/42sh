@@ -10,7 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "lexer.h"
+#include "libft.h"
+#include "utils.h"
 
 /**
  * @brief Extracts the name from an environment variable string.

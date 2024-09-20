@@ -10,7 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "lexer.h"
+#include "libft.h"
+
+#include <stdlib.h>
+#include <stdio.h>
 
 type_of_token get_token_tag(Lexer_p l) {
 	if (l->ch == '\0') {

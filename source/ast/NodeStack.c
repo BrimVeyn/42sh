@@ -11,7 +11,9 @@
 /* ************************************************************************** */
 
 
-#include "../../include/42sh.h"
+#include "ast.h"
+#include "utils.h"
+#include "libft.h"
 
 NodeStack *node_stack_init(void) {
 	NodeStack *self = gc_add(ft_calloc(1, sizeof(NodeStack)), GC_SUBSHELL);

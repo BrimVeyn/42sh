@@ -10,7 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "parser.h"
+#include "libft.h"
+#include "utils.h"
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <readline/readline.h>
 
 char *here_doc(char *eof){
 	char *input = NULL;

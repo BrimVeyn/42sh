@@ -6,4 +6,6 @@ ast_test
 compile_commands.json
 .cache
 .clangd
-objects
+objects/
+objets/
+*.a

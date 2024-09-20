@@ -10,7 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/42sh.h"
+#include "utils.h"
+#include "libft.h"
+
+#include <stdarg.h>
+#include <unistd.h>
 
 static size_t ft_itoa_buffer(char *buffer, int number) {
 	size_t buffer_len = ft_strlen(buffer);
