@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 11:47:59 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/13 11:13:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/20 12:59:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ int main(int ac, char *av[]) {
 	(void) av;
 	gc_init(GC_GENERAL);
 	gc_init(GC_SUBSHELL);
-	Token *none_token __attribute__((unused)) = token_none_init();
 	
 	char *input = NULL;
 	while ((input = readline("> ")) != NULL) {

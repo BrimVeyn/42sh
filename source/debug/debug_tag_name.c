@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 13:37:54 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/04 15:49:25 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/19 10:02:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@ const char *get_tag_name_token(type_of_token type) {
 	switch(type) {
 		case T_REDIRECTION:
 			return "T_REDIRECTION";
-		case T_GROUPING:
-			return "T_GROUPING";
 		case T_SEPARATOR:
 			return "T_SEPARATOR";
 		case T_NONE:
@@ -46,10 +44,6 @@ const char *get_tag_name_separator(type_of_separator type) {
 			return "S_SUB_CLOSE";
 		case S_SUB_OPEN:
 			return "S_SUB_OPEN";
-		case S_CMD_SUB:
-			return "S_CMD_SUB";
-		case S_DQ:
-			return "S_DOUBLE_QUOTE";
 		case S_EOF:
 			return "S_EOF";
 		case S_NEWLINE:

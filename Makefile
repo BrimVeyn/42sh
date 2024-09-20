@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+         #
+#    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/16 16:15:35 by nbardavi          #+#    #+#              #
-#    Updated: 2024/09/19 09:29:27 by nbardavi         ###   ########.fr        #
+#    Updated: 2024/09/20 16:22:38 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,11 +27,14 @@ PARSER_SRC		:= $(wildcard source/parser/*.c)
 STRING_SRC		:= $(wildcard source/string/*.c)
 UTILS_SRC		:= $(wildcard source/utils/*.c)
 SIGNALS_SRC		:= $(wildcard source/signals/*.c)
+BUILTINS_SRC		:= $(wildcard source/builtins/*.c)
 
 INC       := -I./include -I./libftprintf/header
 
 SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) \
-				   $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC) $(REGEX_SRC)
+				   $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC) \
+				   $(REGEX_SRC) $(BUILTINS_SRC)
+
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
 
 SRC_NO_MAIN := $(filter-out source/main.c, $(SRC))

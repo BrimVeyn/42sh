@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 15:49:29 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/04 15:53:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/19 10:02:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,6 @@ const char *get_tag_str_separator(type_of_separator type) {
 			return ")";
 		case S_SUB_OPEN:
 			return "(";
-		case S_CMD_SUB:
-			return "$(";
-		case S_DQ:
-			return "\"";
 		case S_EOF:
 			return "\\0";
 		case S_NEWLINE:
@@ -62,6 +58,6 @@ const char *get_tag_str_redirection(type_of_redirection type) {
 		case R_DUP_BOTH_APPEND:
 			return "&>>";
 		default:
-			return "?????";
+			return "unknown redirection (tagStr)";
 	}
 }

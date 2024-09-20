@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/17 15:12:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/20 14:49:28 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,11 +75,6 @@ typedef enum {
 	C_SHELL, //grep, etc...
 } type_of_command;
 
-typedef enum {
-	DEFAULT,
-	DQUOTE,
-} type_mode;
-
 typedef struct {
 	char		*input;
 	uint16_t	input_len;
@@ -128,9 +123,14 @@ typedef struct {
 } Error;
 
 
+typedef struct {
+	StringList *env;
+	StringList *set;
+} Vars;
+
 //-----------------Lexer------------------//
 TokenList		*lexer_lex_all(Lexer_p l);
-Token			*lexer_get_next_token(Lexer_p l,type_mode mode);
+Token			*lexer_get_next_token(Lexer_p l);
 Lexer_p			lexer_init(char *input);
 void			lexer_debug(Lexer_p lexer);
 void			lexer_deinit(Lexer_p lexer);
@@ -140,15 +140,14 @@ bool			lexer_syntax_error(TokenList *tokens);
 
 //-----------------Utils------------------//
 bool			is_whitespace(char c);
-bool			is_redirection_char(char c);
 bool			is_number(char *str);
 bool			next_token_is_redirection(Lexer_p l);
 bool			is_fdable_redirection(Lexer_p l);
 bool			is_fdable_redirection(Lexer_p l);
-bool			is_delimiter(type_mode mode, char c);
+bool			is_delimiter(const char c);
 void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
 void			eat_whitespace(Lexer_p l);
-char			*get_word(Lexer_p l, type_mode mode);
+char			*get_word(Lexer_p l);
 
 //-----------------Typing------------------//
 type_of_token		get_token_tag(Lexer_p l);
@@ -179,6 +178,7 @@ StringList		*string_list_init(void);
 void			string_list_add_or_update(StringList *sl, char *variable);
 void			string_list_remove(StringList *sl, char *variable);
 char			*string_list_get_value_with_id(StringList *sl, char *id);
+void			string_list_print(const StringList *list);
 
 //----------------Syntax----------------//
 bool	is_pipe(const TokenList *list, const int *i);
