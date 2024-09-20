@@ -3,18 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   exec_secure_functions.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:52:42 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/09 14:50:35 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/20 16:19:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "exec.h"
-#include "utils.h"
 
-#include <fcntl.h>
+#define _GNU_SOURCE
 #include <unistd.h>
+#include "../../include/exec.h"
+#include "../../include/utils.h"
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 
