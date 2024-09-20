@@ -13,8 +13,8 @@
 
 #define _GNU_SOURCE
 #include <unistd.h>
-#include "../../include/exec.h"
-#include "../../include/utils.h"
+#include "exec.h"
+#include "utils.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
