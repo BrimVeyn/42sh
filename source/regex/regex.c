@@ -6,215 +6,195 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 15:49:33 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/24 16:32:35 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "regex.h"
+#include "../../include/42sh.h"
 #include <stdint.h>
 #include <stdio.h>
 
-static int matchdigit(char c){
-    return (0 <= c && c <= 9);
+const char *get_regex_type(regex_pattern_type type);
+
+void regex_append_node(regex_compiled_t *regexp, regex_node_t *node) {
+	if (regexp->size >= regexp->capacity - 1) {
+		regexp->capacity *= 2;
+		regexp->pattern = (regex_node_t **)ft_realloc(regexp->pattern, regexp->size, regexp->capacity, sizeof(regex_node_t *));
+	}
+	regexp->pattern[regexp->size] = node;
+	regexp->size += 1;
+	regexp->pattern[regexp->size] = NULL;
 }
 
-static int matchalpha(char c){
-    return (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z'));
-}
-
-static int matchalphanum(char c){
-    return matchdigit(c) || matchalpha(c);
-}
-
-static int matchwhitespace(char c){
-    return (('\a' <= c && c <= '\r') || c == ' ');
-}
-
-int matchmetachar(char c, const char* str)
-{
-  switch (str[0])
-  {
-    case 'd': return  matchdigit(c);
-    case 'D': return !matchdigit(c);
-    case 'w': return  matchalphanum(c);
-    case 'W': return !matchalphanum(c);
-    case 's': return  matchwhitespace(c);
-    case 'S': return !matchwhitespace(c);
-	case '$': return c == '$';
-	case '-': return c == '-';
-    default:  return (c == str[0]);
-  }
-}
-
-match_result regex_match(char *regexp, char *text) {
-    match_result result = { -1, -1 };
-    int text_pos = 0;
+void regex_compile_pattern(regex_compiled_t *regexp, char *pattern){
+	regexp->size = 0;
+	regexp->capacity = 10;
+	regexp->pattern = ft_calloc(10, sizeof(regex_node_t *));
+	regexp->err = "Success";
+	regexp->is_pattern_valid = true;
+	
+	if (pattern == NULL){
+		regexp->is_pattern_valid = false;
+		regexp->err = "NULL pattern string";
+		return;
+	}
+	
 	int i = 0;
-
-    if (regexp[0] == '^') {
-        if (regex_matchhere(regexp + 1, text, &text_pos)) {
-            result.start = 0;
-            result.end = text_pos;
-            return result;
-        }
-    }
-
-    do {
-		text_pos = i;
-        int start_text_pos = text_pos;
-        if (regex_matchhere(regexp, text, &text_pos)) {
-            result.start = start_text_pos;
-            result.end = text_pos;
-            return result;
-        }
-		i++;
-    } while (*text++ != '\0' && ++text_pos);
-
-    return result;
-}
-
-int regex_matchstar(char c, char *regexp, char *text, int *text_pos) {
-	printf("In matchstar\n");
-    char *start = text;
-    while (*text != '\0' && ((*text == c) || c == '.')) {
-        (*text_pos)++;
-        text++;
-    }
-
-    do {
-        if (regexp[0] == '$' && *text == '\0') {
-            return 1;
-        }
-
-        if (regex_matchhere(regexp, text, text_pos)) {
-            return 1;
-        }
-
-        (*text_pos)--;
-        text--;
-    } while (text >= start);
-
-	printf("end matchstar\n");
-    return 0;
-}
-int regex_is_range_match(char *regexp, char c) {
-    char start = regexp[0];
-    char end = regexp[2];
-    return (start <= c && c <= end);
-}
-
-int regex_find_range_start(char *regexp){
-    int i = 0;
-    for (; regexp[i] != '['; i--){}
-    return i;
-}
-
-int regex_find_range_end(char *regexp){
-    int i = 0;
-    for (; regexp[i] != ']'; i++){
-	}
-    return i;
-}
-
-int regex_matchrange(char *regexp, char *text, int *text_pos, int previous_found) {
-    int has_star = (regexp[regex_find_range_end(regexp) + 1] == '*');
-    int matched = 0;
-	int has_caret = (*regexp == '^');
-
-	if (has_caret){
-		regexp++;
-	}
-
-    while(*regexp != ']') {
-        // implemente litteral charactere here (&& regexp[0] != '\\')
-        // +2 to skip current char and -
-		if (regexp[0] == '\\' && matchmetachar(*text, regexp + 1)){
-			matched = 1;
+	while(pattern[i] != '\0'){
+		char char_in_pattern = pattern[i];
+		switch(char_in_pattern){
+			case '^':
+				set_begin(regexp);
+				i++;
+				break;
+			case '$':
+				set_end(regexp);
+				i++;
+				break;
+			case '.':
+				set_dot(regexp);
+				i++;
+				break;
+			case '[':
+				set_range(regexp, pattern + i + 1, &i);
+				break;
+			case '*':
+				set_quantifier(regexp, REGEX_STAR);
+				i++;
+				break;
+			default:
+				set_single_char(regexp, char_in_pattern);
+				i++;
 		}
-        if (regexp[1] == '-' && (regexp += 2) && regex_is_range_match(regexp - 2, *text)){
-            matched = 1;
-        } else if (*regexp == *text){
-            matched = 1;
-        }
-
-        if ((matched && !has_caret) || (!matched && has_caret && *regexp)){
-            previous_found = 1;
-			(*text_pos)++;
-			text++;
-			if (has_star && !*text && !has_caret){
-				printf("found + end text go matchere\n");
-				// for (int i = 0; i < 1000000000; i++){}
-				printf("\nfdp va: %s\n", regexp);
-				regexp = (*regexp == ']') ? regexp: regexp + regex_find_range_end(regexp);
-				(*text_pos)--;
-                return regex_matchhere(regexp, text - 1, text_pos);
-			}
-            if (has_star && *text){
-				printf("found + star\n");
-                return regex_matchrange(regexp + regex_find_range_start(regexp) + 1, text, text_pos, previous_found);
-            }
-			printf("found\n");
-            return regex_matchhere(regexp + regex_find_range_end(regexp) + 1, text, text_pos);
-        }
-
-        regexp++;
-    }
-    
-    if (has_star) {
-  //       if (previous_found)
-  //           return regex_matchhere(regexp + 2, text, text_pos);
-		// // printf("Not found but there is a star\n");
-        return regex_matchhere(regexp + 2, text, text_pos);
-    }
-
-    return 0;
-}
-
-int regex_matchhere(char *regexp, char *text, int *text_pos) {
-	printf("regexp char: %c ", *regexp);
-	printf("regexp: %25s ", regexp);
-	printf("text char: %c ", *text);
-	printf("text_pos: %d\n", *text_pos);
-    if (regexp[0] == '\0' || (*text == '\0' && (regexp[0] == '*' && (regexp[1] == '$' || regexp[1] == '\0')))) {
-        return 1;
-    }
-	if (regexp[0] == '\\' && matchmetachar(*text, regexp + 1)){
-		(*text_pos)++;
-		return regex_matchhere(regexp + 2, text + 1, text_pos);
 	}
-    if (regexp[0] == '$'){
-        return (*text == '\0');
-    }
-    if (regexp[0] == '['){
-        return regex_matchrange(regexp + 1, text, text_pos, 0);
-    }
-    if (regexp[1] == '*') {
-        return regex_matchstar(*regexp, regexp + 2, text, text_pos);
-    }
-    if (*text != '\0' && (regexp[0] == '.' || regexp[0] == *text)) {
-        (*text_pos)++;
-        return regex_matchhere(regexp + 1, text + 1, text_pos);
-    }
-
-    // printf("regex_matchhere return 0\n");
-    return 0;
+	set_end_of_pattern(regexp);
 }
 
-void regex_test(char *regexp, char *text){
-    match_result result = regex_match(regexp, text);
-    printf("start: %d\nend: %d\n", result.start, result.end);
+int regex_exec_pattern(regex_compiled_t *regexp, char *string, regex_match_t *pmatch){
+	pmatch->re_start = -1;
+	pmatch->re_end = -1;
 
-    for (int i = 0; text[i]; i++) {
-        if (i == result.start)
-            printf("\033[0;32m");
-        else if (i == result.end)
-            printf("\033[0m");
-        printf("%c", text[i]);
-    }
-    printf("\n");
-    printf("\033[0m");
-
-    printf("%s\n", regexp);
-    printf("==================\n");
+	int i = 0;
+	while(true){
+		regex_node_t *node = regexp->pattern[i];
+		switch(node->type){
+			case REGEX_SINGLE_CHAR:
+				
+				break;
+			default:
+				;
+		}
+	}
 }
 
+const char *get_quantifier_type(regex_quantifier_type type) {
+	switch(type) {
+		case REGEX_STAR:
+			return "*";
+		default:
+			return "??????";
+	}
+}
+
+const char *get_regex_type(regex_pattern_type type) {
+	switch(type) {
+		case REGEX_END_OF_PATTERN:
+			return "END OF PATTERN";
+		case REGEX_DOT:
+			return ".";
+		case REGEX_BEGIN:
+			return "^";
+		case REGEX_END:
+			return "$";
+		case REGEX_RANGE:
+			return "[]";
+		case REGEX_SINGLE_CHAR:
+			return "char";
+		default:
+			return "??????";
+	}
+}
+
+void print_regex_pattern(regex_compiled_t *regexp){
+
+	for (int i = 0; i < regexp->size; i++){
+		int type = regexp->pattern[i]->type;
+		printf("==========\ntype: %s\n", get_regex_type(type));
+		if (type == REGEX_SINGLE_CHAR){
+			printf("	char: '%c'\n", regexp->pattern[i]->c);
+			
+		}
+		if (type == REGEX_RANGE){
+			for (int j = 0; regexp->pattern[i]->range[j][0] != '\0'; j++){
+				printf("	range pattern : [%s]\n", regexp->pattern[i]->range[j]);
+			}
+		}
+		if (regexp->pattern[i]->quantifier != REGEX_NO_QUANTIFIER){
+			printf("quatified by %s\n", get_quantifier_type(regexp->pattern[i]->quantifier));
+		}
+	}
+}
+
+int main (void){
+	regex_compiled_t regexp;
+	regex_compile_pattern(&regexp, "^S[a-z\\-]*.*$");
+	print_regex_pattern(&regexp);
+
+	return 0;
+}
+
+#include <regex.h>
+// void regex_test(char *regexp, char *text) {
+//     match_result my_result = regex_match(regexp, text);
+//
+//     regex_t regex;
+//     regmatch_t matches[1];
+//     int result = regcomp(&regex, regexp, REG_EXTENDED);
+//     if (result != 0) {
+//         char errbuf[128];
+//         regerror(result, &regex, errbuf, sizeof(errbuf));
+//         printf("Erreur de compilation du regex POSIX: %s\n", errbuf);
+//         return;
+//     }
+//
+//     result = regexec(&regex, text, 1, matches, 0);
+//     int posix_start = -1, posix_end = -1;
+//     if (result == 0) {
+//         posix_start = matches[0].rm_so;
+//         posix_end = matches[0].rm_eo;
+//     } else if (result == REG_NOMATCH) {
+//         posix_start = posix_end = -1;
+//     }
+//
+//     if (my_result.start != posix_start || my_result.end != posix_end) {
+//
+//         printf("My regex: start = %d, end = %d\n", my_result.start, my_result.end);
+//         printf("POSIX regex: start = %d, end = %d\n", posix_start, posix_end);
+//
+//         printf("My regex:\n");
+//         for (int i = 0; text[i]; i++) {
+//             if (i == my_result.start)
+//                 printf("\033[0;32m");
+//             else if (i == my_result.end)
+//                 printf("\033[0m");
+//             printf("%c", text[i]);
+//         }
+//         printf("\033[0m\n");
+//
+//         printf("POSIX regex:\n");
+//         for (int i = 0; text[i]; i++) {
+//             if (i == posix_start)
+//                 printf("\033[0;31m");
+//             else if (i == posix_end)
+//                 printf("\033[0m");
+//             printf("%c", text[i]);
+//         }
+//         printf("\033[0m\n");
+//     } else {
+//         printf("Valid\n");
+//     }
+//
+//     regfree(&regex);
+//     printf("==================\n");
+// }
