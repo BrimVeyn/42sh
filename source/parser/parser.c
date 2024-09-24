@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 16:31:01 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/24 14:09:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,9 +104,10 @@ SimpleCommand *parser_get_command(const TokenList *tl) {
 
 TokenList *parser_eat_variables(TokenList *tokens) {
 	TokenList *self = token_list_init();
+	bool found_bin = false;
 	int i = 0;
 
-	while (i < tokens->size) {
+	while (i < tokens->size && !found_bin) {
 		Token *elem = tokens->t[i];
 		if (!is_word(tokens, &i) || (is_word(tokens, &i) && is_redirection(tokens, &i))) {
 			i += 1;
@@ -114,8 +115,13 @@ TokenList *parser_eat_variables(TokenList *tokens) {
 		}
 
 		char *word = elem->w_infix;
+		if (!word) {
+			i += 1;
+			continue;
+		}
 
 		if (regex_match("^[_a-zA-Z][a-zA-Z1-9_]*=", word).start == -1) {
+			found_bin = true;
 			i += 1;
 			continue;
         }
@@ -143,9 +149,9 @@ SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
 	if (!parser_command_substitution(tl, shell_vars)) {
 		return NULL;
 	}
-	// if (!parser_arithmetic_expansion(tl, shell_vars)) {
-	// 	return NULL;
-	// }
+	if (!parser_arithmetic_expansion(tl, shell_vars)) {
+		return NULL;
+	}
 	// if (!parser_filename_expansion(tl)){
 	// 	return NULL;
 	// }
@@ -153,7 +159,7 @@ SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
 	RedirectionList *redirs = parser_get_redirection(tl);
 	SimpleCommand *command = parser_get_command(tl);
 
-	if (command->bin == NULL)
+	if (command->bin == NULL && command_vars->size != 0)
 		add_vars_to_set(shell_vars, command_vars);
 
 	command->redir_list = redirs;

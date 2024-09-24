@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:20 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 16:25:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/24 09:31:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "../../include/parser.h"
 #include "../../include/debug.h"
 #include "../../libftprintf/header/libft.h"
+#include <stdio.h>
 
 bool is_whitespace_only(TokenList *tokens) {
 	for (int i = 0; i < tokens->size; i++) {
@@ -77,6 +78,10 @@ bool lexer_syntax_error(TokenList *tokens) {
 		return true;
 	for (int it = 0; it < tokens->size; it++) {
 		if (is_subshell(tokens, &it)) {
+			if (is_end_sub(tokens, &(int){it + 1})) {
+				dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagStr((type_of_separator) S_SUB_CLOSE));
+				return true;
+            }
 			int it_save = it;
 			if (!is_subshell_closed(tokens, &it)) {
 				dprintf(2, UNCLOSED_SUBSHELL_STR"`%s\'\n", tagStr((type_of_separator) S_SUB_CLOSE));

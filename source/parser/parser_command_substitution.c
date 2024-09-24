@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 16:31:32 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/24 13:04:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "../../libftprintf/header/libft.h"
 #include "../../include/utils.h" 
 #include "../../include/ast.h" 
+#include "exec.h"
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -69,12 +70,8 @@ static bool execute_command_sub(char *input, Vars *shell_vars) {
 	Lexer_p lexer = lexer_init(input);
 	TokenList *tokens = lexer_lex_all(lexer);
 	if (lexer_syntax_error(tokens))  {
-		dprintf(2, "input = %s\n", input);
-		dprintf(2, "Unhandled lexer_syntax_error in command_sub\n");
-		exit(EXIT_FAILURE);
 		return false;
 	}
-
 	heredoc_detector(tokens);
 	Node *AST = ast_build(tokens);
 	ast_execute(AST, shell_vars);
@@ -84,6 +81,7 @@ static bool execute_command_sub(char *input, Vars *shell_vars) {
 
 bool parser_command_substitution(TokenList *tokens, Vars *shell_vars) {
 	static int COMMAND_SUB_NO = 0;
+	bool error = false;
 	int i = 0;
 
 	while(i < tokens->size) {
@@ -102,25 +100,24 @@ bool parser_command_substitution(TokenList *tokens, Vars *shell_vars) {
 			} else i += 1; continue;
 		}
 
-		//TODO handle empty command sub | segfaults for now
-		
 		char infix[MAX_WORD_LEN] = {0};
 		ft_memcpy(infix, &elem->w_infix[range.start + 1], range.end - range.start);
-		// dprintf(2, "INFIX: %s\n", infix);
 
 		char file_name[MAX_FILENAME_LEN] = {0};
 		ft_sprintf(file_name, "/tmp/command_sub_%d", COMMAND_SUB_NO++);
 
 		int output_fd = open(file_name, O_CREAT | O_TRUNC | O_WRONLY | O_CLOEXEC, 0644);
 		if (output_fd == -1) {
-			printf("failed\n");
+			printf("DUP failed in command sub what do we do ?\n");
 			exit(EXIT_FAILURE);
 		}
 
 		int STDOUT_SAVE = dup(STDOUT_FILENO);
 
 		dup2(output_fd, STDOUT_FILENO); close(output_fd);
-		execute_command_sub(infix, shell_vars);
+		if (!execute_command_sub(infix, shell_vars)) {
+			error = true;
+		}
 		dup2(STDOUT_SAVE, STDOUT_FILENO); close(STDOUT_SAVE);
 
 
@@ -133,11 +130,20 @@ bool parser_command_substitution(TokenList *tokens, Vars *shell_vars) {
 		char *result = read_whole_file(output_fd);
 		close(output_fd); unlink(file_name);
 
+
 		char *prefix = ft_substr(elem->w_infix, 0, range.start);
 		char *postfix = ft_substr(elem->w_infix, range.end + 1, ft_strlen(elem->w_infix) - range.end);
 
+		if (!ft_strlen(result) && !ft_strlen(prefix) && !ft_strlen(postfix)) {
+			FREE_POINTERS(prefix, result, postfix);
+			elem->w_infix = NULL;
+			i += 1;
+			continue;
+		}
+
 		parser_word_split(tokens, shell_vars, prefix, result, postfix, i);
-		FREE_POINTERS(prefix, postfix, result);
+		FREE_POINTERS(prefix, result, postfix);
+		if (error) return false;
 	}
 	return true;
 }

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 10:28:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/24 09:31:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,13 @@ TokenListStack *branch_stack_to_rpn(TokenListStack *list) {
 	return output;
 }
 
+#include <stdio.h>
+#include "debug.h"
+#include "colors.h"
+
 Node *ast_build(TokenList *tokens) {
+	// printf("~~~~~~~~~~~~~~~~~~~~~~~~\n");
+	// tokenListToString(tokens);
 	TokenListStack *branch_stack = split_operator(tokens);
 	// dprintf(2, C_RED"----------BEFORE-------------"C_RESET"\n");
 	// for (size_t i = 0; i < branch_stack->size; i++) {
