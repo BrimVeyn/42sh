@@ -6,11 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/20 16:30:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/24 15:57:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "arithmetic.h"
+#include "debug.h"
+#include "lexer.h"
 
 int get_arithmetic_exp_range_end(char *str, int *i, Range *range) {
 	(*i) += 3; //skip '$(('
@@ -62,15 +64,25 @@ bool parser_arithmetic_expansion(TokenList *tokens, Vars *shell_vars) {
 			if (!is_range_valid(range, UNCLOSED_ARITMETIC_EXP_STR)) {
 				g_exitno = 126;
 				return false;
-			} else i += 1; continue;
+			} else {
+				i += 1; 
+				continue;
+			}
 		}
 
 		char infix[MAX_WORD_LEN] = {0};
 		ft_memcpy(infix, &elem->w_infix[range.start + 3], (range.end - range.start) - 4);
+		printf("%s\n", infix);
 
-		// Lexer_p lexer = lexer_init(infix);
-		// ATokenList *tokens = lexer_arithmetic_exp_lex_all(lexer);
-		// aTokenListToString(tokens);
+		Lexer_p lexer = lexer_init(infix);
+		ATokenStack *tokens = lexer_arithmetic_exp_lex_all(lexer);
+		//TODO syntax check !
+		if (!tokens) {
+			i += 1;
+			continue;
+		}
+		// ATokenStack *stack = tokens_to_rpn();
+		aTokenListToString(tokens);
 
 		// dprintf(2, "infix = %s\n", infix);
 

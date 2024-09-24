@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:50:32 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/20 16:28:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/24 15:55:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,22 +50,22 @@ void printCommand(SimpleCommand *command) {
 	dprintf(2,C_GOLD"---------...---------"C_RESET"\n");
 }
 
-// void aTokenToString(AToken *token) {
-// 	switch (token->tag) {
-// 		case A_OPERAND:
-// 			dprintf(2, "OPERAND\n");
-// 			break;
-// 		case A_OPERATOR:
-// 			dprintf(2, "OPERATOR\n");
-// 			break;
-// 		default:
-// 			dprintf(2, "UNHANDLED FORMAT !\n");
-// 			break;
-// 	}
-// }
-//
-// void aTokenListToString(ATokenList *tokens) {
-// 	for (int i = 0; i < tokens->size; i++) {
-// 		aTokenToString(tokens->data[i]);
-// 	}
-// }
+void aTokenToString(AToken *token) {
+	switch (token->tag) {
+		case A_OPERAND:
+			dprintf(2, "OPERAND\n");
+			break;
+		case A_OPERATOR:
+			dprintf(2, "OPERATOR\n");
+			break;
+		default:
+			dprintf(2, "UNHANDLED FORMAT !\n");
+			break;
+	}
+}
+
+void aTokenListToString(ATokenStack *tokens) {
+	for (int i = 0; i < tokens->size; i++) {
+		aTokenToString(tokens->data[i]);
+	}
+}

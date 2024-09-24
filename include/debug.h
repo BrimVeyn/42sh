@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 16:39:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 16:24:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/24 15:54:55 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "ast.h"
 #include "parser.h"
 #include "lexer.h"
+#include "../source/parser/arithmetic.h"
 
 extern int g_debug;
 
@@ -33,8 +34,8 @@ const char *get_tag_str_separator(type_of_separator type);
 
 //---------------Parser debug---------------//
 void printCommand(SimpleCommand *command);
-// void aTokenToString(AToken *token);
-// void aTokenListToString(ATokenList *tokens);
+void aTokenToString(AToken *token);
+void aTokenListToString(ATokenStack *tokens);
 
 //---------------Lexer debug---------------//
 void lexer_debug(Lexer_p lexer);

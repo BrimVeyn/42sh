@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/17 15:09:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/17 15:15:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/24 09:24:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,11 +121,18 @@ Node *extract_command_group(TokenList *list, int *i) {
 	return AST;
 }
 
+#include <unistd.h>
+#include <stdio.h>
+#include "debug.h"
+
 Node *extract_subshell(TokenList *list, int *i) {
+	// printf("ici !\n");
 	TokenList *newlist = extract_subshell_rec(list, i);
 	// printf("============================================\n");
-	// tokenListToString(list);
+	// tokenListToString(newlist);
 	// printf("============================================\n");
+	if (newlist->size == 0)
+		return NULL;
 	Node *AST = ast_build(newlist);
 	AST->tree_tag = TREE_SUBSHELL;
 	AST->redirs = eat_redirections(list, TREE_SUBSHELL, *i);
