@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 16:26:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/25 17:35:08 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/lexer.h"
 #include "../../include/utils.h"
 #include "../../libftprintf/header/libft.h"
+#include <stdio.h>
 
 /**
  * @brief Extracts the name from an environment variable string.
@@ -110,6 +111,7 @@ char *string_list_get_value_with_id(StringList *sl, char *id){
 		if (!ft_strcmp(id, tmp_id)){
 			char *value = gc_add(ft_calloc(ft_strlen(sl->value[i]), sizeof(char)), GC_GENERAL);
 			get_env_variable_value(value, sl->value[i]);
+			dprintf(2, "%s = %s\n", id, value);
 			return value;
 		}
 		ft_memset(tmp_id, 0, ft_strlen(tmp_id) * sizeof(char));

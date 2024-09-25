@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 10:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/24 16:31:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/25 17:20:49 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,10 @@
 #include "utils.h"
 
 typedef enum {
-	O_INCR, //++
-	O_DECR, //--
+	O_POST_INCR, //a++
+	O_POST_DECR, //a--
+	O_PREF_INCR, //++a
+	O_PREF_DECR, //--a
 	O_PLUS, // +
 	O_MINUS, // -
 	O_MULT, // *
@@ -54,7 +56,7 @@ typedef struct {
 	arithemtic_operand_tag operand_tag;
 	char *variable;
 	union {
-		long value;
+		long litteral;
 		arithmetic_operators operator;
 	};
 } AToken;
@@ -66,16 +68,26 @@ typedef struct {
 } ATokenStack;
 
 typedef struct ANode {
-	AToken *data;
-	struct Node		*left;
-	struct Node		*right;
+	AToken *value;
+	struct ANode *left;
+	struct ANode *right;
 } ANode;
 
+typedef struct {
+	ANode **data;
+	uint16_t size;
+	uint16_t capacity;
+} ANodeStack;
+
 //----------------Token List Stack------------------//
-ATokenStack			*lexer_arithmetic_exp_lex_all(Lexer_p lexer);
+ATokenStack			*lexer_arithmetic_exp_lex_all(Lexer_p lexer, Vars *shell_vars);
 ATokenStack			*atoken_stack_init(void);
 void				atoken_stack_push(ATokenStack *self, AToken *token);
 AToken				*atoken_stack_pop(ATokenStack *self);
-AToken				*lexer_get_next_atoken(Lexer_p l);
+AToken				*lexer_get_next_atoken(Lexer_p l, Vars *shell_vars);
+
+ANodeStack *anode_stack_init(void);
+ANode *anode_stack_pop(ANodeStack *self);
+void anode_stack_push(ANodeStack *tl, ANode *token);
 
 #endif // !ARITHMETIC

@@ -1,38 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   NodeStack.c                                        :+:      :+:    :+:   */
+/*   ANodeStack.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 15:31:15 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/25 13:31:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/25 13:31:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "arithmetic.h"
 
-#include "ast.h"
-#include "utils.h"
-#include "libft.h"
-
-NodeStack *node_stack_init(void) {
-	NodeStack *self = gc_add(ft_calloc(1, sizeof(NodeStack)), GC_SUBSHELL);
-	self->data = (Node **) gc_add(ft_calloc(10, sizeof(Node *)), GC_SUBSHELL);
+ANodeStack *anode_stack_init(void) {
+	ANodeStack *self = gc_add(ft_calloc(1, sizeof(ANodeStack)), GC_SUBSHELL);
+	self->data = (ANode **) gc_add(ft_calloc(10, sizeof(ANode *)), GC_SUBSHELL);
 	self->size = 0;
 	self->capacity = 10;
 	return self;
 }
 
-Node *node_stack_pop(NodeStack *self) {
+ANode *anode_stack_pop(ANodeStack *self) {
 	self->size -= 1;
 	return self->data[self->size];
 }
 
-void node_stack_push(NodeStack *tl, Node *token) {
+void anode_stack_push(ANodeStack *tl, ANode *token) {
 	if (tl->size >= tl->capacity) {
 		tl->capacity *= 2;
-		Node **tmp = tl->data;
-		tl->data = (Node **) ft_realloc(tl->data, tl->size, tl->capacity, sizeof(Node *));
+		ANode **tmp = tl->data;
+		tl->data = (ANode **) ft_realloc(tl->data, tl->size, tl->capacity, sizeof(ANode *));
 		gc_free(tmp, GC_GENERAL);
 		gc_add(tl->data, GC_GENERAL);
 	}

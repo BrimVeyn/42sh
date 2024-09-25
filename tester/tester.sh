@@ -15,6 +15,7 @@ else
 		"subshell"
 		"command_sub"
 		"command_group"
+		"arithmetic_expansion"
 	)
 fi
 

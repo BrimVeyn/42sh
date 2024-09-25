@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:50:32 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/24 15:55:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/25 16:56:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,13 +50,33 @@ void printCommand(SimpleCommand *command) {
 	dprintf(2,C_GOLD"---------...---------"C_RESET"\n");
 }
 
+char *aOpToSTring(AToken *token) {
+	static const struct {
+		arithmetic_operators op;
+		char *str;
+	} map[] = {
+		{O_PLUS, "+"}, {O_MINUS, "-"},
+		{O_MULT, "*"}, {O_DIVIDE, "/"}, {O_MODULO, "%"},
+		{O_POST_INCR, "x++"}, {O_POST_DECR, "x--"},
+		{O_PREF_INCR, "++x"}, {O_PREF_DECR, "--x"},
+		{O_LT, "<"}, {O_GT, ">"}, {O_LE, "<="}, {O_GE, ">="},
+		{O_EQUAL, "=="}, {O_DIFFERENT, "!="},
+		{O_AND, "&&"}, {O_OR, "||"},
+	};
+
+	for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); i++) {
+		if (token->operator == map[i].op) return map[i].str;
+	}
+	return "invalid";
+}
+
 void aTokenToString(AToken *token) {
 	switch (token->tag) {
 		case A_OPERAND:
-			dprintf(2, "OPERAND\n");
+			dprintf(2, "%ld ", token->litteral);
 			break;
 		case A_OPERATOR:
-			dprintf(2, "OPERATOR\n");
+			dprintf(2, "%s ", aOpToSTring(token));
 			break;
 		default:
 			dprintf(2, "UNHANDLED FORMAT !\n");
@@ -65,7 +85,10 @@ void aTokenToString(AToken *token) {
 }
 
 void aTokenListToString(ATokenStack *tokens) {
+	dprintf(2, "-------------Print start--------\n");
 	for (int i = 0; i < tokens->size; i++) {
 		aTokenToString(tokens->data[i]);
 	}
+	dprintf(2, "\n");
+	dprintf(2, "-------------Print end--------\n");
 }
