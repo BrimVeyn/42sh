@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/24 09:31:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/25 12:10:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,7 @@ TokenListStack *branch_stack_to_rpn(TokenListStack *list) {
 			token_list_stack_push(output, current);
 		}
 	}
-	while (operator->size > 0) {
+	while (operator->size) {
 		token_list_stack_push(output, token_list_stack_pop(operator));
 	}
 	return output;
