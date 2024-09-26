@@ -6,11 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:20:10 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 16:03:48 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/26 12:22:36 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
+#include "lexer.h"
 #include "utils.h"
 #include "libft.h"
 
@@ -97,7 +98,7 @@ char *find_bin_location(char *bin, StringList *env){
 		return (NULL);
 	}
 
-	char **path = ft_split(string_list_get_value_with_id(env, "PATH"), ':');
+	char **path = ft_split(string_list_get_value(env, "PATH"), ':');
 	for (int i = 0; path[i]; i++) {
 		char *bin_with_path = ft_strjoin(path[i], (char *)gc_add(ft_strjoin("/",bin), GC_GENERAL));
 
@@ -125,9 +126,8 @@ bool exec_simple_command(const SimpleCommand *command, Vars *shell_vars) {
 		}
 		char *path = find_bin_location(command->bin, shell_vars->env);
 		if (!path) return false;
-		secure_execve(path, command->args, shell_vars->env->value);
-	}
-	else return false;
+		secure_execve(path, command->args, shell_vars->env->data);
+	} else return false;
 	return true;
 }
 

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 11:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/25 17:30:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/26 16:49:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "../../include/regex.h"
 #include "lexer.h"
 #include "libft.h"
+#include "parser.h"
 #include "utils.h"
 #include <stdio.h>
 
@@ -44,7 +45,6 @@ arithmetic_operators get_operator_tag(Lexer_p l) {
 			return multi_char_op[i].op_tab;
 		}
 	}
-
     switch (l->ch) {
         case '(': lexer_read_char(l); return O_POPEN;
         case ')': lexer_read_char(l); return O_PCLOSE;
@@ -60,10 +60,10 @@ arithmetic_operators get_operator_tag(Lexer_p l) {
 }
 
 bool is_operator_char(char c) {
-	return (ft_strchr("+-*/%<>=!|&", c));
+	return (ft_strchr("+-*/%<>=!|&()", c));
 }
 
-bool fill_operand(AToken *self, Lexer_p l, Vars *shell_vars) {
+bool fill_operand(AToken *self, Lexer_p l) {
 	const int start = l->position;
 	while (ft_isalnum(l->ch) || l->ch == '_') {
 		lexer_read_char(l);
@@ -76,6 +76,7 @@ bool fill_operand(AToken *self, Lexer_p l, Vars *shell_vars) {
 	}
 	if (!is_number(var) && regex_match("^[_a-zA-Z][a-zA-Z1-9_]*", var).start == -1) {
 		free(var);
+		dprintf(2, "ici !\n");
 		return false;
 	}
 	if (is_number(var)) {
@@ -84,17 +85,19 @@ bool fill_operand(AToken *self, Lexer_p l, Vars *shell_vars) {
 	} else {
 		self->operand_tag = VARIABLE;
 		self->variable = var;
-		char *val = string_list_get_value_with_id(shell_vars->set, self->variable);
-		self->litteral = (val) ? ft_atoi(val) : 0;
 	}
 	gc_add(var, GC_SUBSHELL);
 	return true;
 }
 
-AToken *lexer_get_next_atoken(Lexer_p l, Vars *shell_vars) {
-	AToken *self = gc_add(ft_calloc(1, sizeof(AToken *)), GC_SUBSHELL);
+AToken *lexer_get_next_atoken(Lexer_p l) {
+	AToken *self = gc_add(ft_calloc(1, sizeof(AToken)), GC_SUBSHELL);
 
 	eat_whitespace(l);
+	if (!l->ch) {
+		self->tag = A_EOF;
+		return self;
+	}
 
 	self->tag = get_atoken_tag(l);
 
@@ -103,13 +106,13 @@ AToken *lexer_get_next_atoken(Lexer_p l, Vars *shell_vars) {
 			//catch unknown token and return an error;
 			self->operator = get_operator_tag(l);
 			if (self->operator == O_ERROR) {
-				dprintf(2, "SYNTAX ERROR operator\n");
+				dprintf(2, ARITHMETIC_SYNTAX_ERROR"%c\")\n", l->ch);
 				return NULL;
 			}
 			break;
 		case A_OPERAND:
-			if (!fill_operand(self, l, shell_vars)) {
-				dprintf(2, "SYNTAX ERROR var\n");
+			if (!fill_operand(self, l)) {
+				dprintf(2, ARITHMETIC_SYNTAX_ERROR"%c\")\n", l->ch);
 				return NULL;
 			}
 			break;
@@ -127,16 +130,16 @@ void free_atoken_stack(ATokenStack *list) {
 	gc_free(list, GC_SUBSHELL);
 }
 
-ATokenStack *lexer_arithmetic_exp_lex_all(Lexer_p lexer, Vars *shell_vars) {
+ATokenStack *lexer_arithmetic_exp_lex_all(Lexer_p lexer) {
 	ATokenStack *self = atoken_stack_init();
 
 	while (lexer->ch) {
-		AToken *tmp = lexer_get_next_atoken(lexer, shell_vars);
+		AToken *tmp = lexer_get_next_atoken(lexer);
 		if (!tmp) {
 			gc_free(lexer, GC_SUBSHELL);
 			free_atoken_stack(self);
 			return NULL;
-		}
+		} else if (tmp->tag == A_EOF) return self;
 		atoken_stack_push(self, tmp);
 	}
 	return self;

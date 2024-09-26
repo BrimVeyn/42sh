@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/25 17:36:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/26 17:19:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,32 @@
 #include "ast.h"
 #include "debug.h"
 #include "lexer.h"
+#include "libft.h"
+#include "parser.h"
 #include "utils.h"
 #include "assert.h"
 #include <stdio.h>
 
-int get_arithmetic_exp_range_end(char *str, int *i, Range *range) {
+static void skip_parenthesis(char *str, int *i) {
+	(*i)++;
+	while (str[*i] && str[*i] != ')') {
+		if (str[*i] == '(') {
+			skip_parenthesis(str, i);
+		}
+		(*i)++;
+	}
+}
+
+static int get_arithmetic_exp_range_end(char *str, int *i) {
 	(*i) += 3; //skip '$(('
 
 	while (str[*i] && ft_strncmp("))", &str[*i], 2)) {
 		if (!ft_strncmp("$((", &str[*i], 3)) {
-			range->start = *i;
-			return get_arithmetic_exp_range_end(str, i, range);
+			get_arithmetic_exp_range_end(str, i);
 			if (*i == -1) return -1;
+		}
+		if (str[*i] == '(') {
+			skip_parenthesis(str, i);
 		}
 		(*i)++;
 	}
@@ -43,7 +57,7 @@ Range get_arithmetic_exp_range(char *str) {
 	self.start = ft_strstr(str, "$((");
 	if (self.start != -1) {
 		int start_copy = self.start;
-		self.end = get_arithmetic_exp_range_end(str, &start_copy, &self);
+		self.end = get_arithmetic_exp_range_end(str, &start_copy);
 	}
 	return self;
 }
@@ -57,6 +71,7 @@ typedef enum {
 	P4 = 2, // - '<=' '>=' '<' '>'
 	P5 = 1, // - '==' '!='
 	P6 = 0, // - '&&' '||'
+	PP = -1, // - ()
 } operator_precedence;
 
 operator_precedence get_precedence(AToken *token) {
@@ -71,6 +86,7 @@ operator_precedence get_precedence(AToken *token) {
 		{O_LE, P4}, {O_GE, P4}, {O_LT, P4}, {O_GT, P4},
 		{O_EQUAL, P5}, {O_DIFFERENT, P5},
 		{O_AND, P6}, {O_OR, P6},
+		{O_PCLOSE, PP}, {O_POPEN, PP},
 	};
 
 	for (size_t i = 0; i < sizeof(pre) / sizeof(pre[0]); i++) {
@@ -83,6 +99,14 @@ bool is_aoperator(const AToken *token) {
 	return (token->tag == A_OPERATOR);
 }
 
+bool is_lparen(const AToken *token) {
+	return (token->tag == A_OPERATOR && token->operator == O_POPEN);
+}
+
+bool is_rparen(const AToken *token) {
+	return (token->tag == A_OPERATOR && token->operator == O_PCLOSE);
+}
+
 bool has_higher_prec(ATokenStack *operator, AToken *current) {
 	if (!operator->size) return false;
 	return (get_precedence(operator->data[operator->size - 1]) >= get_precedence(current));
@@ -92,9 +116,19 @@ ATokenStack *tokens_to_rpn(ATokenStack *list) {
 	ATokenStack *output = atoken_stack_init();
 	ATokenStack *operator = atoken_stack_init();
 	
+	// aTokenListToString(list);
 	for (int i = 0; i < list->size; i++) {
 		AToken *current = list->data[i];
-		if (!is_aoperator(current)) {
+		if (is_lparen(current)) {
+			atoken_stack_push(operator, current);
+		} else if (is_rparen(current)) {
+			while (true) {
+				AToken *popped = atoken_stack_pop(operator);
+				if (is_lparen(popped))
+					break;
+				atoken_stack_push(output, popped);
+            }
+		} else if (!is_aoperator(current)) {
 			atoken_stack_push(output, current);
 		} else {
 			while (has_higher_prec(operator, current)) {
@@ -153,16 +187,39 @@ ANode *generate_atree(ATokenStack *list) {
 	return anode_stack_pop(self);
 }
 
-ANode *incr(ANode *self, Vars *shell_vars) {
+long get_value(ANode *self, Vars *shell_vars) {
 	if (self->value->operand_tag == VARIABLE) {
-		char tmp[MAX_WORD_LEN];
-		self->value->litteral += 1;
-		ft_sprintf(tmp, "%s=%d", self->value->variable, self->value->litteral);
-		dprintf(2, "str: %s\n", tmp);
-		string_list_add_or_update(shell_vars->set, strdup(tmp));
+		char *str_value = string_list_get_value(shell_vars->set, self->value->variable);
+		long int_value = (str_value == NULL) ? 0 : ft_atoi(str_value);
+		return int_value;
+	} else {
+		return self->value->litteral;
+	}
+}
+
+static ANode *incr(ANode *self, Vars *shell_vars) {
+	if (self->value->operand_tag == VARIABLE) {
+		char tmp[MAX_WORD_LEN] = {0};
+		long var_value = get_value(self, shell_vars);
+		ft_sprintf(tmp, "%s=%ld", self->value->variable, var_value + 1);
+		char *new_value = gc_add(ft_strdup(tmp), GC_GENERAL);
+		string_list_add_or_update(shell_vars->set, new_value);
 	}
 	return self;
 }
+
+static ANode *decr(ANode *self, Vars *shell_vars) {
+	if (self->value->operand_tag == VARIABLE) {
+		char tmp[MAX_WORD_LEN] = {0};
+		long var_value = get_value(self, shell_vars);
+		ft_sprintf(tmp, "%s=%ld", self->value->variable, var_value - 1);
+		char *new_value = gc_add(ft_strdup(tmp), GC_GENERAL);
+		string_list_add_or_update(shell_vars->set, new_value);
+	}
+	return self;
+}
+
+#include "colors.h"
 
 long aAST_execute(ANode *node, Vars *shell_vars) {
 	if (!node) return 0;
@@ -170,16 +227,40 @@ long aAST_execute(ANode *node, Vars *shell_vars) {
 	switch (node->value->tag) {
 		case A_OPERATOR:
 			switch (node->value->operator) {
-				case O_PREF_INCR: {
-					return aAST_execute(incr(node->left, shell_vars), shell_vars);
+				case O_PREF_INCR: return aAST_execute(incr(node->left, shell_vars), shell_vars);
+				case O_POST_INCR: {
+					long var_value = get_value(node->left, shell_vars);
+					incr(node->left, shell_vars);
+					return var_value;
 				}
-				case O_PLUS:
-					return aAST_execute(node->left, shell_vars) + aAST_execute(node->right, shell_vars);
+				case O_PREF_DECR: return aAST_execute(decr(node->left, shell_vars), shell_vars);
+				case O_POST_DECR: {
+					long var_value = get_value(node->left, shell_vars);
+					decr(node->left, shell_vars);
+					return var_value;
+				}
+				case O_PLUS: return aAST_execute(node->left, shell_vars) + aAST_execute(node->right, shell_vars);
+				case O_MINUS: return aAST_execute(node->left, shell_vars) - aAST_execute(node->right, shell_vars);
+				case O_MULT: return aAST_execute(node->left, shell_vars) * aAST_execute(node->right, shell_vars);
+				case O_DIVIDE: return aAST_execute(node->left, shell_vars) / aAST_execute(node->right, shell_vars);
+				case O_MODULO: return aAST_execute(node->left, shell_vars) % aAST_execute(node->right, shell_vars);
+				case O_GE: return aAST_execute(node->left, shell_vars) >= aAST_execute(node->right, shell_vars);
+				case O_LE: return aAST_execute(node->left, shell_vars) <= aAST_execute(node->right, shell_vars);
+				case O_GT: return aAST_execute(node->left, shell_vars) > aAST_execute(node->right, shell_vars);
+				case O_LT: return aAST_execute(node->left, shell_vars) < aAST_execute(node->right, shell_vars);
+				case O_EQUAL: return aAST_execute(node->left, shell_vars) == aAST_execute(node->right, shell_vars);
+				case O_DIFFERENT: return aAST_execute(node->left, shell_vars) != aAST_execute(node->right, shell_vars);
+				case O_AND: return aAST_execute(node->left, shell_vars) && aAST_execute(node->right, shell_vars);
+				case O_OR: return aAST_execute(node->left, shell_vars) || aAST_execute(node->right, shell_vars);
 				default:
+                {
+					dprintf(2, "AST unhandled case\n");
 					exit(EXIT_FAILURE);
+                }
 		}
-		case A_OPERAND:
-			return node->value->litteral; //GET_VALUE;
+		case A_OPERAND: {
+			return get_value(node, shell_vars);
+		}
 		default:
 			exit(EXIT_FAILURE);
 	}
@@ -196,17 +277,74 @@ bool arithmetic_syntax_check(ATokenStack *list) {
 		const AToken *prev = i > 0 ? list->data[i - 1] : NULL;
 		AToken *current = list->data[i];
 		const AToken *next = i < list->size - 1 ? list->data[i + 1] : NULL;
+		const AToken *nextnext = i < list->size - 2 ? list->data[i + 2] : NULL;
 
+		if (nextnext) {
+			if (is_incr_or_decr(current) && !is_aoperator(next) && is_incr_or_decr(nextnext)) {
+				dprintf(2, ASSIGNMENT_REQUIRES_LVALUE"++\")\n");
+				return false;
+			}
+		}
+		if (next) {
+			if (is_aoperator(current) && !is_aoperator(next)) {
+				if (current->operator == O_DIVIDE || current->operator == O_MODULO) {
+					if (next->operand_tag == VALUE && next->litteral == 0) {
+						dprintf(2, DIVISION_BY_0"\n");
+						return false;
+					}
+				}
+			}	
+		}
 		if (is_incr_or_decr(current)) {
 			if (prev && !is_aoperator(prev)) {
 				current->operator = (current->operator == O_PREF_DECR) ? O_POST_DECR : O_POST_INCR;
 			} else if (next && is_aoperator(next)) {
-				dprintf(2, "syntax error !\n");
+				dprintf(2, OPERAND_EXPECTED"\n");
 				return false;
 			}
 		}
 	}
 	return true;
+}
+
+static void copy_till_end_of_nested(char *ref, char *buffer, int *i, int *j, int n) {
+	buffer[(*j)++] = '(';
+	(*i) += n;
+	while (ref[*i])
+    {
+		if (!ft_strncmp(&ref[*i], "$((", 3)) {
+			copy_till_end_of_nested(ref, buffer, i, j, 3);
+		}
+		if (ref[*i] == '(') {
+			copy_till_end_of_nested(ref, buffer, i, j, 1);
+		}
+		buffer[(*j)] = ref[(*i)];
+		if (!ft_strncmp(&ref[*i], "))", 2)) {
+			(*i) += 2;
+			(*j) += 1;
+			return;
+		}
+		if (ref[*i] == ')') {
+			(*i) += 1;
+			(*j) += 1;
+			return;
+        }
+		(*i)++;
+		(*j)++;
+    }
+}
+
+void replace_nested_greedy(char *ref, char *buffer) {
+	int i = 0;
+	int j = 0;
+	while (ref[i]) {
+		if (!ft_strncmp(&ref[i], "$((", 3)) {
+			copy_till_end_of_nested(ref, buffer, &i, &j, 3);
+			continue;
+		}
+		buffer[j++] = ref[i++];
+	}
+	buffer[j] = '\0';
 }
 
 bool parser_arithmetic_expansion(TokenList *tokens, Vars *shell_vars) {
@@ -234,12 +372,23 @@ bool parser_arithmetic_expansion(TokenList *tokens, Vars *shell_vars) {
 
 		char infix[MAX_WORD_LEN] = {0};
 		ft_memcpy(infix, &elem->w_infix[range.start + 3], (range.end - range.start) - 4);
+		char *tmp = ft_strdup(infix);
+		infix[0] = '\0';
+		replace_nested_greedy(tmp, infix);
+		FREE_POINTERS(tmp);
+
+		// printf(C_RED"------"C_RESET"\n");
 		// printf("%s\n", infix);
+		// printf(C_RED"------"C_RESET"\n");
 
 		Lexer_p lexer = lexer_init(infix);
-		ATokenStack *tokens = lexer_arithmetic_exp_lex_all(lexer, shell_vars);
+		ATokenStack *tokens = lexer_arithmetic_exp_lex_all(lexer);
+		if (!tokens) {
+			g_exitno = 1;
+			return false;
+		}
 		if (!arithmetic_syntax_check(tokens)) {
-			exit(EXIT_FAILURE); // TODO handle error properly
+			exit(EXIT_FAILURE); // TODO: handle error properly
 		}
 		// aTokenListToString(tokens);
 		if (!tokens) {
@@ -248,7 +397,7 @@ bool parser_arithmetic_expansion(TokenList *tokens, Vars *shell_vars) {
 		}
 		// (void) shell_vars;
 		ATokenStack *token_queue = tokens_to_rpn(tokens);
-		aTokenListToString(token_queue);
+		// aTokenListToString(token_queue);
 		ANode *AST = generate_atree(token_queue);
 		long result = aAST_execute(AST, shell_vars);
 		//Freee old w_infix, handle prefix and suffix

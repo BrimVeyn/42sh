@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_sprintf.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 22:18:12 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/19 09:38:53 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/26 15:31:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,33 @@
 #include "libft.h"
 
 #include <stdarg.h>
+#include <stdio.h>
 #include <unistd.h>
+#include <stdbool.h>
 
-static size_t ft_itoa_buffer(char *buffer, int number) {
+static size_t ft_ltoa_buffer(char *buffer, long number) {
 	size_t buffer_len = ft_strlen(buffer);
 	size_t i = 0;
+	bool neg = number < 0;
+
+	if (!number) {
+		buffer[buffer_len++] = '0';
+		return 1;
+	}
+		
+	if (neg) number = -number;
 
 	while (number) {
 		buffer[buffer_len++] = (number % 10) + '0';
 		number = number / 10;
 		i += 1;
 	}
+
+	if (neg) {
+		buffer[buffer_len++] = '-';
+		i += 1;
+    }
+
 	for (size_t j = 0; j < i / 2; j++) {
 		char tmp = buffer[buffer_len - j - 1];
 		buffer[buffer_len - j - 1] = buffer[buffer_len - i + j];
@@ -74,9 +90,15 @@ void ft_sprintf(char *buffer, char *fmt, ...) {
 		}
 		if (!ft_strncmp(&fmt[i], "%d", 2)) {
 			const int number = va_arg(args, int);
-			const size_t number_len = ft_itoa_buffer(buffer, number);
+			const size_t number_len = (int) ft_ltoa_buffer(buffer, number);
 			buffer_len += number_len;
 			i += 2;
+		}
+		if (!ft_strncmp(&fmt[i], "%ld", 3)) {
+			const long number = va_arg(args, int);
+			const size_t number_len = ft_ltoa_buffer(buffer, number);
+			buffer_len += number_len;
+			i += 3;
 		}
 		buffer[buffer_len] = fmt[i];
 		buffer_len += 1;

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:20:37 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 16:26:25 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/26 15:07:40 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,12 @@ void lexer_read_char(Lexer_p l) {
 	}
 	l->position = l->read_position;
 	l->read_position += 1;
+}
+
+void lexer_reverse_read_char(Lexer_p l) {
+	l->read_position -= 1;
+	l->position = l->read_position;
+	l->ch = l->input[l->read_position];
 }
 
 void lexer_read_x_char(Lexer_p l, uint16_t n) {
@@ -56,9 +62,23 @@ static void skip_parameter_exp(Lexer_p l) {
 	}
 }
 
+static void skip_parenthesis(Lexer_p l) {
+	lexer_read_char(l);
+	while (l->ch && l->ch != ')') {
+		if (l->ch == '(') {
+			skip_parenthesis(l);
+		}
+		lexer_read_char(l);
+	}
+}
+
 static void skip_arithmetic_exp(Lexer_p l) {
 	lexer_read_x_char(l, 3);
 	while (l->ch) {
+		if (l->ch == '(') {
+			skip_parenthesis(l);
+			lexer_read_char(l);
+		}
 		if (!ft_strncmp(&l->input[l->position], "$((", 3)) {
 			skip_arithmetic_exp(l);
 		}
@@ -73,8 +93,10 @@ static void skip_arithmetic_exp(Lexer_p l) {
 char *get_word(Lexer_p l) {
 	const uint16_t start = l->position;
 	while (l->ch != '\0') {
-		if (!ft_strncmp(&l->input[l->position], "$((", 3))
+		if (!ft_strncmp(&l->input[l->position], "$((", 3)) {
 			skip_arithmetic_exp(l);
+			lexer_reverse_read_char(l);
+        }
 		if (!ft_strncmp(&l->input[l->position], "$(", 2))
 			skip_command_sub(l, 2);
 		if (!ft_strncmp(&l->input[l->position], "${", 2))
