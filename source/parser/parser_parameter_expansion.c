@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:17 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 14:05:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/26 15:41:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 char *handle_format(char metachar[3], char *id, char *word, StringList *env){
 	// printf("id: %s\nword: %s\nmetachar: %s\n", id, word, metachar);
-	char *value = string_list_get_value_with_id(env, id);
+	char *value = string_list_get_value(env, id);
 	if (!value){
 		if (!ft_strcmp(metachar, ":-")){
 			return (word);
@@ -36,10 +36,10 @@ char *handle_format(char metachar[3], char *id, char *word, StringList *env){
 			exit(EXIT_FAILURE);
 		}
 	}
-	if (string_list_get_value_with_id(env, id) == NULL)
+	if (string_list_get_value(env, id) == NULL)
 		return ft_strdup("");
 	if (metachar[0] == '#' || metachar[0] == '%'){
-		char *value = ft_strdup(string_list_get_value_with_id(env, id));
+		char *value = ft_strdup(string_list_get_value(env, id));
 		char *regexp = NULL;
 
 		if (metachar[0] == '#'){
@@ -75,7 +75,7 @@ char *parser_get_variable_value(char *to_expand, StringList *env){
 	
 
 	if (to_expand[0] == '#'){
-		return gc_add(ft_itoa(ft_strlen(to_expand)), GC_GENERAL);
+		return gc_add(ft_itoa(ft_strlen(to_expand)), GC_SUBSHELL);
 	}
 
 	match_result find_format = regex_match("[:#%]", to_expand);
@@ -88,8 +88,8 @@ char *parser_get_variable_value(char *to_expand, StringList *env){
 		return handle_format(metachar, name, word, env);
 	}
 	
-	char *value = string_list_get_value_with_id(env, to_expand);
-	return value ? value : gc_add(ft_strdup(""), GC_GENERAL);
+	char *value = string_list_get_value(env, to_expand);
+	return value ? value : gc_add(ft_strdup(""), GC_SUBSHELL);
 }
 
 static int get_format_pos(char *str){
@@ -153,7 +153,7 @@ bool parser_parameter_expansion(TokenList *tl, Vars *shell_vars){
 
 				result = regex_match("\\${?}", el->w_infix);
 				if (result.start != -1)
-					value = ft_itoa(g_exitno);
+					value = gc_add(ft_itoa(g_exitno), GC_SUBSHELL);
 				else{
 
 					result = regex_match ("\\${.*}", el->w_infix);
@@ -167,7 +167,7 @@ bool parser_parameter_expansion(TokenList *tl, Vars *shell_vars){
 				char *end = ft_substr(el->w_infix, result.end, ft_strlen(el->w_infix));
 				char *tmp = ft_strjoin(start, value);
 				
-				el->w_infix = gc_add(ft_strjoin(tmp, end), GC_GENERAL);
+				el->w_infix = gc_add(ft_strjoin(tmp, end), GC_SUBSHELL);
 				free(tmp); free(start); free(end);
 
 			} while(regex_match("\\${[A-Za-z_][A-Za-z0-9_]*}", el->w_infix).start != -1);

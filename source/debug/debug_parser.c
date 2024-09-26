@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:50:32 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/25 16:56:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/26 15:44:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,8 @@ char *aOpToSTring(AToken *token) {
 		{O_PREF_INCR, "++x"}, {O_PREF_DECR, "--x"},
 		{O_LT, "<"}, {O_GT, ">"}, {O_LE, "<="}, {O_GE, ">="},
 		{O_EQUAL, "=="}, {O_DIFFERENT, "!="},
-		{O_AND, "&&"}, {O_OR, "||"},
+		{O_AND, "&&"}, {O_OR, "||"}, 
+		{O_POPEN, "("}, {O_PCLOSE, ")"},
 	};
 
 	for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); i++) {
@@ -72,8 +73,15 @@ char *aOpToSTring(AToken *token) {
 
 void aTokenToString(AToken *token) {
 	switch (token->tag) {
-		case A_OPERAND:
-			dprintf(2, "%ld ", token->litteral);
+		case A_OPERAND: 
+			switch (token->operand_tag) {
+				case VALUE:
+					dprintf(2, "%ld ", token->litteral);
+					break;
+				case VARIABLE:
+					dprintf(2, "%s ", token->variable);
+					break;
+			}
 			break;
 		case A_OPERATOR:
 			dprintf(2, "%s ", aOpToSTring(token));

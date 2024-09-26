@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 10:08:43 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/20 16:31:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/26 12:09:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ static TokenList *ft_token_split(const char *str, const char *ifs) {
 }
 
 static TokenList *word_splitter(char *str, Vars *shell_vars) {
-	char *IFS_value = string_list_get_value_with_id(shell_vars->env, "IFS");
+	char *IFS_value = string_list_get_value(shell_vars->env, "IFS");
 	if (!IFS_value) {
 		IFS_value = "\n\t ";
 	}

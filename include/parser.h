@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 16:25:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/26 15:57:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,10 @@
 #define UNCLOSED_COMMAND_SUB_STR "42sh: syntax error: unclosed command substitution, expected `)\n"
 #define UNCLOSED_ARITMETIC_EXP_STR "42sh: syntax error: unclosed arithmetic expression, expected `))\n"
 #define UNCLOSED_QUOTES_STR "42sh: syntax error: unclosed quotes, expected "
+#define DIVISION_BY_0 "42sh: division by 0 (error token is \"0\")"
+#define ARITHMETIC_SYNTAX_ERROR "42sh: sytax error: invalid arithmetic operator (error token is \""
+#define ASSIGNMENT_REQUIRES_LVALUE "42sh: assignment requires lvalue (error token is \""
+#define OPERAND_EXPECTED "42sh: operand expected (error token is an operator)"
 
 typedef enum {
 	R_FD,

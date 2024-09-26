@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 10:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/25 17:20:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/26 14:31:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ typedef enum {
 typedef enum {
 	A_OPERATOR,
 	A_OPERAND,
+	A_EOF,
 } arithemtic_token_tag;
 
 typedef enum {
@@ -54,8 +55,8 @@ typedef enum {
 typedef struct {
 	arithemtic_token_tag tag;
 	arithemtic_operand_tag operand_tag;
-	char *variable;
 	union {
+		char *variable;
 		long litteral;
 		arithmetic_operators operator;
 	};
@@ -80,11 +81,11 @@ typedef struct {
 } ANodeStack;
 
 //----------------Token List Stack------------------//
-ATokenStack			*lexer_arithmetic_exp_lex_all(Lexer_p lexer, Vars *shell_vars);
+ATokenStack *lexer_arithmetic_exp_lex_all(Lexer_p lexer);
 ATokenStack			*atoken_stack_init(void);
 void				atoken_stack_push(ATokenStack *self, AToken *token);
 AToken				*atoken_stack_pop(ATokenStack *self);
-AToken				*lexer_get_next_atoken(Lexer_p l, Vars *shell_vars);
+AToken *lexer_get_next_atoken(Lexer_p l);
 
 ANodeStack *anode_stack_init(void);
 ANode *anode_stack_pop(ANodeStack *self);

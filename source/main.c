@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 16:24:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/26 13:49:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,10 +115,8 @@ void add_input_to_history(char *input){
 }
 
 void env_to_string_list(StringList *env_list, const char **env){
-	for (uint16_t i = 0; env[i]; i++){
+	for (uint16_t i = 0; env[i]; i++)
 		string_list_add_or_update(env_list, gc_add(ft_strdup(env[i]), GC_SUBSHELL));
-	}
-	// string_list_add_or_update(env_list, NULL);
 }
 
 Vars *vars_init(const char **env) {

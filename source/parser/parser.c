@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/25 17:33:26 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/26 12:26:25 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,6 @@ TokenList *parser_eat_variables(TokenList *tokens) {
 void add_vars_to_set(Vars *shell_vars, TokenList *vars) {
 	StringList *set = shell_vars->set;
 	for (int i = 0; i < vars->size; i++) {
-		dprintf(2, "str: %s\n", vars->t[i]->w_infix);
 		string_list_add_or_update(set, vars->t[i]->w_infix);
 	}
 }
