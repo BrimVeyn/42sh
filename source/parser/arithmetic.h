@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 10:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/26 14:31:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/27 15:46:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,19 @@
 #include "utils.h"
 
 typedef enum {
+	P0 = 6, // - 'a++' 'a--'
+	P1 = 5, // - '++a' '--a'
+	P3 = 4, // - '*' '/' '%'
+	P2 = 3, // - '+' '-'
+	P4 = 2, // - '<=' '>=' '<' '>'
+	P5 = 1, // - '==' '!='
+	P6 = 0, // - '&&' '||'
+	PP = -1, // - ()
+} operator_precedence;
+
+typedef enum {
+	O_POPEN, //(
+	O_PCLOSE, //)
 	O_POST_INCR, //a++
 	O_POST_DECR, //a--
 	O_PREF_INCR, //++a
@@ -36,8 +49,6 @@ typedef enum {
 	O_DIFFERENT, // !=
 	O_OR, // ||
 	O_AND, // &&
-	O_POPEN, //(
-	O_PCLOSE, //)
 	O_ERROR, //unexecpected char
 } arithmetic_operators;
 
@@ -81,14 +92,28 @@ typedef struct {
 } ANodeStack;
 
 //----------------Token List Stack------------------//
-ATokenStack *lexer_arithmetic_exp_lex_all(Lexer_p lexer);
-ATokenStack			*atoken_stack_init(void);
-void				atoken_stack_push(ATokenStack *self, AToken *token);
-AToken				*atoken_stack_pop(ATokenStack *self);
-AToken *lexer_get_next_atoken(Lexer_p l);
+ATokenStack		*lexer_arithmetic_exp_lex_all(Lexer_p lexer);
+ATokenStack		*atoken_stack_init(void);
+void			atoken_stack_push(ATokenStack *self, AToken *token);
+AToken			*atoken_stack_pop(ATokenStack *self);
+AToken			*lexer_get_next_atoken(Lexer_p l);
 
-ANodeStack *anode_stack_init(void);
-ANode *anode_stack_pop(ANodeStack *self);
-void anode_stack_push(ANodeStack *tl, ANode *token);
+//----------------Arithmetic AST------------------//
+ANode		*generate_atree(ATokenStack *list);
+long		aAST_execute(ANode *node, Vars *shell_vars, int *error);
+
+//----------------ANode stack---------------------//
+ANodeStack	*anode_stack_init(void);
+ANode		*anode_stack_pop(ANodeStack *self);
+void		anode_stack_push(ANodeStack *tl, ANode *token);
+
+//---------------Syntax error--------------------//
+bool arithmetic_syntax_check(ATokenStack *list);
+bool has_higher_prec(const ATokenStack *operator, const AToken *current);
+bool is_rparen(const AToken *token);
+bool is_lparen(const AToken *token);
+bool is_incr_or_decr(const AToken *token);
+bool is_aoperator(const AToken *token);
+operator_precedence get_precedence(const AToken *token);
 
 #endif // !ARITHMETIC
