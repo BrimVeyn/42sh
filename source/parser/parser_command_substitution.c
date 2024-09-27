@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/24 13:04:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/27 11:24:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,20 +87,16 @@ bool parser_command_substitution(TokenList *tokens, Vars *shell_vars) {
 	while(i < tokens->size) {
 		Token *elem = tokens->t[i];
 
-		if (!is_word(tokens, &i)) {
-			i += 1;
-			continue;
-		}
+		if (!is_word(tokens, &i)) { i += 1; continue; }
 
 		const Range range = get_command_sub_range(elem->w_infix);
 		if (is_a_match(range)) {
-			if (!is_range_valid(range, UNCLOSED_COMMAND_SUB_STR)) {
-				g_exitno = 126;
-				return false;
-			} else i += 1; continue;
+			if (!is_range_valid(range, UNCLOSED_COMMAND_SUB_STR)) { g_exitno = 126; return false; }
+			else { i += 1; continue; }
 		}
 
 		char infix[MAX_WORD_LEN] = {0};
+		ft_memset(infix, '\0', MAX_WORD_LEN);
 		ft_memcpy(infix, &elem->w_infix[range.start + 1], range.end - range.start);
 
 		char file_name[MAX_FILENAME_LEN] = {0};
@@ -115,11 +111,8 @@ bool parser_command_substitution(TokenList *tokens, Vars *shell_vars) {
 		int STDOUT_SAVE = dup(STDOUT_FILENO);
 
 		dup2(output_fd, STDOUT_FILENO); close(output_fd);
-		if (!execute_command_sub(infix, shell_vars)) {
-			error = true;
-		}
+		if (!execute_command_sub(infix, shell_vars)) { error = true; }
 		dup2(STDOUT_SAVE, STDOUT_FILENO); close(STDOUT_SAVE);
-
 
 		output_fd = open(file_name, O_RDONLY, 0644);
 		if (output_fd == -1) {
@@ -127,17 +120,14 @@ bool parser_command_substitution(TokenList *tokens, Vars *shell_vars) {
 			exit(EXIT_FAILURE);
 		}
 
+		char *prefix = ft_substr(elem->w_infix, 0, range.start);
+		char *postfix = ft_substr(elem->w_infix, range.end + 1, ft_strlen(elem->w_infix) - range.end);
 		char *result = read_whole_file(output_fd);
 		close(output_fd); unlink(file_name);
 
-
-		char *prefix = ft_substr(elem->w_infix, 0, range.start);
-		char *postfix = ft_substr(elem->w_infix, range.end + 1, ft_strlen(elem->w_infix) - range.end);
-
 		if (!ft_strlen(result) && !ft_strlen(prefix) && !ft_strlen(postfix)) {
 			FREE_POINTERS(prefix, result, postfix);
-			elem->w_infix = NULL;
-			i += 1;
+			elem->w_infix = NULL; i += 1;
 			continue;
 		}
 

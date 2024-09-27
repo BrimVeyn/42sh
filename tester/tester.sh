@@ -3,6 +3,11 @@
 EXEC_PATH="../42sh"
 # PROMPT="echo -"
 
+if [[ "${1}" == "-d" ]]; then
+	debug=1;
+	shift 1;
+fi
+
 if [[ $1 ]]; then
 	test_lists=(
 		$1
@@ -42,7 +47,7 @@ ok=0
 
 for file in "${test_lists[@]}"
 do
-	printf "\n$RED ========$file========\n\n"
+	printf "\n$RED ========$file========\n"
 	while IFS= read -r line
 	do
 		
@@ -65,24 +70,28 @@ do
 
 		FILE_DIFF=$(diff -q ./42sh_outfiles ./bash_outfiles)
 
-		printf "$BLUE$BOLD Test %3s:" $i
+		printf "$BLUE$BOLD Test %4s:" $i
 		
 		if [[ "$EXEC_OUTPUT" == "$BASH_OUTPUT" && $FILE_DIFF == "" && "$EXEC_EXITNO" == "$BASH_EXITNO" && "$EXEC_COPY" == "$BASH_COPY" ]]; then
-			printf "  ✅"
+			printf "  ✅  "
 			if [[ "$EXEC_ERROR" != "$BASH_ERROR" ]]; then
-				printf "⚠️ "
+				printf "⚠️   "
 			fi
 			((ok++))
 		else
 			printf "  ❌  "
 		fi
-		printf "$RESET$GREY%s$RESET \n" "$line"
+		if [ ${#line} -gt 80 ]; then
+			printf "$RESET$GREY%.77s${RED}...$RESET \n" "$line"
+		else
+			printf "$RESET$GREY%.80s$RESET \n" "$line"
+		fi
 
 		if [[ "$EXEC_OUTPUT" != "$BASH_OUTPUT" ]]; then
 			printf "42sh output: %s\n" "$EXEC_OUTPUT"
 			printf "bash output: %s\n" "$BASH_OUTPUT"
 		fi
-		if [[ "$EXEC_ERROR" != "$BASH_ERROR" ]]; then
+		if [[ "$EXEC_ERROR" != "$BASH_ERROR" && debug -eq 1 ]]; then
 			printf "42sh error: %s\n" "$EXEC_ERROR"
 			printf "bash error: %s\n" "$BASH_ERROR"
 		fi
@@ -104,6 +113,7 @@ do
 
 		printf "$RESET"
 	done < "$file"
+	printf "${RED} ======================================\n${RESET}"
 done
 
 printf "${GREEN}${ok}${RESET} / ${GREEN}${i}${RESET} test(s) passed !\n"
