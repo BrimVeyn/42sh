@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/24 14:45:26 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/24 15:44:35 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/27 13:53:01 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,12 +53,14 @@ void set_begin(regex_compiled_t *regexp){
 	regex_append_node(regexp, node);
 }
 
-void set_range(regex_compiled_t *regexp, char *pattern, int *index){
+void set_range(regex_compiled_t *regexp, const char *pattern, int *index){
 	char range_string_list[256][4];
 	int i = 0;
 	int pattern_number = 0;
 	
 	memset(range_string_list, 0, sizeof(range_string_list));
+	if (pattern[0] == '^')
+		i++;
 	while(pattern[i] && pattern[i] != ']'){
 		if (pattern[i] == '\\'){
 			ft_memcpy(range_string_list[pattern_number], &pattern[i + 1], sizeof(char) * 2);
@@ -83,7 +85,10 @@ void set_range(regex_compiled_t *regexp, char *pattern, int *index){
 	*index += i + 2;
 
 	regex_node_t *node = (regex_node_t *) ft_calloc(1, sizeof(regex_node_t));
+
 	node->type = REGEX_RANGE;
+	if (pattern[0] == '^')
+		node->type = REGEX_INVERT_RANGE;
 	node->quantifier = REGEX_NO_QUANTIFIER;
 	ft_memcpy(node->range, range_string_list, sizeof(range_string_list));
 	regex_append_node(regexp, node);
