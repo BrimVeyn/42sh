@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/26 12:26:25 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 13:06:59 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,13 +54,13 @@ void add_redirection_from_token(RedirectionList **redir_list, const Token *el) {
 	const Token *next = (el->tag == T_WORD && el->w_postfix->tag == T_REDIRECTION) ? el->w_postfix : el;
 	Redirection *current_redir = (Redirection *) gc_add(ft_calloc(1, sizeof(Redirection)), GC_SUBSHELL);
 
-	current_redir->prefix_fd = (next != el) ? ft_atoi(el->w_infix) : -1;
+	current_redir->prefix_fd = (next != el) ? ft_atol(el->w_infix) : -1;
 	current_redir->r_type = next->r_type;
 	if (is_number(next->r_postfix->w_infix) &&
 		(next->r_type == R_DUP_OUT ||
 		next->r_type == R_DUP_IN)) {
 		current_redir->su_type = R_FD;
-		current_redir->fd = ft_atoi(next->r_postfix->w_infix);
+		current_redir->fd = ft_atol(next->r_postfix->w_infix);
 	} else {
 		current_redir->su_type = R_FILENAME;
 		current_redir->filename = next->r_postfix->w_infix;

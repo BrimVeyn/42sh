@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/27 16:52:59 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 11:03:32 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,7 @@ bool parser_arithmetic_expansion(TokenList *tokens, Vars *shell_vars) {
 		if (!tokens->size) { goto empty; }
 		if (!tokens) { g_exitno = 1; return false; }
 		if (!arithmetic_syntax_check(tokens)) {
-			exit(EXIT_FAILURE); // TODO: handle error properly
+			return false;
 		}
 		ATokenStack *token_queue = tokens_to_rpn(tokens);
 		ANode *AST = generate_atree(token_queue);
@@ -177,7 +177,7 @@ bool parser_arithmetic_expansion(TokenList *tokens, Vars *shell_vars) {
 	empty: {
 			char *prefix = ft_substr(elem->w_infix, 0, range.start);
 			char *postfix = ft_substr(elem->w_infix, range.end + 1, (strlen(elem->w_infix) - 1) - range.end);
-			char *result_str = ft_itoa(result);
+			char *result_str = ft_ltoa(result);
 			char *prefix_result = ft_strjoin(prefix, result_str);
 			char *prefix_result_postfix= ft_strjoin(prefix_result, postfix);
 			FREE_POINTERS(prefix, postfix, result_str, prefix_result);

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/19 09:02:06 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/30 10:01:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,8 @@ int				ft_strstr(char *haystack, char *needle);
 int				ft_strrstr(char *haystack, char *needle);
 void			ft_sprintf(char *buffer, char *fmt, ...);
 void			ft_dprintf(int fd, char *fmt, ...);
+long			ft_atol(const char *str);
+char			*ft_ltoa(long n);
 
 //----------------File Utils--------------------//
 char			*get_next_line(int fd);

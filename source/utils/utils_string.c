@@ -6,18 +6,19 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/19 10:03:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 11:29:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
 #include "libft.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 void *ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize) {
-	void *new_ptr = malloc(nbEl * elSize);
+	void *new_ptr = ft_calloc(nbEl, elSize);
 	if (!new_ptr)
 		exit(EXIT_FAILURE);
 	ft_memcpy(new_ptr, ptr, oldSize * elSize);
@@ -105,4 +106,78 @@ char *replace_char_greedy(char *str, char c, char by){
 		}
 	}
 	return str;
+}
+
+long	ft_atol(const char *str)
+{
+	int	i = 0;
+	int8_t	sign = 1;
+	long	result = 0;
+
+	while ((str[i] >= 9 && str[i] <= 13) || str[i] == 32)
+		i++;
+	if (str[i] == '+' && str[i + 1] != '-')
+		i++;
+	if (str[i] == '-')
+	{
+		i++;
+		sign = -1;
+	}
+	while (str[i] && str[i] >= '0' && str[i] <= '9')
+	{
+		result *= 10;
+		result += str[i] - '0';
+		i++;
+	}
+	return (result * sign);
+}
+
+static int	count_digit(long n)
+{
+	int				cpt;
+	unsigned long	nbr;
+
+	cpt = 1;
+	if (n < 0)
+	{
+		nbr = -n;
+		cpt++;
+	}
+	else
+		nbr = n;
+	while (nbr >= 10)
+	{
+		nbr /= 10;
+		cpt++;
+	}
+	return (cpt);
+}
+
+char	*ft_ltoa(long n)
+{
+	char			*returnvalue;
+	uint8_t				i;
+	uint8_t				fin;
+	unsigned long	nbr;
+
+	i = count_digit(n) - 1;
+	fin = count_digit(n);
+	returnvalue = malloc(sizeof(char) * fin + 1);
+	if (!returnvalue)
+		return (NULL);
+	if (n < 0)
+	{
+		nbr = -n;
+		returnvalue[0] = '-';
+	}
+	else
+		nbr = n;
+	while (nbr > 9)
+	{
+		returnvalue[i--] = (nbr % 10) + '0';
+		nbr /= 10;
+	}
+	returnvalue[i] = nbr + '0';
+	returnvalue[fin] = '\0';
+	return (returnvalue);
 }

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:17 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/26 15:41:54 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 10:57:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ char *parser_get_variable_value(char *to_expand, StringList *env){
 	
 
 	if (to_expand[0] == '#'){
-		return gc_add(ft_itoa(ft_strlen(to_expand)), GC_SUBSHELL);
+		return gc_add(ft_ltoa(ft_strlen(to_expand)), GC_SUBSHELL);
 	}
 
 	match_result find_format = regex_match("[:#%]", to_expand);
