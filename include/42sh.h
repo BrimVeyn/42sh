@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:15:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 15:52:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 15:07:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ extern int g_debug;
 #endif // !SIGNAL_H
 
 #ifndef REGEX_H
-	#include "../source/regex/regex.h"
+	#include "../source/regex/ft_regex.h"
 #endif // !REGEX_H
 //
 #ifndef ARITHMETIC_H

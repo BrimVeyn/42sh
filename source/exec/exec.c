@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/16 16:20:10 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/30 13:36:11 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/30 15:08:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,18 +180,6 @@ void close_saved_fds(int *saved_fds) {
 		close(saved_fds[STDERR_FILENO]);
 		saved_fds[STDERR_FILENO] = -1;
 	}
-}
-
-void close_all_fds(void) {
-	for (uint16_t i = 3; i < 1024; i++) {
-		close(i);
-	}
-}
-
-void close_std_fds(void) {
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
 }
 
 bool exec_builtin(SimpleCommand *command, Vars *shell_vars){
