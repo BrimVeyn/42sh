@@ -6,12 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 11:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/30 10:57:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 15:07:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "arithmetic.h"
-#include "../../include/regex.h"
+#include "../../include/ft_regex.h"
 #include "lexer.h"
 #include "libft.h"
 #include "parser.h"
@@ -19,7 +19,7 @@
 #include <stdio.h>
 
 arithemtic_token_tag get_atoken_tag(Lexer_p l) {
-	if (regex_match("^[_0-9a-zA-Z]", &l->input[l->position]).start != -1) {
+	if (regex_match("^[_0-9a-zA-Z]", &l->input[l->position]).re_start != -1) {
 		return A_OPERAND;
 	} else {
 		return A_OPERATOR;
@@ -74,7 +74,7 @@ bool fill_operand(AToken *self, Lexer_p l) {
 		free(var);
 		return false;
 	}
-	if (!is_number(var) && regex_match("^[_a-zA-Z][a-zA-Z1-9_]*", var).start == -1) {
+	if (!is_number(var) && regex_match("^[_a-zA-Z][a-zA-Z1-9_]*", var).re_start == -1) {
 		free(var);
 		dprintf(2, "ici !\n");
 		return false;

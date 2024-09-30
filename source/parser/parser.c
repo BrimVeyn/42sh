@@ -6,12 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/30 13:06:59 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 15:09:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/parser.h"
-#include "../../include/regex.h"
+#include "../../include/ft_regex.h"
 #include "../../libftprintf/header/libft.h"
 #include "../../include/utils.h"
 
@@ -121,7 +121,7 @@ TokenList *parser_eat_variables(TokenList *tokens) {
 			continue;
 		}
 
-		if (regex_match("^[_a-zA-Z][a-zA-Z1-9_]*=", word).start == -1) {
+		if (regex_match("^[_a-zA-Z][a-zA-Z1-9_]*=", word).re_start == -1) {
 			found_bin = true;
 			i += 1;
 			continue;

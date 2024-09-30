@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/16 16:17:05 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/27 17:05:41 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/09/30 14:55:55 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/30 14:55:55 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,9 +150,9 @@ int main(const int ac, const char *av[], const char *env[]) {
 	while ((input = init_prompt_and_signals()) != NULL) {
 		if (*input) 
 		{
-			if (isatty(STDIN_FILENO)){
-				add_input_to_history(input);
-			}
+			// if (isatty(STDIN_FILENO)){
+			// 	add_input_to_history(input);
+			// }
 			// input = replace_char_greedy(input, '\n', ';');
 			// printf("input: %s\n", input);
 			Lexer_p lexer = lexer_init(input);
