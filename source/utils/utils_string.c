@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/30 11:29:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 16:24:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,9 @@ void *ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize) {
 	return new_ptr;
 }
 
-int ft_strlenlen(const char **strstr){
-	int i = 0;
-	for (; strstr[i]; i++){}
+size_t ft_strlenlen(const char **strstr){
+	size_t i = 0;
+	for (; strstr[i]; i++) {}
 	return i;
 }
 

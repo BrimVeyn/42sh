@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:18:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/30 13:03:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 16:25:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,5 +39,6 @@ void builtin_set(const SimpleCommand *, Vars *);
 void builtin_env(const SimpleCommand *, Vars *);
 void builtin_echo(const SimpleCommand *command, Vars *shell_vars);
 void builtin_exit(const SimpleCommand *command, Vars *shell_vars);
+void builtin_export(const SimpleCommand *command, Vars *shell_vars);
 
 #endif
