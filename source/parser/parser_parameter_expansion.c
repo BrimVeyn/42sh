@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:17 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/27 16:35:38 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/30 14:51:58 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ char *parser_get_variable_value(char *to_expand, StringList *env){
 	
 
 	if (to_expand[0] == '#'){
-		return gc_add(ft_itoa(ft_strlen(to_expand)), GC_GENERAL);
+		return gc_add(ft_itoa(ft_strlen(string_list_get_value_with_id(env, to_expand + 1))), GC_GENERAL);
 	}
 
 	regex_match_t find_format = regex_match("[:#%]", to_expand);
@@ -79,6 +79,7 @@ char *parser_get_variable_value(char *to_expand, StringList *env){
 	if (find_format.re_start != -1){
 		memcpy(name, to_expand, find_format.re_start);
 		word = ft_substr(to_expand, find_format.re_end + lenght_meta - 1, ft_strlen(to_expand) - find_format.re_end);
+		gc_add(word, GC_GENERAL);
 		ft_memcpy(metachar, &to_expand[find_format.re_start], sizeof(char) * lenght_meta);
 		return handle_format(metachar, name, word, env);
 	}
@@ -100,6 +101,16 @@ static int get_format_pos(char *str){
 	return -1;
 }
 
+static bool is_parameter_balanced(char *string){
+	regex_match_t r1;
+	do {
+		r1 = regex_match("\\$\\{.*\\}", string);
+		string[r1.re_end] = '\0';
+		string += r1.re_start + 2;
+	} while (r1.re_start != -1);
+	return (regex_match("\\$\\{", string).re_start != -1 || regex_match("\\}", string).re_start != -1);
+}
+
 static bool is_bad_substitution(Token *el, int pos){
 	int format_pos = get_format_pos(el->w_infix);
 	char *before_format = NULL;
@@ -112,23 +123,13 @@ static bool is_bad_substitution(Token *el, int pos){
 		free(tmp);
 	}
 
-	// printf("hello %s\n", el->w_infix);
-	// regex_test("\\$[^$]*}", el->w_infix);
-	// regex_test("\\$\\{\\}", before_format);
-	// regex_test("\\$\\{[^\\}]*$", before_format);
-	// regex_test("\\$\\{[^$]*\\}", el->w_infix);
-	// regex_test("\\$\\{.*:\\}", el->w_infix);
-	// regex_test("\\$\\{[^\\}]*\\}", before_format);
-	// regex_test("\\$\\{[#A-Za-z_][A-Za-z0-9_]*[:#%]?.*\\}", before_format);
-	// regex_test("\\$\\{\\?\\}", before_format);
-
-	if (regex_match("\\$\\{\\}", before_format).re_start == pos || //match ${} 
-		regex_match("\\$\\{[^\\}]*$", before_format).re_start == pos || //if missing }
-		regex_match("\\$\\{[^$]*\\}", el->w_infix).re_start != pos ||
-		regex_match("\\$\\{.*:\\}", el->w_infix).re_start == pos ||
-		(regex_match("\\$\\{[^\\}]*\\}", before_format).re_start == pos && regex_match("\\$\\{[#A-Za-z_][A-Za-z0-9_]*[:#%]?.*\\}", before_format).re_start != pos && 
-		regex_match("\\$\\{\\?\\}", before_format).re_start != pos))
-	{ //check if first char is a number
+	if (regex_match("\\$\\{\\}", before_format).re_start == pos ||
+		regex_match("\\$\\{[^\\}]*$", el->w_infix).re_start == pos ||
+		(regex_match("\\$\\{[A-Za-z_][A-Za-z0-9_]*[#%:].+\\}", el->w_infix).re_start != pos &&
+		regex_match("\\$\\{[\\?#]\\}", el->w_infix).re_start != pos &&
+		(regex_match("\\$\\{#?[A-Za-z_][A-Za-z0-9_]*\\}", el->w_infix).re_start != pos &&
+		is_parameter_balanced(el->w_infix))))
+	{ 
 		dprintf(2, "${}: bad substitution\n");
 		g_exitno = 1;
 		free(before_format);
@@ -147,7 +148,7 @@ bool parser_parameter_expansion(TokenList *tl, StringList *env){
 			char *value = NULL;
 
 			do{
-				result = regex_match ("\\${[^$]*}", el->w_infix);
+				result = regex_match ("\\$\\{", el->w_infix);
 				if (result.re_start == -1){
 					break;
 				}
@@ -156,13 +157,14 @@ bool parser_parameter_expansion(TokenList *tl, StringList *env){
 					return false;
 				}
 
-				result = regex_match("\\${?}", el->w_infix);
+				result = regex_match("\\$\\{\\?\\}", el->w_infix);
 				if (result.re_start != -1)
 					value = ft_itoa(g_exitno);
 				else{
-					result = regex_match ("\\${[^$]*}", el->w_infix);
-					if (result.re_start != -1)
+					result = regex_match ("\\$\\{[^\\$]*\\}", el->w_infix);
+					if (result.re_start != -1){
 						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.re_start + 2, result.re_end - result.re_start - 3), GC_SUBSHELL), env);
+					}
 					else
 						break;
 				}
@@ -173,10 +175,9 @@ bool parser_parameter_expansion(TokenList *tl, StringList *env){
 				
 				el->w_infix = gc_add(ft_strjoin(tmp, re_end), GC_GENERAL);
 				free(tmp); free(re_start); free(re_end);
-				printf("string: %s\n\n", el->w_infix);
-				regex_test("\\${[^$]*}", el->w_infix);
+				// printf("string: %s\n\n", el->w_infix);
 
-			} while(regex_match("\\${[^$]*}", el->w_infix).re_start != -1);
+			} while(true);
 		}
 	}
 	return true;

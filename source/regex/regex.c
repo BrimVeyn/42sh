@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/27 16:10:52 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/30 11:19:06 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,10 @@ void regex_compile_pattern(regex_compiled_t *regexp, const char *pattern){
 				set_quantifier(regexp, REGEX_QUESTION);
 				i++;
 				break;
+			case '+':
+				set_quantifier(regexp, REGEX_PLUS);
+				i++;
+				break;
 			case '\\':
 				i++;
 				char_in_pattern = pattern[i];
@@ -126,14 +130,20 @@ int matchquestion(regex_node_t *search, regex_node_t **pattern, char *string, in
     return matchhere(pattern, string, end_pos);
 }
 
-int matchstar(regex_node_t *search, regex_node_t **pattern, char *string, int *end_pos) {
+
+int matchplus(regex_node_t *search, regex_node_t **pattern, char *string, int *end_pos) {
     char *saved_pos = string;
+    int matched = 0;
+
     while (*string != '\0' && (matchchar(search, *string) || matchrange(search, *string))) {
         string++;
         (*end_pos)++;
+        matched = 1;
     }
 
-    while (string >= saved_pos) {
+    if (!matched) return 0;
+
+    while (string > saved_pos) {
         if (matchhere(pattern, string, end_pos))
             return 1;
         string--;
@@ -143,10 +153,28 @@ int matchstar(regex_node_t *search, regex_node_t **pattern, char *string, int *e
     return 0;
 }
 
+int matchstar(regex_node_t *search, regex_node_t **pattern, char *string, int *end_pos) {
+    char *saved_pos = string;
+    while (*string != '\0' && (matchchar(search, *string) || matchrange(search, *string))) {
+        string++;
+        (*end_pos)++;
+    }
+	
+    while (string >= saved_pos) {
+        if (matchhere(pattern, string, end_pos))
+            return 1;
+        string--;
+        (*end_pos)--;
+    }
+    return 0;
+}
+
 int matchhere(regex_node_t **pattern, char *string, int *end_pos) {
     // print_regex_node(*pattern);
     if ((*pattern)->type == REGEX_END_OF_PATTERN)
         return 1;
+    if ((*pattern)->quantifier == REGEX_PLUS)
+		return matchplus(*pattern, pattern + 1, string, end_pos);
     if ((*pattern)->quantifier == REGEX_QUESTION)
 		return matchquestion(*pattern, pattern + 1, string, end_pos);
     if ((*pattern)->quantifier == REGEX_STAR)
@@ -210,6 +238,10 @@ const char *get_quantifier_type(regex_quantifier_type type) {
 	switch(type) {
 		case REGEX_STAR:
 			return "*";
+		case REGEX_QUESTION:
+			return "?";
+		case REGEX_PLUS:
+			return "+";
 		default:
 			return "??????";
 	}
@@ -285,21 +317,20 @@ void regex_test(char *pattern, char *text) {
     } else if (result == REG_NOMATCH) {
         posix_re_start = posix_re_end = -1;
     }
-
+	printf("My regex:    re_start = %d, re_end = %d\n", my_result.re_start, my_result.re_end);
+	for (int i = 0; text[i]; i++) {
+		if (i == my_result.re_start)
+			printf("\033[0;32m");
+		else if (i == my_result.re_end)
+			printf("\033[0m");
+		printf("%c", text[i]);
+	}
+	printf("\033[0m\n");
+	
     if (my_result.re_start != posix_re_start || my_result.re_end != posix_re_end) {
-
-        printf("My regex:    re_start = %d, re_end = %d\n", my_result.re_start, my_result.re_end);
+		printf("pattern: %s\n", pattern);
         printf("POSIX regex: re_start = %d, re_end = %d\n", posix_re_start, posix_re_end);
 
-        printf("My regex:\n");
-        for (int i = 0; text[i]; i++) {
-            if (i == my_result.re_start)
-                printf("\033[0;32m");
-            else if (i == my_result.re_end)
-                printf("\033[0m");
-            printf("%c", text[i]);
-        }
-        printf("\033[0m\n");
 
         printf("POSIX regex:\n");
         for (int i = 0; text[i]; i++) {
@@ -314,5 +345,5 @@ void regex_test(char *pattern, char *text) {
         printf("✅  %s%s%s\n", C_LIGHT_GRAY, pattern, C_RESET);
     }
     regfree(&regex);
-    // printf("==================\n");
+    printf("==================\n");
 }
