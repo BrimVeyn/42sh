@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 13:14:29 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/27 16:10:54 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/09/30 13:05:13 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,28 @@ int main(int ac, char **av) {
 		regex_test("^A.*?B.*?C$", "A123B456C789"); // Non-greedy match avec '*?' entre 'A' et 'B', puis 'B' et 'C'
 		regex_test("^A.*?1?.*C$", "A12C"); // '?' après '1' rend le '1' facultatif dans la chaîne
 		regex_test("^A.?B.?C$", "ABC"); // '?' rend facultatif le match entre 'A' et 'B', ainsi qu'entre 'B' et 'C'
-
+		regex_test("a+", "aaa");
+		regex_test("a+", "a");
+		regex_test("a+", "");
+		regex_test("a+b+", "aaabbb");
+		regex_test("a+b+", "ab");
+		regex_test("a+b+", "bb");
+		regex_test("a+b+", "aab");
+		regex_test("a+z+", "aaazz");
+		regex_test("[a-z]+", "abcd");
+		regex_test("[a-z]+", "1234");
+		regex_test("a*", "aaa");
+		regex_test("a*", "a");
+		regex_test("a*", "");
+		regex_test("a*b*", "aaabbb");
+		regex_test("a*b*", "ab");
+		regex_test("a*b*", "bb");
+		regex_test("a*b*", "aab");
+		regex_test("a*z*", "aaazz");
+		regex_test("[a-z]*", "abcd");
+		regex_test("[a-z]*", "1234");
+		regex_test("\\$\\{#?[A-Za-z_][A-Za-z0-9_]*[#%:]?[^\\}%:#]+\\}", "${VAR:}");
+		regex_test("\\$\\{#?[A-Za-z_][A-Za-z0-9_]*[#%:]?[^\\}%:#]+\\}", "echo ${DEFINED_VAR:-${NESTED_VARIABLE:-salut}}");
 		// regex_test("^[^a-z]*[A-Z]*[^0-9]*$", "!@#$HELLO!!");
 		// regex_test("^[A-Z][a-z]*[^A-Z]*[A-Z]*[^0-9]*$", "HelloWORLD!!");
 		// regex_test("^[A-Za-z]*[^A-Z]*[A-Z]*[^0-9]*$", "hello!!WORLD!!");

@@ -38,3 +38,7 @@ echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#/home}
 echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##/home}
 echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%/home}
 echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%/home}
+echo ${#PATH}
+echo ${#PATH:-DSADAS}
+echo ${#DFPASDAS}
+echo ${#}
