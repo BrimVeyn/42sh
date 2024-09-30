@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/26 13:19:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 11:29:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,7 @@ void string_list_add_or_update(StringList *sl, char *var) {
 		if  (!ft_strcmp(curr_id, id)) {
 			gc_free(sl->data[i], GC_GENERAL);
 			sl->data[i] = gc_add(ft_strdup(var), GC_GENERAL);
-			free(curr_id);
-			free(id);
+			FREE_POINTERS(curr_id, id);
 			return ;
 		}
 		free(curr_id);

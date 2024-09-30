@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 11:11:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/27 16:32:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 11:01:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 static long get_value(ANode *self, Vars *shell_vars) {
 	if (self->value->operand_tag == VARIABLE) {
 		char *str_value = string_list_get_value(shell_vars->set, self->value->variable);
-		long int_value = (str_value == NULL) ? 0 : ft_atoi(str_value);
+		long int_value = (str_value == NULL) ? 0 : ft_atol(str_value);
 		return int_value;
 	} else {
 		return self->value->litteral;

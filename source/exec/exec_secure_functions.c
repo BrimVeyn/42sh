@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:52:42 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 16:19:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 11:27:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void secure_pipe2(int pipefd[2], int flags){
 	}
 }
 
-void secure_execve(const char *pathname, char *const argv[], char *const envp[]){
+void secure_execve(const char *pathname, char **const argv, char **const envp){
 	if (execve(pathname, argv, envp) == -1){
 		printf("%s: command not found\n", argv[0]);
 		gc_cleanup(GC_ALL);

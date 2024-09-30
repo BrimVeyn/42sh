@@ -6,15 +6,18 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:20:10 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/26 12:22:36 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 13:36:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
+#include "debug.h"
 #include "lexer.h"
+#include "parser.h"
 #include "utils.h"
 #include "libft.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -118,35 +121,50 @@ char *find_bin_location(char *bin, StringList *env){
 	return NULL;
 }
 
+typedef void (*builtin_func_t)(const SimpleCommand *, Vars *);
+
+bool builtin_executer(const SimpleCommand *command, Vars *shell_vars) {
+	if (!command->bin) 
+		return false;
+
+	static const struct {
+		char *bin;
+		builtin_func_t func;
+	} map[] = {
+		{"env",  &builtin_env},
+		{"set",  &builtin_set},
+		{"echo",  &builtin_echo},
+		{"exit",  &builtin_exit},
+	};
+
+	int result_index = -1;
+	for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); i++) {
+		if (!ft_strcmp(command->bin, map[i].bin)) {
+			result_index = i;
+			break;
+		}
+	}
+
+	if (result_index != -1) {
+		map[result_index].func(command, shell_vars);
+		return true;
+	}
+	return false;
+}
+
 bool exec_simple_command(const SimpleCommand *command, Vars *shell_vars) {
 	if (apply_all_redirect(command->redir_list)) {
 		if (!command->bin) {
 			g_exitno = EXIT_SUCCESS;
 			return false;
 		}
+		if (builtin_executer(command, shell_vars))
+			return false;
 		char *path = find_bin_location(command->bin, shell_vars->env);
 		if (!path) return false;
 		secure_execve(path, command->args, shell_vars->env->data);
 	} else return false;
 	return true;
-}
-
-bool exec_builtin(SimpleCommand *command, Vars *shell_vars){
-	if (!command->bin){
-		return false;
-	}
-	if (!ft_strcmp(command->bin, "exit")){
-		exit(g_exitno);
-	}
-	if (!ft_strcmp(command->bin, "env")) {
-		builtin_env(shell_vars);
-		return true;
-	}
-	if (!ft_strcmp(command->bin, "set")) {
-		builtin_set(shell_vars);
-		return true;
-	}
-	return false;
 }
 
 void close_saved_fds(int *saved_fds) {
@@ -174,6 +192,24 @@ void close_std_fds(void) {
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
+}
+
+bool exec_builtin(SimpleCommand *command, Vars *shell_vars){
+	if (!command->bin){
+		return false;
+	}
+	if (!ft_strcmp(command->bin, "exit")){
+		exit(g_exitno);
+	}
+	if (!ft_strcmp(command->bin, "env")) {
+		builtin_env(command, shell_vars);
+		return true;
+	}
+	if (!ft_strcmp(command->bin, "set")) {
+		builtin_set(command, shell_vars);
+		return true;
+	}
+	return false;
 }
 
 int exec_executer(Executer *executer, Vars *shell_vars) {
@@ -234,18 +270,17 @@ int exec_executer(Executer *executer, Vars *shell_vars) {
 
 		if (current->data_tag == DATA_TOKENS) {
 			SimpleCommand *command = parser_parse_current(current->s_data, shell_vars);
-			// printCommand(command);
 			if (!command && pipefd[0] == -1){
 				close_all_fds();
 				return false;
 			}
-			if (pipefd[0] == -1 && exec_builtin(command, shell_vars)){
+			if (pipefd[0] == -1 && builtin_executer(command, shell_vars)){
 				break;
 			}
 			pids[i] = secure_fork();
 			if (pids[i] == 0) {
 				close_all_fds();
-				if (!exec_simple_command(command, shell_vars)) {
+				if (!command || !exec_simple_command(command, shell_vars)) {
 					gc_cleanup(GC_ALL);
 					exit(g_exitno);
 				}

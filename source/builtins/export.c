@@ -1,20 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   exit.c                                             :+:      :+:    :+:   */
+/*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/20 16:02:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/30 13:07:04 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/09/30 14:33:24 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/09/30 14:53:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "exec.h"
+#include "../include/exec.h"
+#include "libft.h"
+#include "parser.h"
+#include "regex.h"
 #include "utils.h"
-#include <stdlib.h>
+#include <linux/limits.h>
+#include <stdio.h>
+#include <unistd.h>
 
-void builtin_exit(const SimpleCommand *command, __attribute__((unused)) Vars *shell_vars) {
-	if (!command->args[1]) exit(EXIT_SUCCESS);
-	exit(ft_atol(command->args[1]));
+void builtin_export(const SimpleCommand *command, Vars *shell_vars) {
+	(void) shell_vars;
+	size_t i = 0;
+
+	//if -p shift
+	
+	for (i = 1; command->args[i]; i++) {
+		if (regex_match("[_a-zA-Z][_a-zA-Z0-9]*=", command->args[i]).end != -1) {
+			;
+		}
+	}
 }

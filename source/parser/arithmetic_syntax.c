@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 11:18:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/27 15:40:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 11:38:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,6 @@ bool arithmetic_syntax_check(ATokenStack *list) {
 		}
 		if (is_abinary_op(current)) {
 			if (!next || !prev || (is_aoperator(prev) && is_abinary_op(prev)) || (is_aoperator(next) && is_abinary_op(next))) {
-				dprintf(2, "puteau !\n");
 				dprintf(2, OPERAND_EXPECTED"\n");
 				return false;
 			}  

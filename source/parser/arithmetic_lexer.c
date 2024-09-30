@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   lexer_arithmetic_expansions.c                      :+:      :+:    :+:   */
+/*   arithmetic_lexer.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 11:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/26 16:49:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 10:57:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ bool fill_operand(AToken *self, Lexer_p l) {
 	}
 	if (is_number(var)) {
 		self->operand_tag = VALUE;
-		self->litteral = ft_atoi(var); //make it signed long
+		self->litteral = ft_atol(var); //make it signed long
 	} else {
 		self->operand_tag = VARIABLE;
 		self->variable = var;
