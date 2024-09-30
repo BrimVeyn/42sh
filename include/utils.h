@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/30 10:01:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 16:24:34 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void			gc_addcharchar(char **str, int n);
 //----------------Utils--------------------//
 void			free_charchar(char **s);
 void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
-int				ft_strlenlen(const char **strstr);
+size_t			ft_strlenlen(const char **strstr);
 char			**ft_strdupdup(const char **env);
 int				there_is_star(char *str);
 int				there_is_slash(char *str);
