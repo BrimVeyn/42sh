@@ -6,18 +6,21 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 12:20:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/01 12:33:55 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/01 17:22:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <linux/limits.h>
+#include <string.h>
 #include <unistd.h>
 #include "exec.h"
 #include "libft.h"
 #include "ft_regex.h"
+#include "utils.h"
 
 void builtin_echo(const SimpleCommand *command, __attribute__((unused)) Vars *shell_vars) {
-	char buffer[NGROUPS_MAX] = {0};
+	char buffer[MAX_WORD_LEN * 10] = {0};
+	memset(buffer, '\0', MAX_WORD_LEN);
 	bool newline = true;
 	size_t i = 1;
 

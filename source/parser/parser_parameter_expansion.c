@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/01 11:11:38 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/01 15:40:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@
 #include "exec.h"
 #include "ft_regex.h"
 
-char *handle_format(char metachar[3], char *id, char *word, StringList *env){
+char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 	// printf("id: %s\nword: %s\nmetachar: %s\n", id, word, metachar);
-	char *value = string_list_get_value(env, id);
+	char *value = shell_vars_get_value(shell_vars, id);
 	if (!value){
 		if (!ft_strcmp(metachar, ":-")){
 			return (word);
@@ -27,7 +27,7 @@ char *handle_format(char metachar[3], char *id, char *word, StringList *env){
 		else if (!ft_strcmp(metachar, ":=")){
 			char *variable = gc_add(ft_calloc(ft_strlen(word) + ft_strlen(id) + 3, sizeof(char)), GC_GENERAL);
 			ft_sprintf(variable, "%s=%s", id, word);
-			string_list_add_or_update(env, variable);
+			string_list_add_or_update(shell_vars->env, variable);
 			return (word);
 		}
 		else if (!ft_strcmp(metachar, ":?")){
@@ -37,10 +37,10 @@ char *handle_format(char metachar[3], char *id, char *word, StringList *env){
 			exit(EXIT_FAILURE);
 		}
 	}
-	if (string_list_get_value(env, id) == NULL)
+	if (shell_vars_get_value(shell_vars, id) == NULL)
 		return ft_strdup("");
 	if (metachar[0] == '#' || metachar[0] == '%'){
-		char *value = ft_strdup(string_list_get_value(env, id));
+		char *value = ft_strdup(shell_vars_get_value(shell_vars, id));
 		char *regexp = NULL;
 
 		if (metachar[0] == '#'){
@@ -68,7 +68,7 @@ char *handle_format(char metachar[3], char *id, char *word, StringList *env){
 	return ft_strdup(value);
 }
 
-char *parser_get_variable_value(char *to_expand, StringList *env){
+char *parser_get_variable_value(char *to_expand, Vars *shell_vars){
 
 	char metachar[3] = {0};
 	char *word = NULL;
@@ -76,7 +76,7 @@ char *parser_get_variable_value(char *to_expand, StringList *env){
 	
 
 	if (to_expand[0] == '#'){
-		return gc_add(ft_itoa(ft_strlen(string_list_get_value(env, to_expand + 1))), GC_GENERAL);
+		return gc_add(ft_itoa(ft_strlen(shell_vars_get_value(shell_vars, to_expand + 1))), GC_GENERAL);
 	}
 
 	regex_match_t find_format = regex_match("[:#%]", to_expand);
@@ -86,10 +86,10 @@ char *parser_get_variable_value(char *to_expand, StringList *env){
 		word = ft_substr(to_expand, find_format.re_end + lenght_meta - 1, ft_strlen(to_expand) - find_format.re_end);
 		gc_add(word, GC_GENERAL);
 		ft_memcpy(metachar, &to_expand[find_format.re_start], sizeof(char) * lenght_meta);
-		return handle_format(metachar, name, word, env);
+		return handle_format(metachar, name, word, shell_vars);
 	}
 	
-	char *value = string_list_get_value(env, to_expand);
+	char *value = shell_vars_get_value(shell_vars, to_expand);
 	return value ? value : gc_add(ft_strdup(""), GC_SUBSHELL);
 }
 
@@ -153,7 +153,7 @@ bool parser_parameter_expansion(TokenList *tl, Vars *shell_vars){
 			regex_match_t result;
 			char *value = NULL;
 			
-			char *home = string_list_get_value(shell_vars->env, "HOME");
+			char *home = shell_vars_get_value(shell_vars, "HOME");
 			do {
 				int index = ft_strstr(el->w_infix, "~");
 				if (index == -1)
@@ -188,7 +188,7 @@ bool parser_parameter_expansion(TokenList *tl, Vars *shell_vars){
 				else {
 					result = regex_match ("\\$\\{[^\\$]*\\}", el->w_infix);
 					if (result.re_start != -1){
-						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.re_start + 2, result.re_end - result.re_start - 3), GC_SUBSHELL), shell_vars->env);
+						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.re_start + 2, result.re_end - result.re_start - 3), GC_SUBSHELL), shell_vars);
 						// printf("value: %s\n", value);	
 					} else
 						break;
