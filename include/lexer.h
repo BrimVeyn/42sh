@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/26 12:22:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/01 13:29:00 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LEXER_H
 # define LEXER_H
 
+#include <readline/history.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -33,6 +34,13 @@ typedef enum {
 	//---------------
 	T_NONE, // Generic none token when no prefix/suffix
 } type_of_token;
+
+typedef enum {
+	H_NO_EVENT,
+	H_LAST,
+	H_WORD,
+	H_NUMBER,
+} type_of_history_event;
 
 typedef enum {
 	ERROR_NONE, //error free 

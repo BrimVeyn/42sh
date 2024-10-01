@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/30 16:24:48 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/01 15:33:50 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,9 @@
 #include "../include/lexer.h"
 #include "../include/ast.h"
 #include "../include/exec.h"
+#include "../include/regex.h"
 #include "../libftprintf/header/libft.h"
+#include "ft_regex.h"
 
 #include <stdio.h>
 #include <fcntl.h>
@@ -112,6 +114,91 @@ Vars *vars_init(const char **env) {
 
 	return self;
 }
+
+char *get_event_number(char *string){
+	char *number = ft_calloc(10, sizeof(char));
+	int i = 0;
+	while (string[i] && is_number(&string[i])){
+		number[i] = string[i];
+		i++;
+		if (i >= 10)
+			break;
+	}
+	if (i <= 0 || i >= 10){
+		return NULL;
+	}
+	return number;
+}
+
+char *get_history_index(char *string, int index){
+	int cpt = 0;
+	int old_end = 0;
+	if (index < 0){
+		return NULL;
+	}
+
+	for (int i = 0; string[i]; i++){
+		if (string[i] == '\n'){
+			cpt++;
+			old_end = i + 1;
+		}
+		if (cpt == index){
+			return ft_substr(string, old_end, i - old_end - 1);
+		}
+	}
+	return NULL;
+}
+
+// bool history_expansion (char *string, int history_fd){
+//
+// 	regex_match_t result = regex_match("[^\\\\]\\!", string);
+//
+// 	if (result.is_found){
+// 		struct stat st;
+// 		if (fstat(history_fd, &st) == -1){
+// 			perror("Can't get history's file stats");
+// 			exit(EXIT_FAILURE);
+// 		}
+// 		size_t file_size = st.st_size;
+//
+// 		char *buffer = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, history_fd, 0);
+// 		if (buffer == MAP_FAILED) {
+// 			perror("mmap failed");
+// 			exit(EXIT_FAILURE);
+// 		}
+// 	}
+//
+// 	char *command = NULL;
+// 	do {
+// 		type_of_history_event event_type = H_NO_EVENT;
+// 		regex_match_t result = regex_match("[^\\\\]\\![^ ]*", string);
+// 		if (string[result.re_start + 1] == '!'){
+// 			event_type = H_LAST;
+// 		}
+// 		else if (ft_isdigit(string[result.re_start + 1])){
+// 			char *cnumber = get_event_number(string + result.re_start + 1);
+// 			if (cnumber == NULL){
+// 				char *tmp = ft_substr(string,result.re_start, result.re_end - result.re_start);
+// 				ft_dprintf(2, "42sh: %s not found", tmp);
+// 				free(tmp);
+// 				return false;
+// 			}
+// 			int number = ft_atoi(cnumber);
+// 			command = get_history_index(string, number);
+// 		}
+// 		// else if (ft_isalpha(string[result.re_start + 1])){
+// 		// 	char *c
+// 		// }
+// 		if (command){
+// 			char *start = ft_substr(string, 0, result.re_start - 1);
+// 			char *end = ft_substr(string, result.re_end + 1, ft_strlen(string) - result.re_end);
+// 			char *start_and_command = ft_strjoin(start, command);
+// 			string = ft_strjoin(start_and_command, end);
+// 			FREE_POINTERS(start, end, start_and_command, command);
+// 		}
+//
+// 	} while (true);
+// }
 
 int main(const int ac, const char *av[], const char *env[]) {
 
