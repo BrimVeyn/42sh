@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/26 12:22:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/01 15:33:08 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,9 +95,7 @@ typedef struct Token {
 	type_of_token tag;
 	type_of_error e;
 	union {
-		struct {
-			type_of_separator s_type;
-		}; //separator
+		type_of_separator s_type;
 
 		struct {
 			type_of_redirection r_type;
@@ -178,6 +176,7 @@ StringList		*string_list_init(void);
 void			string_list_add_or_update(StringList *sl, char *variable);
 void			string_list_remove(StringList *sl, char *variable);
 char			*string_list_get_value(StringList *sl, char *id);
+char			*shell_vars_get_value(Vars *shell_vars, char *id);
 void			string_list_print(const StringList *list);
 
 //----------------Syntax----------------//

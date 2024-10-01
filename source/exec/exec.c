@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/30 16:25:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/01 13:19:40 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,6 +136,8 @@ bool builtin_executer(const SimpleCommand *command, Vars *shell_vars) {
 		{"echo",  &builtin_echo},
 		{"exit",  &builtin_exit},
 		{"export",  &builtin_export},
+		{"hash",  &builtin_hash},
+		{"type",  &builtin_type},
 	};
 
 	int result_index = -1;
