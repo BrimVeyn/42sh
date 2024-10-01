@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/26 15:57:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/01 09:32:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 #define ARITHMETIC_SYNTAX_ERROR "42sh: sytax error: invalid arithmetic operator (error token is \""
 #define ASSIGNMENT_REQUIRES_LVALUE "42sh: assignment requires lvalue (error token is \""
 #define OPERAND_EXPECTED "42sh: operand expected (error token is an operator)"
+#define INVALID_IDENTIFIER(s) dprintf(STDERR_FILENO, "bash: export: `%s\': not a valid identifier\n", s);
 
 typedef enum {
 	R_FD,

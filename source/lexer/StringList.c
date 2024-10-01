@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/30 11:29:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/01 08:42:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ void string_list_add(StringList *tl, char *token) {
 
 void string_list_add_or_update(StringList *sl, char *var) {
 	char *equal_ptr = ft_strchr(var, '=');
+	bool add_only = (!equal_ptr);
 	size_t equal_pos = equal_ptr - var;
 	char *id = ft_substr(var, 0, equal_pos);
 
@@ -49,8 +50,10 @@ void string_list_add_or_update(StringList *sl, char *var) {
 		char *curr_id = ft_substr(sl->data[i], 0, curr_equal_pos);
 
 		if  (!ft_strcmp(curr_id, id)) {
-			gc_free(sl->data[i], GC_GENERAL);
-			sl->data[i] = gc_add(ft_strdup(var), GC_GENERAL);
+			if (!add_only) {
+				gc_free(sl->data[i], GC_GENERAL);
+				sl->data[i] = gc_add(ft_strdup(var), GC_GENERAL);
+            }
 			FREE_POINTERS(curr_id, id);
 			return ;
 		}
@@ -77,6 +80,8 @@ char *string_list_get_value(StringList *sl, char *id) {
 
 void string_list_print(const StringList *list) {
 	for (size_t i = 0; i < list->size; i++) {
-		dprintf(2, "[%zu]: %s\n", i, list->data[i]);
+		char *eql = ft_strchr(list->data[i], '=');
+		if (!eql) continue;
+		dprintf(2, "%s\n", list->data[i]);
 	}
 }
