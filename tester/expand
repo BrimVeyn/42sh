@@ -34,11 +34,16 @@ echo ${UNDEFINED_VAR:-Empty_Value} | cat
 echo ${HOME_VAR:-/default/home}
 echo ${UNDEFINED_VAR:=temporary}; echo ${UNDEFINED_VAR}
 echo ${HOME_SET:?Home is not set}; echo ${HOME_SET}
-echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#/home}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#}
 echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##/home}
 echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%/home}
 echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%/home}
 echo ${#PATH}
+echo ${PATH:}
 echo ${#PATH:-DSADAS}
 echo ${#DFPASDAS}
 echo ${#}
