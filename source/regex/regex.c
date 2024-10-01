@@ -6,14 +6,14 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/30 15:07:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 15:32:18 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_regex.h"
-#include "utils.h"
-#include "libft.h"
-#include "colors.h"
+#include "../../include/ft_regex.h"
+#include "../../include/utils.h"
+#include "../../libftprintf/header/libft.h"
+#include "../../include/colors.h"
 #include <stdint.h>
 #include <stdio.h>
 

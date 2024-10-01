@@ -21,6 +21,7 @@ else
 		"command_sub"
 		"command_group"
 		"arithmetic_expansion"
+		"builtin_export"
 	)
 fi
 

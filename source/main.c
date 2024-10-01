@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/30 14:55:55 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/09/30 16:24:48 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 #include "../include/debug.h"
 #include "../include/lexer.h"
 #include "../include/ast.h"
-#include "../libftprintf/header/libft.h"
 #include "../include/exec.h"
+#include "../libftprintf/header/libft.h"
 
 #include <stdio.h>
 #include <fcntl.h>
@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
 
 int g_debug = 0;
 
@@ -49,69 +51,50 @@ void get_history() {
         exit(EXIT_FAILURE);
     }
 
-    int n = 2;
-
-    ssize_t read_bytes = 0;
-    ssize_t total = 0;
-
-	char *buffer = ft_calloc(n + 1, sizeof(char));
-	if (!buffer) {
-		perror("Calloc buffer history failed");
-		close(fd);
-		exit(EXIT_FAILURE);
+	struct stat st;
+	if (fstat(fd, &st) == -1){
+        perror("Can't get history's file stats");
+        exit(EXIT_FAILURE);
 	}
+    size_t file_size = st.st_size;
 
-	while ((read_bytes = read(fd, buffer + total, n - total)) > 0) {
-		total += read_bytes;
-		buffer[total] = '\0';
-		
-		if (total >= n - 1) {
-			n *= 2;
-			char *new_buffer = ft_realloc(buffer, ft_strlen(buffer), n + 1, sizeof(char));
-
-			if (!new_buffer) {
-				perror("buffer realloc history failed");
-				free(buffer);
-				close(fd);
-				exit(EXIT_FAILURE);
-			}
-			ft_memset(new_buffer + total, 0, n - total);
-			free(buffer);
-			buffer = new_buffer;
-		}
-	}
-
-    if (read_bytes == -1) {
-        perror("Error read_bytesing file");
-        free(buffer);
-        close(fd);
+    char *buffer = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (buffer == MAP_FAILED) {
+        perror("mmap failed");
         exit(EXIT_FAILURE);
     }
 
-	// printf("buffer: |%s|", buffer);
-	// ft_strlen(buffer);
-	char **history = ft_split(buffer, '\n');
-	for ( uint32_t i = 0; history[i]; i++) {
-		add_history(history[i]);
-	}
+	char *start = buffer;
+    char *end = buffer; 
 
-    free(buffer);
-	free_charchar(history);
+	while(*end){
+		if (*end == '\n'){
+			char *tmp = (char *)malloc(end - start + 1);
+			memcpy(tmp, start, end - start);
+			tmp[end - start] = '\0';
+			add_history(tmp);
+			free(tmp);
+			start = end + 1;
+		}
+		end++;
+	}
+	munmap(buffer, file_size);
 	close(fd);
 }
 
-void add_input_to_history(char *input){
+void add_input_to_history(char *input, int *history_fd){
 	add_history(input);
 	char *home = getenv("HOME");
 	char history_filename[1024] = {0};
 	ft_sprintf(history_filename, "%s/.42sh_history", home);
-    int history_fd = open(history_filename, O_APPEND | O_WRONLY | O_CREAT, 0644);
-	if (history_fd == -1) {
-		perror("Can't open history file");
-		exit(EXIT_FAILURE);
+	if (*history_fd == -1){
+		*history_fd = open(history_filename, O_APPEND | O_WRONLY | O_CREAT, 0644);
+		if (*history_fd == -1) {
+			perror("Can't open history file");
+			exit(EXIT_FAILURE);
+		}
 	}
-	dprintf(history_fd, "%s\n", input);
-	close(history_fd);
+	dprintf(*history_fd, "%s\n", input);
 }
 
 void env_to_string_list(StringList *env_list, const char **env){
@@ -139,7 +122,7 @@ int main(const int ac, const char *av[], const char *env[]) {
 	gc_init(GC_GENERAL);
 	gc_init(GC_SUBSHELL);
 	Vars *shell_vars = vars_init(env);
-	// for(int i = 0; env_list->value[i]; i++){printf("%s", env_list->value[i]);}
+	int history_fd = -1;
 
 	g_signal = 0;
 	char *input = NULL;
@@ -150,11 +133,10 @@ int main(const int ac, const char *av[], const char *env[]) {
 	while ((input = init_prompt_and_signals()) != NULL) {
 		if (*input) 
 		{
-			// if (isatty(STDIN_FILENO)){
-			// 	add_input_to_history(input);
-			// }
-			// input = replace_char_greedy(input, '\n', ';');
-			// printf("input: %s\n", input);
+			if (isatty(STDIN_FILENO)){
+				add_input_to_history(input, &history_fd);
+			}
+			input = replace_char_greedy(input, '\n', ';');
 			Lexer_p lexer = lexer_init(input);
 			TokenList *tokens = lexer_lex_all(lexer);
 			if (lexer_syntax_error(tokens))
