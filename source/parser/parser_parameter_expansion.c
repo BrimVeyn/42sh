@@ -3,13 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   parser_parameter_expansion.c                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/30 15:24:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/01 11:11:38 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "lexer.h"
 #include "parser.h"
 #include "libft.h"
 #include "utils.h"
@@ -128,8 +129,9 @@ static bool is_bad_substitution(Token *el, int pos){
 	}
 
 	if (regex_match("\\$\\{\\}", before_format).re_start == pos ||
+		regex_match("\\$\\{.*:\\}", el->w_infix).re_start == pos ||
 		regex_match("\\$\\{[^\\}]*$", el->w_infix).re_start == pos ||
-		(regex_match("\\$\\{[A-Za-z_][A-Za-z0-9_]*[#%:].+\\}", el->w_infix).re_start != pos &&
+		(regex_match("\\$\\{[A-Za-z_][A-Za-z0-9_]*[#%:].*\\}", el->w_infix).re_start != pos &&
 		regex_match("\\$\\{[\\?#]\\}", el->w_infix).re_start != pos &&
 		(regex_match("\\$\\{#?[A-Za-z_][A-Za-z0-9_]*\\}", el->w_infix).re_start != pos &&
 		is_parameter_balanced(el->w_infix))))
@@ -150,6 +152,26 @@ bool parser_parameter_expansion(TokenList *tl, Vars *shell_vars){
 		if (el->tag == T_WORD){
 			regex_match_t result;
 			char *value = NULL;
+			
+			char *home = string_list_get_value(shell_vars->env, "HOME");
+			do {
+				int index = ft_strstr(el->w_infix, "~");
+				if (index == -1)
+					break;
+				char *start = (index == 0) ? ft_strdup("") : ft_substr(el->w_infix, 0, index - 1);
+				char *end = ((size_t)index == ft_strlen(el->w_infix)) ? ft_strdup("") : ft_substr(el->w_infix, index + 1, ft_strlen(el->w_infix) - index);
+				char *start_and_home = ft_strjoin(start, home);
+				char *new_string = gc_add(ft_strjoin(home, end), GC_SUBSHELL);
+				gc_free(el->w_infix, GC_SUBSHELL);
+				el->w_infix = new_string;
+
+				// char value[MAX_WORD_LEN] = {0};
+				// ft_memset(value, 0, MAX_WORD_LEN);
+				// ft_sprintf(value, "%s%s%s", start, home, end);
+				// el->w_infix = gc_add(ft_strdup(value), GC_SUBSHELL);
+				// printf("VALUE: %s\n", value);
+				FREE_POINTERS(start, end, start_and_home);
+			} while (1);
 
 			do{
 				result = regex_match ("\\$\\{", el->w_infix);
