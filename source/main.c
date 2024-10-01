@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/30 16:24:48 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/01 13:20:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,6 +154,7 @@ int main(const int ac, const char *av[], const char *env[]) {
 	}
 	rl_clear_history();
 	gc_cleanup(GC_ALL);
+	close_all_fds();
 	close_std_fds();
 	return (0);
 }

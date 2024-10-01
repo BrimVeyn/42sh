@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/01 09:32:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/01 14:29:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@
 #define ASSIGNMENT_REQUIRES_LVALUE "42sh: assignment requires lvalue (error token is \""
 #define OPERAND_EXPECTED "42sh: operand expected (error token is an operator)"
 #define INVALID_IDENTIFIER(s) dprintf(STDERR_FILENO, "bash: export: `%s\': not a valid identifier\n", s);
+#define HASH_BIN_NOT_FOUND(s) dprintf(STDERR_FILENO, "bash: hash: %s: not found\n", s);
+#define HASH_OPTION_REQUIRES_ARG dprintf(STDERR_FILENO, "bash: hash: -d: option requires an argument\n"); 
 
 typedef enum {
 	R_FD,

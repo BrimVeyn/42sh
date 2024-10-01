@@ -6,7 +6,7 @@
 #    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/30 14:55:20 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/09/30 15:26:29 by bvan-pae         ###   ########.fr        #
+#    Updated: 2024/10/01 13:19:42 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME			:= 42sh
 LIBFT			:= libftprintf/libftprintf.a
 CC 				:= gcc
 LDFLAGS			:= -lreadline -lncurses
-CFLAGS 			:= -Wall -Werror -Wextra #-g3 -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
+CFLAGS 			:= -Wall -Werror -Wextra -g3 #-fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
 SANFLAGS		:= -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
 
 LEXER_SRC 		:= $(wildcard source/lexer/*.c)

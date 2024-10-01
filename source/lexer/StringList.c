@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/01 08:42:48 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/01 15:32:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,14 @@ char *string_list_get_value(StringList *sl, char *id) {
 		free(curr_id);
 	}
 	return NULL;
+}
+
+char *shell_vars_get_value(Vars *shell_vars, char *id) {
+	char *return_value = string_list_get_value(shell_vars->env, id);
+	if (!return_value) {
+		return_value = string_list_get_value(shell_vars->set, id);
+	}
+	return return_value;
 }
 
 void string_list_print(const StringList *list) {

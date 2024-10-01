@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:18:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/30 16:25:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/01 15:30:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ typedef enum {
 	E_NOPERM,
 } exec_ernno;
 
-//----Secure mes couilles oui !
 int secure_fork(void);
 bool secure_dup2(int from, int to);
 void secure_pipe2(int pipefd[2], int flags);
@@ -35,10 +34,33 @@ void close_all_fds(void);
 
 
 
-void builtin_set(const SimpleCommand *, Vars *);
-void builtin_env(const SimpleCommand *, Vars *);
+#define TABLE_SIZE 1000
+
+typedef struct Entry {
+	int	 hits;
+	char *command;
+	char *bin;
+	struct Entry *next; //to handle collisions
+} Entry;
+
+typedef enum {
+	HASH_ADD_USED,
+	HASH_ADD_UNUSED,
+	HASH_REMOVE,
+	HASH_CLEAR,
+	HASH_PRINT,
+	HASH_GET,
+} hash_mode;
+
+//------------------------Builtins-----------------------------//
+void builtin_set(const SimpleCommand *command, Vars *shell_vars);
+void builtin_env(const SimpleCommand *command, Vars *shell_vars);
 void builtin_echo(const SimpleCommand *command, Vars *shell_vars);
 void builtin_exit(const SimpleCommand *command, Vars *shell_vars);
 void builtin_export(const SimpleCommand *command, Vars *shell_vars);
+void builtin_type(const SimpleCommand *command, Vars *shell_vars);
+void builtin_hash(const SimpleCommand *command, Vars *shell_vars);
+void hash_interface(hash_mode mode, char *arg, Vars *shell_vars);
+//-------------------------------------------------------------//
 
 #endif
