@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 16:40:02 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/01 17:31:27 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
 #include "libft.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 //garbage collector
@@ -34,7 +35,8 @@ void *gc_add(void *ptr, int n) {
 	if (gc[n].size >= gc[n].capacity) {
 		gc[n].capacity *= 2;
 		void **tmp = gc[n].garbage;
-		gc[n].garbage = ft_realloc(gc[n].garbage, gc[n].size, gc[n].capacity, sizeof(void *));
+		dprintf(2, "size: %d\n", gc[n].size);
+		gc[n].garbage = (void **) ft_realloc(gc[n].garbage, gc[n].size, gc[n].capacity, sizeof(void *));
 		free(tmp);
 		if (!gc[n].garbage)
 			exit(EXIT_FAILURE);
@@ -66,7 +68,9 @@ void gc_free(void *addr, int n) {
 	for (uint16_t i = 0; i < gc[n].size; i++) {
 		if ((uintptr_t) addr == (uintptr_t) gc[n].garbage[i]) {
 			free(gc[n].garbage[i]);
-			gc[n].garbage[i] = NULL;
+			gc[n].garbage[i] = gc[n].garbage[gc[n].size - 1]; 
+			gc[n].garbage[gc[n].size - 1] = NULL;
+			gc[n].size--;
 			break;
 		}
 	}

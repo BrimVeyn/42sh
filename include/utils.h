@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/30 16:24:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/01 17:27:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ typedef enum {
 
 typedef struct {
 	void **garbage;
-	uint16_t size;
-	uint16_t capacity;
+	uint32_t size;
+	uint32_t capacity;
 } Garbage;
 
 //----------------Garbage-------------------//

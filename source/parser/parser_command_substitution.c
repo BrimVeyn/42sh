@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/27 11:24:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/01 17:15:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,9 @@
 #include "../../include/utils.h" 
 #include "../../include/ast.h" 
 #include "exec.h"
+#include "ft_regex.h"
 
+#include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -79,6 +81,13 @@ static bool execute_command_sub(char *input, Vars *shell_vars) {
 	return true;
 }
 
+bool is_variable_assignment(char *str) {
+	if (regex_match("[_a-zA-Z][_a-zA-Z0-9]*=", str).is_found) {
+		return true;
+	}
+	return false;
+}
+
 bool parser_command_substitution(TokenList *tokens, Vars *shell_vars) {
 	static int COMMAND_SUB_NO = 0;
 	bool error = false;
@@ -131,7 +140,16 @@ bool parser_command_substitution(TokenList *tokens, Vars *shell_vars) {
 			continue;
 		}
 
-		parser_word_split(tokens, shell_vars, prefix, result, postfix, i);
+		if (!is_variable_assignment(prefix)) {
+			parser_word_split(tokens, shell_vars, prefix, result, postfix, i);
+		} else {
+			// char buffer[MAX_WORD_LEN] = {0};
+			dprintf(2, "%zu %zu %zu\n", strlen(prefix), strlen(result), strlen(postfix));
+			fflush(stderr);
+			// ft_sprintf(buffer, "%s%s%s", prefix, result, postfix);
+			elem->w_infix = gc_add(ft_strdup("hey"), GC_SUBSHELL);
+		}
+		// dprintf(2, "result = %s\n", elem->w_infix);
 		FREE_POINTERS(prefix, result, postfix);
 		if (error) return false;
 	}
