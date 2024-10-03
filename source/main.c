@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/01 15:33:50 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/03 14:56:39 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ char *init_prompt_and_signals(void) {
 	return input;
 }
 
-void get_history() {
+int get_history(void) {
 	char *home = getenv("HOME");
 	char history_filename[1024] = {0};
 	ft_sprintf(history_filename, "%s/.42sh_history", home);
@@ -82,6 +82,8 @@ void get_history() {
 	}
 	munmap(buffer, file_size);
 	close(fd);
+	fd = open(history_filename, O_APPEND | O_RDWR | O_CREAT, 0644);
+	return fd;
 }
 
 void add_input_to_history(char *input, int *history_fd){
@@ -89,13 +91,13 @@ void add_input_to_history(char *input, int *history_fd){
 	char *home = getenv("HOME");
 	char history_filename[1024] = {0};
 	ft_sprintf(history_filename, "%s/.42sh_history", home);
-	if (*history_fd == -1){
-		*history_fd = open(history_filename, O_APPEND | O_WRONLY | O_CREAT, 0644);
-		if (*history_fd == -1) {
-			perror("Can't open history file");
-			exit(EXIT_FAILURE);
-		}
-	}
+	// if (*history_fd == -1){
+	// 	*history_fd = open(history_filename, O_APPEND | O_WRONLY | O_CREAT, 0644);
+	// 	if (*history_fd == -1) {
+	// 		perror("Can't open history file");
+	// 		exit(EXIT_FAILURE);
+	// 	}
+	// }
 	dprintf(*history_fd, "%s\n", input);
 }
 
@@ -149,57 +151,6 @@ char *get_history_index(char *string, int index){
 	return NULL;
 }
 
-// bool history_expansion (char *string, int history_fd){
-//
-// 	regex_match_t result = regex_match("[^\\\\]\\!", string);
-//
-// 	if (result.is_found){
-// 		struct stat st;
-// 		if (fstat(history_fd, &st) == -1){
-// 			perror("Can't get history's file stats");
-// 			exit(EXIT_FAILURE);
-// 		}
-// 		size_t file_size = st.st_size;
-//
-// 		char *buffer = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, history_fd, 0);
-// 		if (buffer == MAP_FAILED) {
-// 			perror("mmap failed");
-// 			exit(EXIT_FAILURE);
-// 		}
-// 	}
-//
-// 	char *command = NULL;
-// 	do {
-// 		type_of_history_event event_type = H_NO_EVENT;
-// 		regex_match_t result = regex_match("[^\\\\]\\![^ ]*", string);
-// 		if (string[result.re_start + 1] == '!'){
-// 			event_type = H_LAST;
-// 		}
-// 		else if (ft_isdigit(string[result.re_start + 1])){
-// 			char *cnumber = get_event_number(string + result.re_start + 1);
-// 			if (cnumber == NULL){
-// 				char *tmp = ft_substr(string,result.re_start, result.re_end - result.re_start);
-// 				ft_dprintf(2, "42sh: %s not found", tmp);
-// 				free(tmp);
-// 				return false;
-// 			}
-// 			int number = ft_atoi(cnumber);
-// 			command = get_history_index(string, number);
-// 		}
-// 		// else if (ft_isalpha(string[result.re_start + 1])){
-// 		// 	char *c
-// 		// }
-// 		if (command){
-// 			char *start = ft_substr(string, 0, result.re_start - 1);
-// 			char *end = ft_substr(string, result.re_end + 1, ft_strlen(string) - result.re_end);
-// 			char *start_and_command = ft_strjoin(start, command);
-// 			string = ft_strjoin(start_and_command, end);
-// 			FREE_POINTERS(start, end, start_and_command, command);
-// 		}
-//
-// 	} while (true);
-// }
-
 int main(const int ac, const char *av[], const char *env[]) {
 
 	if (ac != 1 && !ft_strcmp("-d", av[1])){
@@ -215,11 +166,14 @@ int main(const int ac, const char *av[], const char *env[]) {
 	char *input = NULL;
 
 	if (isatty(STDIN_FILENO))
-		get_history();
+		history_fd = get_history();
 
 	while ((input = init_prompt_and_signals()) != NULL) {
 		if (*input) 
 		{
+			if (history_expansion(&input, history_fd) == false){
+				continue;
+			}
 			if (isatty(STDIN_FILENO)){
 				add_input_to_history(input, &history_fd);
 			}
