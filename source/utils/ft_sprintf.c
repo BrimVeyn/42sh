@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 22:18:12 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/01 15:34:08 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/02 11:23:37 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,28 +80,32 @@ void ft_sprintf(char *buffer, char *fmt, ...) {
 
 	size_t buffer_len = ft_strlen(buffer);
 
-	for (size_t i = 0; i < fmt_lem; i++) {
+	for (size_t i = 0; i < fmt_lem;) {
 		if (!ft_strncmp(&fmt[i], "%s", 2)) {
 			const char *str = va_arg(args, char *);
 			const size_t str_len = ft_strlen(str);
 			ft_memcpy(buffer + buffer_len, str, str_len + 1);
 			buffer_len += str_len;
 			i += 2;
+			continue;
 		}
 		if (!ft_strncmp(&fmt[i], "%d", 2)) {
 			const int number = va_arg(args, int);
 			const size_t number_len = (int) ft_ltoa_buffer(buffer, number);
 			buffer_len += number_len;
 			i += 2;
+			continue;
 		}
 		if (!ft_strncmp(&fmt[i], "%ld", 3)) {
 			const long number = va_arg(args, int);
 			const size_t number_len = ft_ltoa_buffer(buffer, number);
 			buffer_len += number_len;
 			i += 3;
+			continue;
 		}
 		buffer[buffer_len] = fmt[i];
 		buffer_len += 1;
+		i++;
 	}
 	buffer[buffer_len] = '\0';
 	va_end(args);
