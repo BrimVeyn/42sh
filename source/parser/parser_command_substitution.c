@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/01 17:15:02 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:47:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,7 @@ bool parser_command_substitution(TokenList *tokens, Vars *shell_vars) {
 			dprintf(2, "%zu %zu %zu\n", strlen(prefix), strlen(result), strlen(postfix));
 			fflush(stderr);
 			// ft_sprintf(buffer, "%s%s%s", prefix, result, postfix);
-			elem->w_infix = gc_add(ft_strdup("hey"), GC_SUBSHELL);
+			elem->w_infix = gc(GC_ADD, ft_strdup("hey"), GC_SUBSHELL);
 		}
 		// dprintf(2, "result = %s\n", elem->w_infix);
 		FREE_POINTERS(prefix, result, postfix);

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:36:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/01 15:36:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/03 17:11:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,17 +18,12 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#define DELIMITERS_DEFAULT "|$;\0\n"
-#define DELIMITERS_DQUOTE "$\0"
-
 typedef enum {
 	T_COMMAND,
 	//---------------
 	T_REDIRECTION, //ok
 	//---------------
-	T_GROUPING,
-	//---------------
-	T_WORD, // generic word ?
+	T_WORD, 
 	//---------------
 	T_SEPARATOR,
 	//---------------
@@ -124,14 +119,9 @@ typedef struct TokenList {
 } TokenList;
 
 typedef struct {
-	type_of_error	error;
-	char			*error_message;
-} Error;
-
-
-typedef struct {
 	StringList *env;
 	StringList *set;
+	StringList *local;
 } Vars;
 
 //-----------------Lexer------------------//
@@ -182,7 +172,9 @@ void			get_env_variable_value(char *buffer, char *variable);
 int				get_env_variable_index(StringList *sl, char *variable);
 StringList		*string_list_init(void);
 void			string_list_add_or_update(StringList *sl, char *variable);
-void			string_list_remove(StringList *sl, char *variable);
+bool			string_list_update(StringList *sl, char *var);
+void			string_list_clear(StringList *list);
+bool			string_list_remove(StringList *sl, char *id);
 char			*string_list_get_value(StringList *sl, char *id);
 char			*shell_vars_get_value(Vars *shell_vars, char *id);
 void			string_list_print(const StringList *list);

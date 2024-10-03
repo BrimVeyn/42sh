@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 11:11:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/30 11:01:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:47:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ static ANode *incr(ANode *self, Vars *shell_vars) {
 		char tmp[MAX_WORD_LEN] = {0};
 		long var_value = get_value(self, shell_vars);
 		ft_sprintf(tmp, "%s=%ld", self->value->variable, var_value + 1);
-		char *new_value = gc_add(ft_strdup(tmp), GC_GENERAL);
+		char *new_value = gc(GC_ADD, ft_strdup(tmp), GC_GENERAL);
 		string_list_add_or_update(shell_vars->set, new_value);
 	}
 	return self;
@@ -40,14 +40,14 @@ static ANode *decr(ANode *self, Vars *shell_vars) {
 		char tmp[MAX_WORD_LEN] = {0};
 		long var_value = get_value(self, shell_vars);
 		ft_sprintf(tmp, "%s=%ld", self->value->variable, var_value - 1);
-		char *new_value = gc_add(ft_strdup(tmp), GC_GENERAL);
+		char *new_value = gc(GC_ADD, ft_strdup(tmp), GC_GENERAL);
 		string_list_add_or_update(shell_vars->set, new_value);
 	}
 	return self;
 }
 
 static ANode *gen_aoperator_node(AToken *tok, ANode *left, ANode *right) {
-	ANode *self = gc_add(ft_calloc(1, sizeof(ANode)), GC_SUBSHELL);
+	ANode *self = gc(GC_ADD, ft_calloc(1, sizeof(ANode)), GC_SUBSHELL);
 	self->value = tok;
 	self->left = left;
 	self->right = right;
@@ -55,7 +55,7 @@ static ANode *gen_aoperator_node(AToken *tok, ANode *left, ANode *right) {
 }
 
 static ANode *gen_aoperand_node(AToken *tok) {
-	ANode *self = gc_add(ft_calloc(1, sizeof(ANode)), GC_SUBSHELL);
+	ANode *self = gc(GC_ADD, ft_calloc(1, sizeof(ANode)), GC_SUBSHELL);
 	self->value = tok;
 	self->left = NULL;
 	self->right = NULL;

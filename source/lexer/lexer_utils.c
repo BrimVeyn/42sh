@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:57 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/30 14:56:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:47:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ char *get_word(Lexer_p l) {
 			break;
 	}
 	const uint16_t end = l->position;
-	return (char *) gc_add(ft_substr(l->input, start, end - start), GC_SUBSHELL);
+	return (char *) gc(GC_ADD, ft_substr(l->input, start, end - start), GC_SUBSHELL);
 }
 
 void eat_whitespace(Lexer_p l) {

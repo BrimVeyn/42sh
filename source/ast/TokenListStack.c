@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 13:38:32 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/14 20:40:39 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:49:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 #include "utils.h"
 
 TokenListStack *token_list_stack_init(void) {
-	TokenListStack *self = gc_add(ft_calloc(1, sizeof(TokenListStack)), GC_SUBSHELL);
-	self->data = (TokenList **) gc_add(ft_calloc(10, sizeof(TokenList *)), GC_SUBSHELL);
+	TokenListStack *self = gc(GC_ADD, ft_calloc(1, sizeof(TokenListStack)), GC_SUBSHELL);
+	self->data = (TokenList **) gc(GC_ADD, ft_calloc(10, sizeof(TokenList *)), GC_SUBSHELL);
 	self->size = 0;
 	self->capacity = 10;
 	return self;
@@ -32,8 +32,8 @@ void token_list_stack_push(TokenListStack *self, TokenList *token) {
 		self->capacity *= 2;
 		TokenList **tmp = self->data;
 		self->data = (TokenList **) ft_realloc(self->data, self->size, self->capacity, sizeof(TokenList *));
-		gc_free(tmp, GC_GENERAL);
-		gc_add(self->data, GC_SUBSHELL);
+		gc(GC_FREE, tmp, GC_GENERAL);
+		gc(GC_ADD, self->data, GC_SUBSHELL);
 	}
 	self->data[self->size] = token;
 	self->size += 1;

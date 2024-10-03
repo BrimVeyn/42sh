@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/01 15:40:54 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/03 14:36:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,16 +25,18 @@ char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 			return (word);
 		}
 		else if (!ft_strcmp(metachar, ":=")){
-			char *variable = gc_add(ft_calloc(ft_strlen(word) + ft_strlen(id) + 3, sizeof(char)), GC_GENERAL);
+			char *variable = gc(GC_ADD, ft_calloc(ft_strlen(word) + ft_strlen(id) + 3, sizeof(char)), GC_GENERAL);
 			ft_sprintf(variable, "%s=%s", id, word);
 			string_list_add_or_update(shell_vars->env, variable);
 			return (word);
 		}
 		else if (!ft_strcmp(metachar, ":?")){
 			ft_dprintf(2, " %s\n", word);
-			gc_cleanup(GC_ALL);
-			close_all_fds();
-			exit(EXIT_FAILURE);
+			// TODO: ajouter un return FALSE jusquau parser pour prevenir de l'execution des commandes suivantes voir posix
+			return "";
+			// gc(GC_CLEANUP, GC_ALL);
+			// close_all_fds();
+			// exit(EXIT_FAILURE);
 		}
 	}
 	if (shell_vars_get_value(shell_vars, id) == NULL)
@@ -62,7 +64,7 @@ char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 			new_value = NULL;
 		}
 		free(regexp);
-		gc_add(value, GC_GENERAL);
+		gc(GC_ADD, value, GC_GENERAL);
 		return value;
 	}
 	return ft_strdup(value);
@@ -76,7 +78,7 @@ char *parser_get_variable_value(char *to_expand, Vars *shell_vars){
 	
 
 	if (to_expand[0] == '#'){
-		return gc_add(ft_itoa(ft_strlen(shell_vars_get_value(shell_vars, to_expand + 1))), GC_GENERAL);
+		return gc(GC_ADD, ft_itoa(ft_strlen(shell_vars_get_value(shell_vars, to_expand + 1))), GC_GENERAL);
 	}
 
 	regex_match_t find_format = regex_match("[:#%]", to_expand);
@@ -84,13 +86,13 @@ char *parser_get_variable_value(char *to_expand, Vars *shell_vars){
 	if (find_format.re_start != -1){
 		memcpy(name, to_expand, find_format.re_start);
 		word = ft_substr(to_expand, find_format.re_end + lenght_meta - 1, ft_strlen(to_expand) - find_format.re_end);
-		gc_add(word, GC_GENERAL);
+		gc(GC_ADD, word, GC_GENERAL);
 		ft_memcpy(metachar, &to_expand[find_format.re_start], sizeof(char) * lenght_meta);
 		return handle_format(metachar, name, word, shell_vars);
 	}
 	
 	char *value = shell_vars_get_value(shell_vars, to_expand);
-	return value ? value : gc_add(ft_strdup(""), GC_SUBSHELL);
+	return value ? value : gc(GC_ADD, ft_strdup(""), GC_SUBSHELL);
 }
 
 static int get_format_pos(char *str){
@@ -161,14 +163,14 @@ bool parser_parameter_expansion(TokenList *tl, Vars *shell_vars){
 				char *start = (index == 0) ? ft_strdup("") : ft_substr(el->w_infix, 0, index - 1);
 				char *end = ((size_t)index == ft_strlen(el->w_infix)) ? ft_strdup("") : ft_substr(el->w_infix, index + 1, ft_strlen(el->w_infix) - index);
 				char *start_and_home = ft_strjoin(start, home);
-				char *new_string = gc_add(ft_strjoin(home, end), GC_SUBSHELL);
-				gc_free(el->w_infix, GC_SUBSHELL);
+				char *new_string = gc(GC_ADD, ft_strjoin(home, end), GC_SUBSHELL);
+				gc(GC_FREE, el->w_infix, GC_SUBSHELL);
 				el->w_infix = new_string;
 
 				// char value[MAX_WORD_LEN] = {0};
 				// ft_memset(value, 0, MAX_WORD_LEN);
 				// ft_sprintf(value, "%s%s%s", start, home, end);
-				// el->w_infix = gc_add(ft_strdup(value), GC_SUBSHELL);
+				// el->w_infix = gc(GC_ADD, ft_strdup(value), GC_SUBSHELL);
 				// printf("VALUE: %s\n", value);
 				FREE_POINTERS(start, end, start_and_home);
 			} while (1);
@@ -188,7 +190,7 @@ bool parser_parameter_expansion(TokenList *tl, Vars *shell_vars){
 				else {
 					result = regex_match ("\\$\\{[^\\$]*\\}", el->w_infix);
 					if (result.re_start != -1){
-						value = parser_get_variable_value(gc_add(ft_substr(el->w_infix, result.re_start + 2, result.re_end - result.re_start - 3), GC_SUBSHELL), shell_vars);
+						value = parser_get_variable_value(gc(GC_ADD, ft_substr(el->w_infix, result.re_start + 2, result.re_end - result.re_start - 3), GC_SUBSHELL), shell_vars);
 						// printf("value: %s\n", value);	
 					} else
 						break;
@@ -199,7 +201,7 @@ bool parser_parameter_expansion(TokenList *tl, Vars *shell_vars){
 				char *re_end = ft_substr(el->w_infix, result.re_end, ft_strlen(el->w_infix));
 				char *tmp = ft_strjoin(re_start, value);
 				
-				el->w_infix = gc_add(ft_strjoin(tmp, re_end), GC_GENERAL);
+				el->w_infix = gc(GC_ADD, ft_strjoin(tmp, re_end), GC_GENERAL);
 				free(tmp); free(re_start); free(re_end);
 				// printf("string: %s\n\n", el->w_infix);
 

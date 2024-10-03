@@ -1,5 +1,4 @@
 #!/bin/bash
-
 EXEC_PATH="../42sh"
 # PROMPT="echo -"
 
