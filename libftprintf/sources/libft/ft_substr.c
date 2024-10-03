@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbardavi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 16:48:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2023/12/24 12:38:03 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/03 13:47:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,3 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	returnvalue[i] = '\0';
 	return (returnvalue);
 }
-
-// int main(void)
-// {
-//   char *test = ft_substr("tripouille", 0, 42000);
-//   printf("%s", test);
-//   return (0);
-// }

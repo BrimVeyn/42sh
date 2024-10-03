@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:19:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/19 10:06:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:47:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void init_token_from_tag(Token *token) {
 
 //Extract next token from the input
 Token *lexer_get_next_token(Lexer_p l) {
-	Token *token = gc_add(ft_calloc(1, sizeof(Token)), GC_SUBSHELL);
+	Token *token = gc(GC_ADD, ft_calloc(1, sizeof(Token)), GC_SUBSHELL);
 
 	eat_whitespace(l);
 

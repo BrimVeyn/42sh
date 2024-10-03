@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/01 15:44:01 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/03 17:12:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,13 +103,13 @@ char *find_bin_location(char *bin, StringList *env){
 
 	char **path = ft_split(string_list_get_value(env, "PATH"), ':');
 	for (int i = 0; path[i]; i++) {
-		char *bin_with_path = ft_strjoin(path[i], (char *)gc_add(ft_strjoin("/",bin), GC_GENERAL));
+		char *bin_with_path = ft_strjoin(path[i], (char *)gc(GC_ADD, ft_strjoin("/",bin), GC_SUBSHELL));
 
 		struct stat file_stat;
 		if (stat(bin_with_path, &file_stat) != -1){
 			if (file_stat.st_mode & S_IXUSR){
 				free_charchar(path);
-				return (char *)gc_add(bin_with_path, GC_GENERAL);
+				return (char *)gc(GC_ADD, bin_with_path, GC_SUBSHELL);
 			}
 		}
 		free(bin_with_path);
@@ -131,13 +131,11 @@ bool builtin_executer(const SimpleCommand *command, Vars *shell_vars) {
 		char *bin;
 		builtin_func_t func;
 	} map[] = {
-		{"env",  &builtin_env},
-		{"set",  &builtin_set},
-		{"echo",  &builtin_echo},
-		{"exit",  &builtin_exit},
-		{"export",  &builtin_export},
-		{"hash",  &builtin_hash},
-		{"type",  &builtin_type},
+		{"env",  &builtin_env}, {"set",  &builtin_set},
+		{"echo",  &builtin_echo}, {"exit",  &builtin_exit},
+		{"export",  &builtin_export}, {"hash",  &builtin_hash},
+		{"type",  &builtin_type}, //{"cd", &builtin_cd}, 
+		{"pwd", &builtin_pwd}, {"unset", &builtin_unset},
 	};
 
 	int result_index = -1;
@@ -158,14 +156,11 @@ bool builtin_executer(const SimpleCommand *command, Vars *shell_vars) {
 bool exec_simple_command(const SimpleCommand *command, Vars *shell_vars) {
 	if (apply_all_redirect(command->redir_list)) {
 		if (!command->bin) {
-			g_exitno = EXIT_SUCCESS;
 			return false;
 		}
 		if (builtin_executer(command, shell_vars))
 			return false;
-		char *path = find_bin_location(command->bin, shell_vars->env);
-		if (!path) return false;
-		secure_execve(path, command->args, shell_vars->env->data);
+		secure_execve(command->bin, command->args, shell_vars->env->data);
 	} else return false;
 	return true;
 }
@@ -185,23 +180,20 @@ void close_saved_fds(int *saved_fds) {
 	}
 }
 
-bool exec_builtin(SimpleCommand *command, Vars *shell_vars){
-	if (!command->bin){
-		return false;
-	}
-	if (!ft_strcmp(command->bin, "exit")){
-		exit(g_exitno);
-	}
-	if (!ft_strcmp(command->bin, "env")) {
-		builtin_env(command, shell_vars);
-		return true;
-	}
-	if (!ft_strcmp(command->bin, "set")) {
-		builtin_set(command, shell_vars);
-		return true;
+bool is_builtin(char *bin) {
+	static const char *builtins[] = {
+		"echo", "cd", "pwd", "export", "type",
+		"unset", "env", "exit", "set", "hash",
+	};
+
+	for (size_t i = 0; i < sizeof(builtins) / sizeof(builtins[0]); i++) {
+		if (!ft_strcmp(builtins[i], bin)) {
+			return true;
+		}
 	}
 	return false;
 }
+
 
 int exec_executer(Executer *executer, Vars *shell_vars) {
 	Executer *current = executer;
@@ -244,14 +236,15 @@ int exec_executer(Executer *executer, Vars *shell_vars) {
 					close_all_fds();
 					if (current->n_data->redirs != NULL) {
 						if (!apply_all_redirect(current->n_data->redirs)) {
-							gc_cleanup(GC_SUBSHELL);
+							gc(GC_CLEANUP, GC_SUBSHELL);
 							exit(g_exitno);
 						}
 					}
 					g_exitno = ast_execute(current->n_data, shell_vars);
 					//LE BUG VENAIT DE LA LARBIN
-					gc_cleanup(GC_SUBSHELL);
-					free(gc_get()[GC_GENERAL].garbage);
+					gc(GC_CLEANUP, GC_SUBSHELL);
+					// char *str = gc(GC_CALLOC, 670, sizeof(char *), GC_SUBSHELL);
+					free(((Garbage *)gc(GC_GET))[GC_GENERAL].garbage);
 					//MERDE !
 					close_std_fds();
 					exit(g_exitno);
@@ -261,10 +254,32 @@ int exec_executer(Executer *executer, Vars *shell_vars) {
 
 		if (current->data_tag == DATA_TOKENS) {
 			SimpleCommand *command = parser_parse_current(current->s_data, shell_vars);
+			// printCommand(command);
 			if (!command && pipefd[0] == -1){
 				close_all_fds();
 				return false;
 			}
+
+			if (command && command->bin) {
+				char *maybe_bin = hash_interface(HASH_FIND, command->bin, shell_vars);
+				if (!is_builtin(command->bin)) {
+					if (maybe_bin) {
+						hash_interface(HASH_ADD_USED, command->bin, shell_vars);
+						// gc(GC_FREE, command->bin, GC_SUBSHELL);
+						command->bin = maybe_bin;
+					} else {
+						maybe_bin = find_bin_location(command->bin, shell_vars->env);
+						if (maybe_bin) {
+							hash_interface(HASH_ADD_USED, command->bin, shell_vars);
+							// gc(GC_FREE, command->bin, GC_SUBSHELL);
+							command->bin = maybe_bin;
+						} else {
+							command->bin = NULL;
+						}
+					}
+				}
+			}
+
 			if (pipefd[0] == -1 && builtin_executer(command, shell_vars)){
 				break;
 			}
@@ -272,10 +287,11 @@ int exec_executer(Executer *executer, Vars *shell_vars) {
 			if (pids[i] == 0) {
 				close_all_fds();
 				if (!command || !exec_simple_command(command, shell_vars)) {
-					gc_cleanup(GC_ALL);
+					gc(GC_CLEANUP, GC_ALL);
 					exit(g_exitno);
 				}
 			}
+			string_list_clear(shell_vars->local);
 		}
 
 		dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);

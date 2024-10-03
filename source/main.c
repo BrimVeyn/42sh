@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:35:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/01 15:35:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/03 17:35:36 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <fcntl.h>
+#include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <readline/readline.h>
@@ -101,17 +102,17 @@ void add_input_to_history(char *input, int *history_fd){
 
 void env_to_string_list(StringList *env_list, const char **env){
 	for (uint16_t i = 0; env[i]; i++)
-		string_list_add_or_update(env_list, gc_add(ft_strdup(env[i]), GC_SUBSHELL));
+		string_list_add_or_update(env_list, gc(GC_ADD, ft_strdup(env[i]), GC_ENV));
 }
 
 Vars *vars_init(const char **env) {
-	Vars *self = gc_add(ft_calloc(1, sizeof(Vars)), GC_SUBSHELL);
+	Vars *self = gc(GC_ADD, ft_calloc(1, sizeof(Vars)), GC_ENV);
 
 	self->env = string_list_init();
 	self->set = string_list_init();
+	self->local = string_list_init();
 	env_to_string_list(self->env, env);
 	env_to_string_list(self->set, env);
-
 	return self;
 }
 
@@ -206,8 +207,6 @@ int main(const int ac, const char *av[], const char *env[]) {
 		g_debug = 1;
 	}
 
-	gc_init(GC_GENERAL);
-	gc_init(GC_SUBSHELL);
 	Vars *shell_vars = vars_init(env);
 	int history_fd = -1;
 
@@ -218,11 +217,9 @@ int main(const int ac, const char *av[], const char *env[]) {
 		get_history();
 
 	while ((input = init_prompt_and_signals()) != NULL) {
-		if (*input) 
-		{
-			if (isatty(STDIN_FILENO)){
+		if (*input) {
+			if (isatty(STDIN_FILENO))
 				add_input_to_history(input, &history_fd);
-			}
 			input = replace_char_greedy(input, '\n', ';');
 			Lexer_p lexer = lexer_init(input);
 			TokenList *tokens = lexer_lex_all(lexer);
@@ -232,16 +229,17 @@ int main(const int ac, const char *av[], const char *env[]) {
 			signal_manager(SIG_EXEC);
 			Node *AST = ast_build(tokens);
 			ast_execute(AST, shell_vars);
-			if (g_debug){
+			if (g_debug)
 				printTree(AST);
-			}
-			// gc_cleanup(GC_SUBSHELL);
-			// gc_init(GC_GENERAL);
+			char *last_executed = ft_strjoin("_=", input);
+			string_list_add_or_update(shell_vars->env, last_executed);
+			string_list_add_or_update(shell_vars->set, last_executed);
+			FREE_POINTERS(last_executed);
+			gc(GC_RESET, GC_SUBSHELL);
 		}
 	}
 	rl_clear_history();
-	gc_cleanup(GC_ALL);
-	close_all_fds();
-	close_std_fds();
+	gc(GC_CLEANUP, GC_ALL);
+	close_all_fds(); close_std_fds();
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 13:37:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/20 16:27:36 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:49:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 #include "../../libftprintf/header/libft.h"
 
 TokenList *token_list_init(void) {
-	TokenList *self = gc_add(ft_calloc(1, sizeof(TokenList)), GC_SUBSHELL);
+	TokenList *self = gc(GC_ADD, ft_calloc(1, sizeof(TokenList)), GC_SUBSHELL);
 	TokenList tl = {
-		.t = (Token **) gc_add(ft_calloc(10, sizeof(Token *)), GC_SUBSHELL),
+		.t = (Token **) gc(GC_ADD, ft_calloc(10, sizeof(Token *)), GC_SUBSHELL),
 		.size = 0,
 		.capacity = 10,
 	};
@@ -30,8 +30,8 @@ void token_list_add(TokenList *tl, Token *token) {
 		tl->capacity *= 2;
 		Token **tmp = tl->t;
 		tl->t = ft_realloc(tl->t, tl->size, tl->capacity, sizeof(Token *));
-		gc_free(tmp, GC_GENERAL);
-		gc_add(tl->t, GC_SUBSHELL);
+		gc(GC_FREE, tmp, GC_GENERAL);
+		gc(GC_ADD, tl->t, GC_SUBSHELL);
 	}
 	tl->t[tl->size] = token;
 	tl->size += 1;
@@ -48,8 +48,8 @@ void token_list_insert(TokenList *tl, Token *token, const int index){
 		tl->capacity *= 2;
 		Token **tmp = tl->t;
 		tl->t = ft_realloc(tl->t, tl->size, tl->capacity, sizeof(Token *));
-		gc_free(tmp, GC_GENERAL);
-		gc_add(tl->t, GC_SUBSHELL);
+		gc(GC_FREE, tmp, GC_GENERAL);
+		gc(GC_ADD, tl->t, GC_SUBSHELL);
 	}
     tl->size += 1;
 

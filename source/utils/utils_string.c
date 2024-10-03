@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/30 16:24:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:49:04 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void *ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize) {
 	if (!new_ptr)
 		exit(EXIT_FAILURE);
 	ft_memcpy(new_ptr, ptr, oldSize * elSize);
-	gc_free(ptr, GC_GENERAL);
+	gc(GC_FREE, ptr, GC_GENERAL);
 	return new_ptr;
 }
 
@@ -102,7 +102,7 @@ char *replace_char_greedy(char *str, char c, char by){
 			else
 				sprintf(newstr, "%s;%s", start, end);
 			FREE_POINTERS(start, end);
-			return replace_char_greedy(gc_add(newstr, GC_GENERAL), c, by);
+			return replace_char_greedy(gc(GC_ADD, newstr, GC_GENERAL), c, by);
 		}
 	}
 	return str;

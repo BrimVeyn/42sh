@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/01 16:44:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/03 15:54:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "../../include/ft_regex.h"
 #include "../../libftprintf/header/libft.h"
 #include "../../include/utils.h"
+#include "lexer.h"
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -33,7 +34,7 @@ char *here_doc(char *eof){
 		dprintf(file_fd, "%s\n", input);
 	}
 	close(file_fd);
-	return gc_add(ft_strdup(filename), GC_GENERAL);
+	return gc(GC_ADD, ft_strdup(filename), GC_GENERAL);
 }
 
 bool heredoc_detector(TokenList *data) {
@@ -52,7 +53,7 @@ bool heredoc_detector(TokenList *data) {
 
 void add_redirection_from_token(RedirectionList **redir_list, const Token *el) {
 	const Token *next = (el->tag == T_WORD && el->w_postfix->tag == T_REDIRECTION) ? el->w_postfix : el;
-	Redirection *current_redir = (Redirection *) gc_add(ft_calloc(1, sizeof(Redirection)), GC_SUBSHELL);
+	Redirection *current_redir = (Redirection *) gc(GC_ADD, ft_calloc(1, sizeof(Redirection)), GC_SUBSHELL);
 
 	current_redir->prefix_fd = (next != el) ? ft_atol(el->w_infix) : -1;
 	current_redir->r_type = next->r_type;
@@ -79,7 +80,7 @@ RedirectionList *parser_get_redirection(const TokenList *tl) {
 }
 
 SimpleCommand *parser_get_command(const TokenList *tl) {
-	SimpleCommand *curr_command = (SimpleCommand *) gc_add(ft_calloc(1, sizeof(SimpleCommand)), GC_SUBSHELL);
+	SimpleCommand *curr_command = (SimpleCommand *) gc(GC_ADD, ft_calloc(1, sizeof(SimpleCommand)), GC_SUBSHELL);
 
 	size_t count = 0;
 	for (uint16_t it = 0; it < tl->size; it++) {
@@ -87,7 +88,7 @@ SimpleCommand *parser_get_command(const TokenList *tl) {
 		count += (el->tag == T_WORD && el->w_postfix->tag != T_REDIRECTION);
 	}
 
-	curr_command->args = (char **) gc_add(ft_calloc(count + 1, sizeof(char *)), GC_SUBSHELL);
+	curr_command->args = (char **) gc(GC_ADD, ft_calloc(count + 1, sizeof(char *)), GC_SUBSHELL);
 
 	size_t i = 0;
 	for (uint16_t it = 0; it < tl->size; it++) {
@@ -134,8 +135,16 @@ TokenList *parser_eat_variables(TokenList *tokens) {
 
 void add_vars_to_set(Vars *shell_vars, TokenList *vars) {
 	StringList *set = shell_vars->set;
+	StringList *env = shell_vars->env;
 	for (int i = 0; i < vars->size; i++) {
+		string_list_update(env, vars->t[i]->w_infix);
 		string_list_add_or_update(set, vars->t[i]->w_infix);
+	}
+}
+
+void add_vars_to_local(StringList *list, TokenList *vars) {
+	for (int i = 0; i < vars->size; i++) {
+		string_list_add_or_update(list, vars->t[i]->w_infix);
 	}
 }
 
@@ -160,8 +169,11 @@ SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
 	RedirectionList *redirs = parser_get_redirection(tl);
 	SimpleCommand *command = parser_get_command(tl);
 
-	if (command->bin == NULL && command_vars->size != 0)
+	if (command->bin == NULL && command_vars->size != 0) {
 		add_vars_to_set(shell_vars, command_vars);
+    } else {
+		add_vars_to_local(shell_vars->local, command_vars);
+	}
 
 	command->redir_list = redirs;
 	return command;

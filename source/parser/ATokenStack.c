@@ -14,8 +14,8 @@
 #include "arithmetic.h"
 
 ATokenStack *atoken_stack_init(void) {
-	ATokenStack *self = gc_add(ft_calloc(1, sizeof(ATokenStack)), GC_SUBSHELL);
-	self->data = (AToken **) gc_add(ft_calloc(10, sizeof(AToken *)), GC_SUBSHELL);
+	ATokenStack *self = gc(GC_ADD, ft_calloc(1, sizeof(ATokenStack)), GC_SUBSHELL);
+	self->data = (AToken **) gc(GC_ADD, ft_calloc(10, sizeof(AToken *)), GC_SUBSHELL);
 	self->size = 0;
 	self->capacity = 10;
 	return self;
@@ -31,8 +31,8 @@ void atoken_stack_push(ATokenStack *self, AToken *token) {
 		self->capacity *= 2;
 		AToken **tmp = self->data;
 		self->data = (AToken **) ft_realloc(self->data, self->size, self->capacity, sizeof(AToken *));
-		gc_free(tmp, GC_GENERAL);
-		gc_add(self->data, GC_SUBSHELL);
+		gc(GC_FREE, tmp, GC_GENERAL);
+		gc(GC_ADD, self->data, GC_SUBSHELL);
 	}
 	self->data[self->size] = token;
 	self->size += 1;

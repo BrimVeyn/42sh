@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/30 11:03:32 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:47:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,7 +181,7 @@ bool parser_arithmetic_expansion(TokenList *tokens, Vars *shell_vars) {
 			char *prefix_result = ft_strjoin(prefix, result_str);
 			char *prefix_result_postfix= ft_strjoin(prefix_result, postfix);
 			FREE_POINTERS(prefix, postfix, result_str, prefix_result);
-			elem->w_infix = gc_add(prefix_result_postfix, GC_SUBSHELL);
+			elem->w_infix = gc(GC_ADD, prefix_result_postfix, GC_SUBSHELL);
 	}
 	}
 	return true;

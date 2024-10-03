@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/17 14:54:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/17 15:08:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:47:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "utils.h"
 
 Node *gen_operator_node(TokenList *tok, Node *left, Node *right) {
-	Node *self = gc_add(ft_calloc(1, sizeof(Node)), GC_SUBSHELL);
+	Node *self = gc(GC_ADD, ft_calloc(1, sizeof(Node)), GC_SUBSHELL);
 	self->tag = N_OPERATOR;
 	self->tree_tag = TREE_DEFAULT;
 	self->redirs = NULL;
@@ -26,7 +26,7 @@ Node *gen_operator_node(TokenList *tok, Node *left, Node *right) {
 }
 
 Node *gen_operand_node(TokenList *list) {
-	Node *self = gc_add(ft_calloc(1, sizeof(Node)), GC_SUBSHELL);
+	Node *self = gc(GC_ADD, ft_calloc(1, sizeof(Node)), GC_SUBSHELL);
 	self->tag = N_OPERAND;
 	self->tree_tag = TREE_DEFAULT;
 	self->redirs = NULL;

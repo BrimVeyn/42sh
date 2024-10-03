@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 11:47:59 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/20 12:59:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:55:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,6 @@ int main(int ac, char *av[]) {
 	}
 
 	rl_clear_history();
-	gc_cleanup(GC_GENERAL);
+	gc(GC_CLEANUP, GC_GENERAL);
 	return (0);
 }

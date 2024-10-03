@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/25 12:10:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:55:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,7 +154,7 @@ Node *ast_build(TokenList *tokens) {
 	// printTree(AST);
 	// printf("-----\n");
 	if (g_debug) {
-		// gc_cleanup();
+		// gc(GC_CLEANUP, );
 		// exit(EXIT_FAILURE);
 	}
 	return AST;

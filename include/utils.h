@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/01 17:27:54 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/03 17:31:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,22 @@ typedef struct {
 
 typedef enum {
 	GC_GENERAL,
+	GC_ENV,
 	GC_SUBSHELL,
 	GC_ALL,
 } type_of_garbage;
+
+typedef enum {
+	GC_ALLOC,
+	GC_CALLOC,
+	GC_ADD,
+	GC_FREE,
+	GC_CLEANUP,
+	GC_RESET,
+	GC_GET,
+} gc_mode;
+
+#define GC_LEVELS GC_ALL
 
 typedef struct {
 	void **garbage;
@@ -49,12 +62,7 @@ typedef struct {
 } Garbage;
 
 //----------------Garbage-------------------//
-Garbage			*gc_get(void);
-void			gc_init(int n);
-void			*gc_add(void *ptr, int n);
-void			gc_cleanup(int n);
-void			gc_free(void *addr, int n);
-void			gc_addcharchar(char **str, int n);
+void *gc(gc_mode mode, ...);
 
 //----------------Utils--------------------//
 void			free_charchar(char **s);

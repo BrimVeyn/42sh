@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 11:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/30 15:07:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/02 12:49:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,12 +86,12 @@ bool fill_operand(AToken *self, Lexer_p l) {
 		self->operand_tag = VARIABLE;
 		self->variable = var;
 	}
-	gc_add(var, GC_SUBSHELL);
+	gc(GC_ADD, var, GC_SUBSHELL);
 	return true;
 }
 
 AToken *lexer_get_next_atoken(Lexer_p l) {
-	AToken *self = gc_add(ft_calloc(1, sizeof(AToken)), GC_SUBSHELL);
+	AToken *self = gc(GC_ADD, ft_calloc(1, sizeof(AToken)), GC_SUBSHELL);
 
 	eat_whitespace(l);
 	if (!l->ch) {
@@ -125,9 +125,9 @@ AToken *lexer_get_next_atoken(Lexer_p l) {
 
 void free_atoken_stack(ATokenStack *list) {
 	for (size_t i = 0; i < list->size; i++) {
-		gc_free(list->data[i], GC_SUBSHELL);
+		gc(GC_FREE, list->data[i], GC_SUBSHELL);
 	}
-	gc_free(list, GC_SUBSHELL);
+	gc(GC_FREE, list, GC_SUBSHELL);
 }
 
 ATokenStack *lexer_arithmetic_exp_lex_all(Lexer_p lexer) {
@@ -136,7 +136,7 @@ ATokenStack *lexer_arithmetic_exp_lex_all(Lexer_p lexer) {
 	while (lexer->ch) {
 		AToken *tmp = lexer_get_next_atoken(lexer);
 		if (!tmp) {
-			gc_free(lexer, GC_SUBSHELL);
+			gc(GC_FREE, lexer, GC_SUBSHELL);
 			free_atoken_stack(self);
 			return NULL;
 		} else if (tmp->tag == A_EOF) return self;

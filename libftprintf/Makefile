@@ -1,6 +1,6 @@
 NAME = libftprintf.a
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -g3
+CFLAGS = -Wall -Wextra -Werror -g3 -fPIC
 SRCS = sources/custom_utils/ft_strcmp.c \
 sources/custom_utils/ft_strjoin_free.c \
 sources/libft/ft_atoi.c \
@@ -67,14 +67,10 @@ WHITE			:= \033[0;97m
 all: $(NAME)
 
 $(NAME): $(OBJDIR) $(OBJS)
-	@echo "$(GREEN)Making binary: $(NAME)"
-	@printf "$(MAGENTA)"
 	@$(AR) $(NAME) $(OBJS)
-	@$(LIB) $(NAME)
-	@printf "Done !$(DEF_COLOR)\n"
+	@$(LIB) $(NAME) 
 
 $(OBJDEST)/%.o: sources/%.c
-	@printf '$(YELLOW)Compiling : %-40s $(CYAN)-->	$(YELLOW)%-30s\n' "$<" "$@";
 	@printf "$(BLUE)"
 	@$(CC) $(CFLAGS) -c $< -o $@
 	@printf "$(DEF_COLOR)"
@@ -91,5 +87,3 @@ fclean: clean
 re: fclean all
 
 .PHONY: all clean fclean re bonus
-
-

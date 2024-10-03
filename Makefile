@@ -6,7 +6,7 @@
 #    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/30 14:55:20 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/10/01 13:19:42 by bvan-pae         ###   ########.fr        #
+#    Updated: 2024/10/03 17:00:33 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME			:= 42sh
 LIBFT			:= libftprintf/libftprintf.a
 CC 				:= gcc
 LDFLAGS			:= -lreadline -lncurses
-CFLAGS 			:= -Wall -Werror -Wextra -g3 #-fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
+CFLAGS 			:= -Wall -Werror -Wextra -g3 #-fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-call
 SANFLAGS		:= -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
 
 LEXER_SRC 		:= $(wildcard source/lexer/*.c)
@@ -27,7 +27,7 @@ PARSER_SRC		:= $(wildcard source/parser/*.c)
 STRING_SRC		:= $(wildcard source/string/*.c)
 UTILS_SRC		:= $(wildcard source/utils/*.c)
 SIGNALS_SRC		:= $(wildcard source/signals/*.c)
-BUILTINS_SRC		:= $(wildcard source/builtins/*.c)
+BUILTINS_SRC	:= $(wildcard source/builtins/*.c)
 
 INC       := -I./include -I./libftprintf/header
 
@@ -62,6 +62,7 @@ SAN 			:= san
 OBJDIR 			:= objects
 DIRS			:= $(patsubst source/%,objects/%,$(dir $(wildcard source/*/*)))
 
+BOLD			:= \e[1m
 DEF_COLOR		:= \033[0;39m
 GRAY			:= \033[0;90m
 RED				:= \033[0;91m
@@ -71,13 +72,53 @@ BLUE			:= \033[0;94m
 MAGENTA			:= \033[0;95m
 CYAN			:= \033[0;96m
 WHITE			:= \033[0;97m
+PASTEL_BLUE     := \033[0;38;2;130;135;206m
+PRUSSIAN_BLUE   := \033[0;38;2;28;49;68m
+JASPER   		:= \033[0;38;2;213;87;59m
+OLIVINE   		:= \033[0;38;2;154;184;122m
+
+
+TOTAL_FILES := $(shell echo $(SRC) | wc -w)
+COMPILE_COUNT := 0
+
+# Define a function that prints a progress bar based on the current count
+define update_compile_count
+    $(eval COMPILE_COUNT := $(shell echo $$(( $(COMPILE_COUNT) + 1 ))))
+    $(call print_progress_bar,$(COMPILE_COUNT),$(TOTAL_FILES))
+endef
+
+
+# Shell function to print a progress bar
+define print_progress_bar
+    @CURRENT=$(1); \
+    TOTAL=$(2); \
+    if [ "$$TOTAL" -eq 0 ]; then \
+        echo "No files to compile."; \
+    else \
+        PERCENT=$$((CURRENT * 100 / TOTAL)); \
+        BAR_WIDTH=50; \
+        EMPTY_BLOCK=" "; \
+        FILLED_BLOCK="#"; \
+        FILLED=$$((BAR_WIDTH * PERCENT / 100)); \
+        EMPTY=$$((BAR_WIDTH - FILLED)); \
+        FILLED_BAR=$$(printf "%$${FILLED}s" | sed "s/ /$${FILLED_BLOCK}/g") \
+        EMPTY_BAR=$$(printf "%$${EMPTY}s" | sed "s/ /$${EMPTY_BLOCK}/g"); \
+		printf "\033[?25l"; \
+		printf "\033[1B"; \
+        printf "\rProgress: [$(PASTEL_BLUE)$$FILLED_BAR$(DEF_COLOR)$$EMPTY_BAR] %d%% (%d/%d)\n" $$PERCENT $$CURRENT $$TOTAL; \
+        if [ "$$CURRENT" -eq "$$TOTAL" ]; then printf "\033[?25h"; else printf "\033[2A"; fi; \
+    fi
+endef
 
 # Wrapper to exec command in order to handle the reset color if an error occured
 define cmd_wrapper
-	$1 || { echo -n "$(DEF_COLOR)"; exit 1; }
+	$1 || { printf "\033[?25h"; echo -n "$(DEF_COLOR)"; exit 1; }
 endef
 
-all: $(NAME)
+all: compute_total $(NAME)
+
+compute_total:
+	$(eval TOTAL_FILES := $(shell var=$$(./test.sh); if [ $${var} -ne 0 ]; then echo $${var} ; else echo $(TOTAL_FILES); fi))
 
 $(SAN): $(LIBFT) $(OBJDIR) $(OBJ)
 	@echo "$(GREEN)Making binary with sanitizer: $(NAME)"
@@ -110,14 +151,14 @@ $(REGEX_TEST): $(LIBFT) $(OBJDIR) $(OBJ_NO_MAIN)
 	@printf "$(REGEX_TEST) done !$(DEF_COLOR)\n"
 
 $(NAME): $(LIBFT) $(OBJDIR) $(OBJ)
-	@echo "$(GREEN)Making binary: $(NAME)"
-	@printf "$(MAGENTA)"
-	@$(call cmd_wrapper, $(CC) $(OBJ) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(NAME))
+	@echo "$(OLIVINE)Making binary: $(NAME)"
+	@printf "$(JASPER)"
+	@$(call cmd_wrapper, $(CC) $(OBJ) $(CFLAGS) $(LDFLAGS) $(LIBFT) -o $(NAME))
 	@printf "Done !$(DEF_COLOR)\n"
 
 -include $(DEPS)
 $(OBJDIR)/%.o: source/%.c
-	@printf '$(YELLOW)Compiling : %-45s $(CYAN)-->	$(YELLOW)%-30s\n' "$<" "$@";
+	@$(call update_compile_count)
 	@printf "$(BLUE)"
 	@$(call cmd_wrapper, $(CC) $(CFLAGS) $(INC) -MMD -c $< -o $@)
 	@printf "$(DEF_COLOR)"
@@ -125,12 +166,11 @@ $(OBJDIR)/%.o: source/%.c
 clean:
 	@rm -rf $(OBJDIR)
 	@make --no-print-directory -C libftprintf/ clean 
-	@printf "$(RED)Objects deleted !$(DEF_COLOR)\n"
-
+	@printf "$(JASPER)Objects deleted !$(DEF_COLOR)\n"
 fclean: clean
 	@rm -rf $(NAME) $(AST_TEST) $(REGEX_TEST) $(EXEC_TEST) $(LEXER_TEST)
 	@make --no-print-directory -C libftprintf/ fclean
-	@printf "$(RED)Binary deleted !$(DEF_COLOR)\n"
+	@printf "$(JASPER)Binary deleted !$(DEF_COLOR)"
 
 bear:
 	bear -- make re
