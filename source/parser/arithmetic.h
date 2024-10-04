@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 10:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/27 15:46:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/04 11:44:34 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,14 @@
 #include "utils.h"
 
 typedef enum {
-	P0 = 6, // - 'a++' 'a--'
-	P1 = 5, // - '++a' '--a'
-	P3 = 4, // - '*' '/' '%'
-	P2 = 3, // - '+' '-'
-	P4 = 2, // - '<=' '>=' '<' '>'
-	P5 = 1, // - '==' '!='
-	P6 = 0, // - '&&' '||'
-	PP = -1, // - ()
+	PP, // - ()
+	P0, // - '&&' '||'
+	P1, // - '==' '!='
+	P2, // - '<=' '>=' '<' '>'
+	P3, // - '+' '-'
+	P4, // - '*' '/' '%'
+	P5, // - '++a' '--a'
+	P6, // - 'a++' 'a--'
 } operator_precedence;
 
 typedef enum {
@@ -99,21 +99,18 @@ AToken			*atoken_stack_pop(ATokenStack *self);
 AToken			*lexer_get_next_atoken(Lexer_p l);
 
 //----------------Arithmetic AST------------------//
-ANode		*generate_atree(ATokenStack *list);
-long		aAST_execute(ANode *node, Vars *shell_vars, int *error);
+ANode			*generate_atree(ATokenStack *list);
+long			aAST_execute(ANode *node, Vars *shell_vars, int *error);
 
 //----------------ANode stack---------------------//
-ANodeStack	*anode_stack_init(void);
-ANode		*anode_stack_pop(ANodeStack *self);
-void		anode_stack_push(ANodeStack *tl, ANode *token);
+ANodeStack		*anode_stack_init(void);
+ANode			*anode_stack_pop(ANodeStack *self);
+void			anode_stack_push(ANodeStack *tl, ANode *token);
 
 //---------------Syntax error--------------------//
-bool arithmetic_syntax_check(ATokenStack *list);
-bool has_higher_prec(const ATokenStack *operator, const AToken *current);
-bool is_rparen(const AToken *token);
-bool is_lparen(const AToken *token);
-bool is_incr_or_decr(const AToken *token);
-bool is_aoperator(const AToken *token);
-operator_precedence get_precedence(const AToken *token);
+bool			arithmetic_syntax_check(ATokenStack *list);
+bool 			is_rparen(const AToken *token);
+bool 			is_lparen(const AToken *token);
+bool 			is_aoperator(const AToken *token);
 
 #endif // !ARITHMETIC

@@ -22,6 +22,7 @@ ATokenStack *atoken_stack_init(void) {
 }
 
 AToken *atoken_stack_pop(ATokenStack *self) {
+	if (self->size == 0) return NULL;
 	self->size -= 1;
 	return self->data[self->size];
 }

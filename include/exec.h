@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:18:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/03 17:12:01 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/04 17:30:55 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ void close_std_fds(void);
 void close_all_fds(void);
 bool is_builtin(char *bin);
 
+//------------------------Builtins-----------------------------//
 #define TABLE_SIZE 1000
 
 typedef struct Entry {
@@ -52,20 +53,44 @@ typedef enum {
 	HASH_GET,
 } hash_mode;
 
-//------------------------Builtins-----------------------------//
+void *hash_interface(hash_mode mode, char *arg, Vars *shell_vars);
+char *hash_find_bin(char *bin, Vars *shell_vars);
+
+void builtin_hash(const SimpleCommand *command, Vars *shell_vars);
 void builtin_set(const SimpleCommand *command, Vars *shell_vars);
 void builtin_env(const SimpleCommand *command, Vars *shell_vars);
 void builtin_echo(const SimpleCommand *command, Vars *shell_vars);
 void builtin_exit(const SimpleCommand *command, Vars *shell_vars);
 void builtin_export(const SimpleCommand *command, Vars *shell_vars);
 void builtin_type(const SimpleCommand *command, Vars *shell_vars);
-void builtin_hash(const SimpleCommand *command, Vars *shell_vars);
 void builtin_pwd(const SimpleCommand *command, Vars *shell_vars);
 void builtin_cd(const SimpleCommand *command, Vars *shell_vars);
 void builtin_unset(const SimpleCommand *command, Vars *shell_vars);
-void *hash_interface(hash_mode mode, char *arg, Vars *shell_vars);
-char *hash_find_bin(char *bin, Vars *shell_vars);
+void builtin_jobs(const SimpleCommand *command, Vars *shell_vars);
+void builtin_fg(const SimpleCommand *command, Vars *shell_vars);
 //-------------------------------------------------------------//
-//
+
+//--------------------------Jobs Interface---------------------//
+typedef enum {
+	PROCESS_PAUSED,
+	PROCESS_RESUMED,
+	PROCESS_EXITED,
+	TABLE_PRINT,
+} process_status;
+
+typedef struct {
+	pid_t id;
+	char *bin;
+	process_status status;
+} ProcessInfos;
+
+typedef struct {
+	ProcessInfos **data;
+	size_t size;
+	size_t capacity;
+} JobTable;
+
+void job(process_status status, pid_t pid, char *bin);
+//-------------------------------------------------------------//
 
 #endif
