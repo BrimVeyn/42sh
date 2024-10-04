@@ -93,8 +93,9 @@ do
 			((ok++)); ((line_len++));
 			if ((line_len >= max_line_len / 2)); then printf "\n"; line_len=0; fi
 			continue
+		else
+			printf "❌"
 		fi
-		printf "❌"
 		((line_len++));
 		if ((line_len >= max_line_len / 2)); then printf "\n"; line_len=0; fi
 

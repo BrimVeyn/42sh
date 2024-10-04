@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/03 17:12:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/04 17:38:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,8 +134,9 @@ bool builtin_executer(const SimpleCommand *command, Vars *shell_vars) {
 		{"env",  &builtin_env}, {"set",  &builtin_set},
 		{"echo",  &builtin_echo}, {"exit",  &builtin_exit},
 		{"export",  &builtin_export}, {"hash",  &builtin_hash},
-		{"type",  &builtin_type}, //{"cd", &builtin_cd}, 
+		{"type",  &builtin_type}, {"jobs",  &builtin_jobs},
 		{"pwd", &builtin_pwd}, {"unset", &builtin_unset},
+		{"fg", &builtin_fg}, 
 	};
 
 	int result_index = -1;
@@ -183,7 +184,8 @@ void close_saved_fds(int *saved_fds) {
 bool is_builtin(char *bin) {
 	static const char *builtins[] = {
 		"echo", "cd", "pwd", "export", "type",
-		"unset", "env", "exit", "set", "hash",
+		"unset", "env", "exit", "set", 
+		"hash", "jobs", "fg",
 	};
 
 	for (size_t i = 0; i < sizeof(builtins) / sizeof(builtins[0]); i++) {
@@ -199,7 +201,7 @@ int exec_executer(Executer *executer, Vars *shell_vars) {
 	Executer *current = executer;
 	int pipefd[2] = {-1 , -1};
 	int saved_fds[3] = {-1, -1, -1};
-	pid_t pids[1024];
+	pid_t pids[1024] = {0};
 	int i = 0;
 
 	saved_fds[STDIN_FILENO] = dup(STDIN_FILENO);
@@ -241,11 +243,9 @@ int exec_executer(Executer *executer, Vars *shell_vars) {
 						}
 					}
 					g_exitno = ast_execute(current->n_data, shell_vars);
-					//LE BUG VENAIT DE LA LARBIN
+					gc(GC_CLEANUP, GC_ENV);
 					gc(GC_CLEANUP, GC_SUBSHELL);
-					// char *str = gc(GC_CALLOC, 670, sizeof(char *), GC_SUBSHELL);
 					free(((Garbage *)gc(GC_GET))[GC_GENERAL].garbage);
-					//MERDE !
 					close_std_fds();
 					exit(g_exitno);
 				}
@@ -265,13 +265,11 @@ int exec_executer(Executer *executer, Vars *shell_vars) {
 				if (!is_builtin(command->bin)) {
 					if (maybe_bin) {
 						hash_interface(HASH_ADD_USED, command->bin, shell_vars);
-						// gc(GC_FREE, command->bin, GC_SUBSHELL);
 						command->bin = maybe_bin;
 					} else {
 						maybe_bin = find_bin_location(command->bin, shell_vars->env);
 						if (maybe_bin) {
 							hash_interface(HASH_ADD_USED, command->bin, shell_vars);
-							// gc(GC_FREE, command->bin, GC_SUBSHELL);
 							command->bin = maybe_bin;
 						} else {
 							command->bin = NULL;
@@ -304,9 +302,7 @@ int exec_executer(Executer *executer, Vars *shell_vars) {
 	}
 
 	for (int j = 0; j < i; j++) {
-		int status = 0;
-		waitpid(pids[j], &status, 0);
-		g_exitno = WEXITSTATUS(status);
+		waitpid(pids[j], NULL, WNOHANG);
 	}
 
 	close_saved_fds(saved_fds);

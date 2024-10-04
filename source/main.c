@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:35:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/03 17:35:36 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/04 15:29:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,11 +211,11 @@ int main(const int ac, const char *av[], const char *env[]) {
 	int history_fd = -1;
 
 	g_signal = 0;
-	char *input = NULL;
 
 	if (isatty(STDIN_FILENO))
 		get_history();
 
+	char *input = NULL;
 	while ((input = init_prompt_and_signals()) != NULL) {
 		if (*input) {
 			if (isatty(STDIN_FILENO))
@@ -241,5 +241,5 @@ int main(const int ac, const char *av[], const char *env[]) {
 	rl_clear_history();
 	gc(GC_CLEANUP, GC_ALL);
 	close_all_fds(); close_std_fds();
-	return (0);
+	return (EXIT_SUCCESS);
 }

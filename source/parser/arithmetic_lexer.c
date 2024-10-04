@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 11:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/02 12:49:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/04 11:01:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "parser.h"
 #include "utils.h"
 #include <stdio.h>
+#include <unistd.h>
 
 arithemtic_token_tag get_atoken_tag(Lexer_p l) {
 	if (regex_match("^[_0-9a-zA-Z]", &l->input[l->position]).re_start != -1) {
@@ -106,13 +107,13 @@ AToken *lexer_get_next_atoken(Lexer_p l) {
 			//catch unknown token and return an error;
 			self->operator = get_operator_tag(l);
 			if (self->operator == O_ERROR) {
-				dprintf(2, ARITHMETIC_SYNTAX_ERROR"%c\")\n", l->ch);
+				ARITHMETIC_SYNTAX_ERROR((char []){l->ch});
 				return NULL;
 			}
 			break;
 		case A_OPERAND:
 			if (!fill_operand(self, l)) {
-				dprintf(2, ARITHMETIC_SYNTAX_ERROR"%c\")\n", l->ch);
+				ARITHMETIC_SYNTAX_ERROR((char []){l->ch});
 				return NULL;
 			}
 			break;
