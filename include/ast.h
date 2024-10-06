@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:44 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/20 14:27:32 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/06 18:13:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 #include "lexer.h"
 #include "parser.h"
+
+#include <termios.h>
 
 typedef struct {
 	TokenList **data;
@@ -50,17 +52,30 @@ typedef enum {
 	DATA_TOKENS,
 } type_of_data;
 
-typedef struct Executer {
+typedef struct Process {
+	struct Process *next;
+	pid_t pid;
+	bool completed;
+	bool stopped;
+	int status;
+
 	type_of_data data_tag;
 	union {
 		Node *n_data;
 		TokenList *s_data;
 	};
-	struct Executer *next;
-} Executer;
+} Process;
+
+typedef struct Job {
+	struct Job *next; //maybe we'll need to rebuild a list of jobs similar to what ExecuterList was TODO: think about it
+	struct Process *first_process; //pointer to the first process
+	pid_t pgid; //process group id
+	bool notified; //true if user told about stopped jobs
+	struct termios tmodes; //saved terminal modes
+} Job;
 
 typedef struct {
-	Executer **data;
+	Process **data;
 	uint16_t size;
 	uint16_t capacity;
 } ExecuterList;
@@ -93,13 +108,13 @@ NodeStack			*node_stack_init(void);
 Node				*node_stack_pop(NodeStack *self);
 void				node_stack_push(NodeStack *tl, Node *token);
 
-//----------------Executer------------------//
-Executer			*executer_init(Node *node, TokenList *list);
-void				executer_push_back(Executer **lst, Executer *new_value);
+//----------------Job------------------//
+Process				*process_init(Node *node, TokenList *list);
+void				process_push_back(Process **lst, Process *new_value);
 
-//----------------Executer List------------------//
+//----------------Job List------------------//
 ExecuterList		*build_executer_list(TokenList *list);
 ExecuterList		*executer_list_init(void);
-void				executer_list_push(ExecuterList *tl, Executer *token);
+void				executer_list_push(ExecuterList *tl, Process *process);
 
 #endif // !AST_H

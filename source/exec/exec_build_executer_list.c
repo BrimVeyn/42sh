@@ -6,11 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/17 15:09:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/24 09:24:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/06 16:57:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
+#include <sys/mman.h>
 
 void parser_skip_subshell(TokenList *list, int *j) {
 	(*j)++;
@@ -145,19 +146,19 @@ Node *extract_subshell(TokenList *list, int *i) {
 	// return ast_build(newlist);
 }
 
-void create_executer_and_push(Executer **executer, TokenList *list, int *i) {
-	Executer *new = NULL;
+void create_executer_and_push(Process **executer, TokenList *list, int *i) {
+	Process *new = NULL;
 
 	if (is_cmdgrp_start(list, i)) {
-		new = executer_init(extract_command_group(list, i), NULL);
+		new = process_init(extract_command_group(list, i), NULL);
 	}
 	else if (is_subshell(list, i))
-		new = executer_init(extract_subshell(list, i), NULL);
+		new = process_init(extract_subshell(list, i), NULL);
 	else
-		new = executer_init(NULL, extract_tokens(list, i));
+		new = process_init(NULL, extract_tokens(list, i));
 
 	(*i) += 1; //skip operator
-	executer_push_back(executer, new);
+	process_push_back(executer, new);
 }
 
 type_of_separator next_separator(TokenList *list, int *i) {
@@ -185,7 +186,7 @@ ExecuterList *build_executer_list(TokenList *list) {
 	ExecuterList *self = executer_list_init();
 	int i = 0;
 	while (i < list->size) {
-		Executer *executer = NULL;
+		Process *executer = NULL;
 		type_of_separator next_sep = next_separator(list, &i);
 
 		if (next_sep == S_PIPE) {

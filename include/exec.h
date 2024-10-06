@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:18:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/04 17:30:55 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/06 17:59:41 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,21 +17,34 @@
 #include "parser.h"
 #include <stdbool.h>
 
-typedef enum {
-	E_ISDIR = 1,
-	E_NOPERM,
-} exec_ernno;
+//------------Shell Infos------------------//
+#define SHELL_INIT 0
+#define SHELL_GET 1
 
-int secure_fork(void);
-bool secure_dup2(int from, int to);
-void secure_pipe2(int pipefd[2], int flags);
-void secure_execve(const char *pathname, char **const argv, char **const envp);
-int exec_node(Node *node, Vars *env);
-char *find_bin_location(char *bin, StringList *env);
-void close_saved_fds(int *saved_fds);
-void close_std_fds(void);
-void close_all_fds(void);
-bool is_builtin(char *bin);
+typedef struct ShellInfos {
+	bool	interactive;
+	pid_t	shell_pgid;
+	int		shell_terminal;
+	struct termios shell_tmodes;
+} ShellInfos;
+
+ShellInfos *shell(int mode);
+//---------------------------------------//
+
+void	close_saved_fds(int *saved_fds);
+void	close_std_fds(void);
+void	close_all_fds(void);
+
+int		secure_fork(void);
+bool	secure_dup2(int from, int to);
+void	secure_pipe2(int pipefd[2], int flags);
+void	secure_execve(const char *pathname, char **const argv, char **const envp);
+
+bool	is_builtin(char *bin);
+
+int		exec_node(Node *node, Vars *env);
+
+char	*find_bin_location(char *bin, StringList *env);
 
 //------------------------Builtins-----------------------------//
 #define TABLE_SIZE 1000

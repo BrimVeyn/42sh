@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:58:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/02 12:49:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/06 16:58:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,26 +16,26 @@
 
 ExecuterList *executer_list_init(void) {
 	ExecuterList *self = gc(GC_ADD, ft_calloc(1, sizeof(ExecuterList)), GC_SUBSHELL);
-	self->data = (Executer **) gc(GC_ADD, ft_calloc(10, sizeof(Executer *)), GC_SUBSHELL);
+	self->data = (Process **) gc(GC_ADD, ft_calloc(10, sizeof(Job *)), GC_SUBSHELL);
 	self->size = 0;
 	self->capacity = 10;
 	return self;
 }
 
-void executer_list_push(ExecuterList *tl, Executer *token) {
+void executer_list_push(ExecuterList *tl, Process *process) {
 	if (tl->size >= tl->capacity) {
 		tl->capacity *= 2;
-		Executer **tmp = tl->data;
-		tl->data = (Executer **) ft_realloc(tl->data, tl->size, tl->capacity, sizeof(Executer *));
+		Process **tmp = tl->data;
+		tl->data = (Process **) ft_realloc(tl->data, tl->size, tl->capacity, sizeof(Process *));
 		gc(GC_FREE, tmp, GC_GENERAL);
 		gc(GC_ADD, tl->data, GC_GENERAL);
 	}
-	tl->data[tl->size] = token;
+	tl->data[tl->size] = process;
 	tl->size += 1;
 }
 
-void executer_push_back(Executer **lst, Executer *new_value) {
-	Executer *temp;
+void process_push_back(Process **lst, Process *new_value) {
+	Process *temp;
 
 	if (*lst == NULL)
 		*lst = new_value;
@@ -48,8 +48,8 @@ void executer_push_back(Executer **lst, Executer *new_value) {
 	}
 }
 
-Executer *executer_init(Node *node, TokenList *list) {
-	Executer *self = (Executer *) gc(GC_ADD, ft_calloc(1, sizeof(Executer)), GC_SUBSHELL);
+Process *process_init(Node *node, TokenList *list) {
+	Process *self = (Process *) gc(GC_ADD, ft_calloc(1, sizeof(Process)), GC_SUBSHELL);
 	if (node != NULL) {
 		self->data_tag = DATA_NODE;
 		self->n_data = node;

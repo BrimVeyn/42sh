@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 15:09:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/04 17:37:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/06 16:10:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,61 +92,32 @@ void job(process_status status, pid_t pid, char *bin) {
 	}
 }
 
-void signal_sigint_prompt(__attribute__((unused)) int code) {
+void signal_sigint_prompt(int code) {
 	rl_done = 1;
 	g_signal = code;
 }
 
-void signal_sigint_exec(__attribute__((unused)) int code) {
+void signal_sigint_exec(int code) {
 	printf("\n");
 	g_signal = code;
 }
 
-#include <sys/wait.h>
-
-void signal_sigchld_prompt(int code) {
-    (void) code; // Ignore the signal number, we know it's SIGCHLD
-    int status;
-    pid_t pid;
-
-    // Use WNOHANG to avoid blocking and WUNTRACED to detect stopped children
-    while ((pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED)) > 0) {
-        if (WIFEXITED(status)) {
-            // Child exited normally
-            printf("Process %d exited with status %d\n", pid, WEXITSTATUS(status));
-			g_exitno = WEXITSTATUS(status);
-            // Update job table, remove child, etc.
-        } else if (WIFSIGNALED(status)) {
-            // Child was terminated by a signal
-            printf("Process %d killed by signal %d\n", pid, WTERMSIG(status));
-            // Update job table, etc.
-        } else if (WIFSTOPPED(status)) {
-            // Child was stopped by SIGTSTP or another stop signal
-            printf("Process %d stopped by signal %d\n", pid, WSTOPSIG(status));
-            // Update job table to mark this job as "stopped"
-        } else if (WIFCONTINUED(status)) {
-            // Child has been resumed (e.g., via `fg`)
-            printf("Process %d continued\n", pid);
-            // Update job table to mark this job as "running" again
-        }
-    }
-}
-
-void signal_sigtstp_prompt(int code) {
-	(void) code;	
-	printf("sigstp received: %d!\n", code);
-}
-
 void signal_prompt_mode(void) {
 	signal(SIGINT, signal_sigint_prompt);
-	signal(SIGCHLD, signal_sigchld_prompt);
-	signal(SIGTSTP, signal_sigtstp_prompt);
 	signal(SIGQUIT, SIG_IGN);
+	signal(SIGTSTP, SIG_IGN);
+	signal(SIGTTIN, SIG_IGN);
+	signal(SIGTTOU, SIG_IGN);
+	signal(SIGCHLD, SIG_IGN);
 }
 
 void signal_exec_mode(void) {
 	signal(SIGINT, signal_sigint_exec);
-	// signal(SIGTSTP, signal_sigtstp_child);
+	signal(SIGQUIT, SIG_DFL);
+	signal(SIGTSTP, SIG_DFL);
+	signal(SIGTTIN, SIG_DFL);
+	signal(SIGTTOU, SIG_DFL);
+	signal(SIGCHLD, SIG_DFL);
 }
 
 void signal_manager(type_of_signals mode) {
@@ -156,6 +127,8 @@ void signal_manager(type_of_signals mode) {
 			break;
 		case SIG_EXEC:
 			signal_exec_mode();
+			break;
+		case SIG_HERE_DOC:
 			break;
 		default:
 			return;
