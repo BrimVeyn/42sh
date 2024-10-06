@@ -6,20 +6,19 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:35:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/04 15:29:39 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/06 17:59:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/utils.h"
-#include "../include/signals.h"
-#include "../include/debug.h"
-#include "../include/lexer.h"
-#include "../include/ast.h"
-#include "../include/exec.h"
-#include "../include/regex.h"
-#include "../libftprintf/header/libft.h"
-#include "ft_regex.h"
+#include "utils.h"
+#include "signals.h"
+#include "debug.h"
+#include "lexer.h"
+#include "ast.h"
+#include "exec.h"
+#include "libft.h"
 
+#include <signal.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
@@ -28,17 +27,21 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <termios.h>
 #include <sys/mman.h>
+#include <signals.h>
 
 int g_debug = 0;
 
-char *init_prompt_and_signals(void) {
-	signal_manager(SIG_PROMPT);
+char *init_prompt_and_signals(bool shell_is_interactive) {
 	rl_event_hook = rl_event_dummy;
-	
 	char *input = NULL;
-	if (isatty(STDIN_FILENO))
+
+	if (shell_is_interactive) {
+		signal_manager(SIG_PROMPT);
 		input = readline("42sh > ");
+	}
 	else
 		input = get_next_line(STDIN_FILENO);
 	return input;
@@ -150,94 +153,72 @@ char *get_history_index(char *string, int index){
 	return NULL;
 }
 
-// bool history_expansion (char *string, int history_fd){
-//
-// 	regex_match_t result = regex_match("[^\\\\]\\!", string);
-//
-// 	if (result.is_found){
-// 		struct stat st;
-// 		if (fstat(history_fd, &st) == -1){
-// 			perror("Can't get history's file stats");
-// 			exit(EXIT_FAILURE);
-// 		}
-// 		size_t file_size = st.st_size;
-//
-// 		char *buffer = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, history_fd, 0);
-// 		if (buffer == MAP_FAILED) {
-// 			perror("mmap failed");
-// 			exit(EXIT_FAILURE);
-// 		}
-// 	}
-//
-// 	char *command = NULL;
-// 	do {
-// 		type_of_history_event event_type = H_NO_EVENT;
-// 		regex_match_t result = regex_match("[^\\\\]\\![^ ]*", string);
-// 		if (string[result.re_start + 1] == '!'){
-// 			event_type = H_LAST;
-// 		}
-// 		else if (ft_isdigit(string[result.re_start + 1])){
-// 			char *cnumber = get_event_number(string + result.re_start + 1);
-// 			if (cnumber == NULL){
-// 				char *tmp = ft_substr(string,result.re_start, result.re_end - result.re_start);
-// 				ft_dprintf(2, "42sh: %s not found", tmp);
-// 				free(tmp);
-// 				return false;
-// 			}
-// 			int number = ft_atoi(cnumber);
-// 			command = get_history_index(string, number);
-// 		}
-// 		// else if (ft_isalpha(string[result.re_start + 1])){
-// 		// 	char *c
-// 		// }
-// 		if (command){
-// 			char *start = ft_substr(string, 0, result.re_start - 1);
-// 			char *end = ft_substr(string, result.re_end + 1, ft_strlen(string) - result.re_end);
-// 			char *start_and_command = ft_strjoin(start, command);
-// 			string = ft_strjoin(start_and_command, end);
-// 			FREE_POINTERS(start, end, start_and_command, command);
-// 		}
-//
-// 	} while (true);
-// }
+ShellInfos *shell(int mode) {
+	static ShellInfos *self = NULL;
+
+	if (mode == SHELL_INIT) {
+		self = gc(GC_CALLOC, 1, sizeof(ShellInfos), GC_ENV);
+		self->shell_terminal = STDIN_FILENO;
+		self->interactive = isatty(self->shell_terminal);
+		if (self->interactive) {
+			//stop itself untill we are in the foreground, can access terminal
+			while (tcgetpgrp(self->shell_terminal) != (self->shell_pgid = getpgrp()))
+				kill(- self->shell_pgid, SIGTTIN);
+			//put ourselves in our new proces group
+			self->shell_pgid = getpid();
+			if (setpgid(self->shell_pgid, self->shell_pgid) < 0)
+			{
+				dprintf(2, "42sh: erorr couldn't put the shell in its own process group\n");
+				gc(GC_CLEANUP, GC_ALL);
+			}
+			//set itself as terminal
+			tcsetpgrp(self->shell_terminal, self->shell_pgid);
+			//saves its attributes
+			tcgetattr(self->shell_terminal, &self->shell_tmodes);
+		}
+	} else {
+		return self;
+	}
+	return NULL;
+}
+
 
 int main(const int ac, const char *av[], const char *env[]) {
+	(void) av; (void) ac;
 
-	if (ac != 1 && !ft_strcmp("-d", av[1])){
-		g_debug = 1;
-	}
+	shell(SHELL_INIT);
+	g_signal = 0;
 
 	Vars *shell_vars = vars_init(env);
 	int history_fd = -1;
+	ShellInfos *self = shell(SHELL_GET);
 
-	g_signal = 0;
-
-	if (isatty(STDIN_FILENO))
+	if (self->interactive) 
 		get_history();
 
 	char *input = NULL;
-	while ((input = init_prompt_and_signals()) != NULL) {
+	//display the prompt, init signals if shell in interactive and reads input
+	while ((input = init_prompt_and_signals(self->interactive)) != NULL) {
 		if (*input) {
-			if (isatty(STDIN_FILENO))
+			if (self->interactive)
 				add_input_to_history(input, &history_fd);
-			input = replace_char_greedy(input, '\n', ';');
 			Lexer_p lexer = lexer_init(input);
 			TokenList *tokens = lexer_lex_all(lexer);
 			if (lexer_syntax_error(tokens))
 				continue; 
 			heredoc_detector(tokens);
-			signal_manager(SIG_EXEC);
 			Node *AST = ast_build(tokens);
 			ast_execute(AST, shell_vars);
-			if (g_debug)
-				printTree(AST);
+			//update env '_' variable
 			char *last_executed = ft_strjoin("_=", input);
 			string_list_add_or_update(shell_vars->env, last_executed);
 			string_list_add_or_update(shell_vars->set, last_executed);
 			FREE_POINTERS(last_executed);
+			//reset memory collection for the next input
 			gc(GC_RESET, GC_SUBSHELL);
 		}
 	}
+	//clear history, clear all allocations, close all fds and exit
 	rl_clear_history();
 	gc(GC_CLEANUP, GC_ALL);
 	close_all_fds(); close_std_fds();

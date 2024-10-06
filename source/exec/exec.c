@@ -6,19 +6,24 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/04 17:38:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/06 18:22:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
+#include "ast.h"
 #include "debug.h"
 #include "lexer.h"
 #include "parser.h"
+#include "signals.h"
 #include "utils.h"
 #include "libft.h"
 
+#include <readline/history.h>
+#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -196,9 +201,122 @@ bool is_builtin(char *bin) {
 	return false;
 }
 
+void launch_process(SimpleCommand *command, Vars *shell_vars,  pid_t pgid, bool foreground) {
+	ShellInfos *shell_infos = shell(SHELL_GET);
+	pid_t pid;
+	if (shell_infos->interactive) {
+		pid = getpid();
+		if (pgid == 0)
+			pgid = pid;
+		setpgid(pid, pgid);
+		if (foreground) {
+			tcsetpgrp(shell_infos->shell_terminal, pgid);
+		}
+		signal_manager(SIG_EXEC);
+	}
+	close_all_fds();
+	if (!command || !exec_simple_command(command, shell_vars)) {
+		gc(GC_CLEANUP, GC_ALL);
+		exit(g_exitno);
+	}
+}
 
-int exec_executer(Executer *executer, Vars *shell_vars) {
-	Executer *current = executer;
+void resolve_bin(SimpleCommand *command, Vars *shell_vars) {
+	if (command && command->bin) {
+		char *maybe_bin = hash_interface(HASH_FIND, command->bin, shell_vars);
+		if (!is_builtin(command->bin)) {
+			if (maybe_bin) {
+				hash_interface(HASH_ADD_USED, command->bin, shell_vars);
+				command->bin = maybe_bin;
+			} else {
+				maybe_bin = find_bin_location(command->bin, shell_vars->env);
+				if (maybe_bin) {
+					hash_interface(HASH_ADD_USED, command->bin, shell_vars);
+					command->bin = maybe_bin;
+				} else {
+					command->bin = NULL;
+				}
+			}
+		}
+	}
+}
+
+int job_is_stopped(Job *j) {
+  Process *p;
+
+  for (p = j->first_process; p; p = p->next)
+    if (!p->completed && !p->stopped)
+      return 0;
+  return 1;
+}
+
+int job_is_completed(Job *j) {
+  Process *p;
+
+  for (p = j->first_process; p; p = p->next)
+    if (!p->completed)
+      return 0;
+  return 1;
+}
+
+
+int mark_process_status(Job *job, pid_t pid, int status) {
+	Process *p;
+
+	if (pid == 0)
+		return -1;
+
+	for (p = job->first_process; p; p = p->next) {
+		if (p->pid == pid) {
+			p->status = status;
+			if (WIFSTOPPED(status)) {
+				p->stopped = true;
+			} else {
+				p->completed = true;
+				if (WIFSIGNALED(status)) {
+					dprintf(2, "terminated by signal %d\n", WTERMSIG(status));
+				}
+			}
+			return 0;
+		}
+	}
+	return -1;
+}
+
+void wait_for_job(Job *job) {
+	int status;
+	pid_t pid;
+
+	do {
+		pid = waitpid(WAIT_ANY, &status, WUNTRACED);
+	} while (!mark_process_status(job, pid, status)
+			&& !job_is_stopped(job) && !job_is_completed(job));
+}
+
+void put_job_in_foreground(Job *job, bool cont) {
+	ShellInfos *self = shell(SHELL_GET);
+	//put job in the same pgid than the shell
+	tcsetpgrp(self->shell_terminal, job->pgid);
+
+	//send job a continue signal is necessary (can be trigger by fg builtin for example)
+	if (cont) {
+		tcsetattr(self->shell_terminal, TCSADRAIN, &job->tmodes);
+		if (kill(-job->pgid, SIGCONT) < 0) {
+			perror("job foreground SIGCONT failed\n");
+		}
+	}
+	wait_for_job(job);
+	//put shell back in foreground
+	tcsetpgrp(self->shell_terminal, self->shell_pgid);
+
+	//restor terminal attributes
+	tcgetattr(self->shell_terminal, &job->tmodes);
+	tcsetattr(self->shell_terminal, TCSADRAIN, &self->shell_tmodes);
+}
+
+int launch_job(Job *job, Vars *shell_vars, bool foreground) {
+	ShellInfos *shell_infos = shell(SHELL_GET);
+	Process *proc = job->first_process;
 	int pipefd[2] = {-1 , -1};
 	int saved_fds[3] = {-1, -1, -1};
 	pid_t pids[1024] = {0};
@@ -210,39 +328,39 @@ int exec_executer(Executer *executer, Vars *shell_vars) {
 
 	bool prev_pipe = false;
 
-	while (current) {
+	while (proc) {
 
 		if (prev_pipe) {
 			secure_dup2(pipefd[0], STDIN_FILENO);
             close(pipefd[0]);
 		}
-		if (current->next) {
+		if (proc->next) {
 			prev_pipe = true;
 			secure_pipe2(pipefd, O_CLOEXEC);
 			secure_dup2(pipefd[1], STDOUT_FILENO);
             close(pipefd[1]);
 		}
 		
-		if (current->data_tag == DATA_NODE) {
-			if (current->n_data->tree_tag == TREE_COMMAND_GROUP) {
-				if (current->n_data->redirs != NULL) {
-					if (apply_all_redirect(current->n_data->redirs)) {
-						g_exitno = ast_execute(current->n_data, shell_vars);
+		if (proc->data_tag == DATA_NODE) {
+			if (proc->n_data->tree_tag == TREE_COMMAND_GROUP) {
+				if (proc->n_data->redirs != NULL) {
+					if (apply_all_redirect(proc->n_data->redirs)) {
+						g_exitno = ast_execute(proc->n_data, shell_vars);
 					}
 				} else {
-					g_exitno = ast_execute(current->n_data, shell_vars);
+					g_exitno = ast_execute(proc->n_data, shell_vars);
 				}
-			} else if (current->n_data->tree_tag == TREE_SUBSHELL) {
+			} else if (proc->n_data->tree_tag == TREE_SUBSHELL) {
 				pids[i] = secure_fork();
 				if (pids[i] == 0) {
 					close_all_fds();
-					if (current->n_data->redirs != NULL) {
-						if (!apply_all_redirect(current->n_data->redirs)) {
+					if (proc->n_data->redirs != NULL) {
+						if (!apply_all_redirect(proc->n_data->redirs)) {
 							gc(GC_CLEANUP, GC_SUBSHELL);
 							exit(g_exitno);
 						}
 					}
-					g_exitno = ast_execute(current->n_data, shell_vars);
+					g_exitno = ast_execute(proc->n_data, shell_vars);
 					gc(GC_CLEANUP, GC_ENV);
 					gc(GC_CLEANUP, GC_SUBSHELL);
 					free(((Garbage *)gc(GC_GET))[GC_GENERAL].garbage);
@@ -252,44 +370,31 @@ int exec_executer(Executer *executer, Vars *shell_vars) {
 			}
 		}
 
-		if (current->data_tag == DATA_TOKENS) {
-			SimpleCommand *command = parser_parse_current(current->s_data, shell_vars);
+		if (proc->data_tag == DATA_TOKENS) {
+			SimpleCommand *command = parser_parse_current(proc->s_data, shell_vars);
 			// printCommand(command);
 			if (!command && pipefd[0] == -1){
 				close_all_fds();
 				return false;
 			}
-
-			if (command && command->bin) {
-				char *maybe_bin = hash_interface(HASH_FIND, command->bin, shell_vars);
-				if (!is_builtin(command->bin)) {
-					if (maybe_bin) {
-						hash_interface(HASH_ADD_USED, command->bin, shell_vars);
-						command->bin = maybe_bin;
-					} else {
-						maybe_bin = find_bin_location(command->bin, shell_vars->env);
-						if (maybe_bin) {
-							hash_interface(HASH_ADD_USED, command->bin, shell_vars);
-							command->bin = maybe_bin;
-						} else {
-							command->bin = NULL;
-						}
-					}
-				}
-			}
-
-			if (pipefd[0] == -1 && builtin_executer(command, shell_vars)){
+			resolve_bin(command, shell_vars);
+			//if its a not a pipeline, try to execute a builtin w/o forking
+			if (pipefd[0] == -1 && builtin_executer(command, shell_vars))
 				break;
-			}
+
 			pids[i] = secure_fork();
 			if (pids[i] == 0) {
-				close_all_fds();
-				if (!command || !exec_simple_command(command, shell_vars)) {
-					gc(GC_CLEANUP, GC_ALL);
-					exit(g_exitno);
+				launch_process(command, shell_vars, job->pgid, true);
+			} else {
+				proc->pid = pids[i];
+				if (shell_infos->interactive)
+				{
+					if (!job->pgid)
+						job->pgid = pids[i];
+					setpgid(pids[i], job->pgid);
 				}
+				string_list_clear(shell_vars->local);
 			}
-			string_list_clear(shell_vars->local);
 		}
 
 		dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
@@ -297,26 +402,41 @@ int exec_executer(Executer *executer, Vars *shell_vars) {
 		dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
 		
 		//increment pid only if it isnt a command group
-		i += !(current->data_tag == DATA_NODE && current->n_data->tree_tag == TREE_COMMAND_GROUP);
-		current = current->next;
+		i += !(proc->data_tag == DATA_NODE && proc->n_data->tree_tag == TREE_COMMAND_GROUP);
+		proc = proc->next;
 	}
 
-	for (int j = 0; j < i; j++) {
-		waitpid(pids[j], NULL, WNOHANG);
-	}
+	if (!shell_infos->interactive) {
+		wait_for_job(job);
+	} else if (foreground) {
+		put_job_in_foreground(job, false);
+	} //else {
+	// 	puy_job_in_background(job, false);
+	// }
 
 	close_saved_fds(saved_fds);
 	return true;
 }
 
-int exec_node(Node *node, Vars *shell_vars) {
-	const ExecuterList *list = build_executer_list(node->value.operand);
+Job *job_init(Process *first_process) {
+	Job *self = gc(GC_CALLOC, 1, sizeof(Job), GC_SUBSHELL);
+	self->first_process = first_process;
+	return self;
+}
 
-	for (int it = 0; it < list->size; it++) {
-		Executer *executer = list->data[it];
-		if (exec_executer(executer, shell_vars) == false) {
-			break;
-		}
-	}
+
+
+int exec_node(Node *node, Vars *shell_vars) {
+	// TODO: remove ExecuterList, became useless
+	bool foreground = true; //TODO: define it in ast_exec later
+	const ExecuterList *list = build_executer_list(node->value.operand);
+	Job *job = job_init(list->data[0]);
+	launch_job(job, shell_vars, foreground);
+	// for (int it = 0; it < list->size; it++) {
+	// 	Job *executer = list->data[it];
+	// 	if (exec_executer(executer, shell_vars) == false) {
+	// 		break;
+	// 	}
+	// }
 	return g_exitno;
 }

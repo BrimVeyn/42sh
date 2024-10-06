@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/03 15:54:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/06 15:50:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,9 +150,6 @@ void add_vars_to_local(StringList *list, TokenList *vars) {
 
 SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
 	// parser_brace_expansion();
-	// parser_tilde_expansion();
-
-	//AU BOULOT
 	if (!parser_parameter_expansion(tl, shell_vars)){
 		return NULL;
 	}
@@ -162,12 +159,10 @@ SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
 	if (!parser_arithmetic_expansion(tl, shell_vars)) {
 		return NULL;
 	}
-	// if (!parser_filename_expansion(tl)){
-	// 	return NULL;
-	// }
 	TokenList *command_vars = parser_eat_variables(tl);
 	RedirectionList *redirs = parser_get_redirection(tl);
 	SimpleCommand *command = parser_get_command(tl);
+	command->redir_list = redirs;
 
 	if (command->bin == NULL && command_vars->size != 0) {
 		add_vars_to_set(shell_vars, command_vars);
@@ -175,6 +170,5 @@ SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
 		add_vars_to_local(shell_vars->local, command_vars);
 	}
 
-	command->redir_list = redirs;
 	return command;
 }
