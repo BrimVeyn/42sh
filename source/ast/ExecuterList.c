@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:58:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/06 16:58:54 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/07 10:19:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ void process_push_back(Process **lst, Process *new_value) {
 }
 
 Process *process_init(Node *node, TokenList *list) {
-	Process *self = (Process *) gc(GC_ADD, ft_calloc(1, sizeof(Process)), GC_SUBSHELL);
+	Process *self = (Process *) gc(GC_CALLOC, 1, sizeof(Process), GC_SUBSHELL);
 	if (node != NULL) {
 		self->data_tag = DATA_NODE;
 		self->n_data = node;

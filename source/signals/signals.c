@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 15:09:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/06 16:10:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/07 17:16:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,11 +108,11 @@ void signal_prompt_mode(void) {
 	signal(SIGTSTP, SIG_IGN);
 	signal(SIGTTIN, SIG_IGN);
 	signal(SIGTTOU, SIG_IGN);
-	signal(SIGCHLD, SIG_IGN);
+	// signal(SIGCHLD, SIG_IGN);
 }
 
 void signal_exec_mode(void) {
-	signal(SIGINT, signal_sigint_exec);
+	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
 	signal(SIGTSTP, SIG_DFL);
 	signal(SIGTTIN, SIG_DFL);

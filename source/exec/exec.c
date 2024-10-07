@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/06 18:22:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/07 17:18:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 int g_exitno;
 
@@ -204,15 +205,25 @@ bool is_builtin(char *bin) {
 void launch_process(SimpleCommand *command, Vars *shell_vars,  pid_t pgid, bool foreground) {
 	ShellInfos *shell_infos = shell(SHELL_GET);
 	pid_t pid;
-	if (shell_infos->interactive) {
-		pid = getpid();
-		if (pgid == 0)
-			pgid = pid;
-		setpgid(pid, pgid);
-		if (foreground) {
-			tcsetpgrp(shell_infos->shell_terminal, pgid);
-		}
-		signal_manager(SIG_EXEC);
+	if (shell_infos->interactive)
+	{
+		/* Put the process into the process group and give the process group
+		 the terminal, if appropriate.
+		 This has to be done both by the shell and in the individual
+		 child processes because of potential race conditions.  */
+		pid = getpid ();
+		if (pgid == 0) pgid = pid;
+		setpgid (pid, pgid);
+		if (foreground)
+			tcsetpgrp (shell_infos->shell_terminal, pgid);
+
+		/* Set the handling for job control signals back to the default.  */
+		signal (SIGINT, SIG_DFL);
+		signal (SIGQUIT, SIG_DFL);
+		signal (SIGTSTP, SIG_DFL);
+		signal (SIGTTIN, SIG_DFL);
+		signal (SIGTTOU, SIG_DFL);
+		signal (SIGCHLD, SIG_DFL);
 	}
 	close_all_fds();
 	if (!command || !exec_simple_command(command, shell_vars)) {
@@ -259,45 +270,53 @@ int job_is_completed(Job *j) {
   return 1;
 }
 
+#include <errno.h>
 
-int mark_process_status(Job *job, pid_t pid, int status) {
+int mark_process_status (Job *j, pid_t pid, int status) {
 	Process *p;
 
-	if (pid == 0)
+	if (pid <= 0) {
 		return -1;
-
-	for (p = job->first_process; p; p = p->next) {
-		if (p->pid == pid) {
-			p->status = status;
-			if (WIFSTOPPED(status)) {
-				p->stopped = true;
-			} else {
-				p->completed = true;
-				if (WIFSIGNALED(status)) {
-					dprintf(2, "terminated by signal %d\n", WTERMSIG(status));
+	} else {
+		/* Update the record for the process.  */
+		for (p = j->first_process; p; p = p->next)
+			if (p->pid == pid)
+			{
+				p->status = status;
+				if (WIFEXITED(status)) {
+					g_exitno = WEXITSTATUS(status);
 				}
+				if (WIFSTOPPED (status))
+					p->stopped = 1;
+				else
+				{
+					p->completed = 1;
+					if (WIFSIGNALED (status))
+						fprintf (stderr, "%d: Terminated by signal %d.\n", (int) pid, WTERMSIG (p->status));
+				}
+				return 0;
 			}
-			return 0;
-		}
+		fprintf (stderr, "No child process %d.\n", pid);
+		return -1;
 	}
-	return -1;
 }
 
-void wait_for_job(Job *job) {
-	int status;
-	pid_t pid;
+void wait_for_job (Job *j) {
+  int status;
+  pid_t pid;
 
 	do {
-		pid = waitpid(WAIT_ANY, &status, WUNTRACED);
-	} while (!mark_process_status(job, pid, status)
-			&& !job_is_stopped(job) && !job_is_completed(job));
+		pid = waitpid(-j->pgid, &status, WUNTRACED);
+		// dprintf(2, "waited for pid: %d\n", pid);
+	} while (!mark_process_status(j, pid, status)
+	&& !job_is_stopped(j)
+	&& !job_is_completed(j));
 }
 
 void put_job_in_foreground(Job *job, bool cont) {
 	ShellInfos *self = shell(SHELL_GET);
 	//put job in the same pgid than the shell
-	tcsetpgrp(self->shell_terminal, job->pgid);
-
+	tcsetpgrp (self->shell_terminal, job->pgid);
 	//send job a continue signal is necessary (can be trigger by fg builtin for example)
 	if (cont) {
 		tcsetattr(self->shell_terminal, TCSADRAIN, &job->tmodes);
@@ -307,11 +326,9 @@ void put_job_in_foreground(Job *job, bool cont) {
 	}
 	wait_for_job(job);
 	//put shell back in foreground
-	tcsetpgrp(self->shell_terminal, self->shell_pgid);
-
-	//restor terminal attributes
-	tcgetattr(self->shell_terminal, &job->tmodes);
-	tcsetattr(self->shell_terminal, TCSADRAIN, &self->shell_tmodes);
+	tcsetpgrp (self->shell_terminal, self->shell_pgid);
+	tcgetattr (self->shell_terminal, &job->tmodes);
+	tcsetattr (self->shell_terminal, TCSADRAIN, &self->shell_tmodes);
 }
 
 int launch_job(Job *job, Vars *shell_vars, bool foreground) {
@@ -364,8 +381,21 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 					gc(GC_CLEANUP, GC_ENV);
 					gc(GC_CLEANUP, GC_SUBSHELL);
 					free(((Garbage *)gc(GC_GET))[GC_GENERAL].garbage);
-					close_std_fds();
 					exit(g_exitno);
+				} else {
+					proc->pid = pids[i];
+					if (shell_infos->interactive)
+					{
+						if (!job->pgid)
+							job->pgid = pids[i];
+						setpgid (pids[i], job->pgid);
+					}
+					string_list_clear(shell_vars->local);
+				}
+				if (!shell_infos->interactive) {
+					wait_for_job(job);
+				} else if (foreground) {
+					put_job_in_foreground(job, 0);
 				}
 			}
 		}
@@ -386,12 +416,13 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 			if (pids[i] == 0) {
 				launch_process(command, shell_vars, job->pgid, true);
 			} else {
+				// Parent process
 				proc->pid = pids[i];
 				if (shell_infos->interactive)
 				{
 					if (!job->pgid)
 						job->pgid = pids[i];
-					setpgid(pids[i], job->pgid);
+					setpgid (pids[i], job->pgid);
 				}
 				string_list_clear(shell_vars->local);
 			}
@@ -409,8 +440,9 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 	if (!shell_infos->interactive) {
 		wait_for_job(job);
 	} else if (foreground) {
-		put_job_in_foreground(job, false);
-	} //else {
+		put_job_in_foreground(job, 0);
+	}
+	// } //else {
 	// 	puy_job_in_background(job, false);
 	// }
 
@@ -432,11 +464,13 @@ int exec_node(Node *node, Vars *shell_vars) {
 	const ExecuterList *list = build_executer_list(node->value.operand);
 	Job *job = job_init(list->data[0]);
 	launch_job(job, shell_vars, foreground);
-	// for (int it = 0; it < list->size; it++) {
-	// 	Job *executer = list->data[it];
-	// 	if (exec_executer(executer, shell_vars) == false) {
-	// 		break;
-	// 	}
+
+	// for (Process *p = job->first_process; p; p = p->next) {
+	// 	dprintf(2, "Process's pid: %d\n", p->pid);
+	// 	dprintf(2, "status: %d\n", p->status);
+	// 	dprintf(2, "completed: %d\n", p->completed);
+	// 	dprintf(2, "stopped: %d\n", p->stopped);
 	// }
+	
 	return g_exitno;
 }
