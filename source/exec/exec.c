@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/07 17:18:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/08 17:36:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include "signals.h"
 #include "utils.h"
 #include "libft.h"
+#include "colors.h"
 
 #include <readline/history.h>
 #include <signal.h>
@@ -138,10 +139,10 @@ bool builtin_executer(const SimpleCommand *command, Vars *shell_vars) {
 		builtin_func_t func;
 	} map[] = {
 		{"env",  &builtin_env}, {"set",  &builtin_set},
-		{"echo",  &builtin_echo}, {"exit",  &builtin_exit},
+		/*{"echo",  &builtin_echo},*/ {"exit",  &builtin_exit},
 		{"export",  &builtin_export}, {"hash",  &builtin_hash},
 		{"type",  &builtin_type}, {"jobs",  &builtin_jobs},
-		{"pwd", &builtin_pwd}, {"unset", &builtin_unset},
+		/*{"pwd", &builtin_pwd},*/ {"unset", &builtin_unset},
 		{"fg", &builtin_fg}, 
 	};
 
@@ -189,7 +190,7 @@ void close_saved_fds(int *saved_fds) {
 
 bool is_builtin(char *bin) {
 	static const char *builtins[] = {
-		"echo", "cd", "pwd", "export", "type",
+		/*"echo",*/ "cd", /*"pwd",*/ "export", "type",
 		"unset", "env", "exit", "set", 
 		"hash", "jobs", "fg",
 	};
@@ -218,12 +219,7 @@ void launch_process(SimpleCommand *command, Vars *shell_vars,  pid_t pgid, bool 
 			tcsetpgrp (shell_infos->shell_terminal, pgid);
 
 		/* Set the handling for job control signals back to the default.  */
-		signal (SIGINT, SIG_DFL);
-		signal (SIGQUIT, SIG_DFL);
-		signal (SIGTSTP, SIG_DFL);
-		signal (SIGTTIN, SIG_DFL);
-		signal (SIGTTOU, SIG_DFL);
-		signal (SIGCHLD, SIG_DFL);
+		signal_manager(SIG_EXEC);
 	}
 	close_all_fds();
 	if (!command || !exec_simple_command(command, shell_vars)) {
@@ -280,23 +276,22 @@ int mark_process_status (Job *j, pid_t pid, int status) {
 	} else {
 		/* Update the record for the process.  */
 		for (p = j->first_process; p; p = p->next)
-			if (p->pid == pid)
-			{
+			if (p->pid == pid) {
 				p->status = status;
 				if (WIFEXITED(status)) {
 					g_exitno = WEXITSTATUS(status);
-				}
-				if (WIFSTOPPED (status))
-					p->stopped = 1;
-				else
-				{
 					p->completed = 1;
-					if (WIFSIGNALED (status))
-						fprintf (stderr, "%d: Terminated by signal %d.\n", (int) pid, WTERMSIG (p->status));
+					// dprintf (2, C_LIGHT_MAGENTA"EXIT"C_RESET": "C_GOLD"%d"C_RESET" status: "C_BRIGHT_BLUE"%d"C_RESET"\n", pid, WEXITSTATUS(status));
+				} else if (WIFSTOPPED (status)) {
+					p->stopped = 1;
+					// dprintf (2, "%d: Stopped\n", pid);
+				} else if (WIFSIGNALED (status)) {
+					p->completed = 1;
+					// dprintf (2, "%d: Terminated by signal %d.\n", (int) pid, WTERMSIG (p->status));
 				}
 				return 0;
 			}
-		fprintf (stderr, "No child process %d.\n", pid);
+		fprintf (stderr, C_RED"FATAL: No child process %d."C_RESET"\n", pid);
 		return -1;
 	}
 }
@@ -307,27 +302,32 @@ void wait_for_job (Job *j) {
 
 	do {
 		pid = waitpid(-j->pgid, &status, WUNTRACED);
-		// dprintf(2, "waited for pid: %d\n", pid);
+		if (pid != -1) {
+			// dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", j->pgid, pid, getpid());
+		} else {
+			// dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", j->pgid, pid,  getpid());
+		}
 	} while (!mark_process_status(j, pid, status)
 	&& !job_is_stopped(j)
 	&& !job_is_completed(j));
 }
 
-void put_job_in_foreground(Job *job, bool cont) {
+void put_job_in_foreground (Job *j, int cont) {
 	ShellInfos *self = shell(SHELL_GET);
-	//put job in the same pgid than the shell
-	tcsetpgrp (self->shell_terminal, job->pgid);
-	//send job a continue signal is necessary (can be trigger by fg builtin for example)
+	/* Put the job into the foreground.  */
+	tcsetpgrp (self->shell_terminal, j->pgid);
+	/* Send the job a continue signal, if necessary.  */
 	if (cont) {
-		tcsetattr(self->shell_terminal, TCSADRAIN, &job->tmodes);
-		if (kill(-job->pgid, SIGCONT) < 0) {
-			perror("job foreground SIGCONT failed\n");
-		}
+		tcsetattr (self->shell_terminal, TCSADRAIN, &j->tmodes);
+		if (kill (- j->pgid, SIGCONT) < 0)
+			perror ("kill (SIGCONT)");
 	}
-	wait_for_job(job);
-	//put shell back in foreground
+	/* Wait for it to report.  */
+	wait_for_job (j);
+	/* Put the self->shell back in the foreground.  */
 	tcsetpgrp (self->shell_terminal, self->shell_pgid);
-	tcgetattr (self->shell_terminal, &job->tmodes);
+	/* Restore the self->shell’s terminal modes.  */
+	tcgetattr (self->shell_terminal, &j->tmodes);
 	tcsetattr (self->shell_terminal, TCSADRAIN, &self->shell_tmodes);
 }
 
@@ -370,7 +370,8 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 			} else if (proc->n_data->tree_tag == TREE_SUBSHELL) {
 				pids[i] = secure_fork();
 				if (pids[i] == 0) {
-					close_all_fds();
+					// dprintf(2, C_BRIGHT_BLUE"INFO"C_RESET": Command: "C_DARK_YELLOW"%s"C_RESET" PID | GPID: "C_YELLOW "%d | %d"C_RESET"\n", "SUBSHELL", getpid(), getpgid(getpid()));
+					// close_all_fds();
 					if (proc->n_data->redirs != NULL) {
 						if (!apply_all_redirect(proc->n_data->redirs)) {
 							gc(GC_CLEANUP, GC_SUBSHELL);
@@ -384,18 +385,12 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 					exit(g_exitno);
 				} else {
 					proc->pid = pids[i];
-					if (shell_infos->interactive)
-					{
+					// if (shell_infos->interactive) {
 						if (!job->pgid)
 							job->pgid = pids[i];
 						setpgid (pids[i], job->pgid);
-					}
+					// }
 					string_list_clear(shell_vars->local);
-				}
-				if (!shell_infos->interactive) {
-					wait_for_job(job);
-				} else if (foreground) {
-					put_job_in_foreground(job, 0);
 				}
 			}
 		}
@@ -418,12 +413,12 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 			} else {
 				// Parent process
 				proc->pid = pids[i];
-				if (shell_infos->interactive)
-				{
+				// if (shell_infos->interactive) {
 					if (!job->pgid)
 						job->pgid = pids[i];
 					setpgid (pids[i], job->pgid);
-				}
+				// }
+				// dprintf(2, C_BRIGHT_BLUE"INFO"C_RESET": Command: "C_YELLOW"%s"C_RESET" PID | GPID: "C_YELLOW "%d | %d"C_RESET"\n", command->bin, pids[i], getpgid(pids[i]));
 				string_list_clear(shell_vars->local);
 			}
 		}
@@ -456,8 +451,6 @@ Job *job_init(Process *first_process) {
 	return self;
 }
 
-
-
 int exec_node(Node *node, Vars *shell_vars) {
 	// TODO: remove ExecuterList, became useless
 	bool foreground = true; //TODO: define it in ast_exec later
@@ -465,12 +458,11 @@ int exec_node(Node *node, Vars *shell_vars) {
 	Job *job = job_init(list->data[0]);
 	launch_job(job, shell_vars, foreground);
 
-	// for (Process *p = job->first_process; p; p = p->next) {
-	// 	dprintf(2, "Process's pid: %d\n", p->pid);
-	// 	dprintf(2, "status: %d\n", p->status);
-	// 	dprintf(2, "completed: %d\n", p->completed);
-	// 	dprintf(2, "stopped: %d\n", p->stopped);
-	// }
+	for (Process *p = job->first_process; p; p = p->next) {
+		dprintf(2, C_BRIGHT_CYAN"%d"C_RESET": status | completed | stopped :" \
+		  C_YELLOW"%d"C_RESET" | "C_LIGHT_GREEN"%d"C_RESET" | "C_LIGHT_ORANGE"%d"C_RESET"\n",
+		  p->pid, WEXITSTATUS(p->status), p->completed, p->stopped);
+	}
 	
 	return g_exitno;
 }
