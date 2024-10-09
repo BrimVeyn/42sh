@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:44 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/06 18:13:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/09 09:17:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ typedef struct {
 //----------------AST-----------------//
 Node				*ast_build(TokenList *tokens);
 Node				*generate_tree(TokenListStack *list);
-int					ast_execute(Node *AST, Vars *shell_vars);
+int					ast_execute(Node *AST, Vars *shell_vars, bool foreground);
 Node				*gen_operator_node(TokenList *tok, Node *left, Node *right);
 Node				*gen_operand_node(TokenList *list);
 Node				*generate_tree(TokenListStack *list);

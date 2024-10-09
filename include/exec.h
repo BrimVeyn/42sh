@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:18:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/06 17:59:41 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/09 09:50:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,11 @@
 #include "parser.h"
 #include <stdbool.h>
 
+//List of active / background jobs
+extern Job *job_list;
+
 //------------Shell Infos------------------//
-#define SHELL_INIT 0
-#define SHELL_GET 1
+typedef enum { SHELL_INIT, SHELL_GET } shell_interface_mode;
 
 typedef struct ShellInfos {
 	bool	interactive;
@@ -30,7 +32,6 @@ typedef struct ShellInfos {
 
 ShellInfos *shell(int mode);
 //---------------------------------------//
-
 void	close_saved_fds(int *saved_fds);
 void	close_std_fds(void);
 void	close_all_fds(void);
@@ -42,7 +43,9 @@ void	secure_execve(const char *pathname, char **const argv, char **const envp);
 
 bool	is_builtin(char *bin);
 
-int		exec_node(Node *node, Vars *env);
+int		exec_node(Node *node, Vars *shell_vars, bool foreground);
+void	update_status(void);
+void	do_job_notification(void);
 
 char	*find_bin_location(char *bin, StringList *env);
 

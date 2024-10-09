@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/08 17:36:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/09 10:55:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -274,31 +274,33 @@ int mark_process_status (Job *j, pid_t pid, int status) {
 	if (pid <= 0) {
 		return -1;
 	} else {
+		for (; j; j = j->next) {
 		/* Update the record for the process.  */
-		for (p = j->first_process; p; p = p->next)
-			if (p->pid == pid) {
-				p->status = status;
-				if (WIFEXITED(status)) {
-					g_exitno = WEXITSTATUS(status);
-					p->completed = 1;
-					// dprintf (2, C_LIGHT_MAGENTA"EXIT"C_RESET": "C_GOLD"%d"C_RESET" status: "C_BRIGHT_BLUE"%d"C_RESET"\n", pid, WEXITSTATUS(status));
-				} else if (WIFSTOPPED (status)) {
-					p->stopped = 1;
-					// dprintf (2, "%d: Stopped\n", pid);
-				} else if (WIFSIGNALED (status)) {
-					p->completed = 1;
-					// dprintf (2, "%d: Terminated by signal %d.\n", (int) pid, WTERMSIG (p->status));
+			for (p = j->first_process; p; p = p->next)
+				if (p->pid == pid) {
+					p->status = status;
+					if (WIFEXITED(status)) {
+						g_exitno = WEXITSTATUS(status);
+						p->completed = 1;
+						// dprintf (2, C_LIGHT_MAGENTA"EXIT"C_RESET": "C_GOLD"%d"C_RESET" status: "C_BRIGHT_BLUE"%d"C_RESET"\n", pid, WEXITSTATUS(status));
+					} else if (WIFSTOPPED (status)) {
+						p->stopped = 1;
+						// dprintf (2, "%d: Stopped\n", pid);
+					} else if (WIFSIGNALED (status)) {
+						p->completed = 1;
+						// dprintf (2, "%d: Terminated by signal %d.\n", (int) pid, WTERMSIG (p->status));
+					}
+					return 0;
 				}
-				return 0;
-			}
+		}
 		fprintf (stderr, C_RED"FATAL: No child process %d."C_RESET"\n", pid);
 		return -1;
 	}
 }
 
 void wait_for_job (Job *j) {
-  int status;
-  pid_t pid;
+	int status;
+	pid_t pid;
 
 	do {
 		pid = waitpid(-j->pgid, &status, WUNTRACED);
@@ -310,6 +312,68 @@ void wait_for_job (Job *j) {
 	} while (!mark_process_status(j, pid, status)
 	&& !job_is_stopped(j)
 	&& !job_is_completed(j));
+}
+
+void	job_list_addback(Job **lst, Job *new_value)
+{
+	Job	*temp;
+
+	if (*lst == NULL)
+		*lst = new_value;
+	else
+	{
+		temp = *lst;
+		while (temp->next)
+			temp = temp->next;
+		temp->next = new_value;
+	}
+}
+
+void put_job_in_background (Job *j, int cont) {
+	job_list_addback(&job_list, j);
+	//Send cont signal if necessary (wake up the job)
+	if (cont)
+		if (kill (-j->pgid, SIGCONT) < 0)
+			perror ("kill (SIGCONT)");
+}
+
+void update_status(void) {
+	int status;
+	pid_t pid;
+
+	do {
+		pid = waitpid (WAIT_ANY, &status, WUNTRACED|WNOHANG);
+		dprintf(2, "Waited for: %d\n", pid);
+	} while (!mark_process_status (job_list, pid, status));
+}
+
+void format_job_info (Job *j, const char *status) {
+  dprintf(2, "%ld (%s)\n", (long)j->pgid, status);
+}
+
+void do_job_notification(void) {
+	update_status();
+
+	Job *jlast = NULL;
+	Job *jnext = NULL;
+	for (Job *j = job_list; j; j = j->next) {
+		jnext = j->next;
+
+		if (job_is_completed(j)) {
+			format_job_info(j, "completed");
+			if (jlast) {
+				jlast->next = jnext;
+			} else {
+				job_list = jnext;
+			}
+		} else if (job_is_stopped(j) && !j->notified) {
+			format_job_info(j, "stopped");
+			j->notified = true;
+			jlast = j;
+		} else {
+			jlast = j;
+		}
+	}
 }
 
 void put_job_in_foreground (Job *j, int cont) {
@@ -362,10 +426,10 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 			if (proc->n_data->tree_tag == TREE_COMMAND_GROUP) {
 				if (proc->n_data->redirs != NULL) {
 					if (apply_all_redirect(proc->n_data->redirs)) {
-						g_exitno = ast_execute(proc->n_data, shell_vars);
+						g_exitno = ast_execute(proc->n_data, shell_vars, foreground);
 					}
 				} else {
-					g_exitno = ast_execute(proc->n_data, shell_vars);
+					g_exitno = ast_execute(proc->n_data, shell_vars, foreground);
 				}
 			} else if (proc->n_data->tree_tag == TREE_SUBSHELL) {
 				pids[i] = secure_fork();
@@ -378,18 +442,16 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 							exit(g_exitno);
 						}
 					}
-					g_exitno = ast_execute(proc->n_data, shell_vars);
+					g_exitno = ast_execute(proc->n_data, shell_vars, foreground);
 					gc(GC_CLEANUP, GC_ENV);
 					gc(GC_CLEANUP, GC_SUBSHELL);
 					free(((Garbage *)gc(GC_GET))[GC_GENERAL].garbage);
 					exit(g_exitno);
 				} else {
 					proc->pid = pids[i];
-					// if (shell_infos->interactive) {
-						if (!job->pgid)
-							job->pgid = pids[i];
-						setpgid (pids[i], job->pgid);
-					// }
+					if (!job->pgid)
+						job->pgid = pids[i];
+					setpgid (pids[i], job->pgid);
 					string_list_clear(shell_vars->local);
 				}
 			}
@@ -413,11 +475,9 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 			} else {
 				// Parent process
 				proc->pid = pids[i];
-				// if (shell_infos->interactive) {
-					if (!job->pgid)
-						job->pgid = pids[i];
-					setpgid (pids[i], job->pgid);
-				// }
+				if (!job->pgid)
+					job->pgid = pids[i];
+				setpgid (pids[i], job->pgid);
 				// dprintf(2, C_BRIGHT_BLUE"INFO"C_RESET": Command: "C_YELLOW"%s"C_RESET" PID | GPID: "C_YELLOW "%d | %d"C_RESET"\n", command->bin, pids[i], getpgid(pids[i]));
 				string_list_clear(shell_vars->local);
 			}
@@ -435,11 +495,11 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 	if (!shell_infos->interactive) {
 		wait_for_job(job);
 	} else if (foreground) {
-		put_job_in_foreground(job, 0);
+		put_job_in_foreground(job, false);
+	} else {
+		put_job_in_background(job, false);
+		format_job_info (job, "launched");
 	}
-	// } //else {
-	// 	puy_job_in_background(job, false);
-	// }
 
 	close_saved_fds(saved_fds);
 	return true;
@@ -451,18 +511,18 @@ Job *job_init(Process *first_process) {
 	return self;
 }
 
-int exec_node(Node *node, Vars *shell_vars) {
+int exec_node(Node *node, Vars *shell_vars, bool foreground) {
 	// TODO: remove ExecuterList, became useless
-	bool foreground = true; //TODO: define it in ast_exec later
 	const ExecuterList *list = build_executer_list(node->value.operand);
 	Job *job = job_init(list->data[0]);
 	launch_job(job, shell_vars, foreground);
 
+	/*
 	for (Process *p = job->first_process; p; p = p->next) {
-		dprintf(2, C_BRIGHT_CYAN"%d"C_RESET": status | completed | stopped :" \
-		  C_YELLOW"%d"C_RESET" | "C_LIGHT_GREEN"%d"C_RESET" | "C_LIGHT_ORANGE"%d"C_RESET"\n",
+		dprintf(2, C_BRIGHT_CYAN"%d"C_RESET": status | completed | stopped : " \
+		  C_VIOLET"%d"C_RESET" | "C_LIGHT_GREEN"%d"C_RESET" | "C_LIGHT_ORANGE"%d"C_RESET"\n", \
 		  p->pid, WEXITSTATUS(p->status), p->completed, p->stopped);
-	}
+	} */
 	
 	return g_exitno;
 }
