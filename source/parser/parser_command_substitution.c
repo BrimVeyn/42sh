@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/06 16:19:14 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/09 09:21:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ static bool execute_command_sub(char *input, Vars *shell_vars) {
 	}
 	heredoc_detector(tokens);
 	Node *AST = ast_build(tokens);
-	ast_execute(AST, shell_vars);
+	ast_execute(AST, shell_vars, true);
 
 	return true;
 }

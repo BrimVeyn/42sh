@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:35:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/07 16:34:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/09 10:56:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@
 #include <signals.h>
 
 int g_debug = 0;
+Job *job_list = NULL;
 
 char *init_prompt_and_signals(bool shell_is_interactive) {
 	rl_event_hook = rl_event_dummy;
@@ -208,14 +209,15 @@ int main(const int ac, const char *av[], const char *env[]) {
 				continue; 
 			heredoc_detector(tokens);
 			Node *AST = ast_build(tokens);
-			ast_execute(AST, shell_vars);
+			ast_execute(AST, shell_vars, true);
 			//update env '_' variable
 			char *last_executed = ft_strjoin("_=", input);
 			string_list_add_or_update(shell_vars->env, last_executed);
 			string_list_add_or_update(shell_vars->set, last_executed);
 			FREE_POINTERS(last_executed);
+			do_job_notification();
 			//reset memory collection for the next input
-			gc(GC_RESET, GC_SUBSHELL);
+			// gc(GC_RESET, GC_SUBSHELL);
 		}
 	}
 	//clear history, clear all allocations, close all fds and exit
