@@ -6,14 +6,13 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/01 13:29:00 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/09 13:14:26 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LEXER_H
 # define LEXER_H
 
-#include <readline/history.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
