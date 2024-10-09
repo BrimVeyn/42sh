@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:18:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/09 09:50:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/09 15:46:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,6 @@
 #include "ast.h"
 #include "parser.h"
 #include <stdbool.h>
-
-//List of active / background jobs
-extern Job *job_list;
 
 //------------Shell Infos------------------//
 typedef enum { SHELL_INIT, SHELL_GET } shell_interface_mode;
@@ -41,13 +38,40 @@ bool	secure_dup2(int from, int to);
 void	secure_pipe2(int pipefd[2], int flags);
 void	secure_execve(const char *pathname, char **const argv, char **const envp);
 
-bool	is_builtin(char *bin);
+bool	is_builtin(const char *bin);
+bool	builtin_executer(const SimpleCommand *command, Vars *shell_vars);
 
 int		exec_node(Node *node, Vars *shell_vars, bool foreground);
-void	update_status(void);
-void	do_job_notification(void);
 
 char	*find_bin_location(char *bin, StringList *env);
+
+//------------------------Jobs---------------------------------//
+
+typedef struct {
+	Job **data;
+	size_t size;
+	size_t capacity;
+} JobList;
+
+extern JobList *job_list;
+
+JobList *job_list_init(void);
+void	job_list_add(Job *j);
+
+void	wait_for_job (Job *j);
+void	update_status(void);
+void	do_job_notification(void);
+void	format_job_info (Job *j, const char *status);
+int		mark_process_status (JobList *j, pid_t pid, int status);
+void	put_job_in_foreground (Job *j, int cont);
+void	put_job_in_background (Job *j);
+int		job_is_completed(Job *j);
+int		job_is_stopped(Job *j);
+void	job_list_addback(Job **lst, Job *new_value);
+void	job_move(Job *job);
+void	job_list_remove(Job *el);
+
+//-------------------------------------------------------------//
 
 //------------------------Builtins-----------------------------//
 #define TABLE_SIZE 1000
@@ -84,29 +108,6 @@ void builtin_cd(const SimpleCommand *command, Vars *shell_vars);
 void builtin_unset(const SimpleCommand *command, Vars *shell_vars);
 void builtin_jobs(const SimpleCommand *command, Vars *shell_vars);
 void builtin_fg(const SimpleCommand *command, Vars *shell_vars);
-//-------------------------------------------------------------//
-
-//--------------------------Jobs Interface---------------------//
-typedef enum {
-	PROCESS_PAUSED,
-	PROCESS_RESUMED,
-	PROCESS_EXITED,
-	TABLE_PRINT,
-} process_status;
-
-typedef struct {
-	pid_t id;
-	char *bin;
-	process_status status;
-} ProcessInfos;
-
-typedef struct {
-	ProcessInfos **data;
-	size_t size;
-	size_t capacity;
-} JobTable;
-
-void job(process_status status, pid_t pid, char *bin);
 //-------------------------------------------------------------//
 
 #endif

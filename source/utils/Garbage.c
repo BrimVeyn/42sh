@@ -6,15 +6,17 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/03 17:28:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/09 14:26:28 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
 #include "libft.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 static void gc_init(Garbage *gc) {
 	for (int n = 0; n < GC_ALL; n++) {
@@ -41,10 +43,11 @@ static void *gc_add(Garbage *gc, void *ptr, const int n) {
 	return ptr;
 }
 
-static void gc_free(Garbage *gc, void *addr, int n) {
+static void gc_free(Garbage *gc, void *addr, int n, bool release) {
 	for (uint16_t i = 0; i < gc[n].size; i++) {
 		if ((uintptr_t) addr == (uintptr_t) gc[n].garbage[i]) {
-			free(gc[n].garbage[i]);
+			if (release)
+				free(gc[n].garbage[i]);
 			gc[n].garbage[i] = gc[n].garbage[gc[n].size - 1]; 
 			gc[n].garbage[gc[n].size - 1] = NULL;
 			gc[n].size--;
@@ -154,12 +157,20 @@ void *gc(gc_mode mode, ...) {
 		case GC_FREE: {
 			void *ptr = va_arg(args, void *);
 			const int level = va_arg(args, int);
-			gc_free(GC, ptr, level);
+			gc_free(GC, ptr, level, true);
 			return NULL;
 		}
 		case GC_CLEANUP: {
 			const int level = va_arg(args, int);
 			gc_cleanup(GC, level);
+			return NULL;
+		}
+		case GC_MOVE: {
+			void *ptr = va_arg(args, void *);
+			const int old_level = va_arg(args, int);
+			const int new_level = va_arg(args, int);
+			gc_free(GC, ptr, old_level, false);
+			gc_add(GC, ptr, new_level);
 			return NULL;
 		}
 		default:
