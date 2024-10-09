@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/03 12:29:28 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/07 13:06:48 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,8 +73,12 @@ bool				parser_parameter_expansion(TokenList *tl, Vars *shell_vars);
 bool				parser_command_substitution(TokenList *tl, Vars *shell_vars);
 bool				parser_arithmetic_expansion(TokenList *tokens, Vars *shell_vars);
 int					parser_filename_expansion(TokenList *tl);
-bool parser_word_split(TokenList *dest, Vars *shell_vars, char *prefix, char *infix, char *postfix, int index);
-bool history_expansion (char **pstring, int history_fd);
+bool				parser_word_split(TokenList *dest, Vars *shell_vars, char *prefix, char *infix, char *postfix, int index);
+
+//-------------------history modules------------//
+bool				history_expansion (char **pstring, int history_fd);
+int					get_history(void);
+void				add_input_to_history(char *input, int *history_fd);
 
 //-------------------Parameter Expansion-------------//
 void				parser_skip_subshell(TokenList *list, int *it);

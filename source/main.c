@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/03 14:56:39 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/08 11:27:09 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,64 +41,6 @@ char *init_prompt_and_signals(void) {
 	else
 		input = get_next_line(STDIN_FILENO);
 	return input;
-}
-
-int get_history(void) {
-	char *home = getenv("HOME");
-	char history_filename[1024] = {0};
-	ft_sprintf(history_filename, "%s/.42sh_history", home);
-    int fd = open(history_filename, O_RDWR | O_CREAT, 0644);
-    if (fd == -1) {
-        perror("Can't open history file");
-        exit(EXIT_FAILURE);
-    }
-
-	struct stat st;
-	if (fstat(fd, &st) == -1){
-        perror("Can't get history's file stats");
-        exit(EXIT_FAILURE);
-	}
-    size_t file_size = st.st_size;
-
-    char *buffer = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (buffer == MAP_FAILED) {
-        perror("mmap failed");
-        exit(EXIT_FAILURE);
-    }
-
-	char *start = buffer;
-    char *end = buffer; 
-
-	while(*end){
-		if (*end == '\n'){
-			char *tmp = (char *)malloc(end - start + 1);
-			memcpy(tmp, start, end - start);
-			tmp[end - start] = '\0';
-			add_history(tmp);
-			free(tmp);
-			start = end + 1;
-		}
-		end++;
-	}
-	munmap(buffer, file_size);
-	close(fd);
-	fd = open(history_filename, O_APPEND | O_RDWR | O_CREAT, 0644);
-	return fd;
-}
-
-void add_input_to_history(char *input, int *history_fd){
-	add_history(input);
-	char *home = getenv("HOME");
-	char history_filename[1024] = {0};
-	ft_sprintf(history_filename, "%s/.42sh_history", home);
-	// if (*history_fd == -1){
-	// 	*history_fd = open(history_filename, O_APPEND | O_WRONLY | O_CREAT, 0644);
-	// 	if (*history_fd == -1) {
-	// 		perror("Can't open history file");
-	// 		exit(EXIT_FAILURE);
-	// 	}
-	// }
-	dprintf(*history_fd, "%s\n", input);
 }
 
 void env_to_string_list(StringList *env_list, const char **env){

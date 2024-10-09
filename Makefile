@@ -6,7 +6,7 @@
 #    By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/30 14:55:20 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/10/02 11:33:31 by nbardavi         ###   ########.fr        #
+#    Updated: 2024/10/09 10:15:48 by nbardavi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,21 +19,22 @@ CFLAGS 			:= -Wall -Werror -Wextra -g3# -fsanitize=address -fno-omit-frame-point
 SANFLAGS		:= -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
 
 LEXER_SRC 		:= $(wildcard source/lexer/*.c)
+FT_READLINE_SRC := $(wildcard source/ft_readline/*.c)
 EXEC_SRC 		:= $(wildcard source/exec/*.c)
 AST_SRC			:= $(wildcard source/ast/*.c)
 DEBUG_SRC		:= $(wildcard source/debug/*.c)
 REGEX_SRC		:= $(wildcard source/regex/*.c)
 PARSER_SRC		:= $(wildcard source/parser/*.c)
-STRING_SRC		:= $(wildcard source/string/*.c)
 UTILS_SRC		:= $(wildcard source/utils/*.c)
 SIGNALS_SRC		:= $(wildcard source/signals/*.c)
-BUILTINS_SRC		:= $(wildcard source/builtins/*.c)
+BUILTINS_SRC	:= $(wildcard source/builtins/*.c)
+CSTRING_SRC		:= $(wildcard source/string/*.c)
 
 INC       := -I./include -I./libftprintf/header
 
 SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) \
 				   $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC) \
-				   $(REGEX_SRC) $(BUILTINS_SRC)
+				   $(REGEX_SRC) $(BUILTINS_SRC) $(FT_READLINE_SRC) $(CSTRING_SRC) \
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
 
@@ -56,6 +57,9 @@ REGEX_MAIN	:= $(filter %/regex_main.c, $(BIN_TEST))
 
 EXEC_TEST		:= exec_test
 EXEC_MAIN	:= $(filter %/exec_main.c, $(BIN_TEST))
+
+FT_READLINE_TEST		:= ft_readline_test
+FT_READLINE_MAIN		:= $(filter %/ft_readline_main.c, $(BIN_TEST))
 
 SAN 			:= san
 
@@ -109,6 +113,12 @@ $(REGEX_TEST): $(LIBFT) $(OBJDIR) $(OBJ_NO_MAIN)
 	@$(call cmd_wrapper, $(CC) $(OBJ_NO_MAIN) $(REGEX_MAIN) $(INC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(REGEX_TEST))
 	@printf "$(REGEX_TEST) done !$(DEF_COLOR)\n"
 
+$(FT_READLINE_TEST): $(LIBFT) $(OBJDIR) $(OBJ_NO_MAIN)
+	@echo "$(RED)Making test binary: $(FT_READLINE_TEST)"
+	@printf "$(MAGENTA)"
+	@$(call cmd_wrapper, $(CC) $(OBJ_NO_MAIN) $(FT_READLINE_MAIN) $(INC) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(FT_READLINE_TEST))
+	@printf "$(FT_READLINE_TEST) done !$(DEF_COLOR)\n"
+
 $(NAME): $(LIBFT) $(OBJDIR) $(OBJ)
 	@echo "$(GREEN)Making binary: $(NAME)"
 	@printf "$(MAGENTA)"
@@ -128,7 +138,7 @@ clean:
 	@printf "$(RED)Objects deleted !$(DEF_COLOR)\n"
 
 fclean: clean
-	@rm -rf $(NAME) $(AST_TEST) $(REGEX_TEST) $(EXEC_TEST) $(LEXER_TEST)
+	@rm -rf $(NAME) $(AST_TEST) $(REGEX_TEST) $(EXEC_TEST) $(LEXER_TEST) $(FT_READLINE_TEST)
 	@make --no-print-directory -C libftprintf/ fclean
 	@printf "$(RED)Binary deleted !$(DEF_COLOR)\n"
 
@@ -143,4 +153,4 @@ $(LIBFT) :
 
 re: fclean all
 	
-.PHONY: all clean fclean re regex_test lexer_test exec_test san
+.PHONY: all clean fclean re regex_test lexer_test exec_test san ft_readline_test

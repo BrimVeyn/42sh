@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:15:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/03 12:34:16 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/09 13:13:30 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,6 @@ extern int g_debug;
 
 #include "libft.h"
 #include "colors.h"
-#include <readline/readline.h>
-#include <readline/history.h>
 #include <stdio.h>
 #include <sys/cdefs.h>
 #include <sys/wait.h>
