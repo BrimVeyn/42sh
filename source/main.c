@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:35:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/09 10:56:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/09 15:01:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,18 +33,18 @@
 #include <signals.h>
 
 int g_debug = 0;
-Job *job_list = NULL;
+JobList *job_list = NULL;
 
-char *init_prompt_and_signals(bool shell_is_interactive) {
+char *init_prompt_and_signals(char *input, bool shell_is_interactive) {
 	rl_event_hook = rl_event_dummy;
-	char *input = NULL;
 
+	(void) shell_is_interactive;
 	if (shell_is_interactive) {
 		signal_manager(SIG_PROMPT);
 		input = readline("42sh > ");
-	}
-	else
+	} else {
 		input = get_next_line(STDIN_FILENO);
+	}
 	return input;
 }
 
@@ -166,15 +166,16 @@ ShellInfos *shell(int mode) {
 			while (tcgetpgrp(self->shell_terminal) != (self->shell_pgid = getpgrp()))
 				kill(- self->shell_pgid, SIGTTIN);
 			//put ourselves in our new proces group
-			self->shell_pgid = getpid();
-			if (setpgid(self->shell_pgid, self->shell_pgid) < 0)
-			{
-				dprintf(2, "42sh: erorr couldn't put the shell in its own process group\n");
-				gc(GC_CLEANUP, GC_ALL);
-			}
-			//set itself as terminal
+			// self->shell_pgid = getpid();
+			// printf("pid: %d\n", self->shell_pgid);
+			// if (setpgid(self->shell_pgid, self->shell_pgid) < 0)
+			// {
+			// 	dprintf(2, "42sh: erorr couldn't put the shell in its own process group\n");
+			// 	gc(GC_CLEANUP, GC_ALL);
+			// }
+			// set itself as terminal
 			tcsetpgrp(self->shell_terminal, self->shell_pgid);
-			//saves its attributes
+			// saves its attributes
 			tcgetattr(self->shell_terminal, &self->shell_tmodes);
 		}
 	} else {
@@ -185,10 +186,11 @@ ShellInfos *shell(int mode) {
 
 
 int main(const int ac, const char *av[], const char *env[]) {
-	(void) av; (void) ac;
+	(void) av; (void) ac; (void) env;
 
 	shell(SHELL_INIT);
 	g_signal = 0;
+	job_list = job_list_init();
 
 	Vars *shell_vars = vars_init(env);
 	int history_fd = -1;
@@ -199,7 +201,8 @@ int main(const int ac, const char *av[], const char *env[]) {
 
 	char *input = NULL;
 	//display the prompt, init signals if shell in interactive and reads input
-	while ((input = init_prompt_and_signals(self->interactive)) != NULL) {
+	while ((input = init_prompt_and_signals(input, self->interactive)) != NULL) {
+		do_job_notification();
 		if (*input) {
 			if (self->interactive)
 				add_input_to_history(input, &history_fd);
@@ -215,9 +218,8 @@ int main(const int ac, const char *av[], const char *env[]) {
 			string_list_add_or_update(shell_vars->env, last_executed);
 			string_list_add_or_update(shell_vars->set, last_executed);
 			FREE_POINTERS(last_executed);
-			do_job_notification();
 			//reset memory collection for the next input
-			// gc(GC_RESET, GC_SUBSHELL);
+			gc(GC_RESET, GC_SUBSHELL);
 		}
 	}
 	//clear history, clear all allocations, close all fds and exit

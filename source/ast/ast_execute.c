@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:11:53 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/09 09:18:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/09 15:46:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,16 +18,16 @@
 int ast_execute(Node *node, Vars *shell_vars, bool foreground) {
 	if (node->tag == N_OPERATOR) {
 		if (node->value.operator == S_AND) {
-			int exit_lhs = ast_execute(node->left, shell_vars, true);
+			int exit_lhs = ast_execute(node->left, shell_vars, foreground);
 			if (exit_lhs == EXIT_SUCCESS) {
-				int exit_rhs = ast_execute(node->right, shell_vars, true);
+				int exit_rhs = ast_execute(node->right, shell_vars, foreground);
 				return exit_rhs;
 			} else
 				return exit_lhs;
 		} else if (node->value.operator == S_OR) {
-			int exit_lhs = ast_execute(node->left, shell_vars, true);
+			int exit_lhs = ast_execute(node->left, shell_vars, foreground);
 			if (exit_lhs != EXIT_SUCCESS) {
-				int exit_rhs = ast_execute(node->right, shell_vars, true);
+				int exit_rhs = ast_execute(node->right, shell_vars, foreground);
 				return exit_rhs;
 			}
 			else
@@ -35,10 +35,10 @@ int ast_execute(Node *node, Vars *shell_vars, bool foreground) {
 		} else if (node->value.operator == S_SEMI_COLUMN) {
 			int last_exit;
 			if (node->left) {
-				last_exit = ast_execute(node->left, shell_vars, true);
+				last_exit = ast_execute(node->left, shell_vars, foreground);
 			}
 			if (node->right) {
-				last_exit = ast_execute(node->right, shell_vars, true);
+				last_exit = ast_execute(node->right, shell_vars, foreground);
 			}
 			return last_exit;
 		} else if (node->value.operator == S_BG) {
@@ -47,7 +47,7 @@ int ast_execute(Node *node, Vars *shell_vars, bool foreground) {
 				last_exit = ast_execute(node->left, shell_vars, false);
 			}
 			if (node->right) {
-				last_exit = ast_execute(node->right, shell_vars, true);
+				last_exit = ast_execute(node->right, shell_vars, foreground);
 			}
 			return last_exit;
 		}

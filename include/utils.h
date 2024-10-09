@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/03 17:31:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/09 13:31:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ typedef enum {
 	GC_ALLOC,
 	GC_CALLOC,
 	GC_ADD,
+	GC_MOVE,
 	GC_FREE,
 	GC_CLEANUP,
 	GC_RESET,
