@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/09 16:29:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/10 10:22:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,21 +18,27 @@
 #include <unistd.h>
 
 int job_is_stopped(Job *j) {
-  Process *p;
+	Process *p;
 
-  for (p = j->first_process; p; p = p->next)
-    if (!p->completed && !p->stopped)
-      return 0;
-  return 1;
+	for (p = j->first_process; p; p = p->next)
+		if (!p->completed && !p->stopped) {
+			// printf("stopped no\n");
+			return 0;
+		}
+	// printf("stopped yes\n");
+	return 1;
 }
 
 int job_is_completed(Job *j) {
-  Process *p;
+	Process *p;
 
-  for (p = j->first_process; p; p = p->next)
-    if (!p->completed)
-      return 0;
-  return 1;
+	for (p = j->first_process; p; p = p->next)
+		if (!p->completed) {
+			// printf("completed no\n");
+			return 0;
+		}
+	// printf("completed yes\n");
+	return 1;
 }
 
 void job_move(Job *job) {
@@ -65,11 +71,11 @@ void do_job_notification(void) {
 	for (size_t i = 0; i < job_list->size; i++) {
 		Job *el = job_list->data[i];
 		if (job_is_completed(el)) {
-			//TODO: completed
-			dprintf(2, "[%zu]\tDone\t%s\n", i, get_pipeline(el));
+			if (el->bg)
+				dprintf(2, "[%zu]\tDone\t%s\n", el->id, get_pipeline(el));
 			job_list_remove(el);
 		} else if (job_is_stopped(el) && !el->notified) {
-			//TODO: stopped
+			dprintf(2, "[%zu]\t%d\n", el->id, el->pgid);
 			el->notified = true;
 		}
 	}

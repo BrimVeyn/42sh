@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:18:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/09 15:46:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/10 11:01:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ int		job_is_stopped(Job *j);
 void	job_list_addback(Job **lst, Job *new_value);
 void	job_move(Job *job);
 void	job_list_remove(Job *el);
+void	job_killall(void);
 
 //-------------------------------------------------------------//
 
