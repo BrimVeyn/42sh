@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:44 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/09 15:15:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/10 10:12:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,10 @@ typedef struct Process {
 
 typedef struct Job {
 	struct Process *first_process; //pointer to the first process
+	size_t id; //job control id
 	pid_t pgid; //process group id
 	bool notified; //true if user told about stopped jobs
+	bool bg;
 	struct termios tmodes; //saved terminal modes
 } Job;
 

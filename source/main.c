@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:35:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/09 15:01:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/10 12:19:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,9 @@
 int g_debug = 0;
 JobList *job_list = NULL;
 
-char *init_prompt_and_signals(char *input, bool shell_is_interactive) {
+void *init_prompt_and_signals(char *input, bool shell_is_interactive) {
 	rl_event_hook = rl_event_dummy;
 
-	(void) shell_is_interactive;
 	if (shell_is_interactive) {
 		signal_manager(SIG_PROMPT);
 		input = readline("42sh > ");
@@ -201,9 +200,11 @@ int main(const int ac, const char *av[], const char *env[]) {
 
 	char *input = NULL;
 	//display the prompt, init signals if shell in interactive and reads input
-	while ((input = init_prompt_and_signals(input, self->interactive)) != NULL) {
-		do_job_notification();
-		if (*input) {
+	while (true) {
+		input = init_prompt_and_signals(input, self->interactive);
+		if (self->interactive)
+			do_job_notification();
+		if (input) {
 			if (self->interactive)
 				add_input_to_history(input, &history_fd);
 			Lexer_p lexer = lexer_init(input);
@@ -220,6 +221,13 @@ int main(const int ac, const char *av[], const char *env[]) {
 			FREE_POINTERS(last_executed);
 			//reset memory collection for the next input
 			gc(GC_RESET, GC_SUBSHELL);
+		} else {
+			if (job_list->size) {
+				printf("There are running jobs\n");
+				job_killall();
+				continue;
+			}
+			break;
 		}
 	}
 	//clear history, clear all allocations, close all fds and exit

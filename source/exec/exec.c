@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/09 14:44:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/10 12:18:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -302,7 +302,6 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 	} else if (foreground) {
 		put_job_in_foreground(job, false);
 	} else {
-		//TODO: launched
 		put_job_in_background(job);
 	}
 
