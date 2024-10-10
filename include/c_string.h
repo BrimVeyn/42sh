@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 17:32:48 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/09 11:13:56 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/10 14:04:19 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,9 @@ int str_compare_simd(string *s1, string *s2);
 // ************************************************
 
 void str_assign_right_size(string *str, size_t len);
-string string_init_str(char *str);
+string string_init_str(const char *str);
+void str_destroy(string *str);
+string str_dup(const string *str);
 
 #define STRING_L(value) string_init_str(value);
 
