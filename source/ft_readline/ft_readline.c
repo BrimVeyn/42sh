@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 11:26:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/10 15:13:49 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/10 17:21:29 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,10 +105,10 @@ void init_readline(char *prompt, size_t *cursor_x, size_t *cursor_y) {
     *(cursor_x) = ft_strlen(prompt);
     write(STDOUT_FILENO, prompt, ft_strlen(prompt));
 
-	move_cursor(1, 39);
-	printf("cursor_x: %zu, cursor_y: %zu\n", *cursor_x, *cursor_y);
-	// printf("line length: %d\nprompt lenght: %zu\n", str_length(line), ft_strlen(prompt));
-	fflush(stdout);
+	// move_cursor(1, 39);
+	// printf("cursor_x: %zu, cursor_y: %zu\n", *cursor_x, *cursor_y);
+	// // printf("line length: %d\nprompt lenght: %zu\n", str_length(line), ft_strlen(prompt));
+	// fflush(stdout);
 
     move_cursor(*cursor_x, *cursor_y);
 }
@@ -129,19 +129,18 @@ int handle_normal_keys(char *prompt, char c, string *line, size_t *cursor_x){
 	}
 
 	if (*cursor_x - ft_strlen(prompt) == (size_t)str_length(line))
-		// if (c == 127){
-		// 	str_pop_back(line);
-		// 	cursor_x -= 2;
-		// }
-		// else
+		if (c == 127){
+			str_pop_back(line);
+			*cursor_x -= 2;
+		}
+		else
 			str_push_back(line, c);
 	else
-		// if (c == 127){
-		//
-		// 	str_erase(line, *cursor_x - ft_strlen(prompt), 1);
-		// 	cursor_x -= 2;
-		// }
-		// else
+		if (c == 127){
+			str_erase(line, *cursor_x - ft_strlen(prompt), 1);
+			*cursor_x -= 2;
+		}
+		else
 			str_insert(line, c, *cursor_x - ft_strlen(prompt));
 	(*cursor_x)++;
 	return 0;

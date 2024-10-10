@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 11:29:59 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/10 09:44:03 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/10 17:16:42 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ int main(void){
 			break;
 		}
 		// printf("input: %s", input);
-		add_history(input);
+		if (input[0])
+			add_history(input);
 	}
 	for (int i = 0; i < history->length; i++){
 		printf("history %d: %s", i, history->entries[i]->line.data);
