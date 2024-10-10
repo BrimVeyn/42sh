@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:44 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/10 10:12:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/10 14:25:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,8 @@ typedef struct Job {
 	size_t id; //job control id
 	pid_t pgid; //process group id
 	bool notified; //true if user told about stopped jobs
-	bool bg;
+	bool bg; 
+	int sig; //stopped by signal
 	struct termios tmodes; //saved terminal modes
 } Job;
 

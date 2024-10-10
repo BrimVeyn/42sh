@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/04 11:34:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/10 16:14:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ void				add_redirection_from_token(RedirectionList **redir_list, const Token *el
 //-------------------Parser modules------------//
 bool				parser_parameter_expansion(TokenList *tl, Vars *shell_vars);
 bool				parser_command_substitution(TokenList *tl, Vars *shell_vars);
-bool				parser_arithmetic_expansion(TokenList *tokens, Vars *shell_vars);
+bool parser_arithmetic_expansion(TokenList *tokens, const int idx, const size_t start, Vars *shell_vars);
 int					parser_filename_expansion(TokenList *tl);
 bool				parser_word_split(TokenList *dest, Vars *shell_vars, char *prefix, char *infix, char *postfix, int index);
 

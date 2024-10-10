@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/04 11:06:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/10 17:26:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,12 @@ void string_list_clear(StringList *list) {
 		list->data[i] = NULL;
 	}
 	list->size = 0;
+}
+
+void string_list_delete(StringList *list) {
+	string_list_clear(list);
+	gc(GC_FREE, list->data, GC_ENV);
+	gc(GC_FREE, list, GC_ENV);
 }
 
 void string_list_add(StringList *tl, char *token) {

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/06 15:50:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/10 17:26:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,17 +148,37 @@ void add_vars_to_local(StringList *list, TokenList *vars) {
 	}
 }
 
+Token *get_candidate(TokenList *tl, const int idx) {
+	if (is_word(tl, &idx)) {
+		return tl->t[idx];
+	} else if (is_redirection_tag(tl, &idx)) {
+		return tl->t[idx]->r_postfix;
+	} else {
+		return NULL;
+	}
+}
+
 SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
-	// parser_brace_expansion();
+	// parser_brace_expansion(); TODO: we'll find time
+	
+	// for (int it = 0; it < tl->size; it++) {
+	// 	Token *candidate = get_candidate(tl, it);
+	// 	if (!candidate)
+	// 		continue;
+	// 	StringList *list = string_list_init();
+	// 	parser_arithmetic_expansion(tl, it, 0, shell_vars);
+	// }
+
+
 	if (!parser_parameter_expansion(tl, shell_vars)){
 		return NULL;
 	}
 	if (!parser_command_substitution(tl, shell_vars)) {
 		return NULL;
 	}
-	if (!parser_arithmetic_expansion(tl, shell_vars)) {
-		return NULL;
-	}
+	// if (!parser_arithmetic_expansion(tl, shell_vars)) {
+	// 	return NULL;
+	// }
 	TokenList *command_vars = parser_eat_variables(tl);
 	RedirectionList *redirs = parser_get_redirection(tl);
 	SimpleCommand *command = parser_get_command(tl);

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/10 11:05:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/10 15:48:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "utils.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <termios.h>
@@ -99,7 +100,8 @@ int mark_process_status (JobList *list, pid_t pid, int status) {
 					p->stopped = 1;
 					job_move(job);
 					job_list_add(job);
-					dprintf(2, "[%zu]\tStopped(%d)\t%d\n", job->id, WSTOPSIG(status), job->pgid);
+					job->sig = WSTOPSIG(status);
+					dprintf(STDERR_FILENO, "[%zu]\tStopped(%s)\t%s\n", job->id, sigStr(job->sig), get_pipeline(job));
 					job->notified = true;
 				} else if (WIFSIGNALED (status)) {
 					p->completed = 1;
