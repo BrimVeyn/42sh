@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:18:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/10 11:01:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/10 14:34:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,8 @@ void	format_job_info (Job *j, const char *status);
 int		mark_process_status (JobList *j, pid_t pid, int status);
 void	put_job_in_foreground (Job *j, int cont);
 void	put_job_in_background (Job *j);
+char	*get_pipeline(Job *j);
+char	*sigStr(const int sig);
 int		job_is_completed(Job *j);
 int		job_is_stopped(Job *j);
 void	job_list_addback(Job **lst, Job *new_value);

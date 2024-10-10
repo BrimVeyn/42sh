@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/04 11:43:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/10 16:16:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,60 +156,57 @@ static void replace_nested_greedy(const char *ref, char *buffer) {
 	buffer[j] = '\0';
 }
 
-bool parser_arithmetic_expansion(TokenList *tokens, Vars *shell_vars) {
-	int i = 0;
+#include "colors.h"
 
-	while (i < tokens->size) {
-		Token *elem = tokens->t[i];
+bool parser_arithmetic_expansion(TokenList *tokens, const int idx, const size_t start, Vars *shell_vars) {
+	Token *elem = tokens->t[idx];
+	char *string = &elem->w_infix[start];
 
-		//Goto next token if its not word
-		if (!is_word(tokens, &i)) { i += 1; continue; }
-
-		const Range range = get_arithmetic_exp_range(elem->w_infix);
-		if (is_a_match(range)) {
-			if (!is_range_valid(range, UNCLOSED_ARITMETIC_EXP_STR)) { g_exitno = 126; return false; }
-			else { i += 1; continue; }
-		}
-
-		char infix[MAX_WORD_LEN] = {0};
-		ft_memset(infix, '\0', MAX_WORD_LEN);
-		ft_memcpy(infix, &elem->w_infix[range.start + 3], (range.end - range.start) - 4);
-		char *tmp = ft_strdup(infix);
-		replace_nested_greedy(tmp, infix);
-		FREE_POINTERS(tmp);
-
-		// printf(C_RED"------"C_RESET"\n");
-		// printf("%s\n", infix);
-		// printf(C_RED"------"C_RESET"\n");
-
-		long result = 0;
-		Lexer_p lexer = lexer_init(infix);
-		ATokenStack *tokens = lexer_arithmetic_exp_lex_all(lexer);
-		// aTokenListToString(tokens);
-
-		if (!tokens) { g_exitno = 1; return false; }
-		if (!tokens->size) { goto empty; }
-		if (!arithmetic_syntax_check(tokens)) {
-			return false;
-		}
-		ATokenStack *token_queue = tokens_to_rpn(tokens);
-		ANode *AST = generate_atree(token_queue);
-		int error = 0;
-		result = aAST_execute(AST, shell_vars, &error);
-		if (error == -1) {
-			dprintf(2, DIVISION_BY_0"\n"); g_exitno = 1;
-			return false;
-		}
-
-	empty: {
-			char *prefix = ft_substr(elem->w_infix, 0, range.start);
-			char *postfix = ft_substr(elem->w_infix, range.end + 1, (strlen(elem->w_infix) - 1) - range.end);
-			char *result_str = ft_ltoa(result);
-			char *prefix_result = ft_strjoin(prefix, result_str);
-			char *prefix_result_postfix= ft_strjoin(prefix_result, postfix);
-			FREE_POINTERS(prefix, postfix, result_str, prefix_result);
-			elem->w_infix = gc(GC_ADD, prefix_result_postfix, GC_SUBSHELL);
+	const Range range = get_arithmetic_exp_range(string);
+	if (is_a_match(range)) {
+		if (!is_range_valid(range, UNCLOSED_ARITMETIC_EXP_STR)) { g_exitno = 126; return false; }
+		else { return false; }
 	}
+
+	char infix[MAX_WORD_LEN] = {0};
+	ft_memset(infix, '\0', MAX_WORD_LEN);
+	ft_memcpy(infix, &string[range.start + 3], (range.end - range.start) - 4);
+	char *tmp = ft_strdup(infix);
+	replace_nested_greedy(tmp, infix);
+	FREE_POINTERS(tmp);
+
+	printf(C_RED"------"C_RESET"\n");
+	printf("%s\n", infix);
+	printf(C_RED"------"C_RESET"\n");
+
+	long result = 0;
+	Lexer_p lexer = lexer_init(infix);
+	ATokenStack *token_stack = lexer_arithmetic_exp_lex_all(lexer);
+	// aTokenListToString(token_stack);
+
+	if (!token_stack) { g_exitno = 1; return false; }
+	if (!token_stack->size) { goto empty; }
+	if (!arithmetic_syntax_check(token_stack)) {
+		return false;
+	}
+
+	ATokenStack *token_queue = tokens_to_rpn(token_stack);
+	ANode *AST = generate_atree(token_queue);
+	int error = 0;
+	result = aAST_execute(AST, shell_vars, &error);
+	if (error == -1) {
+		dprintf(2, DIVISION_BY_0"\n"); g_exitno = 1;
+		return false;
+	}
+
+empty: {
+		char *prefix = ft_substr(elem->w_infix, start, range.start);
+		char *postfix = ft_substr(string, range.end + 1, (strlen(string) - 1) - range.end);
+		char *result_str = ft_ltoa(result);
+		char *prefix_result = ft_strjoin(prefix, result_str);
+		char *prefix_result_postfix= ft_strjoin(prefix_result, postfix);
+		FREE_POINTERS(prefix, postfix, result_str, prefix_result);
+		elem->w_infix = gc(GC_ADD, prefix_result_postfix, GC_SUBSHELL);
 	}
 	return true;
 }

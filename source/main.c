@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:35:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/10 12:19:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/10 14:17:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include "libft.h"
 
 #include <signal.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
