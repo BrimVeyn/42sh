@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 11:26:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/09 15:54:39 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/10 15:13:49 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,17 +45,12 @@ void move_cursor(int x, int y) {
 	
     if (move_cursor_seq) {
         char *cursor_position = tgoto(move_cursor_seq, x, y);
-		// disable_raw_mode();
 		tputs(cursor_position, 1, putchar);
 		fflush(stdout);
-		// enable_raw_mode();
-		// disable_raw_mode();
-		// printf("x: %d\ny: %d\n", x, y);
-		// enable_raw_mode();
     }
 }
 
-void set_cursor_pos(size_t *x, size_t *y){
+void get_cursor_pos(size_t *x, size_t *y){
     char buf[32];
     unsigned int i = 0;
 	(void) y;
@@ -84,101 +79,152 @@ void set_cursor_pos(size_t *x, size_t *y){
 	}
 }
 
+void update_line(const char *prompt, string *line){
+	write(1, "\033[2K\r", 5);
+	write(1, prompt, ft_strlen(prompt));
+	write(1, line->data, str_length(line));
+}
+
+void init_readline(char *prompt, size_t *cursor_x, size_t *cursor_y) {
+    static bool history_defined = false;
+
+    char buffer[2048];
+    tgetent(buffer, getenv("TERM"));
+
+    if (!history_defined) {
+        init_history();
+        history_defined = true;
+    }
+
+    history->offset = history->length;
+    add_history("");
+    
+    enable_raw_mode();
+    get_cursor_pos(cursor_x, cursor_y);
+    (*cursor_y)--;
+    *(cursor_x) = ft_strlen(prompt);
+    write(STDOUT_FILENO, prompt, ft_strlen(prompt));
+
+	move_cursor(1, 39);
+	printf("cursor_x: %zu, cursor_y: %zu\n", *cursor_x, *cursor_y);
+	// printf("line length: %d\nprompt lenght: %zu\n", str_length(line), ft_strlen(prompt));
+	fflush(stdout);
+
+    move_cursor(*cursor_x, *cursor_y);
+}
+
+int handle_normal_keys(char *prompt, char c, string *line, size_t *cursor_x){
+	//place new char
+	if (c == '\n'){
+		write(1, "\n", 1);
+		// str_push_back(line, '\n');
+		// update_line(prompt, line);
+		write(1, "\033[2K\r", 5);
+		write(1, prompt, ft_strlen(prompt));
+		write(1, line->data, str_length(line));
+		return 1;
+	}
+	if (c == 127 && *cursor_x == ft_strlen(prompt)){
+		return 2;
+	}
+
+	if (*cursor_x - ft_strlen(prompt) == (size_t)str_length(line))
+		// if (c == 127){
+		// 	str_pop_back(line);
+		// 	cursor_x -= 2;
+		// }
+		// else
+			str_push_back(line, c);
+	else
+		// if (c == 127){
+		//
+		// 	str_erase(line, *cursor_x - ft_strlen(prompt), 1);
+		// 	cursor_x -= 2;
+		// }
+		// else
+			str_insert(line, c, *cursor_x - ft_strlen(prompt));
+	(*cursor_x)++;
+	return 0;
+}
+
+int handle_special_keys(char *prompt, string *line, size_t *cursor_x, size_t *cursor_y){
+
+	char seq[2];
+	if (read(STDIN_FILENO, &seq[0], 1) == 0) return 1;
+	if (read(STDIN_FILENO, &seq[1], 1) == 0) return 1;
+
+	if (seq[0] == '['){
+		if (seq[1] == 'A' && history->offset > 0){
+			history->offset--;
+			*cursor_x = history->entries[history->offset]->line.size + ft_strlen(prompt);
+			history->entries[history->length - 1]->line = str_dup(&history->entries[history->offset]->line);
+			return 2;
+		}
+		else if (seq[1] == 'D'){
+			if (*cursor_x > ft_strlen(prompt)){
+				move_cursor(--(*cursor_x), *cursor_y);
+			}
+		}
+		else if (seq[1] == 'C'){
+			if (*cursor_x <= (size_t)str_length(line) + ft_strlen(prompt) - 1){
+				move_cursor(++(*cursor_x), *cursor_y);
+			}
+		}
+		else if (seq[1] == 'B' && history->offset < history->length){
+			history->offset++;
+			*cursor_x = history->entries[history->offset]->line.size + ft_strlen(prompt);
+			history->entries[history->length - 1]->line = str_dup(&history->entries[history->offset]->line);
+			return 2;
+		}
+	}
+	return 0;
+}
+
 char *ft_readline(char *prompt){
-	static bool history_defined = false;
 	char c;
-	(void)prompt;
+	string *line = NULL;
+	int result = 0;
 
 	size_t cursor_x = 0;
 	size_t cursor_y = 0;
 	
-	char buffer[2048];
-	string line = STRING_L("");
+    init_readline(prompt, &cursor_x, &cursor_y);
+	// printf("cursor_x: %zu, cursor_y: %zu\n", cursor_x, cursor_y);
 
-	tgetent(buffer, getenv("TERM"));
-	
-	if (history_defined == false){
-		init_history();
-		history_defined = true;
-	}
-
-	// signal(SIGINT, signal_sigint_prompt);
-
-	//place cursor and print prompt
-	enable_raw_mode();
-	set_cursor_pos(&cursor_x, &cursor_y);
-	cursor_y--; //strange but need it
-	cursor_x += ft_strlen(prompt) - 1;
-	write(1, prompt, ft_strlen(prompt));
-	move_cursor(cursor_x, cursor_y); //move it to syncronize the position (avoid a bug)
-
+	line = &history->entries[history->length - 1]->line;
 	while(true){
+		update_line(prompt, line);
+		// move_cursor(1, 39);
+		// printf("cursor_x: %zu, cursor_y: %zu\n", cursor_x, cursor_y);
+		// printf("line length: %d\nprompt lenght: %zu\n", str_length(line), ft_strlen(prompt));
+		// fflush(stdout);
+		move_cursor(cursor_x, cursor_y);
+
+		// str_info(line);
 		read(STDIN_FILENO, &c, 1);
 
 		if (c == VEOF){
 			write(1, "\n", 1);
+			if (line->data[0] == '\0'){
+				pop_history();
+			}
 			return NULL;
 		}
 		//handle specials keys
 		else if (c == '\033'){
-			char seq[2];
-			if (read(STDIN_FILENO, &seq[0], 1) == 0) break;
-			if (read(STDIN_FILENO, &seq[1], 1) == 0) break;
-
-			if (seq[0] == '['){
-				if (seq[1] == 'A'){
-				}
-				else if (seq[1] == 'D'){
-					if (cursor_x > ft_strlen(prompt)){
-						move_cursor(--cursor_x, cursor_y);
-					}
-				}
-				else if (seq[1] == 'C'){
-					if (cursor_x <= (size_t)str_length(&line) + ft_strlen(prompt) - 1){
-						move_cursor(++cursor_x, cursor_y);
-					}
-				}
-				else if (seq[1] == 'B'){
-				}
-			}
+			result = handle_special_keys(prompt, line, &cursor_x, &cursor_y);
 		}
 		else {
-			//place new char
-			if (c == '\n'){
-				str_push_back(&line, '\n');
-				write(1, "\033[2K\r", 5);
-				write(1, prompt, ft_strlen(prompt));
-				write(1, line.data, str_length(&line));
-				break;
-			}
-			if (c == 127 && cursor_x == ft_strlen(prompt)){
-				continue;
-			}
-			if (cursor_x - ft_strlen(prompt) == (size_t)str_length(&line))
-				if (c == 127){
-					str_pop_back(&line);
-					cursor_x -= 2;
-				}
-				else
-					str_push_back(&line, c);
-			else
-				if (c == 127){
-
-					str_erase(&line, cursor_x - ft_strlen(prompt), 1);
-					cursor_x -= 2;
-				}
-				else
-					str_insert(&line, c, cursor_x - ft_strlen(prompt));
-
-			write(1, "\033[2K\r", 5);
-			write(1, prompt, ft_strlen(prompt));
-			write(1, line.data, str_length(&line));
-			cursor_x++;
-			move_cursor(cursor_x, cursor_y);
-
+			result = handle_normal_keys(prompt, c, line, &cursor_x);
 		}
+		if (result == 1) break;
 	}
 	disable_raw_mode();
 	// destroy_history();
-	return line.data;
+	// move_cursor(1, 38);
+	// printf("done\n");
+	// fflush(stdout);
+	char *str = ft_strdup(line->data);
+	pop_history();
+	return str;
 }

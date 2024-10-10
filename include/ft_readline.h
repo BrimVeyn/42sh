@@ -6,15 +6,20 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 11:31:11 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/09 14:37:10 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/10 12:16:08 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FT_READLINE_H
 # define FT_READLINE_H
 
+
+#ifndef C_STRING_H
+# include "c_string.h"
+#endif
+
 typedef struct _hist_entry {
-  char *line;
+  string line;
 } HIST_ENTRY;
 
 typedef struct _hist_state {
@@ -29,6 +34,8 @@ extern HISTORY_STATE *history;
 void init_history();
 void destroy_history();
 void add_history(const char *str);
+void pop_history();
+void str_info(const string *str);
 
 char *ft_readline(char *prompt);
 

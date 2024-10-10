@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/09 15:46:16 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/10 10:22:53 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,12 @@ void init_history(){
 	history->length = 0;
 	history->capacity = 10;
 
-	history->entries = malloc(sizeof(HIST_ENTRY*) * 10);
+	history->entries = ft_calloc(10, sizeof(HIST_ENTRY*));
 }
 
 void destroy_history(){
 	for (int i = 0; i < history->length; i++){
-		free(history->entries[i]->line);
+		str_destroy(&history->entries[i]->line);
 		free(history->entries[i]);
 	}
 	free(history->entries);
@@ -36,7 +36,7 @@ void destroy_history(){
 static void history_realloc() {
     if (history->length + 1 >= history->capacity) {
         size_t new_cap = history->capacity * 2;
-        HIST_ENTRY **tmp = malloc(sizeof(HIST_ENTRY*) * new_cap);
+        HIST_ENTRY **tmp = ft_calloc(new_cap, sizeof(HIST_ENTRY*));
 
         memcpy(tmp, history->entries, sizeof(HIST_ENTRY*) * history->length);
 
@@ -56,6 +56,15 @@ void add_history(const char *str) {
         }
     }
 
-    history->entries[history->length]->line = ft_strdup(str);
+    history->entries[history->length]->line = STRING_L(str);
     history->length++;
+}
+
+void pop_history(){
+	if (history->length > 0){
+		str_destroy(&history->entries[history->length - 1]->line);
+		free(history->entries[history->length - 1]);
+		history->entries[history->length - 1] = NULL;
+		history->length--;
+	}
 }
