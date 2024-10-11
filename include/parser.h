@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/10 16:14:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/11 16:32:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define PARSER_H
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include "lexer.h"
 #include "utils.h"
@@ -67,6 +68,52 @@ typedef struct SimpleCommand {
 	char					**args;
 } SimpleCommand;
 
+
+
+typedef enum {
+	EXP_ARITHMETIC,
+	EXP_VARIABLE,
+	EXP_CMDSUB,
+	EXP_WORD,
+} ExpKind;
+
+typedef struct {
+	ExpKind kind;
+	ssize_t	start;
+	ssize_t	end;
+}	ExpRange;
+
+typedef struct {
+	ExpRange **data;
+	size_t size;
+	size_t capacity;
+} ExpRangeList;
+
+typedef struct {
+	char *str;
+	ExpKind kind;
+} Str;
+
+typedef struct {
+	Str **data;
+	size_t size;
+	size_t capacity;
+} StrList;
+
+ExpRange *exp_range_init(void);
+StrList *str_list_init(void);
+void	str_list_print(const StrList *list);
+Str *str_init(const ExpKind kind, char *str);
+
+#define da_add(arr, el) \
+	do { \
+		if ((arr)->size >= (arr)->capacity) { \
+			(arr)->capacity *= 2; \
+			(arr)->data = realloc((arr)->data, sizeof(*(arr)->data) * (arr)->capacity); \
+		} \
+		(arr)->data[(arr)->size++] = el; \
+	} while (0)
+
 char				*parser_get_env_variable_value(char *name, StringList *env);
 //-------------------SimpleCommand-----------------------//
 SimpleCommand		*parser_parse_current(TokenList *tl, Vars *shell_vars);
@@ -82,8 +129,9 @@ void				add_redirection_from_token(RedirectionList **redir_list, const Token *el
 
 //-------------------Parser modules------------//
 bool				parser_parameter_expansion(TokenList *tl, Vars *shell_vars);
-bool				parser_command_substitution(TokenList *tl, Vars *shell_vars);
-bool parser_arithmetic_expansion(TokenList *tokens, const int idx, const size_t start, Vars *shell_vars);
+char				*parser_command_substitution(char *str, Vars *shell_vars);
+ExpRange			*get_command_sub_range(char *str);
+bool				parser_arithmetic_expansion(TokenList *tokens, const int idx, const size_t start, Vars *shell_vars);
 int					parser_filename_expansion(TokenList *tl);
 bool				parser_word_split(TokenList *dest, Vars *shell_vars, char *prefix, char *infix, char *postfix, int index);
 
@@ -94,7 +142,6 @@ bool				is_end_cmdgrp(const TokenList *list, const int *it);
 void				skip_cmdgrp(TokenList *self, TokenList *list, int *i);
 int					get_command_sub_range_end(char *str, int *i);
 
-bool				is_a_match(const Range range);
-bool 				is_range_valid(const Range range, char *str);
-
+bool				is_a_match(const ExpRange *range);
+bool				is_range_valid(const ExpRange *range, char *str);
 #endif // !PARSER_H

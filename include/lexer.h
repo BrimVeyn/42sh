@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:36:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/03 17:11:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/11 15:35:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,8 +90,8 @@ typedef Lexer * Lexer_p;
 
 typedef struct StringList {
 	char		**data;
-	uint16_t	size;
-	uint16_t	capacity;
+	size_t		size;
+	size_t		capacity;
 } StringList;
 
 typedef struct Token {
@@ -178,6 +178,7 @@ bool			string_list_remove(StringList *sl, char *id);
 char			*string_list_get_value(StringList *sl, char *id);
 char			*shell_vars_get_value(Vars *shell_vars, char *id);
 void			string_list_print(const StringList *list);
+void			string_list_print_debug(const StringList *list);
 
 //----------------Syntax----------------//
 bool	is_pipe(const TokenList *list, const int *i);
