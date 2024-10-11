@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/09 09:21:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/11 16:34:14 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,29 +39,26 @@ int get_command_sub_range_end(char *str, int *i) {
 	return *i;
 }
 
-static Range get_command_sub_range(char *str) {
-	Range self = {
-		.start = -1,
-		.end = -1,
-	};
+ExpRange *get_command_sub_range(char *str) {
+	ExpRange *self = exp_range_init();
 
-	self.start = ft_strstr(str, "$(");
-	if (self.start != -1 && !ft_strncmp(&str[self.start], "$((", 3)) {
-		self.start = -1;
+	self->start = ft_strstr(str, "$(");
+	if (self->start != -1 && !ft_strncmp(&str[self->start], "$((", 3)) {
+		self->start = -1;
 	}
-	if (self.start != -1) {
-		int start_copy = self.start;
-		self.end = get_command_sub_range_end(str, &start_copy);
+	if (self->start != -1) {
+		int start_copy = self->start;
+		self->end = get_command_sub_range_end(str, &start_copy);
 	}
 	return self;
 }
 
-bool is_a_match(const Range range) {
-	return (range.start == -1 || range.end == -1);
+bool is_a_match(const ExpRange *range) {
+	return (range->start != -1);
 }
 
-bool is_range_valid(const Range range, char *str) {
-	if (range.start != -1 && range.end == -1) {
+bool is_range_valid(const ExpRange *range, char *str) {
+	if (range->start != -1 && range->end == -1) {
 		dprintf(2, "%s", str);
 		return false;
 	}
@@ -88,71 +85,29 @@ bool is_variable_assignment(char *str) {
 	return false;
 }
 
-bool parser_command_substitution(TokenList *tokens, Vars *shell_vars) {
+char *parser_command_substitution(char *str, Vars *shell_vars) {
 	static int COMMAND_SUB_NO = 0;
-	bool error = false;
-	int i = 0;
 
-	while(i < tokens->size) {
-		Token *elem = tokens->t[i];
+	char file_name[MAX_FILENAME_LEN] = {0};
+	ft_sprintf(file_name, "/tmp/command_sub_%d", COMMAND_SUB_NO++);
 
-		if (!is_word(tokens, &i)) { i += 1; continue; }
+	int output_fd = open(file_name, O_CREAT | O_TRUNC | O_WRONLY | O_CLOEXEC, 0644);
+	int STDOUT_SAVE = dup(STDOUT_FILENO);
 
-		const Range range = get_command_sub_range(elem->w_infix);
-		if (is_a_match(range)) {
-			if (!is_range_valid(range, UNCLOSED_COMMAND_SUB_STR)) { g_exitno = 126; return false; }
-			else { i += 1; continue; }
-		}
+	dup2(output_fd, STDOUT_FILENO); close(output_fd);
+	//TODO: handle error correctly
+	if (!execute_command_sub(str, shell_vars)) { return NULL; }
+	dup2(STDOUT_SAVE, STDOUT_FILENO); close(STDOUT_SAVE);
 
-		char infix[MAX_WORD_LEN] = {0};
-		ft_memset(infix, '\0', MAX_WORD_LEN);
-		ft_memcpy(infix, &elem->w_infix[range.start + 1], range.end - range.start);
-
-		char file_name[MAX_FILENAME_LEN] = {0};
-		ft_sprintf(file_name, "/tmp/command_sub_%d", COMMAND_SUB_NO++);
-
-		int output_fd = open(file_name, O_CREAT | O_TRUNC | O_WRONLY | O_CLOEXEC, 0644);
-		if (output_fd == -1) {
-			printf("DUP failed in command sub what do we do ?\n");
-			exit(EXIT_FAILURE);
-		}
-
-		int STDOUT_SAVE = dup(STDOUT_FILENO);
-
-		dup2(output_fd, STDOUT_FILENO); close(output_fd);
-		if (!execute_command_sub(infix, shell_vars)) { error = true; }
-		dup2(STDOUT_SAVE, STDOUT_FILENO); close(STDOUT_SAVE);
-
-		output_fd = open(file_name, O_RDONLY, 0644);
-		if (output_fd == -1) {
-			printf("failed 2\n");
-			exit(EXIT_FAILURE);
-		}
-
-		char *prefix = ft_substr(elem->w_infix, 0, range.start);
-		char *postfix = ft_substr(elem->w_infix, range.end + 1, ft_strlen(elem->w_infix) - range.end);
-		char *result = read_whole_file(output_fd);
-		close(output_fd); unlink(file_name);
-
-		if (!ft_strlen(result) && !ft_strlen(prefix) && !ft_strlen(postfix)) {
-			FREE_POINTERS(prefix, result, postfix);
-			elem->w_infix = NULL; i += 1;
-			continue;
-		}
-
-		if (!is_variable_assignment(prefix)) {
-			parser_word_split(tokens, shell_vars, prefix, result, postfix, i);
-		} else {
-			// char buffer[MAX_WORD_LEN] = {0};
-			dprintf(2, "%zu %zu %zu\n", strlen(prefix), strlen(result), strlen(postfix));
-			fflush(stderr);
-			// ft_sprintf(buffer, "%s%s%s", prefix, result, postfix);
-			elem->w_infix = gc(GC_ADD, ft_strdup("hey"), GC_SUBSHELL);
-		}
-		// dprintf(2, "result = %s\n", elem->w_infix);
-		FREE_POINTERS(prefix, result, postfix);
-		if (error) return false;
+	output_fd = open(file_name, O_RDONLY, 0644);
+	if (output_fd == -1) {
+		printf("failed 2\n");
+		exit(EXIT_FAILURE);
 	}
-	return true;
+
+	char *result = read_whole_file(output_fd);
+	close(output_fd); unlink(file_name);
+	
+	return result;
 }
 

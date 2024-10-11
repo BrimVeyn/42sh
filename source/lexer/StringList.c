@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/10 17:26:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/11 16:16:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/lexer.h"
 #include "../../include/utils.h"
 #include "../../libftprintf/header/libft.h"
+#include "colors.h"
 #include <stdio.h>
 
 StringList *string_list_init(void) {
@@ -122,6 +123,8 @@ char *shell_vars_get_value(Vars *shell_vars, char *id) {
 	}
 	return return_value;
 }
+
+
 
 void string_list_print(const StringList *list) {
 	for (size_t i = 0; i < list->size; i++) {

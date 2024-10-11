@@ -6,13 +6,15 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 13:37:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/02 12:49:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/11 16:17:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/lexer.h"
 #include "../../include/utils.h"
 #include "../../libftprintf/header/libft.h"
+
+//TODO: check why theres an alloc in GC_GENERAL
 
 TokenList *token_list_init(void) {
 	TokenList *self = gc(GC_ADD, ft_calloc(1, sizeof(TokenList)), GC_SUBSHELL);
