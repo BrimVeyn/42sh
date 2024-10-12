@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/12 23:45:54 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 00:21:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,9 +225,7 @@ void exp_range_print(ExpRangeList *list) {
 }
 
 StrList *post_exp_list_init(ExpRangeList *ranges, Token *candidate) {
-	StrList *self = gc(GC_CALLOC, 1, sizeof(StrList), GC_SUBSHELL);
-	da_init(self, GC_SUBSHELL);
-
+	da_create(self, StrList, GC_SUBSHELL);
 	char *word = candidate->w_infix;
 	const ssize_t word_size = ft_strlen(word);
 	ssize_t i = 0;

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 00:03:48 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 00:20:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,10 +78,14 @@ void *gc(gc_mode mode, ...);
 
 //----------------Dynamic arrays--------------------//
 
-#define da_init(array, garbage_collector_level) \
-	(array)->data = gc(GC_ALLOC, 10, sizeof(void *), garbage_collector_level); \
-	(array)->size = 0; \
-	(array)->capacity = 10; \
+#define gc_unique(datatype, garbage_collector_level) \
+	gc(GC_CALLOC, 1, sizeof(datatype), garbage_collector_level); \
+
+#define da_create(name, datatype, garbage_collector_level) \
+	datatype *name = gc(GC_CALLOC, 1, sizeof(datatype), garbage_collector_level); \
+	(name)->data = gc(GC_CALLOC, 10, sizeof(void *), garbage_collector_level); \
+	(name)->size = 0; \
+	(name)->capacity = 10;
 
 #define da_push(array, new_element, carbage_collector_level) \
 	do { \
@@ -94,6 +98,8 @@ void *gc(gc_mode mode, ...);
 
 #define da_pop(array) \
 	((array)->size == 0 ? NULL : (array)->data[--(array)->size]); \
+
+//------------------------------------------//
 
 
 //----------------Utils--------------------//
