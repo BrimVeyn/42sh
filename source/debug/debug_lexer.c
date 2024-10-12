@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:53:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/15 09:42:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 20:20:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void lexer_debug(Lexer_p lexer) {
 
 void tokenListToString(TokenList *t) {
 	for (uint16_t i = 0; i < t->size; i++) {
-		tokenToString(t->t[i], 0);
+		tokenToString(t->data[i], 0);
 	}
 }
 

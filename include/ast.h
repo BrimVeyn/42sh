@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:44 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/10 14:25:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 20:27:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ TokenList			*token_list_stack_pop(TokenListStack *self);
 void				token_list_stack_push(TokenListStack *self, TokenList *token);
 TokenListStack		*branch_stack_to_rpn(TokenListStack *list);
 TokenListStack		*split_operator(TokenList *list);
-void				skip_subshell(TokenList *newlist, TokenList *list, int *i);
+void				skip_subshell(TokenList *newlist, TokenList *list, size_t *i);
 
 //----------------Node Stack------------------//
 NodeStack			*node_stack_init(void);

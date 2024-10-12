@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 13:42:21 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/12 15:32:58 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/12 20:38:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@
 // 				token_list_insert(tl, new_token, i);
 // 			}
 // 			else {
-// 				tl->t[i]->w_infix = ft_strdup(entry->d_name);
+// 				tl->data[i]->w_infix = ft_strdup(entry->d_name);
 // 			}
 // 			j++;
 // 		}
@@ -121,7 +121,7 @@
 // 				token_list_insert(tl, new_token, i);
 // 			}
 // 			else {
-// 				tl->t[i]->w_infix = ft_strdup(entry->d_name);
+// 				tl->data[i]->w_infix = ft_strdup(entry->d_name);
 // 			}
 // 			j++;
 // 		}
@@ -140,7 +140,7 @@
 
 // int parser_filename_expansion(TokenList *tl){
 // 	for (uint16_t i = 0; i < tl->size; i++) {
-// 		const Token *el = tl->t[i];
+// 		const Token *el = tl->data[i];
 // 		char *str = el->w_infix;
 //
 // 		//need to handle /*

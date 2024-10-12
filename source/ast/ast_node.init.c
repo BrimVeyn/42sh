@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/17 14:54:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/02 12:47:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 20:20:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ Node *gen_operator_node(TokenList *tok, Node *left, Node *right) {
 	self->redirs = NULL;
 	self->left = left;
 	self->right = right;
-	self->value.operator = tok->t[0]->s_type;
+	self->value.operator = tok->data[0]->s_type;
 	return self;
 }
 
@@ -37,7 +37,7 @@ Node *gen_operand_node(TokenList *list) {
 }
 
 bool is_op (TokenList *list) {
-	return (list->size == 1 && list->t[0]->tag == T_SEPARATOR);
+	return (list->size == 1 && list->data[0]->tag == T_SEPARATOR);
 }
 
 Node *generate_tree(TokenListStack *list) {

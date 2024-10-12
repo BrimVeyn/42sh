@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/03 14:36:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 20:20:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,7 @@ static bool is_bad_substitution(Token *el, int pos){
 
 bool parser_parameter_expansion(TokenList *tl, Vars *shell_vars){
 	for (uint16_t i = 0; i < tl->size; i++){
-		Token *el = tl->t[i];
+		Token *el = tl->data[i];
 
 		if (el->tag == T_WORD){
 			regex_match_t result;

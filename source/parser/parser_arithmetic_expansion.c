@@ -159,7 +159,7 @@
 // #include "colors.h"
 //
 // bool parser_arithmetic_expansion(TokenList *tokens, const int idx, const size_t start, Vars *shell_vars) {
-// 	Token *elem = tokens->t[idx];
+// 	Token *elem = tokens->data[idx];
 // 	char *string = &elem->w_infix[start];
 //
 // 	const Range range = get_arithmetic_exp_range(string);

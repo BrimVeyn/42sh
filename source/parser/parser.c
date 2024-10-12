@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/11 17:04:40 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 20:38:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ char *here_doc(char *eof){
 
 bool heredoc_detector(TokenList *data) {
 	for (uint16_t it = 0; it < data->size; it++) {
-		const Token *curr = data->t[it];
+		const Token *curr = data->data[it];
 		Token *const el = (curr->tag == T_WORD && curr->w_postfix->tag == T_REDIRECTION) ? curr->w_postfix : (Token *) curr;
 		if (el->tag == T_REDIRECTION && el->r_type == R_HERE_DOC) {
 			Token *filename = el->r_postfix;
@@ -73,8 +73,8 @@ void add_redirection_from_token(RedirectionList **redir_list, const Token *el) {
 
 RedirectionList *parser_get_redirection(const TokenList *tl) {
 	RedirectionList *redir_list = redirection_list_init();
-	for (int it = 0; it < tl->size; it++) {
-		const Token *el = tl->t[it];
+	for (size_t it = 0; it < tl->size; it++) {
+		const Token *el = tl->data[it];
 		if (is_redirection(tl, &it))
 			add_redirection_from_token(&redir_list, el);
 	}
@@ -86,7 +86,7 @@ SimpleCommand *parser_get_command(const TokenList *tl) {
 
 	size_t count = 0;
 	for (uint16_t it = 0; it < tl->size; it++) {
-		const Token *el = tl->t[it];
+		const Token *el = tl->data[it];
 		count += (el->tag == T_WORD && el->w_postfix->tag != T_REDIRECTION);
 	}
 
@@ -94,7 +94,7 @@ SimpleCommand *parser_get_command(const TokenList *tl) {
 
 	size_t i = 0;
 	for (uint16_t it = 0; it < tl->size; it++) {
-		const Token *el = tl->t[it];
+		const Token *el = tl->data[it];
 		if (el->tag == T_WORD && el->w_postfix->tag != T_REDIRECTION) {
 			if (i == 0) {
 				curr_command->bin = el->w_infix;
@@ -109,10 +109,10 @@ SimpleCommand *parser_get_command(const TokenList *tl) {
 TokenList *parser_eat_variables(TokenList *tokens) {
 	TokenList *self = token_list_init();
 	bool found_bin = false;
-	int i = 0;
+	size_t i = 0;
 
 	while (i < tokens->size && !found_bin) {
-		Token *elem = tokens->t[i];
+		Token *elem = tokens->data[i];
 		if (!is_word(tokens, &i) || (is_word(tokens, &i) && is_redirection(tokens, &i))) {
 			i += 1;
 			continue;
@@ -138,23 +138,23 @@ TokenList *parser_eat_variables(TokenList *tokens) {
 void add_vars_to_set(Vars *shell_vars, TokenList *vars) {
 	StringList *set = shell_vars->set;
 	StringList *env = shell_vars->env;
-	for (int i = 0; i < vars->size; i++) {
-		string_list_update(env, vars->t[i]->w_infix);
-		string_list_add_or_update(set, vars->t[i]->w_infix);
+	for (size_t i = 0; i < vars->size; i++) {
+		string_list_update(env, vars->data[i]->w_infix);
+		string_list_add_or_update(set, vars->data[i]->w_infix);
 	}
 }
 
 void add_vars_to_local(StringList *list, TokenList *vars) {
-	for (int i = 0; i < vars->size; i++) {
-		string_list_add_or_update(list, vars->t[i]->w_infix);
+	for (size_t i = 0; i < vars->size; i++) {
+		string_list_add_or_update(list, vars->data[i]->w_infix);
 	}
 }
 
-Token *get_candidate(TokenList *tl, const int idx) {
+Token *get_candidate(TokenList *tl, const size_t idx) {
 	if (is_word(tl, &idx)) {
-		return tl->t[idx];
+		return tl->data[idx];
 	} else if (is_redirection_tag(tl, &idx)) {
-		return tl->t[idx]->r_postfix;
+		return tl->data[idx]->r_postfix;
 	} else {
 		return NULL;
 	}
@@ -206,7 +206,7 @@ uint8_t find_command_sub_ranges(ExpRangeList *ptr, Token *candidate) {
 		range->start += idx;
 		range->end += idx;
 		idx = range->end;
-		da_add(ptr, range);
+		da_append(ptr, range, GC_SUBSHELL);
 		i++;
 	}
 	return DONE;
@@ -235,18 +235,18 @@ StrList *post_exp_list_init(ExpRangeList *ranges, Token *candidate) {
 		const ExpRange *curr = ((size_t)range_it < ranges->size) ? ranges->data[range_it] : NULL;
 		if (curr && curr->start <= i) {
 			char *el = gc(GC_ADD, ft_substr(word, curr->start + 2, curr->end - curr->start - 2), GC_SUBSHELL);
-			da_add(self, str_init(curr->kind, el));
+			da_append(self, str_init(curr->kind, el), GC_SUBSHELL);
 			range_it++;
 			i = curr->end + 1;
 			continue;
 		} else if (curr) {
 			char *el = gc(GC_ADD, ft_substr(word, i, curr->start - i), GC_SUBSHELL);
-			da_add(self, str_init(EXP_WORD, el));
+			da_append(self, str_init(EXP_WORD, el), GC_SUBSHELL);
 			i = curr->start;
 			continue;
 		} else {
 			char *el = gc(GC_ADD, ft_substr(word, i, word_size), GC_SUBSHELL);
-			da_add(self, str_init(EXP_WORD, el));
+			da_append(self, str_init(EXP_WORD, el), GC_SUBSHELL);
 			i = word_size;
 			continue;
 		}
@@ -325,7 +325,7 @@ TokenList *get_exp_ranges(Token *candidate, Vars *shell_vars) {
 SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
 	// parser_brace_expansion(); TODO: we'll find time
 	
-	for (int it = 0; it < tl->size; it++) {
+	for (size_t it = 0; it < tl->size; it++) {
 		Token *candidate = get_candidate(tl, it);
 		if (!candidate)
 			continue;

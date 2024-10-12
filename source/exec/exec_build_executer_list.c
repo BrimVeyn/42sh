@@ -6,14 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/17 15:09:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/06 16:57:20 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 20:26:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include <sys/mman.h>
 
-void parser_skip_subshell(TokenList *list, int *j) {
+void parser_skip_subshell(TokenList *list, size_t *j) {
 	(*j)++;
 	while (!is_end_sub(list, j)) {
 		if (is_subshell(list, j)) {
@@ -23,7 +23,7 @@ void parser_skip_subshell(TokenList *list, int *j) {
 	}
 }
 
-void parser_skip_cmdgrp(TokenList *list, int *j) {
+void parser_skip_cmdgrp(TokenList *list, size_t *j) {
 	(*j)++;
 	while (!is_end_cmdgrp(list, j)) {
 		if (is_cmdgrp_start(list, j)) {
@@ -36,7 +36,7 @@ void parser_skip_cmdgrp(TokenList *list, int *j) {
 RedirectionList *eat_redirections(TokenList *list, type_of_tree tag, int start) {
 	if (tag == TREE_DEFAULT) return NULL;
 	if (tag == TREE_SUBSHELL || tag == TREE_COMMAND_GROUP) {
-		int i = start;
+		size_t i = start;
 
 		if (i >= list->size) 
 			return NULL;
@@ -44,7 +44,7 @@ RedirectionList *eat_redirections(TokenList *list, type_of_tree tag, int start) 
 		RedirectionList *redirs = redirection_list_init();
 
 		while (i < list->size) {
-			const Token *el = list->t[i];
+			const Token *el = list->data[i];
 			if (is_redirection(list, &i))
 			{
 				add_redirection_from_token(&redirs, el);
@@ -58,7 +58,7 @@ RedirectionList *eat_redirections(TokenList *list, type_of_tree tag, int start) 
 	return NULL;
 }
 
-TokenList *extract_subshell_rec(TokenList *list, int *i) {
+TokenList *extract_subshell_rec(TokenList *list, size_t *i) {
 	TokenList *newlist = token_list_init();
 	(*i)++;
 
@@ -67,7 +67,7 @@ TokenList *extract_subshell_rec(TokenList *list, int *i) {
 			skip_subshell(newlist, list, i);
 		}
 		if (*i < list->size) {
-			token_list_add(newlist, list->t[*i]);
+			token_list_add(newlist, list->data[*i]);
 			(*i)++;
 		}
 	}
@@ -75,7 +75,7 @@ TokenList *extract_subshell_rec(TokenList *list, int *i) {
 	return newlist;
 }
 
-TokenList *extract_cmdgrp_rec(TokenList *list, int *i) {
+TokenList *extract_cmdgrp_rec(TokenList *list, size_t *i) {
 	TokenList *newlist = token_list_init();
 	(*i)++;
 
@@ -84,7 +84,7 @@ TokenList *extract_cmdgrp_rec(TokenList *list, int *i) {
 			skip_cmdgrp(newlist, list, i);
 		}
 		if (*i < list->size) {
-			token_list_add(newlist, list->t[*i]);
+			token_list_add(newlist, list->data[*i]);
 			(*i)++;
 		}
 	}
@@ -93,16 +93,16 @@ TokenList *extract_cmdgrp_rec(TokenList *list, int *i) {
 	return newlist;
 }
 
-TokenList *extract_tokens(TokenList *list, int *i) {
+TokenList *extract_tokens(TokenList *list, size_t *i) {
 	TokenList *newlist = token_list_init();
 	while (*i < list->size && !is_pipe(list, i) && !is_eof(list, i) && !is_semi(list, i)) {
-		token_list_add(newlist, list->t[*i]);
+		token_list_add(newlist, list->data[*i]);
 		(*i)++;
 	}
 	return newlist;
 }
 
-Node *extract_command_group(TokenList *list, int *i) {
+Node *extract_command_group(TokenList *list, size_t *i) {
 	// printf("============================================\n");
 	// tokenListToString(list);
 	// printf("============================================\n");
@@ -126,7 +126,7 @@ Node *extract_command_group(TokenList *list, int *i) {
 #include <stdio.h>
 #include "debug.h"
 
-Node *extract_subshell(TokenList *list, int *i) {
+Node *extract_subshell(TokenList *list, size_t *i) {
 	// printf("ici !\n");
 	TokenList *newlist = extract_subshell_rec(list, i);
 	// printf("============================================\n");
@@ -146,7 +146,7 @@ Node *extract_subshell(TokenList *list, int *i) {
 	// return ast_build(newlist);
 }
 
-void create_executer_and_push(Process **executer, TokenList *list, int *i) {
+void create_executer_and_push(Process **executer, TokenList *list, size_t *i) {
 	Process *new = NULL;
 
 	if (is_cmdgrp_start(list, i)) {
@@ -161,8 +161,8 @@ void create_executer_and_push(Process **executer, TokenList *list, int *i) {
 	process_push_back(executer, new);
 }
 
-type_of_separator next_separator(TokenList *list, int *i) {
-	int j = *i;
+type_of_separator next_separator(TokenList *list, size_t *i) {
+	size_t j = *i;
 	while (j < list->size) {
 		if (is_cmdgrp_start(list, &j)) {
 			parser_skip_cmdgrp(list, &j);
@@ -171,7 +171,7 @@ type_of_separator next_separator(TokenList *list, int *i) {
 			parser_skip_subshell(list, &j);
 		}
 		if (is_semi(list, &j) || is_eof(list, &j) || is_pipe(list, &j)) {
-			return list->t[j]->s_type;
+			return list->data[j]->s_type;
 		}
 		(j)++;
 	}
@@ -184,7 +184,7 @@ ExecuterList *build_executer_list(TokenList *list) {
 	// 	tokenListToString(list); //Debug
 	// }
 	ExecuterList *self = executer_list_init();
-	int i = 0;
+	size_t i = 0;
 	while (i < list->size) {
 		Process *executer = NULL;
 		type_of_separator next_sep = next_separator(list, &i);

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/11 16:32:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 20:28:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,8 +68,6 @@ typedef struct SimpleCommand {
 	char					**args;
 } SimpleCommand;
 
-
-
 typedef enum {
 	EXP_ARITHMETIC,
 	EXP_VARIABLE,
@@ -105,15 +103,6 @@ StrList *str_list_init(void);
 void	str_list_print(const StrList *list);
 Str *str_init(const ExpKind kind, char *str);
 
-#define da_add(arr, el) \
-	do { \
-		if ((arr)->size >= (arr)->capacity) { \
-			(arr)->capacity *= 2; \
-			(arr)->data = realloc((arr)->data, sizeof(*(arr)->data) * (arr)->capacity); \
-		} \
-		(arr)->data[(arr)->size++] = el; \
-	} while (0)
-
 char				*parser_get_env_variable_value(char *name, StringList *env);
 //-------------------SimpleCommand-----------------------//
 SimpleCommand		*parser_parse_current(TokenList *tl, Vars *shell_vars);
@@ -130,17 +119,16 @@ void				add_redirection_from_token(RedirectionList **redir_list, const Token *el
 //-------------------Parser modules------------//
 bool				parser_parameter_expansion(TokenList *tl, Vars *shell_vars);
 char				*parser_command_substitution(char *str, Vars *shell_vars);
-ExpRange			*get_command_sub_range(char *str);
 bool				parser_arithmetic_expansion(TokenList *tokens, const int idx, const size_t start, Vars *shell_vars);
 int					parser_filename_expansion(TokenList *tl);
 bool				parser_word_split(TokenList *dest, Vars *shell_vars, char *prefix, char *infix, char *postfix, int index);
 
 //-------------------Parameter Expansion-------------//
-void				parser_skip_subshell(TokenList *list, int *it);
-int					skip_subshell_str(char *str, int *i);
-bool				is_end_cmdgrp(const TokenList *list, const int *it);
-void				skip_cmdgrp(TokenList *self, TokenList *list, int *i);
+void				parser_skip_subshell(TokenList *list, size_t *it);
+bool				is_end_cmdgrp(const TokenList *list, const size_t *it);
+void				skip_cmdgrp(TokenList *self, TokenList *list, size_t *i);
 int					get_command_sub_range_end(char *str, int *i);
+ExpRange			*get_command_sub_range(char *str);
 
 bool				is_a_match(const ExpRange *range);
 bool				is_range_valid(const ExpRange *range, char *str);
