@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/12 23:44:32 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 00:03:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,11 +84,13 @@ void *gc(gc_mode mode, ...);
 	(array)->capacity = 10; \
 
 #define da_push(array, new_element, carbage_collector_level) \
-	if ((array)->size >= (array)->capacity) { \
-		(array)->capacity *= 2; \
-		(array)->data = gc(GC_REALLOC, (array)->data, (array)->size, (array)->capacity, sizeof(void *), carbage_collector_level); \
-	} \
-	(array)->data[(array)->size++] = new_element; \
+	do { \
+		if ((array)->size >= (array)->capacity) { \
+			(array)->capacity *= 2; \
+			(array)->data = gc(GC_REALLOC, (array)->data, (array)->size, (array)->capacity, sizeof(void *), carbage_collector_level); \
+		} \
+		(array)->data[(array)->size++] = new_element; \
+	} while (0); \
 
 #define da_pop(array) \
 	((array)->size == 0 ? NULL : (array)->data[--(array)->size]); \

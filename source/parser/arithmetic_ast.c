@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 11:11:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/02 12:47:26 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 23:58:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "arithmetic.h"
 #include "assert.h"
-#include "ast.h"
+#include "utils.h"
+
 
 static long get_value(ANode *self, Vars *shell_vars) {
 	if (self->value->operand_tag == VARIABLE) {
@@ -66,20 +67,20 @@ ANode *generate_atree(ATokenStack *list) {
 	ANodeStack *self = anode_stack_init();
 	for (int i = 0; i < list->size; i++) {
 		if (!is_aoperator(list->data[i])) {
-			anode_stack_push(self, gen_aoperand_node(list->data[i]));
+			da_push(self, gen_aoperand_node(list->data[i]), GC_SUBSHELL);
 		} else {
 			if (self->size == 1) {
 				ANode *left = anode_stack_pop(self);
-				anode_stack_push(self, gen_aoperator_node(list->data[i], left, NULL));
+				da_push(self, gen_aoperator_node(list->data[i], left, NULL), GC_SUBSHELL);
 			} else {
 				ANode *right = anode_stack_pop(self);
 				ANode *left = anode_stack_pop(self);
-				anode_stack_push(self, gen_aoperator_node(list->data[i], left, right));
+				da_push(self, gen_aoperator_node(list->data[i], left, right), GC_SUBSHELL);
 			}
 		}
 	}
 	assert(self->size == 1);
-	return anode_stack_pop(self);
+	return da_pop(self);
 }
 
 long aAST_execute(ANode *node, Vars *shell_vars, int *error) {
