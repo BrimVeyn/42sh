@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/12 20:38:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 23:45:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,7 +206,7 @@ uint8_t find_command_sub_ranges(ExpRangeList *ptr, Token *candidate) {
 		range->start += idx;
 		range->end += idx;
 		idx = range->end;
-		da_append(ptr, range, GC_SUBSHELL);
+		da_push(ptr, range, GC_SUBSHELL);
 		i++;
 	}
 	return DONE;
@@ -225,7 +225,9 @@ void exp_range_print(ExpRangeList *list) {
 }
 
 StrList *post_exp_list_init(ExpRangeList *ranges, Token *candidate) {
-	StrList *self = str_list_init();
+	StrList *self = gc(GC_CALLOC, 1, sizeof(StrList), GC_SUBSHELL);
+	da_init(self, GC_SUBSHELL);
+
 	char *word = candidate->w_infix;
 	const ssize_t word_size = ft_strlen(word);
 	ssize_t i = 0;
@@ -235,18 +237,18 @@ StrList *post_exp_list_init(ExpRangeList *ranges, Token *candidate) {
 		const ExpRange *curr = ((size_t)range_it < ranges->size) ? ranges->data[range_it] : NULL;
 		if (curr && curr->start <= i) {
 			char *el = gc(GC_ADD, ft_substr(word, curr->start + 2, curr->end - curr->start - 2), GC_SUBSHELL);
-			da_append(self, str_init(curr->kind, el), GC_SUBSHELL);
+			da_push(self, str_init(curr->kind, el), GC_SUBSHELL);
 			range_it++;
 			i = curr->end + 1;
 			continue;
 		} else if (curr) {
 			char *el = gc(GC_ADD, ft_substr(word, i, curr->start - i), GC_SUBSHELL);
-			da_append(self, str_init(EXP_WORD, el), GC_SUBSHELL);
+			da_push(self, str_init(EXP_WORD, el), GC_SUBSHELL);
 			i = curr->start;
 			continue;
 		} else {
 			char *el = gc(GC_ADD, ft_substr(word, i, word_size), GC_SUBSHELL);
-			da_append(self, str_init(EXP_WORD, el), GC_SUBSHELL);
+			da_push(self, str_init(EXP_WORD, el), GC_SUBSHELL);
 			i = word_size;
 			continue;
 		}

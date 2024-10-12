@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:36:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/12 20:22:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 23:46:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,6 @@ bool			next_token_is_redirection(Lexer_p l);
 bool			is_fdable_redirection(Lexer_p l);
 bool			is_fdable_redirection(Lexer_p l);
 bool			is_delimiter(const char c);
-void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
 void			eat_whitespace(Lexer_p l);
 char			*get_word(Lexer_p l);
 
