@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:35:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/12 20:52:55 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 23:50:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,18 +189,20 @@ ShellInfos *shell(int mode) {
 int main(const int ac, const char *av[], const char *env[]) {
 	(void) av; (void) ac; (void) env;
 
-	StrList *test = str_list_init();
-	Str *test1 = str_init(EXP_ARITHMETIC, ft_strdup("test"));
-	for (size_t i = 0; i < 100; i++) {
-		da_append(test, test1, GC_SUBSHELL);
-	}
-	str_list_print(test);
-	for (size_t i = 0; i < 99; i++) {
-		Str *str = (Str *) da_pop(test);
-		da_append(test, str, GC_SUBSHELL);
-	}
-	printf("size: %zu\n", test->size);
-	str_list_print(test);
+	// StrList *test = gc(GC_CALLOC, 1, sizeof(StrList), GC_SUBSHELL);
+	// da_init(test, GC_SUBSHELL);
+	//
+	// Str *test1 = str_init(EXP_ARITHMETIC, ft_strdup("test"));
+	// for (size_t i = 0; i < 100; i++) {
+	// 	da_push(test, test1, GC_SUBSHELL);
+	// }
+	// str_list_print(test);
+	// for (size_t i = 0; i < 99; i++) {
+	// 	Str *str = (Str *) da_pop(test);
+	// 	da_push(test, str, GC_SUBSHELL);
+	// }
+	// printf("size: %zu\n", test->size);
+	// str_list_print(test);
 
 
 	shell(SHELL_INIT);
