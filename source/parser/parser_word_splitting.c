@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 10:08:43 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/02 12:49:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 20:20:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,8 @@ bool parser_word_split(TokenList *dest, Vars *shell_vars, char *prefix, char *in
 		.end = index + words->size - 1,
 	};
 
-	Token *first = dest->t[range.start];
-	Token *last = dest->t[range.end];
+	Token *first = dest->data[range.start];
+	Token *last = dest->data[range.end];
 
 	char *old_first_word = first->w_infix;
 	char *old_last_word = last->w_infix;

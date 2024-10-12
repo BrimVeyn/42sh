@@ -6,48 +6,48 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/02 12:55:20 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 20:24:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ast.h"
 #include "debug.h"
 
-void skip_cmdgrp(TokenList *self, TokenList *list, int *i) {
-	token_list_add(self, list->t[*i]);
+void skip_cmdgrp(TokenList *self, TokenList *list, size_t *i) {
+	token_list_add(self, list->data[*i]);
 	(*i)++;
 
 	while (*i < list->size && !is_end_cmdgrp(list, i)) {
 		if (is_cmdgrp_start(list, i))
 			skip_cmdgrp(self, list, i);
 		if (*i < list->size) {
-			token_list_add(self, list->t[*i]);
+			token_list_add(self, list->data[*i]);
 			(*i)++;
 		}
 	}
 }
 
-void skip_subshell(TokenList *newlist, TokenList *list, int *i) {
-	token_list_add(newlist, list->t[*i]);
+void skip_subshell(TokenList *newlist, TokenList *list, size_t *i) {
+	token_list_add(newlist, list->data[*i]);
 	(*i)++;
 	while (*i < list->size && !is_end_sub(list, i)) {
 		if (is_subshell(list, i)) {
 			skip_subshell(newlist, list, i);
 		}
 		if (*i < list->size) {
-			token_list_add(newlist, list->t[*i]);
+			token_list_add(newlist, list->data[*i]);
 			(*i)++;
 		}
 	}
 }
 
-TokenList *extract_operator(TokenList *list, int *i) {
+TokenList *extract_operator(TokenList *list, size_t *i) {
 	TokenList *self = token_list_init();
-	token_list_add(self, list->t[(*i)++]);
+	token_list_add(self, list->data[(*i)++]);
 	return self;
 }
 
-TokenList *extract_command(TokenList *list, int *i) {
+TokenList *extract_command(TokenList *list, size_t *i) {
 	// dprintf(2, "-------------START----------\n");
 	// dprintf(2, "i = %d\n", *i);
 	// tokenListToString(list);
@@ -63,7 +63,7 @@ TokenList *extract_command(TokenList *list, int *i) {
 			continue;
 		}
 		if (*i < list->size && !is_ast_operator(list, i) && !is_eof(list, i)) {
-			token_list_add(self, list->t[*i]);
+			token_list_add(self, list->data[*i]);
 		}
 		(*i)++;
 	}
@@ -78,7 +78,7 @@ TokenListStack *split_operator(TokenList *list) {
 	// tokenListToString(list);
 	// dprintf(2, "----------------------------\n");
 	TokenListStack *self = token_list_stack_init();
-	int i = 0;
+	size_t i = 0;
 	while (i < list->size) {
 		if (is_eof(list,&i)) {
 			i++;
@@ -100,7 +100,7 @@ TokenListStack *split_operator(TokenList *list) {
 bool has_higher_precedence(TokenListStack *operator, TokenList *current) {
 	if (operator->size == 0) return true;
 	const TokenList *last_el = operator->data[operator->size - 1];
-	const int zero = 0;
+	const size_t zero = 0;
 
 	if (is_or_or_and(current, &zero) && is_semi_or_bg(last_el, &zero))
 		return true;
@@ -110,9 +110,9 @@ bool has_higher_precedence(TokenListStack *operator, TokenList *current) {
 TokenListStack *branch_stack_to_rpn(TokenListStack *list) {
 	TokenListStack *output = token_list_stack_init();
 	TokenListStack *operator = token_list_stack_init();
-	const int zero = 0;
+	const size_t zero = 0;
 	
-	for (int i = 0; i < list->size; i++) {
+	for (size_t i = 0; i < list->size; i++) {
 		TokenList *current = list->data[i];
 		if (is_ast_operator(current, &zero)) {
 			while(!has_higher_precedence(operator, current)) {

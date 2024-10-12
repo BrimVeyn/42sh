@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/09 13:31:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 20:51:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,28 @@ extern int g_exitno;
         } \
     } \
 
+#define da_append(arr, el, lvl) \
+	if ((arr)->size >= (arr)->capacity) { \
+		(arr)->capacity *= 2; \
+		(arr)->data = gc(GC_REALLOC, (arr)->data, (arr)->size, (arr)->capacity, sizeof(void *), lvl); \
+	} \
+	(arr)->data[(arr)->size++] = el; \
+
+#define da_pop(arr) \
+	((arr)->size == 0 ? NULL : (arr)->data[--(arr)->size]); \
+
+
+
+
+//TODO: Delete this structure
 typedef struct {
 	int start;
 	int end;
 } Range;
+
+
+
+//----------------Garbage-------------------//
 
 typedef enum {
 	GC_GENERAL,
@@ -46,6 +64,7 @@ typedef enum {
 typedef enum {
 	GC_ALLOC,
 	GC_CALLOC,
+	GC_REALLOC,
 	GC_ADD,
 	GC_MOVE,
 	GC_FREE,
@@ -61,9 +80,10 @@ typedef struct {
 	uint32_t size;
 	uint32_t capacity;
 } Garbage;
-
-//----------------Garbage-------------------//
 void *gc(gc_mode mode, ...);
+
+//------------------------------------------//
+
 
 //----------------Utils--------------------//
 void			free_charchar(char **s);

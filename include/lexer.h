@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:36:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/11 15:35:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 20:22:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,9 +113,9 @@ typedef struct Token {
 } Token;
 
 typedef struct TokenList {
-	Token		**t;
-	uint16_t	size;
-	uint16_t	capacity;
+	Token		**data;
+	size_t	size;
+	size_t	capacity;
 } TokenList;
 
 typedef struct {
@@ -181,27 +181,27 @@ void			string_list_print(const StringList *list);
 void			string_list_print_debug(const StringList *list);
 
 //----------------Syntax----------------//
-bool	is_pipe(const TokenList *list, const int *i);
-bool	is_newline(const TokenList *list, const int *i);
-bool 	is_eof(const TokenList *list, const int *i);
-bool 	is_semi(const TokenList *list, const int *i);
-bool 	is_subshell(const TokenList *list, const int *i);
-bool 	is_end_sub(const TokenList *list, const int *i);
-bool 	is_or(const TokenList *list, const int *i);
-bool 	is_bg(const TokenList *list, const int *i);
-bool 	is_and(const TokenList *list, const int *i);
-bool 	is_logical_operator(const TokenList *tokens, const int *it);
-bool	is_break_seperator(const TokenList *tokens, const int *it);
-bool 	is_separator(const TokenList *tokens, const int *it);
-bool	is_word(const TokenList *list, const int *it);
-bool	is_redirection_tag(const TokenList *list, const int *it);
-bool	is_redirection(const TokenList *tokens, const int *it);
-bool	is_semi_or_bg(const TokenList *list, const int *it);
-bool	is_or_or_and(const TokenList *list, const int *it);
-bool	is_ast_operator(const TokenList *list, const int *it);
-bool	is_cmdgrp_start(const TokenList *list, const int *i);
-bool	is_cmdgrp_end(const TokenList *list, const int *i);
-bool	is_end_cmdgrp(const TokenList *list, const int *it);
+bool	is_pipe(const TokenList *list, const size_t *i);
+bool	is_newline(const TokenList *list, const size_t *i);
+bool 	is_eof(const TokenList *list, const size_t *i);
+bool 	is_semi(const TokenList *list, const size_t *i);
+bool 	is_subshell(const TokenList *list, const size_t *i);
+bool 	is_end_sub(const TokenList *list, const size_t *i);
+bool 	is_or(const TokenList *list, const size_t *i);
+bool 	is_bg(const TokenList *list, const size_t *i);
+bool 	is_and(const TokenList *list, const size_t *i);
+bool 	is_logical_operator(const TokenList *tokens, const size_t *it);
+bool	is_break_seperator(const TokenList *tokens, const size_t *it);
+bool 	is_separator(const TokenList *tokens, const size_t *it);
+bool	is_word(const TokenList *list, const size_t *it);
+bool	is_redirection_tag(const TokenList *list, const size_t *it);
+bool	is_redirection(const TokenList *tokens, const size_t *it);
+bool	is_semi_or_bg(const TokenList *list, const size_t *it);
+bool	is_or_or_and(const TokenList *list, const size_t *it);
+bool	is_ast_operator(const TokenList *list, const size_t *it);
+bool	is_cmdgrp_start(const TokenList *list, const size_t *i);
+bool	is_cmdgrp_end(const TokenList *list, const size_t *i);
+bool	is_end_cmdgrp(const TokenList *list, const size_t *it);
 
 
 #endif // !LEXER_H

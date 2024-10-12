@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/10 12:55:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/12 20:49:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,6 @@ void *gc(gc_mode mode, ...) {
 	va_start(args, mode);
 	switch (mode) {
 		case GC_ALLOC: 
-			__attribute__((fallthrough));
 		case GC_CALLOC: {
 			const size_t nb = va_arg(args, size_t);
 			const size_t size = va_arg(args, size_t);
@@ -104,6 +103,19 @@ void *gc(gc_mode mode, ...) {
 			if (mode == GC_CALLOC)
 				return gc(GC_ADD, ft_calloc(nb, size), level);
 			return NULL;
+		}
+		case GC_REALLOC: {
+			void *ptr = va_arg(args, void *);
+			const size_t old_count = va_arg(args, size_t);
+			const size_t new_count = va_arg(args, size_t);
+			const size_t element_size = va_arg(args, size_t);
+			const int level = va_arg(args, int);
+
+			void *new_ptr = gc(GC_CALLOC, new_count, element_size, level);
+			//TODO: add a fatal call in GC_ADD;
+			ft_memcpy(new_ptr, ptr, old_count * element_size);
+			gc_free(GC, ptr, level, true);
+			return new_ptr;
 		}
 		case GC_ADD: {
 			void *ptr = va_arg(args, void *);
