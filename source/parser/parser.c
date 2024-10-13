@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 12:04:01 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 19:15:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "../../include/ft_regex.h"
 #include "../../libftprintf/header/libft.h"
 #include "../../include/utils.h"
+#include "debug.h"
 #include "lexer.h"
 #include "colors.h"
 #include "signals.h"
@@ -161,14 +162,6 @@ Token *get_candidate(TokenList *tl, const size_t idx) {
 	}
 }
 
-ExpRangeList *exp_range_list_init(void) {
-	ExpRangeList *self = gc(GC_ALLOC, 1, sizeof(ExpRangeList), GC_SUBSHELL);
-	self->data = gc(GC_CALLOC, 10, sizeof(ExpRange *), GC_SUBSHELL);
-	self->capacity = 10;
-	self->size = 0;
-	return self;
-}
-
 ExpRange *exp_range_init(void) {
 	ExpRange *self = gc(GC_CALLOC, 1, sizeof(ExpRange), GC_SUBSHELL);
 	self->end = -1;
@@ -253,7 +246,7 @@ StrList *post_exp_list_init(ExpRangeList *ranges, Token *candidate) {
 		}
 	}
 	//DEBUG
-	str_list_print(self);
+	da_print(self);
 	return self;
 }
 
@@ -277,38 +270,99 @@ void exp_list_consume(StrList *str_list, Vars *shell_vars) {
 	}
 }
 
-ExpRangeList *get_range_list(Token *candidate) {
-	ExpRangeList *self = exp_range_list_init();
-	char *str = candidate->w_infix;
-	const size_t word_len = ft_strlen(str);
+#include "c_string.h"
+#include <stdarg.h>
 
-	size_t i = 0;
-	size_t si = i;
-	(void)si;
-	while (i < word_len) {
-		if (ft_strncmp("$((", &str[i], 3)) {
-			// ExpRange *el = eat_arithmetic(candidate, i);
-		} else if (ft_strncmp("$(", &str[i], 2)) {
-			// ExpRange *el = eat_arithmetic(candidate, i);
-		} else if (ft_strncmp("${", &str[i], 2)) {
-			// ExpRange *el = eat_arithmetic(candidate, i);
-		}
+ExpKind identify_exp_begin(char *str) {
+	if (!ft_strncmp(str, "$((", 3)) {
+		return EXP_ARITHMETIC;
+	} else if (!ft_strncmp(str, "$(", 2)) {
+		return EXP_CMDSUB;
+	} else if (!ft_strncmp(str, "${", 2)) {
+		return EXP_VARIABLE;
+	} else {
+		return EXP_WORD;
 	}
+}
+
+ExpKind identify_exp_end(char *str) {
+	if (!ft_strncmp(str, "))", 2)) {
+		return EXP_ARITHMETIC;
+	} else if (!ft_strncmp(str, ")", 1)) {
+		return EXP_CMDSUB;
+	} else if (!ft_strncmp(str, "}", 1)) {
+		return EXP_VARIABLE;
+	} else {
+		return EXP_WORD;
+	}
+}
+
+StrList *get_range_list(Token *candidate) {
+	da_create(self, StrList, GC_SUBSHELL);
+	(void)candidate;(void)self;
+	string word = string_init_str(candidate->w_infix);
+	string cache_stack = string_init_str("");
+	(void)word;(void)cache_stack;
+	
+
+	static const struct {
+		char *begin;
+		char *end;
+	} map[] = {
+		[EXP_ARITHMETIC] = { "$((", "))" },
+		[EXP_CMDSUB] = { "$(", ")"},
+		[EXP_VARIABLE] = { "${", ")" },
+	};
+
+	da_create(begin_stack, StringList, GC_SUBSHELL);
+	da_create(end_stack, StringList, GC_SUBSHELL);
+
+	while (word.size) {
+		ExpKind maybe_begin = 0;
+		ExpKind maybe_end = 0;
+
+		if ((maybe_begin = identify_exp_begin(word.data)) != EXP_WORD) {
+			if (!begin_stack->size) {
+				Str *res = gc_unique(Str, GC_SUBSHELL);
+				res->kind = EXP_WORD;
+				res->str = str_get(&cache_stack);
+				str_clear(&cache_stack);
+				da_push(self, res, GC_SUBSHELL);
+			}
+			da_push(begin_stack, map[maybe_begin].begin, GC_SUBSHELL);
+		} else if (begin_stack->size && (maybe_end = identify_exp_end(word.data)) != EXP_WORD) {
+			da_push(end_stack, map[maybe_end].end, GC_SUBSHELL);
+			str_push_back(&cache_stack, str_pop_front(&word));
+			str_push_back(&cache_stack, str_pop_front(&word));
+
+			if (end_stack->size == begin_stack->size) {
+				da_push(self, str_init(maybe_end, str_get(&cache_stack)), GC_SUBSHELL);
+				str_clear(&cache_stack);
+				da_clear(begin_stack, GC_SUBSHELL);
+				da_clear(end_stack, GC_SUBSHELL);
+			}
+		}
+		str_push_back(&cache_stack, str_pop_front(&word));
+	}
+	Str *res = gc_unique(Str, GC_SUBSHELL);
+	res->kind = EXP_WORD;
+	res->str = ft_strdup(cache_stack.data);
+	str_clear(&cache_stack);
+	da_push(self, res, GC_SUBSHELL);
+
+	dprintf(2, "word: %s\n", word.data);
+	dprintf(2, "word: %s\n", cache_stack.data);
+
 	return self;
 }
 
 TokenList *get_exp_ranges(Token *candidate, Vars *shell_vars) {
 	// TODO: Fill up get_range_list so it can consume any kind of expansion
 	// ExpRangeList *range_list = get_range_list(candidate);
+	da_create(range_list, ExpRangeList, GC_SUBSHELL);
+	StrList *tmp = get_range_list(candidate);
+	da_print(tmp);
 
-	ExpRangeList *range_list = exp_range_list_init();
-
-	if (find_command_sub_ranges(range_list, candidate) == ERROR) {
-		//TODO: free range_list;
-		return NULL;
-	}
-	//TODO: find variable ranges
-	//TODO: find arithmetic ranges
 	if (range_list->size == 0) {
 		return NULL;
 	}
@@ -316,7 +370,7 @@ TokenList *get_exp_ranges(Token *candidate, Vars *shell_vars) {
 	StrList *list = post_exp_list_init(range_list, candidate);
 	//TODO: free range_list
 	exp_list_consume(list, shell_vars);
-	str_list_print(list);
+	da_print(list);
 	//TODO: join list
 	//TODO: apply word split based on ifs, if KIND != WORD --> new token
 	// exp_range_consume(range_list);
