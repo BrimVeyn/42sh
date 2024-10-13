@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:35:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/13 11:36:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 11:56:08 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ Vars *vars_init(const char **env) {
 	self->env = env_list;
 	da_create(set_list, StringList, GC_ENV);
 	self->set = set_list;
-	da_create(local_list, StringList, GC_SUBSHELL);
+	da_create(local_list, StringList, GC_ENV);
 	self->local = local_list;
 	env_to_string_list(self->env, env);
 	env_to_string_list(self->set, env);

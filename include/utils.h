@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 11:34:02 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 11:47:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,5 +143,7 @@ char			*ft_ltoa(long n);
 //----------------File Utils--------------------//
 char			*get_next_line(int fd);
 char			*read_whole_file(int fd);
+
+void			fatal(char *msg, int exit_code);
 
 #endif // !UTILS_H

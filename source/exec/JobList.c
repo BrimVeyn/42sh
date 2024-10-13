@@ -6,12 +6,14 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 13:38:32 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/10 11:24:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 11:54:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 #include "exec.h"
+#include "utils.h"
+
 #include <signal.h>
 
 void job_killall(void) {
