@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/13 11:12:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 11:55:28 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,6 +121,8 @@ void *gc(gc_mode mode, ...) {
 		case GC_ADD: {
 			void *ptr = va_arg(args, void *);
 			const int level = va_arg(args, int);
+			if (!ptr) 
+				fatal("Fatal error: alloc\n", 255);
 			va_end(args);
 			return gc_add(GC, ptr, level);
 		}

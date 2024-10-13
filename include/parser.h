@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 10:22:24 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 11:42:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 #include <stdio.h>
 
 #include "lexer.h"
-#include "utils.h"
 
 //-----------------------------SHELL ------------------------------------------------------------------
 #define UNEXPECTED_TOKEN_STR "42sh: syntax error near unexpected token "
@@ -41,6 +40,8 @@
 #define HASH_OPTION_REQUIRES_ARG dprintf(STDERR_FILENO, "bash: hash: -d: option requires an argument\n"); 
 //------------------------------------------------------------------------------------------------------
 
+//------------------------------Redirections---------------------//
+
 typedef enum {
 	R_FD,
 	R_FILENAME,
@@ -61,6 +62,10 @@ typedef struct RedirectionList {
 	size_t	size;
 	size_t	capacity;
 } RedirectionList;
+
+void add_redirection_from_token(RedirectionList *redir_list, const Token *el);
+
+//---------------------------------------------------------------//
 
 typedef struct SimpleCommand {
 	RedirectionList			*redir_list;
@@ -109,9 +114,6 @@ SimpleCommand		*parser_parse_current(TokenList *tl, Vars *shell_vars);
 
 //-------------------Here_doc-----------------------//
 bool				heredoc_detector(TokenList *data);
-
-//-----------------Redirection List----------------//
-void add_redirection_from_token(RedirectionList *redir_list, const Token *el);
 
 //-------------------Parser modules------------//
 bool				parser_parameter_expansion(TokenList *tl, Vars *shell_vars);
