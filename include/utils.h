@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 11:47:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 17:22:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,15 @@ void *gc(gc_mode mode, ...);
 			ft_memmove(&(array)->data[index], &(array)->data[index + 1], sizeof(void *) * ((array)->size - index)); \
 			(array)->data[--(array)->size] = NULL; \
 		} \
+	} while (0); \
+
+#define da_clear(array, garbage_collector_level) \
+	do { \
+		for (size_t i = 0; i < (array)->size; i++) { \
+			gc(GC_FREE, (array)->data[i], garbage_collector_level); \
+		} \
+		ft_memset((array)->data, 0, sizeof(void *) * (array)->size); \
+		(array)->size = 0; \
 	} while (0); \
 	
 #define da_pop(array) \
