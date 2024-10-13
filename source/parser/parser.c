@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 19:15:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 20:55:37 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,55 +169,6 @@ ExpRange *exp_range_init(void) {
 	return self;
 }
 
-typedef enum {
-	VALID,
-	ERROR,
-	DONE,
-} ErrorCode;
-
-uint8_t find_command_sub_ranges(ExpRangeList *ptr, Token *candidate) {
-	ssize_t idx = 0;
-
-	int i = 0;
-	ssize_t candidate_len = ft_strlen(candidate->w_infix);
-	//TODO: remove debug mode i < 10 by true
-	while (i < 10) {
-		if (idx >= candidate_len - 1) {
-			return DONE;
-		}
-		char *candidat_str = &candidate->w_infix[idx];
-		ExpRange *range = get_command_sub_range(candidat_str);
-		// dprintf(2, "s: %ld e: %ld\n", range->start, range->end);
-		if (is_a_match(range)) {
-			if (!is_range_valid(range, UNCLOSED_COMMAND_SUB_STR)) {
-				g_exitno = 126;
-				return ERROR;
-			}
-		} else {
-			return DONE;
-		}
-		range->kind = EXP_CMDSUB;
-		range->start += idx;
-		range->end += idx;
-		idx = range->end;
-		da_push(ptr, range, GC_SUBSHELL);
-		i++;
-	}
-	return DONE;
-}
-
-void exp_range_print(ExpRangeList *list) {
-	const char *map[3] = {
-		[EXP_ARITHMETIC] = "ARITHMETIC",
-		[EXP_CMDSUB] = "CMD_SUB",
-		[EXP_VARIABLE] = "VARIABLE",
-	};
-
-	for (size_t i = 0; i < list->size; i++) {
-		dprintf(2, "["C_LIGHT_GREEN"%zu"C_RESET"]: "C_MAGENTA"%s"C_RESET": {%ld, %ld}\n", i, map[list->data[i]->kind], list->data[i]->start, list->data[i]->end);
-	}
-}
-
 StrList *post_exp_list_init(ExpRangeList *ranges, Token *candidate) {
 	da_create(self, StrList, GC_SUBSHELL);
 	char *word = candidate->w_infix;
@@ -299,12 +250,9 @@ ExpKind identify_exp_end(char *str) {
 
 StrList *get_range_list(Token *candidate) {
 	da_create(self, StrList, GC_SUBSHELL);
-	(void)candidate;(void)self;
 	string word = string_init_str(candidate->w_infix);
 	string cache_stack = string_init_str("");
-	(void)word;(void)cache_stack;
 	
-
 	static const struct {
 		char *begin;
 		char *end;
@@ -316,13 +264,13 @@ StrList *get_range_list(Token *candidate) {
 
 	da_create(begin_stack, StringList, GC_SUBSHELL);
 	da_create(end_stack, StringList, GC_SUBSHELL);
-
+	int read_pos = 0;
 	while (word.size) {
 		ExpKind maybe_begin = 0;
 		ExpKind maybe_end = 0;
 
 		if ((maybe_begin = identify_exp_begin(word.data)) != EXP_WORD) {
-			if (!begin_stack->size) {
+			if (!begin_stack->size && read_pos) {
 				Str *res = gc_unique(Str, GC_SUBSHELL);
 				res->kind = EXP_WORD;
 				res->str = str_get(&cache_stack);
@@ -332,8 +280,10 @@ StrList *get_range_list(Token *candidate) {
 			da_push(begin_stack, map[maybe_begin].begin, GC_SUBSHELL);
 		} else if (begin_stack->size && (maybe_end = identify_exp_end(word.data)) != EXP_WORD) {
 			da_push(end_stack, map[maybe_end].end, GC_SUBSHELL);
-			str_push_back(&cache_stack, str_pop_front(&word));
-			str_push_back(&cache_stack, str_pop_front(&word));
+			for (size_t i = 0; i < ft_strlen(map[maybe_end].end); i++) {
+				str_push_back(&cache_stack, str_pop_front(&word));
+				read_pos++;
+			}
 
 			if (end_stack->size == begin_stack->size) {
 				da_push(self, str_init(maybe_end, str_get(&cache_stack)), GC_SUBSHELL);
@@ -343,15 +293,14 @@ StrList *get_range_list(Token *candidate) {
 			}
 		}
 		str_push_back(&cache_stack, str_pop_front(&word));
+		read_pos++;
 	}
 	Str *res = gc_unique(Str, GC_SUBSHELL);
 	res->kind = EXP_WORD;
-	res->str = ft_strdup(cache_stack.data);
-	str_clear(&cache_stack);
+	res->str = str_get(&cache_stack);
+	free(cache_stack.data);
+	free(word.data);
 	da_push(self, res, GC_SUBSHELL);
-
-	dprintf(2, "word: %s\n", word.data);
-	dprintf(2, "word: %s\n", cache_stack.data);
 
 	return self;
 }
@@ -363,14 +312,8 @@ TokenList *get_exp_ranges(Token *candidate, Vars *shell_vars) {
 	StrList *tmp = get_range_list(candidate);
 	da_print(tmp);
 
-	if (range_list->size == 0) {
-		return NULL;
-	}
-	exp_range_print(range_list);
-	StrList *list = post_exp_list_init(range_list, candidate);
 	//TODO: free range_list
-	exp_list_consume(list, shell_vars);
-	da_print(list);
+	exp_list_consume(tmp, shell_vars);
 	//TODO: join list
 	//TODO: apply word split based on ifs, if KIND != WORD --> new token
 	// exp_range_consume(range_list);
