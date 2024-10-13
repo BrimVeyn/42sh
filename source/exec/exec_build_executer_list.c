@@ -6,11 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/17 15:09:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/12 20:26:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 10:25:49 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
+#include "lexer.h"
+#include "parser.h"
+#include "utils.h"
 #include <sys/mman.h>
 
 void parser_skip_subshell(TokenList *list, size_t *j) {
@@ -41,13 +44,13 @@ RedirectionList *eat_redirections(TokenList *list, type_of_tree tag, int start) 
 		if (i >= list->size) 
 			return NULL;
 
-		RedirectionList *redirs = redirection_list_init();
+		da_create(redirs, RedirectionList, GC_SUBSHELL);
 
 		while (i < list->size) {
 			const Token *el = list->data[i];
 			if (is_redirection(list, &i))
 			{
-				add_redirection_from_token(&redirs, el);
+				add_redirection_from_token(redirs, el);
 				token_list_remove(list, i);
 			} else {
 				i++;
@@ -59,7 +62,7 @@ RedirectionList *eat_redirections(TokenList *list, type_of_tree tag, int start) 
 }
 
 TokenList *extract_subshell_rec(TokenList *list, size_t *i) {
-	TokenList *newlist = token_list_init();
+	da_create(newlist, TokenList, GC_SUBSHELL);
 	(*i)++;
 
 	while (*i < list->size && !is_end_sub(list, i)) {
@@ -67,7 +70,7 @@ TokenList *extract_subshell_rec(TokenList *list, size_t *i) {
 			skip_subshell(newlist, list, i);
 		}
 		if (*i < list->size) {
-			token_list_add(newlist, list->data[*i]);
+			da_push(newlist, list->data[*i], GC_SUBSHELL);
 			(*i)++;
 		}
 	}
@@ -76,7 +79,7 @@ TokenList *extract_subshell_rec(TokenList *list, size_t *i) {
 }
 
 TokenList *extract_cmdgrp_rec(TokenList *list, size_t *i) {
-	TokenList *newlist = token_list_init();
+	da_create(newlist, TokenList, GC_SUBSHELL);
 	(*i)++;
 
 	while (*i < list->size && !is_end_cmdgrp(list, i)) {
@@ -84,7 +87,7 @@ TokenList *extract_cmdgrp_rec(TokenList *list, size_t *i) {
 			skip_cmdgrp(newlist, list, i);
 		}
 		if (*i < list->size) {
-			token_list_add(newlist, list->data[*i]);
+			da_push(newlist, list->data[*i], GC_SUBSHELL);
 			(*i)++;
 		}
 	}
@@ -94,9 +97,9 @@ TokenList *extract_cmdgrp_rec(TokenList *list, size_t *i) {
 }
 
 TokenList *extract_tokens(TokenList *list, size_t *i) {
-	TokenList *newlist = token_list_init();
+	da_create(newlist, TokenList, GC_SUBSHELL);
 	while (*i < list->size && !is_pipe(list, i) && !is_eof(list, i) && !is_semi(list, i)) {
-		token_list_add(newlist, list->data[*i]);
+		da_push(newlist, list->data[*i], GC_SUBSHELL);
 		(*i)++;
 	}
 	return newlist;

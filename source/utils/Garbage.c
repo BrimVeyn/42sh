@@ -6,14 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/12 20:49:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 11:12:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
 #include "libft.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -98,6 +97,7 @@ void *gc(gc_mode mode, ...) {
 			const size_t nb = va_arg(args, size_t);
 			const size_t size = va_arg(args, size_t);
 			const int level = va_arg(args, int);
+			va_end(args);
 			if (mode == GC_ALLOC)
 				return gc(GC_ADD, malloc(nb * size), level);
 			if (mode == GC_CALLOC)
@@ -110,6 +110,7 @@ void *gc(gc_mode mode, ...) {
 			const size_t new_count = va_arg(args, size_t);
 			const size_t element_size = va_arg(args, size_t);
 			const int level = va_arg(args, int);
+			va_end(args);
 
 			void *new_ptr = gc(GC_CALLOC, new_count, element_size, level);
 			//TODO: add a fatal call in GC_ADD;
@@ -120,23 +121,28 @@ void *gc(gc_mode mode, ...) {
 		case GC_ADD: {
 			void *ptr = va_arg(args, void *);
 			const int level = va_arg(args, int);
+			va_end(args);
 			return gc_add(GC, ptr, level);
 		}
 		case GC_GET: {
+			va_end(args);
 			return GC;
 		}
 		case GC_RESET: {
 			const int level = va_arg(args, int);
+			va_end(args);
 			gc_reset(GC, level);
 			return NULL;
 		}
 		case GC_FREE: {
 			void *ptr = va_arg(args, void *);
 			const int level = va_arg(args, int);
+			va_end(args);
 			return gc_free(GC, ptr, level, true);
 		}
 		case GC_CLEANUP: {
 			const int level = va_arg(args, int);
+			va_end(args);
 			gc_cleanup(GC, level);
 			return NULL;
 		}
@@ -144,13 +150,14 @@ void *gc(gc_mode mode, ...) {
 			void *ptr = va_arg(args, void *);
 			const int old_level = va_arg(args, int);
 			const int new_level = va_arg(args, int);
-			assert(old_level != new_level);
+			va_end(args);
 			if (gc_free(GC, ptr, old_level, false) == 0) {
 				gc_add(GC, ptr, new_level);
 			}
 			return NULL;
 		}
 		default:
+			va_end(args);
 			return NULL;
 			break;
 	}

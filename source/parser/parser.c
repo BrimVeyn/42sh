@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 00:21:11 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 10:58:28 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "../../include/utils.h"
 #include "lexer.h"
 #include "colors.h"
+#include "signals.h"
 
 #include <fcntl.h>
 #include <stdint.h>
@@ -53,7 +54,7 @@ bool heredoc_detector(TokenList *data) {
 	return true;
 }
 
-void add_redirection_from_token(RedirectionList **redir_list, const Token *el) {
+void add_redirection_from_token(RedirectionList *redir_list, const Token *el) {
 	const Token *next = (el->tag == T_WORD && el->w_postfix->tag == T_REDIRECTION) ? el->w_postfix : el;
 	Redirection *current_redir = (Redirection *) gc(GC_ADD, ft_calloc(1, sizeof(Redirection)), GC_SUBSHELL);
 
@@ -68,15 +69,15 @@ void add_redirection_from_token(RedirectionList **redir_list, const Token *el) {
 		current_redir->su_type = R_FILENAME;
 		current_redir->filename = next->r_postfix->w_infix;
 	}
-	redirection_list_add(*redir_list, current_redir);
+	da_push(redir_list, current_redir, GC_SUBSHELL);
 }
 
 RedirectionList *parser_get_redirection(const TokenList *tl) {
-	RedirectionList *redir_list = redirection_list_init();
+	da_create(redir_list, RedirectionList, GC_SUBSHELL);
 	for (size_t it = 0; it < tl->size; it++) {
 		const Token *el = tl->data[it];
 		if (is_redirection(tl, &it))
-			add_redirection_from_token(&redir_list, el);
+			add_redirection_from_token(redir_list, el);
 	}
 	return redir_list;
 }
@@ -107,7 +108,7 @@ SimpleCommand *parser_get_command(const TokenList *tl) {
 }
 
 TokenList *parser_eat_variables(TokenList *tokens) {
-	TokenList *self = token_list_init();
+	da_create(self, TokenList, GC_SUBSHELL);
 	bool found_bin = false;
 	size_t i = 0;
 
@@ -129,7 +130,7 @@ TokenList *parser_eat_variables(TokenList *tokens) {
 			i += 1;
 			continue;
         }
-		token_list_add(self, elem);
+		da_push(self, elem, GC_SUBSHELL);
 		token_list_remove(tokens, i);
 	}
 	return self;
@@ -140,13 +141,13 @@ void add_vars_to_set(Vars *shell_vars, TokenList *vars) {
 	StringList *env = shell_vars->env;
 	for (size_t i = 0; i < vars->size; i++) {
 		string_list_update(env, vars->data[i]->w_infix);
-		string_list_add_or_update(set, vars->data[i]->w_infix);
+		string_list_add_or_update(set, vars->data[i]->w_infix, GC_ENV);
 	}
 }
 
 void add_vars_to_local(StringList *list, TokenList *vars) {
 	for (size_t i = 0; i < vars->size; i++) {
-		string_list_add_or_update(list, vars->data[i]->w_infix);
+		string_list_add_or_update(list, vars->data[i]->w_infix, GC_SUBSHELL);
 	}
 }
 
@@ -319,7 +320,8 @@ TokenList *get_exp_ranges(Token *candidate, Vars *shell_vars) {
 	//TODO: join list
 	//TODO: apply word split based on ifs, if KIND != WORD --> new token
 	// exp_range_consume(range_list);
-	return token_list_init();
+	da_create(dummy, TokenList, GC_SUBSHELL);
+	return dummy;
 }
 
 SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {

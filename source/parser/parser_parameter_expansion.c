@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/12 20:20:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 10:58:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 		else if (!ft_strcmp(metachar, ":=")){
 			char *variable = gc(GC_ADD, ft_calloc(ft_strlen(word) + ft_strlen(id) + 3, sizeof(char)), GC_GENERAL);
 			ft_sprintf(variable, "%s=%s", id, word);
-			string_list_add_or_update(shell_vars->env, variable);
+			string_list_add_or_update(shell_vars->env, variable, GC_ENV);
 			return (word);
 		}
 		else if (!ft_strcmp(metachar, ":?")){

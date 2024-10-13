@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:36:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/12 23:46:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 10:56:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,26 +158,19 @@ void			token_command_grouping_init(Token *token);
 void			token_word_init(Token *token);
 
 //----------------TokenList----------------//
-TokenList		*token_list_init(void);
-void			token_list_add(TokenList *tl, Token *token);
 void			token_list_add_list(TokenList *t1, TokenList *t2);
 void			token_list_remove(TokenList *tl, int index);
 void			token_list_insert(TokenList *tl, Token *token, const int index);
 void			token_list_insert_list(TokenList *dest, TokenList *src, const int index);
 
 //----------------StringList----------------//
-void			get_env_variable_id(char *buffer, char *variable);
-void			get_env_variable_value(char *buffer, char *variable);
-int				get_env_variable_index(StringList *sl, char *variable);
-StringList		*string_list_init(void);
-void			string_list_add_or_update(StringList *sl, char *variable);
+void			string_list_add_or_update(StringList *sl, char *var, int garbage_collector_level);
 bool			string_list_update(StringList *sl, char *var);
 void			string_list_clear(StringList *list);
 bool			string_list_remove(StringList *sl, char *id);
 char			*string_list_get_value(StringList *sl, char *id);
 char			*shell_vars_get_value(Vars *shell_vars, char *id);
 void			string_list_print(const StringList *list);
-void			string_list_print_debug(const StringList *list);
 
 //----------------Syntax----------------//
 bool	is_pipe(const TokenList *list, const size_t *i);

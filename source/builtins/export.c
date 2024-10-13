@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:33:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/01 10:03:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 11:00:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ void builtin_export(const SimpleCommand *command, Vars *shell_vars) {
 	size_t args_len = 0;
 	for (; command->args[args_len]; args_len++) {}
 
+	//TODO: update with regex to handle -pppppp -pppp -p...
 	if (!ft_strcmp(command->args[1], "-p")) {
 		if (args_len == 2) {
 			print_export_p(shell_vars->env);
@@ -69,7 +70,7 @@ void builtin_export(const SimpleCommand *command, Vars *shell_vars) {
 		size_t match_len = (match.is_found) ? match.re_end - match.re_start : -1;
 
 		if ((has_equal && match_len == equal_pos) || (!has_equal && match_len == arg_len)) {
-			string_list_add_or_update(shell_vars->env, command->args[i]);
+			string_list_add_or_update(shell_vars->env, command->args[i], GC_ENV);
 		} else {
 			INVALID_IDENTIFIER(command->args[i]);
 			g_exitno = 1;

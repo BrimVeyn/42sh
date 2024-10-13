@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/10 12:18:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 11:15:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,8 +72,8 @@ bool apply_redirect(const Redirection redirect) {
 }
 
 bool apply_all_redirect(RedirectionList *redirections) {
-	for (int i = 0; redirections->r[i]; i++) {
-		if (!apply_redirect(*redirections->r[i])) {
+	for (int i = 0; redirections->data[i]; i++) {
+		if (!apply_redirect(*redirections->data[i])) {
 			return false;
 		}
 	}
@@ -99,7 +99,7 @@ char *find_bin_location(char *bin, StringList *env){
 		}
 
 	}
-	else if (stat(bin, &file_stat) == -1 && there_is_slash(bin)) {
+	else if (stat(bin, &file_stat) == -1 && ft_strchr(bin, '/')) {
 		dprintf(2, "%s: No such file or directory\n", bin);
 		g_exitno = 127;
 		return (NULL);

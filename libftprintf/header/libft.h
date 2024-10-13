@@ -6,14 +6,13 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:00:03 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/17 10:50:21 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/13 10:26:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LIBFT_H
 # define LIBFT_H
 
-# define _GNU_SOURCE 1
 # include <stddef.h>
 # include <stdio.h>
 # include <stdlib.h>

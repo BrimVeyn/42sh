@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 00:21:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 10:29:37 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ TokenList *extract_command(TokenList *list, size_t *i) {
 			continue;
 		}
 		if (*i < list->size && !is_ast_operator(list, i) && !is_eof(list, i)) {
-			token_list_add(self, list->data[*i]);
+			da_push(self, list->data[*i], GC_SUBSHELL);
 		}
 		(*i)++;
 	}
@@ -107,13 +107,13 @@ TokenListStack *branch_stack_to_rpn(TokenListStack *list) {
 		TokenList *current = list->data[i];
 		if (is_ast_operator(current, &zero)) {
 			while(!has_higher_precedence(operator, current))
-				da_push(output, token_list_stack_pop(operator), GC_SUBSHELL);
+				da_push(output, da_pop(operator), GC_SUBSHELL);
 			da_push(operator, current, GC_SUBSHELL);
 		} else
 			da_push(output, current, GC_SUBSHELL);
 	}
 	while (operator->size)
-		da_push(output, token_list_stack_pop(operator), GC_SUBSHELL);
+		da_push(output, da_pop(operator), GC_SUBSHELL);
 	return output;
 }
 

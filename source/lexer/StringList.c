@@ -6,26 +6,15 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/11 16:16:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 10:56:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/lexer.h"
-#include "../../include/utils.h"
-#include "../../libftprintf/header/libft.h"
-#include "colors.h"
-#include <stdio.h>
+#include "utils.h"
+#include "libft.h"
 
-StringList *string_list_init(void) {
-	StringList *self = gc(GC_ADD, ft_calloc(1, sizeof(StringList)), GC_ENV);
-	StringList tl = {
-		.data = (char **) gc(GC_ADD, ft_calloc(10, sizeof(char *)), GC_ENV),
-		.size = 0,
-		.capacity = 10,
-	};
-	*self = tl;
-	return self;
-}
+#include <stdio.h>
 
 void string_list_clear(StringList *list) {
 	for (size_t i = 0; i < list->size; i++) {
@@ -39,18 +28,6 @@ void string_list_delete(StringList *list) {
 	string_list_clear(list);
 	gc(GC_FREE, list->data, GC_ENV);
 	gc(GC_FREE, list, GC_ENV);
-}
-
-void string_list_add(StringList *tl, char *token) {
-	if (tl->size >= tl->capacity) {
-		tl->capacity *= 2;
-		char **tmp = tl->data;
-		tl->data = ft_realloc(tl->data, tl->size, tl->capacity, sizeof(char *));
-		gc(GC_FREE, tmp, GC_ENV);
-		gc(GC_ADD, tl->data, GC_ENV);
-	}
-	tl->data[tl->size] = token;
-	tl->size += 1;
 }
 
 bool string_list_remove(StringList *sl, char *id) {
@@ -96,9 +73,9 @@ bool string_list_update(StringList *sl, char *var) {
 	return false;
 }
 
-void string_list_add_or_update(StringList *sl, char *var) {
+void string_list_add_or_update(StringList *sl, char *var, int garbage_collector_level) {
 	if (!string_list_update(sl, var))
-		string_list_add(sl, var);
+		da_push(sl, var, garbage_collector_level);
 }
 
 char *string_list_get_value(StringList *sl, char *id) {
@@ -123,8 +100,6 @@ char *shell_vars_get_value(Vars *shell_vars, char *id) {
 	}
 	return return_value;
 }
-
-
 
 void string_list_print(const StringList *list) {
 	for (size_t i = 0; i < list->size; i++) {
