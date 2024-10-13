@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 11:11:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/12 23:58:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 10:58:01 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ static ANode *incr(ANode *self, Vars *shell_vars) {
 		char tmp[MAX_WORD_LEN] = {0};
 		long var_value = get_value(self, shell_vars);
 		ft_sprintf(tmp, "%s=%ld", self->value->variable, var_value + 1);
-		char *new_value = gc(GC_ADD, ft_strdup(tmp), GC_GENERAL);
-		string_list_add_or_update(shell_vars->set, new_value);
+		char *new_value = gc(GC_ADD, ft_strdup(tmp), GC_ENV);
+		string_list_add_or_update(shell_vars->set, new_value, GC_ENV);
 	}
 	return self;
 }
@@ -41,8 +41,8 @@ static ANode *decr(ANode *self, Vars *shell_vars) {
 		char tmp[MAX_WORD_LEN] = {0};
 		long var_value = get_value(self, shell_vars);
 		ft_sprintf(tmp, "%s=%ld", self->value->variable, var_value - 1);
-		char *new_value = gc(GC_ADD, ft_strdup(tmp), GC_GENERAL);
-		string_list_add_or_update(shell_vars->set, new_value);
+		char *new_value = gc(GC_ADD, ft_strdup(tmp), GC_ENV);
+		string_list_add_or_update(shell_vars->set, new_value, GC_ENV);
 	}
 	return self;
 }

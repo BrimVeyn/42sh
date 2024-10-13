@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:19:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/02 12:47:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 10:06:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,10 @@
 #include <stdio.h>
 
 TokenList *lexer_lex_all(Lexer_p l) {
-	TokenList *self = token_list_init();
+	da_create(self, TokenList, GC_SUBSHELL);
 	while (true) {
 		Token *tmp = lexer_get_next_token(l);
-		token_list_add(self, tmp);
+		da_push(self, tmp, GC_SUBSHELL);
 		if (tmp->tag == T_SEPARATOR && tmp->s_type == S_EOF) break;
 	}
 	return self;

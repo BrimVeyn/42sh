@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/12 23:43:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 10:22:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,9 +57,9 @@ typedef struct {
 } Redirection;
 
 typedef struct RedirectionList {
-	Redirection		**r;
-	uint16_t	size;
-	uint16_t	capacity;
+	Redirection		**data;
+	size_t	size;
+	size_t	capacity;
 } RedirectionList;
 
 typedef struct SimpleCommand {
@@ -111,10 +111,7 @@ SimpleCommand		*parser_parse_current(TokenList *tl, Vars *shell_vars);
 bool				heredoc_detector(TokenList *data);
 
 //-----------------Redirection List----------------//
-RedirectionList		*redirection_list_init(void);
-void				redirection_list_add(RedirectionList *rl, Redirection *redirection);
-void				redirection_list_prepend(RedirectionList *rl, Redirection *redirection);
-void				add_redirection_from_token(RedirectionList **redir_list, const Token *el);
+void add_redirection_from_token(RedirectionList *redir_list, const Token *el);
 
 //-------------------Parser modules------------//
 bool				parser_parameter_expansion(TokenList *tl, Vars *shell_vars);

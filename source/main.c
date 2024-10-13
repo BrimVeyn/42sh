@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:35:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/12 23:50:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 11:36:13 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,15 +107,18 @@ void add_input_to_history(char *input, int *history_fd){
 
 void env_to_string_list(StringList *env_list, const char **env){
 	for (uint16_t i = 0; env[i]; i++)
-		string_list_add_or_update(env_list, gc(GC_ADD, ft_strdup(env[i]), GC_ENV));
+		string_list_add_or_update(env_list, gc(GC_ADD, ft_strdup(env[i]), GC_ENV), GC_ENV);
 }
 
 Vars *vars_init(const char **env) {
 	Vars *self = gc(GC_ADD, ft_calloc(1, sizeof(Vars)), GC_ENV);
 
-	self->env = string_list_init();
-	self->set = string_list_init();
-	self->local = string_list_init();
+	da_create(env_list, StringList, GC_ENV);
+	self->env = env_list;
+	da_create(set_list, StringList, GC_ENV);
+	self->set = set_list;
+	da_create(local_list, StringList, GC_SUBSHELL);
+	self->local = local_list;
 	env_to_string_list(self->env, env);
 	env_to_string_list(self->set, env);
 	return self;
@@ -163,20 +166,9 @@ ShellInfos *shell(int mode) {
 		self->shell_terminal = STDIN_FILENO;
 		self->interactive = isatty(self->shell_terminal);
 		if (self->interactive) {
-			//stop itself untill we are in the foreground, can access terminal
 			while (tcgetpgrp(self->shell_terminal) != (self->shell_pgid = getpgrp()))
 				kill(- self->shell_pgid, SIGTTIN);
-			//put ourselves in our new proces group
-			// self->shell_pgid = getpid();
-			// printf("pid: %d\n", self->shell_pgid);
-			// if (setpgid(self->shell_pgid, self->shell_pgid) < 0)
-			// {
-			// 	dprintf(2, "42sh: erorr couldn't put the shell in its own process group\n");
-			// 	gc(GC_CLEANUP, GC_ALL);
-			// }
-			// set itself as terminal
 			tcsetpgrp(self->shell_terminal, self->shell_pgid);
-			// saves its attributes
 			tcgetattr(self->shell_terminal, &self->shell_tmodes);
 		}
 	} else {
@@ -189,22 +181,25 @@ ShellInfos *shell(int mode) {
 int main(const int ac, const char *av[], const char *env[]) {
 	(void) av; (void) ac; (void) env;
 
-	// StrList *test = gc(GC_CALLOC, 1, sizeof(StrList), GC_SUBSHELL);
-	// da_init(test, GC_SUBSHELL);
+	// da_create(list, StrList, GC_SUBSHELL);
+	// da_push(list, str_init(EXP_CMDSUB, "slt"), GC_SUBSHELL);
+	// da_push(list, str_init(EXP_CMDSUB, "slt"), GC_SUBSHELL);
+	// da_push(list, str_init(EXP_CMDSUB, "slt"), GC_SUBSHELL);
+	// da_push(list, str_init(EXP_CMDSUB, "slt"), GC_SUBSHELL);
 	//
-	// Str *test1 = str_init(EXP_ARITHMETIC, ft_strdup("test"));
-	// for (size_t i = 0; i < 100; i++) {
-	// 	da_push(test, test1, GC_SUBSHELL);
-	// }
-	// str_list_print(test);
-	// for (size_t i = 0; i < 99; i++) {
-	// 	Str *str = (Str *) da_pop(test);
-	// 	da_push(test, str, GC_SUBSHELL);
-	// }
-	// printf("size: %zu\n", test->size);
-	// str_list_print(test);
-
-
+	// da_push_front(list, str_init(EXP_CMDSUB, "hey"), GC_SUBSHELL);
+	// da_push_front(list, str_init(EXP_CMDSUB, "bite"), GC_SUBSHELL);
+	// da_push_front(list, str_init(EXP_CMDSUB, "chatte"), GC_SUBSHELL);
+	// da_push_front(list, str_init(EXP_CMDSUB, "couille"), GC_SUBSHELL);
+	//
+	// da_print(list);
+	// da_erase_index(list, 2);
+	// da_erase_index(list, 2);
+	// da_erase_index(list, 2);
+	// da_erase_index(list, 2);
+	// da_erase_index(list, 2);
+	// da_print(list);
+	
 	shell(SHELL_INIT);
 	g_signal = 0;
 	job_list = job_list_init();
@@ -234,8 +229,8 @@ int main(const int ac, const char *av[], const char *env[]) {
 			ast_execute(AST, shell_vars, true);
 			//update env '_' variable
 			char *last_executed = ft_strjoin("_=", input);
-			string_list_add_or_update(shell_vars->env, last_executed);
-			string_list_add_or_update(shell_vars->set, last_executed);
+			string_list_add_or_update(shell_vars->env, last_executed, GC_ENV);
+			string_list_add_or_update(shell_vars->set, last_executed, GC_ENV);
 			FREE_POINTERS(last_executed);
 			//reset memory collection for the next input
 			gc(GC_RESET, GC_SUBSHELL);
@@ -251,6 +246,6 @@ int main(const int ac, const char *av[], const char *env[]) {
 	//clear history, clear all allocations, close all fds and exit
 	rl_clear_history();
 	gc(GC_CLEANUP, GC_ALL);
-	close_all_fds(); close_std_fds();
+	close_all_fds();
 	return (EXIT_SUCCESS);
 }

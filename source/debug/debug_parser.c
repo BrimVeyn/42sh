@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:50:32 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/26 15:44:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 10:24:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,15 @@
 
 void printRedirList(RedirectionList *rl) {
 	dprintf(2,C_BRONZE"------ "C_LIGHT_BROWN"Redir list"C_BRONZE"----\n"C_RESET);
-	for (uint16_t it = 0; it < rl->size; it++) {
-		const Redirection *el = rl->r[it];
-		dprintf(2,"prefix_fd ["C_BRONZE"%d"C_RESET"]:\t"C_LIGHT_BROWN"%d\n"C_RESET, it, el->prefix_fd);
-		dprintf(2,"r_type    ["C_BRONZE"%d"C_RESET"]:\t"C_LIGHT_BROWN"%s\n"C_RESET, it, tagName(el->r_type));
-		dprintf(2,"su_type   ["C_BRONZE"%d"C_RESET"]:\t"C_LIGHT_BROWN"%s\n"C_RESET, it, tagName(el->su_type));
+	for (size_t it = 0; it < rl->size; it++) {
+		const Redirection *el = rl->data[it];
+		dprintf(2,"prefix_fd ["C_BRONZE"%zu"C_RESET"]:\t"C_LIGHT_BROWN"%d\n"C_RESET, it, el->prefix_fd);
+		dprintf(2,"r_type    ["C_BRONZE"%zu"C_RESET"]:\t"C_LIGHT_BROWN"%s\n"C_RESET, it, tagName(el->r_type));
+		dprintf(2,"su_type   ["C_BRONZE"%zu"C_RESET"]:\t"C_LIGHT_BROWN"%s\n"C_RESET, it, tagName(el->su_type));
 		if (el->su_type == R_FD) {
-			dprintf(2,"suffix_fd ["C_BRONZE"%d"C_RESET"]:"C_LIGHT_BROWN"\t%d\n"C_RESET, it, el->fd);
+			dprintf(2,"suffix_fd ["C_BRONZE"%zu"C_RESET"]:"C_LIGHT_BROWN"\t%d\n"C_RESET, it, el->fd);
 		} else if (el->su_type == R_FILENAME) {
-			dprintf(2,"filename  ["C_BRONZE"%d"C_RESET"]:\t"C_LIGHT_BROWN"%s\n"C_RESET, it, el->filename);
+			dprintf(2,"filename  ["C_BRONZE"%zu"C_RESET"]:\t"C_LIGHT_BROWN"%s\n"C_RESET, it, el->filename);
 		}
 		if (it + 1 < rl->size) {
 			dprintf(2,C_BRONZE"------------------\n"C_RESET);

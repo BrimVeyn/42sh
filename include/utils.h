@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 00:20:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/13 11:34:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,33 +87,56 @@ void *gc(gc_mode mode, ...);
 	(name)->size = 0; \
 	(name)->capacity = 10;
 
-#define da_push(array, new_element, carbage_collector_level) \
+#define da_push(array, new_element, garbage_collector_level) \
 	do { \
 		if ((array)->size >= (array)->capacity) { \
 			(array)->capacity *= 2; \
-			(array)->data = gc(GC_REALLOC, (array)->data, (array)->size, (array)->capacity, sizeof(void *), carbage_collector_level); \
+			(array)->data = gc(GC_REALLOC, (array)->data, (array)->size, (array)->capacity, sizeof(void *), garbage_collector_level); \
 		} \
 		(array)->data[(array)->size++] = new_element; \
 	} while (0); \
 
+#define da_push_front(array, new_element, garbage_collector_level) \
+	do { \
+		if ((array)->size >= (array)->capacity) { \
+			(array)->capacity *= 2; \
+			(array)->data = gc(GC_REALLOC, (array)->data, (array)->size, (array)->capacity, sizeof(void *), garbage_collector_level); \
+		} \
+		ft_memmove(&(array)->data[1], (array)->data, sizeof(void *) * (array)->size++); \
+		(array)->data[0] = new_element; \
+	} while (0); \
+
+#define da_erase_index(array, index) \
+	do { \
+		if (index < (array)->size)  { \
+			ft_memmove(&(array)->data[index], &(array)->data[index + 1], sizeof(void *) * ((array)->size - index)); \
+			(array)->data[--(array)->size] = NULL; \
+		} \
+	} while (0); \
+	
 #define da_pop(array) \
 	((array)->size == 0 ? NULL : (array)->data[--(array)->size]); \
+
+#define da_print(array) _Generic((array), \
+	StrList *: str_list_print, \
+	StringList *: string_list_print, \
+	TokenList *: tokenListToString \
+)((array))
 
 //------------------------------------------//
 
 
 //----------------Utils--------------------//
-void			free_charchar(char **s);
-void			*ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize);
+void			*ft_realloc(void *ptr, size_t old_size, size_t new_size, size_t element_size);
+void			free_charchar(char **array);
 size_t			ft_strlenlen(const char **strstr);
 char			**ft_strdupdup(const char **env);
-int				there_is_star(char *str);
-int				there_is_slash(char *str);
 char			*replace_char_greedy(char *str, char c, char by);
 int				ft_strstr(char *haystack, char *needle);
 int				ft_strrstr(char *haystack, char *needle);
-void			ft_sprintf(char *buffer, char *fmt, ...);
-void			ft_dprintf(int fd, char *fmt, ...);
+void			ft_sprintf(char *buffer, const char *fmt, ...);
+int				ft_snprintf(char *buffer, const size_t size_of_buffer, const char *fmt, ...);
+void			ft_dprintf(int fd, const char *fmt, ...);
 long			ft_atol(const char *str);
 char			*ft_ltoa(long n);
 
