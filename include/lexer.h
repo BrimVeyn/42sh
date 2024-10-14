@@ -5,15 +5,14 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/01 15:36:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 13:44:25 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/10/14 16:23:01 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/10/14 16:23:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LEXER_H
 # define LEXER_H
 
-#include <readline/history.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>

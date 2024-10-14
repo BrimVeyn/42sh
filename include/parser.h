@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 13:43:45 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/10/14 16:23:25 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/10/14 16:23:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,11 @@ char				*parser_command_substitution(char *str, Vars *shell_vars);
 bool				parser_arithmetic_expansion(TokenList *tokens, const int idx, const size_t start, Vars *shell_vars);
 int					parser_filename_expansion(TokenList *tl);
 bool				parser_word_split(TokenList *dest, Vars *shell_vars, char *prefix, char *infix, char *postfix, int index);
+
+//-------------------history modules------------//
+bool				history_expansion (char **pstring, int history_fd);
+int					get_history(void);
+void				add_input_to_history(char *input, int *history_fd);
 
 //-------------------Parameter Expansion-------------//
 void				parser_skip_subshell(TokenList *list, size_t *it);

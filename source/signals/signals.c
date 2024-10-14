@@ -5,22 +5,21 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/30 15:09:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/09 13:11:43 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/10/14 16:29:50 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/10/14 16:30:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "signals.h"
+#include "ft_readline.h"
+
 #include <stdio.h>
 #include <signal.h>
-#include <readline/readline.h>
-#include <unistd.h>
-#include <stdbool.h>
-
-#include "signals.h"
 
 int g_signal;
 
-void signal_sigint_prompt(int code) {
+void signal_sigint_prompt(__attribute__((unused)) int code) {
+	ft_rl_newline();
 	rl_done = 1;
 	g_signal = code;
 }
@@ -61,5 +60,3 @@ void signal_manager(type_of_signals mode) {
 			return;
 	}
 }
-
-int rl_event_dummy(void) { return 1; }

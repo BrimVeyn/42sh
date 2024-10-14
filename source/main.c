@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/01 15:35:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 16:20:24 by bvan-pae         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "parser.h"
 #include "utils.h"
 #include "signals.h"
@@ -18,6 +6,7 @@
 #include "ast.h"
 #include "exec.h"
 #include "libft.h"
+#include "ft_readline.h"
 
 #include <signal.h>
 #include <stdint.h>
@@ -26,8 +15,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <readline/readline.h>
-#include <readline/history.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <termios.h>
@@ -37,72 +24,15 @@
 int g_debug = 0;
 JobList *job_list = NULL;
 
-void *init_prompt_and_signals(char *input, bool shell_is_interactive) {
-	rl_event_hook = rl_event_dummy;
-
-	if (shell_is_interactive) {
+void	*init_prompt_and_signals(char *input, bool shell_is_interactive) {
+	if (shell_is_interactive)
 		signal_manager(SIG_PROMPT);
-		input = readline("42sh > ");
-	} else {
-		input = get_next_line(STDIN_FILENO);
+	
+	input = ft_readline("42sh > ");
+	if (!input) {
+		return NULL;
 	}
 	return input;
-}
-
-void get_history() {
-	char *home = getenv("HOME");
-	char history_filename[1024] = {0};
-	ft_sprintf(history_filename, "%s/.42sh_history", home);
-    int fd = open(history_filename, O_RDWR | O_CREAT, 0644);
-    if (fd == -1) {
-        perror("Can't open history file");
-        exit(EXIT_FAILURE);
-    }
-
-	struct stat st;
-	if (fstat(fd, &st) == -1){
-        perror("Can't get history's file stats");
-        exit(EXIT_FAILURE);
-	}
-    size_t file_size = st.st_size;
-
-    char *buffer = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (buffer == MAP_FAILED) {
-        perror("mmap failed");
-        exit(EXIT_FAILURE);
-    }
-
-	char *start = buffer;
-    char *end = buffer; 
-
-	while(*end){
-		if (*end == '\n'){
-			char *tmp = (char *)malloc(end - start + 1);
-			memcpy(tmp, start, end - start);
-			tmp[end - start] = '\0';
-			add_history(tmp);
-			free(tmp);
-			start = end + 1;
-		}
-		end++;
-	}
-	munmap(buffer, file_size);
-	close(fd);
-}
-
-void add_input_to_history(char *input, int *history_fd){
-	add_history(input);
-	char *home = getenv("HOME");
-	char history_filename[1024] = {0};
-	ft_sprintf(history_filename, "%s/.42sh_history", home);
-	if (*history_fd == -1){
-		*history_fd = open(history_filename, O_APPEND | O_WRONLY | O_CREAT, 0644);
-		if (*history_fd == -1) {
-			perror("Can't open history file");
-			exit(EXIT_FAILURE);
-		}
-	}
-	dprintf(*history_fd, "%s\n", input);
 }
 
 void env_to_string_list(StringList *env_list, const char **env){
@@ -189,7 +119,7 @@ int main(const int ac, const char *av[], const char *env[]) {
 	ShellInfos *self = shell(SHELL_GET);
 
 	if (self->interactive) 
-		get_history();
+		history_fd = get_history();
 
 	char *input = NULL;
 	//display the prompt, init signals if shell in interactive and reads input
@@ -198,8 +128,12 @@ int main(const int ac, const char *av[], const char *env[]) {
 		if (self->interactive)
 			do_job_notification();
 		if (input) {
-			if (self->interactive)
+			if (self->interactive) {
+				if (history_expansion(&input, history_fd) == false){
+					continue;
+				}
 				add_input_to_history(input, &history_fd);
+			}
 			Lexer_p lexer = lexer_init(input);
 			TokenList *tokens = lexer_lex_all(lexer);
 			if (lexer_syntax_error(tokens))
@@ -223,8 +157,8 @@ int main(const int ac, const char *av[], const char *env[]) {
 			break;
 		}
 	}
-	//clear history, clear all allocations, close all fds and exit
-	rl_clear_history();
+	if (isatty(STDIN_FILENO))
+		destroy_history();
 	gc(GC_CLEANUP, GC_ALL);
 	close_all_fds();
 	return (EXIT_SUCCESS);
