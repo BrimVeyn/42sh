@@ -6,13 +6,14 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/11 13:20:12 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/14 13:24:16 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_readline.h"
 #include "42sh.h"
 
+bool history_defined = false;
 HISTORY_STATE *history;
 
 void init_history(){
@@ -47,7 +48,11 @@ static void history_realloc() {
 }
 
 void add_history(const char *str) {
-    history_realloc();
+    if (!history_defined) {
+        init_history();
+        history_defined = true;
+    }
+	history_realloc();
 
     if (!history->entries[history->length]) {
         history->entries[history->length] = malloc(sizeof(HIST_ENTRY));
