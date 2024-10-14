@@ -6,6 +6,13 @@
 }
 
 {
+	ignore_tgetstr_sp_leaks
+	Memcheck:Leak
+	...
+	obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.*
+}
+
+{
    ignore_all_usr_bin_leaks
    Memcheck:Leak
    ...

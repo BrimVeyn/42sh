@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:55:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/08 11:27:09 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/14 15:21:57 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,12 @@
 #include "../include/regex.h"
 #include "../libftprintf/header/libft.h"
 #include "ft_regex.h"
+#include "ft_readline.h"
 
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <readline/readline.h>
-#include <readline/history.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
 
@@ -33,13 +32,13 @@ int g_debug = 0;
 
 char *init_prompt_and_signals(void) {
 	signal_manager(SIG_PROMPT);
-	rl_event_hook = rl_event_dummy;
 	
 	char *input = NULL;
-	if (isatty(STDIN_FILENO))
-		input = readline("42sh > ");
-	else
-		input = get_next_line(STDIN_FILENO);
+	// if (isatty(STDIN_FILENO)){
+		input = ft_readline("42sh > ");
+	// }
+	// else
+		// input = get_next_line(STDIN_FILENO);
 	return input;
 }
 
@@ -112,9 +111,11 @@ int main(const int ac, const char *av[], const char *env[]) {
 
 	while ((input = init_prompt_and_signals()) != NULL) {
 		if (*input) 
-		{
-			if (history_expansion(&input, history_fd) == false){
-				continue;
+		{	
+			if (isatty(STDIN_FILENO)){
+				if (history_expansion(&input, history_fd) == false){
+					continue;
+				}
 			}
 			if (isatty(STDIN_FILENO)){
 				add_input_to_history(input, &history_fd);
@@ -135,7 +136,8 @@ int main(const int ac, const char *av[], const char *env[]) {
 			// gc_init(GC_GENERAL);
 		}
 	}
-	rl_clear_history();
+	if (isatty(STDIN_FILENO))
+		destroy_history();
 	gc_cleanup(GC_ALL);
 	close_std_fds();
 	return (0);

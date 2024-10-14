@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 11:31:11 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/11 16:14:45 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/14 13:38:17 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 #ifndef C_STRING_H
 # include "c_string.h"
 #endif
+
+#include <stdbool.h>
 
 typedef struct _hist_entry {
   string line;
@@ -29,7 +31,9 @@ typedef struct _hist_state {
   int capacity;             /* Number of slots allocated to this array. */
 } HISTORY_STATE;
 
+extern int rl_done;
 extern HISTORY_STATE *history;
+extern bool history_defined;
 
 void init_history();
 void destroy_history();
@@ -39,5 +43,6 @@ void str_info(const string *str);
 
 char *ft_readline(const char *prompt);
 void ft_readline_clean();
+void ft_rl_newline();
 
 #endif

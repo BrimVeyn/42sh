@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 11:26:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/11 16:31:14 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/14 16:10:20 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,9 @@
 #include <termios.h>
 #include <termcap.h>
 #include <unistd.h>
+#include <ncurses.h> 
+
+int rl_done = 0;
 
 typedef struct s_readline_state {
     char *prompt;
@@ -56,6 +59,7 @@ void disable_raw_mode()
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
 
+//change ^C print location
 void ft_rl_newline(){
 	write(1, "\033[2K\r", 5);
 	write(1, get_prompt(), ft_strlen(get_prompt()));
@@ -67,6 +71,7 @@ void ft_rl_newline(){
 
 void sigint_handler(){
     ft_rl_newline();
+	rl_done = 1;
 }
 
 void move_cursor(int x, int y) {
@@ -122,44 +127,46 @@ void update_line(string *line){
 }
 
 void init_readline(const char *prompt){
-    static bool history_defined = false;
-
     char buffer[2048];
-    tgetent(buffer, getenv("TERM"));
 
-    if (!history_defined) {
-        init_history();
-        history_defined = true;
-    }
+    set_prompt(prompt);
 
-    history->offset = history->length;
-    add_history("");
+	signal(SIGINT, sigint_handler);
+	tgetent(buffer, getenv("TERM"));
 
-    set_prompt(prompt);  // Set the prompt globally
+	if (!history_defined) {
+		init_history();
+		history_defined = true;
+	}
 
-    signal(SIGINT, sigint_handler);
-    enable_raw_mode();
-    get_cursor_pos();
-    rl_state.cursor_y--;
-    rl_state.cursor_x = ft_strlen(get_prompt());
-    write(STDOUT_FILENO, get_prompt(), ft_strlen(get_prompt()));
+	history->offset = history->length;
+	add_history("");
 
-    move_cursor(rl_state.cursor_x, rl_state.cursor_y);
+	enable_raw_mode();
+
+	get_cursor_pos();
+	rl_state.cursor_y--;
+	rl_state.cursor_x = ft_strlen(get_prompt());
+	write(STDOUT_FILENO, get_prompt(), ft_strlen(get_prompt()));
+
+	move_cursor(rl_state.cursor_x, rl_state.cursor_y);
 }
 
-int handle_normal_keys(char c, string *line){
-    if (c == '\n'){
-        write(1, "\n", 1);
-        write(1, "\033[2K\r", 5);
-        write(1, get_prompt(), ft_strlen(get_prompt()));
-        write(1, line->data, str_length(line));
+int handle_normal_keys(char c, string *line, int interactive){
+    if (c == '\n' || c == '\0'){
+		if (interactive){
+			write(1, "\n", 1);
+			write(1, "\033[2K\r", 5);
+		}
+        // write(1, get_prompt(), ft_strlen(get_prompt()));
+        // write(1, line->data, str_length(line));
         return 1;
     }
     if (c == 127 && rl_state.cursor_x == ft_strlen(get_prompt())){
         return 2;
     }
 
-    if (rl_state.cursor_x - ft_strlen(get_prompt()) == (size_t)str_length(line)) {
+    if (!interactive || (rl_state.cursor_x - ft_strlen(get_prompt()) == (size_t)str_length(line))){
         if (c == 127) {
             str_pop_back(line);
             rl_state.cursor_x -= 2;
@@ -189,7 +196,7 @@ int handle_special_keys(string *line){
             history->offset--;
             rl_state.cursor_x = history->entries[history->offset]->line.size + ft_strlen(get_prompt());
 			str_destroy(line);
-            *line = str_dup(&history->entries[history->offset]->line);
+            *line = str_strdup(&history->entries[history->offset]->line);
             return 2;
         }
         else if (seq[1] == 'D'){
@@ -206,7 +213,7 @@ int handle_special_keys(string *line){
             history->offset++;
             rl_state.cursor_x = history->entries[history->offset]->line.size + ft_strlen(get_prompt());
 			str_destroy(line);
-            *line = str_dup(&history->entries[history->offset]->line);
+            *line = str_strdup(&history->entries[history->offset]->line);
             return 2;
         }
     }
@@ -214,39 +221,63 @@ int handle_special_keys(string *line){
 }
 
 char *ft_readline(const char *prompt){
-    char c;
+    char c = '\0';
     string *line = NULL;
     int result = 0;
+	const int interactive = isatty(STDIN_FILENO);
 
-    init_readline(prompt);
+	if (interactive)
+		init_readline(prompt);
 
     line = malloc(sizeof(string));
-    *line = str_dup(&history->entries[history->length - 1]->line);
+	if (interactive){
+		*line = str_strdup(&history->entries[history->length - 1]->line);
+	} else{
+		*line = STRING_L("");
+	}
 
-    while(true){
-        update_line(line);
-        move_cursor(rl_state.cursor_x, rl_state.cursor_y);
+	rl_done = 0;
+    do{
+		if (interactive){
+			update_line(line);
+			move_cursor(rl_state.cursor_x, rl_state.cursor_y);
+		}
 
-        read(STDIN_FILENO, &c, 1);
+		ssize_t bytes_read = read(STDIN_FILENO, &c, 1);
 
-        if (c == VEOF){
-            write(1, "\n", 1);
-            if (line->data[0] == '\0'){
-                pop_history();
-            }
+        if (bytes_read == 0 || c == VEOF){
+			if (interactive){
+				write(1, "\n", 1);
+				if (line->data[0] == '\0'){
+					pop_history();
+				}
+			}
+			str_destroy(line);
+			free(line);
             return NULL;
         }
         else if (c == '\033'){
             result = handle_special_keys(line);
         }
         else {
-            result = handle_normal_keys(c, line);
+            result = handle_normal_keys(c, line, interactive);
         }
         if (result == 1) break;
-    }
-
-    disable_raw_mode();
-    char *str = ft_strdup(line->data);
-    pop_history();
+    } while(!rl_done);
+	
+	if (interactive)
+		disable_raw_mode();
+	char *str = NULL;
+	if (!rl_done)
+		str = ft_strdup(line->data);
+	str_destroy(line);
+	free(line);
+	if (interactive)
+		pop_history();
+	if (rl_done){
+		return ft_strdup("");
+	}
     return str;
 }
+
+//add calloc in garbage collector

@@ -6,19 +6,20 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 15:09:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/09/02 12:17:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 13:37:33 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "signals.h"
+#include "ft_readline.h"
 
 #include <stdio.h>
 #include <signal.h>
-#include <readline/readline.h>
 
 int g_signal;
 
 void signal_sigint_prompt(__attribute__((unused)) int code) {
+	ft_rl_newline();
 	rl_done = 1;
 	g_signal = code;
 }
