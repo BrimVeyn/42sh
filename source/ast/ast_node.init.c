@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/17 14:54:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/12 20:20:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 17:02:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,20 +41,20 @@ bool is_op (TokenList *list) {
 }
 
 Node *generate_tree(TokenListStack *list) {
-	NodeStack *self = node_stack_init();
+	da_create(self, NodeStack, sizeof(Node *), GC_SUBSHELL);
 	for (uint16_t i = 0; i < list->size; i++) {
 		if (!is_op(list->data[i])) {
-			node_stack_push(self, gen_operand_node(list->data[i]));
+			da_push(self, gen_operand_node(list->data[i]));
 		} else {
 			if (self->size == 1) {
-				Node *left = node_stack_pop(self);
-				node_stack_push(self, gen_operator_node(list->data[i], left, NULL));
+				Node *left = da_pop(self);
+				da_push(self, gen_operator_node(list->data[i], left, NULL));
 			} else {
-				Node *right = node_stack_pop(self);
-				Node *left = node_stack_pop(self);
-				node_stack_push(self, gen_operator_node(list->data[i], left, right));
+				Node *right = da_pop(self);
+				Node *left = da_pop(self);
+				da_push(self, gen_operator_node(list->data[i], left, right));
 			}
 		}
 	}
-	return node_stack_pop(self);
+	return da_pop(self);
 }

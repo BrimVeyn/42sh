@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 10:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 13:48:26 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 16:57:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,19 +97,11 @@ typedef struct {
 
 //----------------Token List Stack------------------//
 ATokenStack		*lexer_arithmetic_exp_lex_all(Lexer_p lexer);
-ATokenStack		*atoken_stack_init(void);
-void			atoken_stack_push(ATokenStack *self, AToken *token);
-AToken			*atoken_stack_pop(ATokenStack *self);
 AToken			*lexer_get_next_atoken(Lexer_p l);
 
 //----------------Arithmetic AST------------------//
 ANode			*generate_atree(ATokenStack *list);
 long			aAST_execute(ANode *node, Vars *shell_vars, int *error);
-
-//----------------ANode stack---------------------//
-ANodeStack		*anode_stack_init(void);
-ANode			*anode_stack_pop(ANodeStack *self);
-void			anode_stack_push(ANodeStack *tl, ANode *token);
 
 //---------------Syntax error--------------------//
 bool			arithmetic_syntax_check(ATokenStack *list);

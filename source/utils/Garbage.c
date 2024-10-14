@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/13 11:55:28 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 17:22:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ static void gc_init(Garbage *gc) {
 	}
 }
 
-static void *gc_add(Garbage *gc, void *ptr, const int n) {
+static void *gc_add(Garbage *gc, void *ptr, const gc_level n) {
 	if (gc[n].size >= gc[n].capacity) {
 		gc[n].capacity *= 2;
 		void **tmp = gc[n].garbage;
@@ -43,7 +43,7 @@ static void *gc_add(Garbage *gc, void *ptr, const int n) {
 	return ptr;
 }
 
-static void *gc_free(Garbage *gc, void *addr, const int n, const bool release) {
+static void *gc_free(Garbage *gc, void *addr, const gc_level n, const bool release) {
 	for (size_t i = 0; i < gc[n].size; i++) {
 		if ((uintptr_t) addr == (uintptr_t) gc[n].garbage[i]) {
 			if (release) {
@@ -59,7 +59,7 @@ static void *gc_free(Garbage *gc, void *addr, const int n, const bool release) {
 	return (void *) 1;
 }
 
-static void gc_cleanup(Garbage *gc, const int n) {
+static void gc_cleanup(Garbage *gc, const gc_level n) {
 	if (n == GC_ALL){
 		for (int i = 0; i < GC_ALL; i++){
 			gc_cleanup(gc, i);
@@ -76,7 +76,7 @@ static void gc_cleanup(Garbage *gc, const int n) {
 	gc[n].capacity = 0;
 }
 
-static void gc_reset(Garbage *gc, const int n) {
+static void gc_reset(Garbage *gc, const gc_level n) {
 	for (size_t i = 0; i < gc[n].size; i++) {
 		free(gc[n].garbage[i]);
 		gc[n].garbage[i] = NULL;
@@ -113,7 +113,6 @@ void *gc(gc_mode mode, ...) {
 			va_end(args);
 
 			void *new_ptr = gc(GC_CALLOC, new_count, element_size, level);
-			//TODO: add a fatal call in GC_ADD;
 			ft_memcpy(new_ptr, ptr, old_count * element_size);
 			gc_free(GC, ptr, level, true);
 			return new_ptr;

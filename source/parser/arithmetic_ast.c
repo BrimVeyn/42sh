@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 11:11:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 13:48:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 16:58:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,17 +64,17 @@ static ANode *gen_aoperand_node(AToken *tok) {
 }
 
 ANode *generate_atree(ATokenStack *list) {
-	ANodeStack *self = anode_stack_init();
+	da_create(self, ANodeStack, sizeof(ANode *), GC_SUBSHELL);
 	for (int i = 0; i < list->size; i++) {
 		if (!is_aoperator(list->data[i])) {
 			da_push(self, gen_aoperand_node(list->data[i]));
 		} else {
 			if (self->size == 1) {
-				ANode *left = anode_stack_pop(self);
+				ANode *left = da_pop(self);
 				da_push(self, gen_aoperator_node(list->data[i], left, NULL));
 			} else {
-				ANode *right = anode_stack_pop(self);
-				ANode *left = anode_stack_pop(self);
+				ANode *right = da_pop(self);
+				ANode *left = da_pop(self);
 				da_push(self, gen_aoperator_node(list->data[i], left, right));
 			}
 		}
