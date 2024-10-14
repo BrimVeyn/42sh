@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 16:12:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 17:22:04 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ typedef enum {
 	GC_ENV,
 	GC_SUBSHELL,
 	GC_ALL,
-} type_of_garbage;
+} gc_level;
 
 typedef enum {
 	GC_ALLOC,
@@ -160,16 +160,12 @@ void			ft_dprintf(int fd, const char *fmt, ...);
 long			ft_atol(const char *str);
 char			*ft_ltoa(long n);
 char			string_stream_pop_front(StringStream *ss);
-
 //------------------------------------------//
 
-
 //----------------File Utils--------------------//
-
 char			*get_next_line(int fd);
 char			*read_whole_file(int fd);
 void			fatal(char *msg, int exit_code);
-
 //------------------------------------------//
 
 

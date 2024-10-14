@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 16:22:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 17:23:13 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,7 +181,7 @@ void string_list_consume(StrList *str_list, Vars *shell_vars) {
 		// printf("trimmed: %s\n", curr->str);
 		switch (kind) {
 			case EXP_CMDSUB: { result = parser_command_substitution(curr->str, shell_vars); break;}
-			case EXP_ARITHMETIC: {result = gc(GC_ADD, ft_strdup(""), GC_SUBSHELL); break;}
+			case EXP_ARITHMETIC: {result = parser_arithmetic_expansion(curr->str, shell_vars); break;}
 			case EXP_VARIABLE: {result = gc(GC_ADD, ft_strdup(""), GC_SUBSHELL); break;}
 			default: {}
 		}
@@ -307,8 +307,6 @@ void parse_candidate(Token *candidate, Vars *shell_vars) {
 }
 
 SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
-	// parser_brace_expansion(); TODO: we'll find time
-	
 	for (size_t it = 0; it < tl->size; it++) {
 		Token *candidate = get_candidate(tl, it);
 		if (!candidate)

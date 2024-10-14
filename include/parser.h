@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:23:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 16:23:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 17:17:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ bool				heredoc_detector(TokenList *data);
 //-------------------Parser modules------------//
 bool				parser_parameter_expansion(TokenList *tl, Vars *shell_vars);
 char				*parser_command_substitution(char *str, Vars *shell_vars);
-bool				parser_arithmetic_expansion(TokenList *tokens, const int idx, const size_t start, Vars *shell_vars);
+char				*parser_arithmetic_expansion(char *str, Vars *shell_vars);
 int					parser_filename_expansion(TokenList *tl);
 bool				parser_word_split(TokenList *dest, Vars *shell_vars, char *prefix, char *infix, char *postfix, int index);
 
@@ -120,8 +120,6 @@ void				add_input_to_history(char *input, int *history_fd);
 
 //-------------------Parameter Expansion-------------//
 void				parser_skip_subshell(TokenList *list, size_t *it);
-bool				is_end_cmdgrp(const TokenList *list, const size_t *it);
 void				skip_cmdgrp(TokenList *self, TokenList *list, size_t *i);
-int					get_command_sub_range_end(char *str, int *i);
 
 #endif // !PARSER_H

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:23:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 16:23:02 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 17:20:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,23 +18,11 @@
 #include <stddef.h>
 
 typedef enum {
-	T_COMMAND,
-	//---------------
-	T_REDIRECTION, //ok
-	//---------------
+	T_REDIRECTION,
 	T_WORD, 
-	//---------------
 	T_SEPARATOR,
-	//---------------
 	T_NONE, // Generic none token when no prefix/suffix
 } type_of_token;
-
-typedef enum {
-	H_NO_EVENT,
-	H_LAST,
-	H_WORD,
-	H_NUMBER,
-} type_of_history_event;
 
 typedef enum {
 	ERROR_NONE, //error free 
@@ -79,20 +67,20 @@ typedef enum {
 
 typedef struct {
 	char		*input;
+	short		ch;
 	uint16_t	input_len;
 	uint16_t	position;
 	uint16_t	read_position;
-	char		ch;
 } Lexer;
 
 typedef Lexer * Lexer_p;
 
-typedef struct StringList {
+typedef struct {
 	char		**data;
 	size_t		size;
 	size_t		capacity;
 	size_t		size_of_element;
-	int			gc_level;
+	int		gc_level;
 } StringList;
 
 typedef struct Token {
@@ -102,13 +90,13 @@ typedef struct Token {
 		type_of_separator s_type;
 
 		struct {
-			type_of_redirection r_type;
 			struct Token *r_postfix;
+			type_of_redirection r_type;
 		};  //redirection
 
 		struct {
-			char			*w_infix;
 			struct Token	*w_postfix;
+			char			*w_infix;
 		}; //word
 	};
 } Token;
@@ -127,6 +115,13 @@ typedef struct {
 	StringList *local;
 } Vars;
 
+typedef enum {
+	H_NO_EVENT,
+	H_LAST,
+	H_WORD,
+	H_NUMBER,
+} type_of_history_event;
+
 //-----------------Lexer------------------//
 TokenList		*lexer_lex_all(Lexer_p l);
 Token			*lexer_get_next_token(Lexer_p l);
@@ -141,7 +136,6 @@ bool			lexer_syntax_error(TokenList *tokens);
 bool			is_whitespace(char c);
 bool			is_number(char *str);
 bool			next_token_is_redirection(Lexer_p l);
-bool			is_fdable_redirection(Lexer_p l);
 bool			is_fdable_redirection(Lexer_p l);
 bool			is_delimiter(const char c);
 void			eat_whitespace(Lexer_p l);

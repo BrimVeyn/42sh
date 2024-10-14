@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 11:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/04 11:01:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 16:56:34 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ void free_atoken_stack(ATokenStack *list) {
 }
 
 ATokenStack *lexer_arithmetic_exp_lex_all(Lexer_p lexer) {
-	ATokenStack *self = atoken_stack_init();
+	da_create(self, ATokenStack, sizeof(AToken *), GC_SUBSHELL);
 
 	while (lexer->ch) {
 		AToken *tmp = lexer_get_next_atoken(lexer);
@@ -141,7 +141,7 @@ ATokenStack *lexer_arithmetic_exp_lex_all(Lexer_p lexer) {
 			free_atoken_stack(self);
 			return NULL;
 		} else if (tmp->tag == A_EOF) return self;
-		atoken_stack_push(self, tmp);
+		da_push(self, tmp);
 	}
 	return self;
 }

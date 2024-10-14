@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:44 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 14:27:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 17:02:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,8 +87,10 @@ typedef struct {
 
 typedef struct {
 	Node **data;
-	uint16_t size;
-	uint16_t capacity;
+	size_t size;
+	size_t capacity;
+	size_t	size_of_element;
+	int		gc_level;
 } NodeStack;
 
 
@@ -100,19 +102,9 @@ Node				*gen_operator_node(TokenList *tok, Node *left, Node *right);
 Node				*gen_operand_node(TokenList *list);
 Node				*generate_tree(TokenListStack *list);
 
-//----------------Token List Stack------------------//
-TokenListStack		*token_list_stack_init(void);
-TokenList			*token_list_stack_pop(TokenListStack *self);
-void				token_list_stack_push(TokenListStack *self, TokenList *token);
 TokenListStack		*branch_stack_to_rpn(TokenListStack *list);
 TokenListStack		*split_operator(TokenList *list);
 void				skip_subshell(TokenList *newlist, TokenList *list, size_t *i);
-
-//----------------Node Stack------------------//
-NodeStack			*node_stack_init(void);
-Node				*node_stack_pop(NodeStack *self);
-void				node_stack_push(NodeStack *tl, Node *token);
-
 //----------------Job------------------//
 Process				*process_init(Node *node, TokenList *list);
 void				process_push_back(Process **lst, Process *new_value);
