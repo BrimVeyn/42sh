@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 10:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/04 11:44:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 13:48:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,8 @@ typedef struct {
 	AToken **data;
 	uint16_t size;
 	uint16_t capacity;
+	size_t	size_of_element;
+	int		gc_level;
 } ATokenStack;
 
 typedef struct ANode {
@@ -89,6 +91,8 @@ typedef struct {
 	ANode **data;
 	uint16_t size;
 	uint16_t capacity;
+	size_t	size_of_element;
+	int		gc_level;
 } ANodeStack;
 
 //----------------Token List Stack------------------//

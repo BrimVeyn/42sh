@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:35:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/13 11:56:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 16:20:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,17 +107,17 @@ void add_input_to_history(char *input, int *history_fd){
 
 void env_to_string_list(StringList *env_list, const char **env){
 	for (uint16_t i = 0; env[i]; i++)
-		string_list_add_or_update(env_list, gc(GC_ADD, ft_strdup(env[i]), GC_ENV), GC_ENV);
+		string_list_add_or_update(env_list, gc(GC_ADD, ft_strdup(env[i]), GC_ENV));
 }
 
 Vars *vars_init(const char **env) {
 	Vars *self = gc(GC_ADD, ft_calloc(1, sizeof(Vars)), GC_ENV);
 
-	da_create(env_list, StringList, GC_ENV);
+	da_create(env_list, StringList, sizeof(char *), GC_ENV);
 	self->env = env_list;
-	da_create(set_list, StringList, GC_ENV);
+	da_create(set_list, StringList, sizeof(char *), GC_ENV);
 	self->set = set_list;
-	da_create(local_list, StringList, GC_ENV);
+	da_create(local_list, StringList, sizeof(char *), GC_ENV);
 	self->local = local_list;
 	env_to_string_list(self->env, env);
 	env_to_string_list(self->set, env);
@@ -177,29 +177,9 @@ ShellInfos *shell(int mode) {
 	return NULL;
 }
 
-
 int main(const int ac, const char *av[], const char *env[]) {
 	(void) av; (void) ac; (void) env;
 
-	// da_create(list, StrList, GC_SUBSHELL);
-	// da_push(list, str_init(EXP_CMDSUB, "slt"), GC_SUBSHELL);
-	// da_push(list, str_init(EXP_CMDSUB, "slt"), GC_SUBSHELL);
-	// da_push(list, str_init(EXP_CMDSUB, "slt"), GC_SUBSHELL);
-	// da_push(list, str_init(EXP_CMDSUB, "slt"), GC_SUBSHELL);
-	//
-	// da_push_front(list, str_init(EXP_CMDSUB, "hey"), GC_SUBSHELL);
-	// da_push_front(list, str_init(EXP_CMDSUB, "bite"), GC_SUBSHELL);
-	// da_push_front(list, str_init(EXP_CMDSUB, "chatte"), GC_SUBSHELL);
-	// da_push_front(list, str_init(EXP_CMDSUB, "couille"), GC_SUBSHELL);
-	//
-	// da_print(list);
-	// da_erase_index(list, 2);
-	// da_erase_index(list, 2);
-	// da_erase_index(list, 2);
-	// da_erase_index(list, 2);
-	// da_erase_index(list, 2);
-	// da_print(list);
-	
 	shell(SHELL_INIT);
 	g_signal = 0;
 	job_list = job_list_init();
@@ -229,8 +209,8 @@ int main(const int ac, const char *av[], const char *env[]) {
 			ast_execute(AST, shell_vars, true);
 			//update env '_' variable
 			char *last_executed = ft_strjoin("_=", input);
-			string_list_add_or_update(shell_vars->env, last_executed, GC_ENV);
-			string_list_add_or_update(shell_vars->set, last_executed, GC_ENV);
+			string_list_add_or_update(shell_vars->env, last_executed);
+			string_list_add_or_update(shell_vars->set, last_executed);
 			FREE_POINTERS(last_executed);
 			//reset memory collection for the next input
 			gc(GC_RESET, GC_SUBSHELL);

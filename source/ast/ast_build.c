@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 10:29:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 13:53:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,38 +15,38 @@
 #include "utils.h"
 
 void skip_cmdgrp(TokenList *self, TokenList *list, size_t *i) {
-	da_push(self, list->data[*i], GC_SUBSHELL);
+	da_push(self, list->data[*i]);
 	(*i)++;
 
 	while (*i < list->size && !is_end_cmdgrp(list, i)) {
 		if (is_cmdgrp_start(list, i))
 			skip_cmdgrp(self, list, i);
 		if (*i < list->size) {
-			da_push(self, list->data[*i], GC_SUBSHELL);
+			da_push(self, list->data[*i]);
 			(*i)++;
 		}
 	}
 }
 
 void skip_subshell(TokenList *newlist, TokenList *list, size_t *i) {
-	da_push(newlist, list->data[(*i)++], GC_SUBSHELL);
+	da_push(newlist, list->data[(*i)++]);
 
 	while (*i < list->size && !is_end_sub(list, i)) {
 		if (is_subshell(list, i))
 			skip_subshell(newlist, list, i);
 		if (*i < list->size)
-			da_push(newlist, list->data[(*i)++], GC_SUBSHELL);
+			da_push(newlist, list->data[(*i)++]);
 	}
 }
 
 TokenList *extract_operator(TokenList *list, size_t *i) {
-	da_create(self, TokenList, GC_SUBSHELL);
-	da_push(self, list->data[(*i)++], GC_SUBSHELL);
+	da_create(self, TokenList, sizeof(Token *), GC_SUBSHELL);
+	da_push(self, list->data[(*i)++]);
 	return self;
 }
 
 TokenList *extract_command(TokenList *list, size_t *i) {
-	da_create(self, TokenList, GC_SUBSHELL);
+	da_create(self, TokenList, sizeof(Token *), GC_SUBSHELL);
 
 	while (*i < list->size && !is_ast_operator(list, i)) {
 		if (is_cmdgrp_start(list , i)) {
@@ -58,7 +58,7 @@ TokenList *extract_command(TokenList *list, size_t *i) {
 			continue;
 		}
 		if (*i < list->size && !is_ast_operator(list, i) && !is_eof(list, i)) {
-			da_push(self, list->data[*i], GC_SUBSHELL);
+			da_push(self, list->data[*i]);
 		}
 		(*i)++;
 	}
@@ -66,7 +66,7 @@ TokenList *extract_command(TokenList *list, size_t *i) {
 }
 
 TokenListStack *split_operator(TokenList *list) {
-	da_create(self, TokenListStack, GC_SUBSHELL);
+	da_create(self, TokenListStack, sizeof(TokenList *), GC_SUBSHELL);
 
 	size_t i = 0;
 	while (i < list->size) {
@@ -74,9 +74,9 @@ TokenListStack *split_operator(TokenList *list) {
 			i++;
 			continue;
 		}
-		da_push(self, extract_command(list, &i), GC_SUBSHELL);
+		da_push(self, extract_command(list, &i));
 		if (i < list->size && is_ast_operator(list, &i)) {
-			da_push(self, extract_operator(list, &i), GC_SUBSHELL);
+			da_push(self, extract_operator(list, &i));
 		} else 
 			i++;
 	}
@@ -99,21 +99,21 @@ bool has_higher_precedence(TokenListStack *operator, TokenList *current) {
 }
 
 TokenListStack *branch_stack_to_rpn(TokenListStack *list) {
-	da_create(output, TokenListStack, GC_SUBSHELL);
-	da_create(operator, TokenListStack, GC_SUBSHELL);
+	da_create(output, TokenListStack, sizeof(TokenList *), GC_SUBSHELL);
+	da_create(operator, TokenListStack, sizeof(TokenList *), GC_SUBSHELL);
 	const size_t zero = 0;
 	
 	for (size_t i = 0; i < list->size; i++) {
 		TokenList *current = list->data[i];
 		if (is_ast_operator(current, &zero)) {
 			while(!has_higher_precedence(operator, current))
-				da_push(output, da_pop(operator), GC_SUBSHELL);
-			da_push(operator, current, GC_SUBSHELL);
+				da_push(output, da_pop(operator));
+			da_push(operator, current);
 		} else
-			da_push(output, current, GC_SUBSHELL);
+			da_push(output, current);
 	}
 	while (operator->size)
-		da_push(output, da_pop(operator), GC_SUBSHELL);
+		da_push(output, da_pop(operator));
 	return output;
 }
 

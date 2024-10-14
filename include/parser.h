@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:56 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 16:18:50 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 13:43:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,8 @@ typedef struct RedirectionList {
 	Redirection		**data;
 	size_t	size;
 	size_t	capacity;
+	size_t	size_of_element;
+	int		gc_level;
 } RedirectionList;
 
 void add_redirection_from_token(RedirectionList *redir_list, const Token *el);
@@ -77,20 +79,9 @@ typedef enum {
 	EXP_ARITHMETIC,
 	EXP_VARIABLE,
 	EXP_CMDSUB,
+	EXP_SUB,
 	EXP_WORD,
 } ExpKind;
-
-typedef struct {
-	ExpKind kind;
-	ssize_t	start;
-	ssize_t	end;
-}	ExpRange;
-
-typedef struct {
-	ExpRange **data;
-	size_t size;
-	size_t capacity;
-} ExpRangeList;
 
 typedef struct {
 	char *str;
@@ -98,15 +89,15 @@ typedef struct {
 } Str;
 
 typedef struct {
-	Str **data;
-	size_t size;
-	size_t capacity;
+	Str		**data;
+	size_t	size;
+	size_t	capacity;
+	size_t	size_of_element;
+	int		gc_level;
 } StrList;
 
-ExpRange *exp_range_init(void);
-StrList *str_list_init(void);
-void	str_list_print(const StrList *list);
-Str *str_init(const ExpKind kind, char *str);
+Str					*str_init(const ExpKind kind, char *str);
+void				str_list_print(const StrList *list);
 
 char				*parser_get_env_variable_value(char *name, StringList *env);
 //-------------------SimpleCommand-----------------------//
@@ -127,8 +118,5 @@ void				parser_skip_subshell(TokenList *list, size_t *it);
 bool				is_end_cmdgrp(const TokenList *list, const size_t *it);
 void				skip_cmdgrp(TokenList *self, TokenList *list, size_t *i);
 int					get_command_sub_range_end(char *str, int *i);
-ExpRange			*get_command_sub_range(char *str);
 
-bool				is_a_match(const ExpRange *range);
-bool				is_range_valid(const ExpRange *range, char *str);
 #endif // !PARSER_H

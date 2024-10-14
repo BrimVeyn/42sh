@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:18:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/10 14:34:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 13:25:14 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,8 @@ bool	is_builtin(const char *bin);
 bool	builtin_executer(const SimpleCommand *command, Vars *shell_vars);
 
 int		exec_node(Node *node, Vars *shell_vars, bool foreground);
+void	add_vars_to_local(StringList *list, TokenList *vars);
+void	add_vars_to_set(Vars *shell_vars, TokenList *vars);
 
 char	*find_bin_location(char *bin, StringList *env);
 

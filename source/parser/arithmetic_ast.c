@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 11:11:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/13 10:58:01 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 13:48:34 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ static ANode *incr(ANode *self, Vars *shell_vars) {
 		long var_value = get_value(self, shell_vars);
 		ft_sprintf(tmp, "%s=%ld", self->value->variable, var_value + 1);
 		char *new_value = gc(GC_ADD, ft_strdup(tmp), GC_ENV);
-		string_list_add_or_update(shell_vars->set, new_value, GC_ENV);
+		string_list_add_or_update(shell_vars->set, new_value);
 	}
 	return self;
 }
@@ -42,7 +42,7 @@ static ANode *decr(ANode *self, Vars *shell_vars) {
 		long var_value = get_value(self, shell_vars);
 		ft_sprintf(tmp, "%s=%ld", self->value->variable, var_value - 1);
 		char *new_value = gc(GC_ADD, ft_strdup(tmp), GC_ENV);
-		string_list_add_or_update(shell_vars->set, new_value, GC_ENV);
+		string_list_add_or_update(shell_vars->set, new_value);
 	}
 	return self;
 }
@@ -67,15 +67,15 @@ ANode *generate_atree(ATokenStack *list) {
 	ANodeStack *self = anode_stack_init();
 	for (int i = 0; i < list->size; i++) {
 		if (!is_aoperator(list->data[i])) {
-			da_push(self, gen_aoperand_node(list->data[i]), GC_SUBSHELL);
+			da_push(self, gen_aoperand_node(list->data[i]));
 		} else {
 			if (self->size == 1) {
 				ANode *left = anode_stack_pop(self);
-				da_push(self, gen_aoperator_node(list->data[i], left, NULL), GC_SUBSHELL);
+				da_push(self, gen_aoperator_node(list->data[i], left, NULL));
 			} else {
 				ANode *right = anode_stack_pop(self);
 				ANode *left = anode_stack_pop(self);
-				da_push(self, gen_aoperator_node(list->data[i], left, right), GC_SUBSHELL);
+				da_push(self, gen_aoperator_node(list->data[i], left, right));
 			}
 		}
 	}

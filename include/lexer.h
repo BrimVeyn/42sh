@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 15:36:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/13 10:56:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 13:44:25 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,8 @@ typedef struct StringList {
 	char		**data;
 	size_t		size;
 	size_t		capacity;
+	size_t		size_of_element;
+	int			gc_level;
 } StringList;
 
 typedef struct Token {
@@ -116,6 +118,8 @@ typedef struct TokenList {
 	Token		**data;
 	size_t	size;
 	size_t	capacity;
+	size_t	size_of_element;
+	int		gc_level;
 } TokenList;
 
 typedef struct {
@@ -164,7 +168,7 @@ void			token_list_insert(TokenList *tl, Token *token, const int index);
 void			token_list_insert_list(TokenList *dest, TokenList *src, const int index);
 
 //----------------StringList----------------//
-void			string_list_add_or_update(StringList *sl, char *var, int garbage_collector_level);
+void			string_list_add_or_update(StringList *sl, char *var);
 bool			string_list_update(StringList *sl, char *var);
 void			string_list_clear(StringList *list);
 bool			string_list_remove(StringList *sl, char *id);

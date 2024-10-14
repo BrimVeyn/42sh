@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 11:56:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 13:46:38 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,21 @@
 #include "libft.h"
 
 #include <stdio.h>
+
+void add_vars_to_set(Vars *shell_vars, TokenList *vars) {
+	StringList *set = shell_vars->set;
+	StringList *env = shell_vars->env;
+	for (size_t i = 0; i < vars->size; i++) {
+		string_list_update(env, vars->data[i]->w_infix);
+		string_list_add_or_update(set, vars->data[i]->w_infix);
+	}
+}
+
+void add_vars_to_local(StringList *list, TokenList *vars) {
+	for (size_t i = 0; i < vars->size; i++) {
+		string_list_add_or_update(list, vars->data[i]->w_infix);
+	}
+}
 
 void string_list_clear(StringList *list) {
 	for (size_t i = 0; i < list->size; i++) {
@@ -73,9 +88,9 @@ bool string_list_update(StringList *sl, char *var) {
 	return false;
 }
 
-void string_list_add_or_update(StringList *sl, char *var, int garbage_collector_level) {
+void string_list_add_or_update(StringList *sl, char *var) {
 	if (!string_list_update(sl, var))
-		da_push(sl, var, garbage_collector_level);
+		da_push(sl, var);
 }
 
 char *string_list_get_value(StringList *sl, char *id) {
