@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 13:37:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/13 10:12:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 13:47:32 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 void token_list_add_list(TokenList *t1, TokenList *t2) {
 	for (uint16_t i = 0; i < t2->size; i++) {
-		da_push(t1, t2->data[i], GC_SUBSHELL);
+		da_push(t1, t2->data[i]);
 	}
 }
 

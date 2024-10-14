@@ -6,64 +6,19 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/11 16:34:14 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 11:25:40 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/parser.h"
-#include "../../libftprintf/header/libft.h"
-#include "../../include/utils.h" 
-#include "../../include/ast.h" 
-#include "exec.h"
+#include "parser.h"
+#include "utils.h" 
+#include "ast.h" 
 #include "ft_regex.h"
 
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-
-int get_command_sub_range_end(char *str, int *i) {
-	(*i) += 2; // skip '$('
-	
-	while (str[*i] && str[*i] != ')') {
-		if (!ft_strncmp("$(", &str[*i], 2)) {
-			get_command_sub_range_end(str, i);
-			if (*i == -1) return -1;
-		}
-		if (str[*i] == '(') {
-			get_command_sub_range_end(str, i);
-			if (*i == -1) return -1;
-		}
-		(*i)++;
-	}
-	if (str[*i] != ')') return -1;
-	return *i;
-}
-
-ExpRange *get_command_sub_range(char *str) {
-	ExpRange *self = exp_range_init();
-
-	self->start = ft_strstr(str, "$(");
-	if (self->start != -1 && !ft_strncmp(&str[self->start], "$((", 3)) {
-		self->start = -1;
-	}
-	if (self->start != -1) {
-		int start_copy = self->start;
-		self->end = get_command_sub_range_end(str, &start_copy);
-	}
-	return self;
-}
-
-bool is_a_match(const ExpRange *range) {
-	return (range->start != -1);
-}
-
-bool is_range_valid(const ExpRange *range, char *str) {
-	if (range->start != -1 && range->end == -1) {
-		dprintf(2, "%s", str);
-		return false;
-	}
-	return true;
-}
+#include <stdlib.h>
 
 static bool execute_command_sub(char *input, Vars *shell_vars) {
 	Lexer_p lexer = lexer_init(input);

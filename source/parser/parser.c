@@ -6,18 +6,16 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 20:55:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 16:20:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/parser.h"
-#include "../../include/ft_regex.h"
-#include "../../libftprintf/header/libft.h"
-#include "../../include/utils.h"
-#include "debug.h"
+#include "parser.h"
+#include "ft_regex.h"
+#include "libft.h"
+#include "utils.h"
 #include "lexer.h"
-#include "colors.h"
-#include "signals.h"
+#include "exec.h"
 
 #include <fcntl.h>
 #include <stdint.h>
@@ -70,11 +68,11 @@ void add_redirection_from_token(RedirectionList *redir_list, const Token *el) {
 		current_redir->su_type = R_FILENAME;
 		current_redir->filename = next->r_postfix->w_infix;
 	}
-	da_push(redir_list, current_redir, GC_SUBSHELL);
+	da_push(redir_list, current_redir);
 }
 
 RedirectionList *parser_get_redirection(const TokenList *tl) {
-	da_create(redir_list, RedirectionList, GC_SUBSHELL);
+	da_create(redir_list, RedirectionList, sizeof(Redirection *), GC_SUBSHELL);
 	for (size_t it = 0; it < tl->size; it++) {
 		const Token *el = tl->data[it];
 		if (is_redirection(tl, &it))
@@ -109,7 +107,7 @@ SimpleCommand *parser_get_command(const TokenList *tl) {
 }
 
 TokenList *parser_eat_variables(TokenList *tokens) {
-	da_create(self, TokenList, GC_SUBSHELL);
+	da_create(self, TokenList, sizeof(Token *), GC_SUBSHELL);
 	bool found_bin = false;
 	size_t i = 0;
 
@@ -131,25 +129,10 @@ TokenList *parser_eat_variables(TokenList *tokens) {
 			i += 1;
 			continue;
         }
-		da_push(self, elem, GC_SUBSHELL);
+		da_push(self, elem);
 		token_list_remove(tokens, i);
 	}
 	return self;
-}
-
-void add_vars_to_set(Vars *shell_vars, TokenList *vars) {
-	StringList *set = shell_vars->set;
-	StringList *env = shell_vars->env;
-	for (size_t i = 0; i < vars->size; i++) {
-		string_list_update(env, vars->data[i]->w_infix);
-		string_list_add_or_update(set, vars->data[i]->w_infix, GC_ENV);
-	}
-}
-
-void add_vars_to_local(StringList *list, TokenList *vars) {
-	for (size_t i = 0; i < vars->size; i++) {
-		string_list_add_or_update(list, vars->data[i]->w_infix, GC_SUBSHELL);
-	}
 }
 
 Token *get_candidate(TokenList *tl, const size_t idx) {
@@ -162,46 +145,30 @@ Token *get_candidate(TokenList *tl, const size_t idx) {
 	}
 }
 
-ExpRange *exp_range_init(void) {
-	ExpRange *self = gc(GC_CALLOC, 1, sizeof(ExpRange), GC_SUBSHELL);
-	self->end = -1;
-	self->start = -1;
-	return self;
-}
-
-StrList *post_exp_list_init(ExpRangeList *ranges, Token *candidate) {
-	da_create(self, StrList, GC_SUBSHELL);
-	char *word = candidate->w_infix;
-	const ssize_t word_size = ft_strlen(word);
-	ssize_t i = 0;
-	ssize_t range_it = 0;
-
-	while (i < word_size) {
-		const ExpRange *curr = ((size_t)range_it < ranges->size) ? ranges->data[range_it] : NULL;
-		if (curr && curr->start <= i) {
-			char *el = gc(GC_ADD, ft_substr(word, curr->start + 2, curr->end - curr->start - 2), GC_SUBSHELL);
-			da_push(self, str_init(curr->kind, el), GC_SUBSHELL);
-			range_it++;
-			i = curr->end + 1;
-			continue;
-		} else if (curr) {
-			char *el = gc(GC_ADD, ft_substr(word, i, curr->start - i), GC_SUBSHELL);
-			da_push(self, str_init(EXP_WORD, el), GC_SUBSHELL);
-			i = curr->start;
-			continue;
-		} else {
-			char *el = gc(GC_ADD, ft_substr(word, i, word_size), GC_SUBSHELL);
-			da_push(self, str_init(EXP_WORD, el), GC_SUBSHELL);
-			i = word_size;
-			continue;
-		}
+void remove_boundaries(Str *exp) {
+	static const size_t boundaries[][2] = {
+		[EXP_WORD] = {0, 0},
+		[EXP_CMDSUB] = {2, 1},
+		[EXP_ARITHMETIC] = {3, 2},
+		[EXP_VARIABLE] = {0, 0},
+	};
+	//We aint't trimming for these types
+	if (exp->kind == EXP_WORD || exp->kind == EXP_VARIABLE) {
+		return ;
 	}
-	//DEBUG
-	da_print(self);
-	return self;
+
+	char *word = exp->str;
+	size_t len = ft_strlen(word);
+	size_t up_bound = boundaries[exp->kind][0];
+	size_t low_bound = boundaries[exp->kind][1];
+
+	char *tmp = ft_substr(word, up_bound, len - up_bound - low_bound);
+	gc(GC_ADD, tmp, GC_SUBSHELL);
+	gc(GC_FREE, word, GC_SUBSHELL);
+	exp->str = tmp;
 }
 
-void exp_list_consume(StrList *str_list, Vars *shell_vars) {
+void string_list_consume(StrList *str_list, Vars *shell_vars) {
 	for (size_t i = 0; i < str_list->size; i++) {
 		char *result = NULL;
 		Str *curr = str_list->data[i];
@@ -209,11 +176,13 @@ void exp_list_consume(StrList *str_list, Vars *shell_vars) {
 
 		if (curr->kind == EXP_WORD) 
 			continue;
-
+		else
+			remove_boundaries(curr);
+		// printf("trimmed: %s\n", curr->str);
 		switch (kind) {
 			case EXP_CMDSUB: { result = parser_command_substitution(curr->str, shell_vars); break;}
-			case EXP_ARITHMETIC: {break;}
-			case EXP_VARIABLE: {break;}
+			case EXP_ARITHMETIC: {result = gc(GC_ADD, ft_strdup(""), GC_SUBSHELL); break;}
+			case EXP_VARIABLE: {result = gc(GC_ADD, ft_strdup(""), GC_SUBSHELL); break;}
 			default: {}
 		}
 		gc(GC_FREE, str_list->data[i]->str, GC_SUBSHELL);
@@ -224,19 +193,30 @@ void exp_list_consume(StrList *str_list, Vars *shell_vars) {
 #include "c_string.h"
 #include <stdarg.h>
 
-ExpKind identify_exp_begin(char *str) {
+ExpKind identify_exp_begin(char *str, int *flag) {
 	if (!ft_strncmp(str, "$((", 3)) {
 		return EXP_ARITHMETIC;
 	} else if (!ft_strncmp(str, "$(", 2)) {
 		return EXP_CMDSUB;
-	} else if (!ft_strncmp(str, "${", 2)) {
+	} else if (!*flag && !ft_strncmp(str, "${", 2)) {
 		return EXP_VARIABLE;
+	} else if (!ft_strncmp(str, "(", 1)) {
+		*flag = 1;
+		return EXP_SUB;
 	} else {
 		return EXP_WORD;
 	}
 }
 
-ExpKind identify_exp_end(char *str) {
+ExpKind identify_exp_end(char *str, int *flag) {
+	if (*flag == 1) {
+		if (!ft_strncmp(str, ")", 1)) {
+			*flag = 0;
+			return EXP_SUB;
+		} else {
+			return EXP_WORD;
+		}
+	}
 	if (!ft_strncmp(str, "))", 2)) {
 		return EXP_ARITHMETIC;
 	} else if (!ft_strncmp(str, ")", 1)) {
@@ -249,9 +229,12 @@ ExpKind identify_exp_end(char *str) {
 }
 
 StrList *get_range_list(Token *candidate) {
-	da_create(self, StrList, GC_SUBSHELL);
-	string word = string_init_str(candidate->w_infix);
-	string cache_stack = string_init_str("");
+	da_create(self, StrList, sizeof(Str *), GC_SUBSHELL);
+	da_create(word, StringStream, sizeof(char), GC_SUBSHELL);
+	da_create(cache_stack, StringStream, sizeof(char), GC_SUBSHELL);
+	for (size_t i = 0; candidate->w_infix[i]; i++) {
+		da_push(word, candidate->w_infix[i]);
+	}
 	
 	static const struct {
 		char *begin;
@@ -260,65 +243,68 @@ StrList *get_range_list(Token *candidate) {
 		[EXP_ARITHMETIC] = { "$((", "))" },
 		[EXP_CMDSUB] = { "$(", ")"},
 		[EXP_VARIABLE] = { "${", ")" },
+		[EXP_SUB] = { "(", ")" },
 	};
 
-	da_create(begin_stack, StringList, GC_SUBSHELL);
-	da_create(end_stack, StringList, GC_SUBSHELL);
-	int read_pos = 0;
-	while (word.size) {
+	da_create(exp_stack, StringList, sizeof(char *), GC_SUBSHELL);
+	bool can_push = false;
+	int flag = 0;
+	while (word->size) {
 		ExpKind maybe_begin = 0;
 		ExpKind maybe_end = 0;
 
-		if ((maybe_begin = identify_exp_begin(word.data)) != EXP_WORD) {
-			if (!begin_stack->size && read_pos) {
+		if ((maybe_begin = identify_exp_begin(word->data, &flag)) != EXP_WORD) {
+			if (!exp_stack->size && can_push) {
 				Str *res = gc_unique(Str, GC_SUBSHELL);
 				res->kind = EXP_WORD;
-				res->str = str_get(&cache_stack);
-				str_clear(&cache_stack);
-				da_push(self, res, GC_SUBSHELL);
+				da_push(cache_stack, '\0');
+				res->str = gc(GC_ADD, ft_strdup(cache_stack->data), GC_SUBSHELL);
+				da_clear(cache_stack);
+				da_push(self, res);
 			}
-			da_push(begin_stack, map[maybe_begin].begin, GC_SUBSHELL);
-		} else if (begin_stack->size && (maybe_end = identify_exp_end(word.data)) != EXP_WORD) {
-			da_push(end_stack, map[maybe_end].end, GC_SUBSHELL);
-			for (size_t i = 0; i < ft_strlen(map[maybe_end].end); i++) {
-				str_push_back(&cache_stack, str_pop_front(&word));
-				read_pos++;
-			}
-
-			if (end_stack->size == begin_stack->size) {
-				da_push(self, str_init(maybe_end, str_get(&cache_stack)), GC_SUBSHELL);
-				str_clear(&cache_stack);
-				da_clear(begin_stack, GC_SUBSHELL);
-				da_clear(end_stack, GC_SUBSHELL);
+			da_push(exp_stack, map[maybe_begin].begin);
+			for (size_t i = 0; i < ft_strlen(map[maybe_begin].begin); i++) {
+				da_push(cache_stack, da_pop_front(word));
 			}
 		}
-		str_push_back(&cache_stack, str_pop_front(&word));
-		read_pos++;
+		if (exp_stack->size && (maybe_end = identify_exp_end(word->data, &flag)) != EXP_WORD) {
+			for (size_t i = 0; i < ft_strlen(map[maybe_end].end); i++) {
+				da_push(cache_stack, da_pop_front(word));
+			}
+			char *stack_back = da_peak_back(exp_stack);
+			if (!ft_strncmp(map[maybe_end].begin, stack_back, ft_strlen(map[maybe_end].begin))) {
+				da_pop(exp_stack);
+				if (!exp_stack->size) {
+					da_push(cache_stack, '\0');
+					da_push(self, str_init(maybe_end, gc(GC_ADD, ft_strdup(cache_stack->data), GC_SUBSHELL)));
+					da_clear(cache_stack);
+				}
+			}
+			can_push = false;
+		} else {
+			da_push(cache_stack, da_pop_front(word));
+			can_push = true;
+		}
 	}
-	Str *res = gc_unique(Str, GC_SUBSHELL);
-	res->kind = EXP_WORD;
-	res->str = str_get(&cache_stack);
-	free(cache_stack.data);
-	free(word.data);
-	da_push(self, res, GC_SUBSHELL);
-
+	if (can_push) {
+		Str *res = gc_unique(Str, GC_SUBSHELL);
+		res->kind = EXP_WORD;
+		da_push(cache_stack, '\0');
+		res->str = gc(GC_ADD, ft_strdup(cache_stack->data), GC_SUBSHELL);
+		da_push(self, res);
+	}
+	gc(GC_FREE, cache_stack->data, GC_SUBSHELL);
+	gc(GC_FREE, word->data, GC_SUBSHELL);
 	return self;
 }
 
-TokenList *get_exp_ranges(Token *candidate, Vars *shell_vars) {
-	// TODO: Fill up get_range_list so it can consume any kind of expansion
-	// ExpRangeList *range_list = get_range_list(candidate);
-	da_create(range_list, ExpRangeList, GC_SUBSHELL);
-	StrList *tmp = get_range_list(candidate);
-	da_print(tmp);
+#include "debug.h"
 
-	//TODO: free range_list
-	exp_list_consume(tmp, shell_vars);
-	//TODO: join list
-	//TODO: apply word split based on ifs, if KIND != WORD --> new token
-	// exp_range_consume(range_list);
-	da_create(dummy, TokenList, GC_SUBSHELL);
-	return dummy;
+void parse_candidate(Token *candidate, Vars *shell_vars) {
+	StrList *string_list = get_range_list(candidate);
+	// da_print(string_list);
+	string_list_consume(string_list, shell_vars);
+	// da_print(string_list);
 }
 
 SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
@@ -328,21 +314,8 @@ SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
 		Token *candidate = get_candidate(tl, it);
 		if (!candidate)
 			continue;
-		TokenList *new_token = get_exp_ranges(candidate, shell_vars);
-		(void) new_token;
-		// parser_arithmetic_expansion(tl, it, 0, shell_vars);
+		parse_candidate(candidate, shell_vars);
 	}
-
-
-	if (!parser_parameter_expansion(tl, shell_vars)){
-		return NULL;
-	}
-	// if (!parser_command_substitution(tl, shell_vars)) {
-	// 	return NULL;
-	// }
-	// if (!parser_arithmetic_expansion(tl, shell_vars)) {
-	// 	return NULL;
-	// }
 	TokenList *command_vars = parser_eat_variables(tl);
 	RedirectionList *redirs = parser_get_redirection(tl);
 	SimpleCommand *command = parser_get_command(tl);

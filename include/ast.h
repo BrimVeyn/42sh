@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:44 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/12 20:27:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 14:27:38 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,10 @@
 
 typedef struct {
 	TokenList **data;
-	uint16_t size;
-	uint16_t capacity;
+	size_t	size;
+	size_t	capacity;
+	size_t	size_of_element;
+	int		gc_level;
 } TokenListStack;
 
 typedef enum {

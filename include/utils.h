@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 17:22:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 16:12:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,17 +31,11 @@ extern int g_exitno;
         } \
     } \
 
-
-
-
-
 //TODO: Delete this structure
 typedef struct {
 	int start;
 	int end;
 } Range;
-
-
 
 //----------------Garbage-------------------//
 
@@ -71,6 +65,7 @@ typedef struct {
 	uint32_t size;
 	uint32_t capacity;
 } Garbage;
+
 void *gc(gc_mode mode, ...);
 
 //------------------------------------------//
@@ -78,59 +73,75 @@ void *gc(gc_mode mode, ...);
 
 //----------------Dynamic arrays--------------------//
 
+typedef struct {
+	char	*data;
+	size_t	size;
+	size_t	capacity;
+	size_t	size_of_element;
+	int		gc_level;
+} StringStream;
+
 #define gc_unique(datatype, garbage_collector_level) \
 	gc(GC_CALLOC, 1, sizeof(datatype), garbage_collector_level); \
 
-#define da_create(name, datatype, garbage_collector_level) \
-	datatype *name = gc(GC_CALLOC, 1, sizeof(datatype), garbage_collector_level); \
-	(name)->data = gc(GC_CALLOC, 10, sizeof(void *), garbage_collector_level); \
+#define da_create(name, type_of_array, element_size, garbage_collector_level) \
+	type_of_array *name = gc(GC_CALLOC, 1, sizeof(type_of_array), garbage_collector_level); \
+	(name)->data = gc(GC_CALLOC, 10, element_size, garbage_collector_level); \
 	(name)->size = 0; \
-	(name)->capacity = 10;
+	(name)->capacity = 10; \
+	(name)->size_of_element = element_size; \
+	(name)->gc_level = garbage_collector_level; \
 
-#define da_push(array, new_element, garbage_collector_level) \
+#define da_push(array, new_element) \
 	do { \
 		if ((array)->size >= (array)->capacity) { \
 			(array)->capacity *= 2; \
-			(array)->data = gc(GC_REALLOC, (array)->data, (array)->size, (array)->capacity, sizeof(void *), garbage_collector_level); \
+			(array)->data = gc(GC_REALLOC, (array)->data, (array)->size, (array)->capacity, (array)->size_of_element, (array)->gc_level); \
 		} \
 		(array)->data[(array)->size++] = new_element; \
 	} while (0); \
 
-#define da_push_front(array, new_element, garbage_collector_level) \
+#define da_push_front(array, new_element) \
 	do { \
 		if ((array)->size >= (array)->capacity) { \
 			(array)->capacity *= 2; \
-			(array)->data = gc(GC_REALLOC, (array)->data, (array)->size, (array)->capacity, sizeof(void *), garbage_collector_level); \
+			(array)->data = gc(GC_REALLOC, (array)->data, (array)->size, (array)->capacity, (array)->size_of_element, (array)->gc_level); \
 		} \
-		ft_memmove(&(array)->data[1], (array)->data, sizeof(void *) * (array)->size++); \
+		ft_memmove(&(array)->data[1], (array)->data, (array)->size_of_element * (array)->size++); \
 		(array)->data[0] = new_element; \
 	} while (0); \
 
 #define da_erase_index(array, index) \
 	do { \
 		if (index < (array)->size)  { \
-			ft_memmove(&(array)->data[index], &(array)->data[index + 1], sizeof(void *) * ((array)->size - index)); \
+			ft_memmove(&(array)->data[index], &(array)->data[index + 1], (array)->size_of_element * ((array)->size - index)); \
 			(array)->data[--(array)->size] = NULL; \
 		} \
 	} while (0); \
 
-#define da_clear(array, garbage_collector_level) \
+#define da_clear(array) \
 	do { \
-		for (size_t i = 0; i < (array)->size; i++) { \
-			gc(GC_FREE, (array)->data[i], garbage_collector_level); \
-		} \
-		ft_memset((array)->data, 0, sizeof(void *) * (array)->size); \
+		ft_memset((array)->data, 0, (array)->size_of_element * (array)->size); \
 		(array)->size = 0; \
 	} while (0); \
 	
 #define da_pop(array) \
-	((array)->size == 0 ? NULL : (array)->data[--(array)->size]); \
+	(array)->size == 0 ? 0 : (array)->data[--(array)->size] \
 
-#define da_print(array) _Generic((array), \
-	StrList *: str_list_print, \
-	StringList *: string_list_print, \
-	TokenList *: tokenListToString \
-)((array))
+#define da_peak_back(array) \
+	(array->size) == 0 ? 0 : (array)->data[(array)->size - 1] \
+
+#define da_print(array) \
+	_Generic((array), \
+		StrList *: str_list_print, \
+		StringList *: string_list_print, \
+		TokenList *: tokenListToString \
+	)((array))
+
+#define da_pop_front(array) \
+	_Generic((array), \
+		StringStream *: string_stream_pop_front \
+	)(array)
 
 //------------------------------------------//
 
@@ -148,11 +159,18 @@ int				ft_snprintf(char *buffer, const size_t size_of_buffer, const char *fmt, .
 void			ft_dprintf(int fd, const char *fmt, ...);
 long			ft_atol(const char *str);
 char			*ft_ltoa(long n);
+char			string_stream_pop_front(StringStream *ss);
+
+//------------------------------------------//
+
 
 //----------------File Utils--------------------//
+
 char			*get_next_line(int fd);
 char			*read_whole_file(int fd);
-
 void			fatal(char *msg, int exit_code);
+
+//------------------------------------------//
+
 
 #endif // !UTILS_H
