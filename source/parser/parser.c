@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 16:20:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/14 16:22:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,7 +190,6 @@ void string_list_consume(StrList *str_list, Vars *shell_vars) {
 	}
 }
 
-#include "c_string.h"
 #include <stdarg.h>
 
 ExpKind identify_exp_begin(char *str, int *flag) {
