@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/12 20:06:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/15 13:41:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,8 @@
 void *ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize) {
 	void *new_ptr = ft_calloc(nbEl, elSize);
 	if (!new_ptr)
-		exit(EXIT_FAILURE);
+		return NULL;
 	ft_memcpy(new_ptr, ptr, oldSize * elSize);
-	gc(GC_FREE, ptr, GC_GENERAL);
 	return new_ptr;
 }
 

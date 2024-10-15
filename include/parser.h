@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:23:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 17:17:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/15 14:47:14 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ typedef struct SimpleCommand {
 	char					**args;
 } SimpleCommand;
 
+//-------------------Expands related-----------------------------//
 typedef enum {
 	EXP_ARITHMETIC,
 	EXP_VARIABLE,
@@ -83,7 +84,8 @@ typedef enum {
 	EXP_WORD,
 } ExpKind;
 
-typedef struct {
+typedef struct Str {
+	struct Str *next;
 	char *str;
 	ExpKind kind;
 } Str;
@@ -98,8 +100,8 @@ typedef struct {
 
 Str					*str_init(const ExpKind kind, char *str);
 void				str_list_print(const StrList *list);
+//---------------------------------------------------------------//
 
-char				*parser_get_env_variable_value(char *name, StringList *env);
 //-------------------SimpleCommand-----------------------//
 SimpleCommand		*parser_parse_current(TokenList *tl, Vars *shell_vars);
 
@@ -110,16 +112,15 @@ bool				heredoc_detector(TokenList *data);
 bool				parser_parameter_expansion(TokenList *tl, Vars *shell_vars);
 char				*parser_command_substitution(char *str, Vars *shell_vars);
 char				*parser_arithmetic_expansion(char *str, Vars *shell_vars);
-int					parser_filename_expansion(TokenList *tl);
-bool				parser_word_split(TokenList *dest, Vars *shell_vars, char *prefix, char *infix, char *postfix, int index);
 
 //-------------------history modules------------//
 bool				history_expansion (char **pstring, int history_fd);
-int					get_history(void);
 void				add_input_to_history(char *input, int *history_fd);
+int					get_history(void);
 
 //-------------------Parameter Expansion-------------//
 void				parser_skip_subshell(TokenList *list, size_t *it);
 void				skip_cmdgrp(TokenList *self, TokenList *list, size_t *i);
+//---------------------------------------------------------------//
 
 #endif // !PARSER_H
