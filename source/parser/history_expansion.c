@@ -6,13 +6,14 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/03 12:28:06 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 16:38:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/15 09:26:54 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
 #include "libft.h"
 #include "ft_regex.h"
+#include "ft_readline.h"
 
 #include <stdio.h>
 #include <sys/mman.h>
@@ -55,7 +56,7 @@ int get_history(void) {
 			char *tmp = (char *)malloc(end - start + 1);
 			memcpy(tmp, start, end - start);
 			tmp[end - start] = '\0';
-			// add_history(tmp);
+			add_history(tmp);
 			free(tmp);
 			start = end + 1;
 		}
@@ -68,7 +69,7 @@ int get_history(void) {
 }
 
 void add_input_to_history(char *input, int *history_fd){
-	// add_history(input);
+	add_history(input);
 	char *home = getenv("HOME");
 	char history_filename[1024] = {0};
 	ft_sprintf(history_filename, "%s/.42sh_history", home);
@@ -104,6 +105,8 @@ char *get_value_wd(char *parameter, char *buffer, size_t file_size){
 
     return value;
 }
+
+//TODO:search in struct history
 
 char *get_value_nb(char *parameter, char *buffer, size_t file_size){
     char *value = NULL;
