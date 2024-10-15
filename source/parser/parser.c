@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 17:23:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/15 17:37:36 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "utils.h"
 #include "lexer.h"
 #include "exec.h"
+#include "debug.h"
 
 #include <fcntl.h>
 #include <stdint.h>
@@ -185,47 +186,46 @@ void string_list_consume(StrList *str_list, Vars *shell_vars) {
 			case EXP_VARIABLE: {result = gc(GC_ADD, ft_strdup(""), GC_SUBSHELL); break;}
 			default: {}
 		}
-		gc(GC_FREE, str_list->data[i]->str, GC_SUBSHELL);
-		str_list->data[i]->str = gc(GC_ADD, result, GC_SUBSHELL);
+		if (result) {
+			gc(GC_FREE, str_list->data[i]->str, GC_SUBSHELL);
+			str_list->data[i]->str = gc(GC_ADD, result, GC_SUBSHELL);
+		}
 	}
 }
 
-#include <stdarg.h>
-
-ExpKind identify_exp_begin(char *str, int *flag) {
+ExpKind identify_exp_begin(char *str) {
 	if (!ft_strncmp(str, "$((", 3)) {
 		return EXP_ARITHMETIC;
 	} else if (!ft_strncmp(str, "$(", 2)) {
 		return EXP_CMDSUB;
-	} else if (!*flag && !ft_strncmp(str, "${", 2)) {
+	} else if (!ft_strncmp(str, "${", 2)) {
 		return EXP_VARIABLE;
 	} else if (!ft_strncmp(str, "(", 1)) {
-		*flag = 1;
 		return EXP_SUB;
 	} else {
 		return EXP_WORD;
 	}
 }
 
-ExpKind identify_exp_end(char *str, int *flag) {
-	if (*flag == 1) {
-		if (!ft_strncmp(str, ")", 1)) {
-			*flag = 0;
-			return EXP_SUB;
-		} else {
-			return EXP_WORD;
-		}
-	}
-	if (!ft_strncmp(str, "))", 2)) {
+ExpKind identify_exp_end(char *str, ExpKind context) {
+	if (str[0] == ')' && (context == EXP_CMDSUB || context == EXP_SUB)) {
+		return context;
+	} else if (!ft_strncmp(str, "))", 2)) {
 		return EXP_ARITHMETIC;
-	} else if (!ft_strncmp(str, ")", 1)) {
-		return EXP_CMDSUB;
-	} else if (!ft_strncmp(str, "}", 1)) {
+	} else if (str[0] == '}' && (context == EXP_VARIABLE)) {
 		return EXP_VARIABLE;
 	} else {
 		return EXP_WORD;
 	}
 }
+
+typedef struct {
+	ExpKind *data;
+	int gc_level;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+} ExpKindList;
 
 StrList *get_range_list(Token *candidate) {
 	da_create(self, StrList, sizeof(Str *), GC_SUBSHELL);
@@ -245,14 +245,14 @@ StrList *get_range_list(Token *candidate) {
 		[EXP_SUB] = { "(", ")" },
 	};
 
-	da_create(exp_stack, StringList, sizeof(char *), GC_SUBSHELL);
+	da_create(exp_stack, ExpKindList, sizeof(ExpKind), GC_SUBSHELL);
 	bool can_push = false;
-	int flag = 0;
 	while (word->size) {
 		ExpKind maybe_begin = 0;
 		ExpKind maybe_end = 0;
+		ExpKind context = da_peak_back(exp_stack);
 
-		if ((maybe_begin = identify_exp_begin(word->data, &flag)) != EXP_WORD) {
+		if ((maybe_begin = identify_exp_begin(word->data)) != EXP_WORD) {
 			if (!exp_stack->size && can_push) {
 				Str *res = gc_unique(Str, GC_SUBSHELL);
 				res->kind = EXP_WORD;
@@ -261,24 +261,24 @@ StrList *get_range_list(Token *candidate) {
 				da_clear(cache_stack);
 				da_push(self, res);
 			}
-			da_push(exp_stack, map[maybe_begin].begin);
+			da_push(exp_stack, maybe_begin);
 			for (size_t i = 0; i < ft_strlen(map[maybe_begin].begin); i++) {
 				da_push(cache_stack, da_pop_front(word));
 			}
+			continue;
 		}
-		if (exp_stack->size && (maybe_end = identify_exp_end(word->data, &flag)) != EXP_WORD) {
-			for (size_t i = 0; i < ft_strlen(map[maybe_end].end); i++) {
-				da_push(cache_stack, da_pop_front(word));
-			}
-			char *stack_back = da_peak_back(exp_stack);
-			if (!ft_strncmp(map[maybe_end].begin, stack_back, ft_strlen(map[maybe_end].begin))) {
+		if (exp_stack->size && (maybe_end = identify_exp_end(word->data, context)) != EXP_WORD) {
+			if (maybe_end == context) {
 				da_pop(exp_stack);
+				for (size_t i = 0; i < ft_strlen(map[maybe_end].end); i++) {
+					da_push(cache_stack, da_pop_front(word));
+				}
 				if (!exp_stack->size) {
 					da_push(cache_stack, '\0');
-					da_push(self, str_init(maybe_end, gc(GC_ADD, ft_strdup(cache_stack->data), GC_SUBSHELL)));
+					da_push(self, str_init(maybe_end, ft_strdup(cache_stack->data)));
 					da_clear(cache_stack);
 				}
-			}
+			} 
 			can_push = false;
 		} else {
 			da_push(cache_stack, da_pop_front(word));
@@ -297,25 +297,164 @@ StrList *get_range_list(Token *candidate) {
 	return self;
 }
 
-#include "debug.h"
+void ss_push_string(StringStream *ss, char *str) {
+	for (size_t i = 0; str[i]; i++) {
+		da_push(ss, str[i]);
+	}
+}
 
-void parse_candidate(Token *candidate, Vars *shell_vars) {
-	StrList *string_list = get_range_list(candidate);
-	// da_print(string_list);
-	string_list_consume(string_list, shell_vars);
-	// da_print(string_list);
+char	*ft_strchrany(const char *string, const char *searchedChars) {
+	if (!searchedChars)
+		return NULL;
+	while (*string) {
+		for (size_t i = 0; searchedChars[i]; i++) {
+			if (*string == searchedChars[i]) {
+				return ((char *) string);
+			}
+		}
+		string++;
+	}
+	return (NULL);
+}
+
+void print_node(Str *node) {
+	Str *head = node;
+	while (head) {
+		printf("n: %s\n", head->str);
+		head = head->next;
+	}
+}
+
+void str_add_back(Str **lst, Str *new_value) {
+	Str	*temp;
+
+	if (*lst == NULL) {
+		*lst = new_value;
+	} else {
+		temp = *lst;
+		while (temp->next)
+			temp = temp->next;
+		temp->next = new_value;
+	}
+}
+
+
+void string_list_split(StrList *list, Vars *shell_vars) {
+	char *IFS = string_list_get_value(shell_vars->env, "IFS");
+	if (!IFS) {
+		IFS = "\n\t ";
+	}
+
+	unsigned char map[32] = {[0 ... 31] = 0};
+
+	for (size_t i = 0; IFS[i]; i++) {
+		const unsigned char c = IFS[i];
+		map[c / 8] |= (1 << (c % 8));
+	}
+
+	for (size_t i = 0; i < list->size; i++) {
+		if (list->data[i]->kind != EXP_WORD) {
+			Str *node = NULL;
+			char *curr_str = list->data[i]->str;
+			const size_t str_len = ft_strlen(curr_str);
+			for (size_t it = 0; it < str_len; it++) {
+
+				const size_t start = it;
+				while (it < str_len && !(map[curr_str[it] / 8] & (1 << (curr_str[it] % 8)))){
+					it++;
+				}
+				const size_t end = it;
+				const char match_char = curr_str[it];
+
+				if (start == end && !(match_char == ' ' || match_char == '\n' || match_char == '\t')) {
+					str_add_back(&node, str_init(list->data[i]->kind, ft_strdup("")));
+				} else if (start != end) {
+					str_add_back(&node, str_init(list->data[i]->kind, ft_substr(curr_str, start, end - start)));
+				}
+			}
+			gc(GC_FREE, list->data[i]->str, GC_SUBSHELL);
+			gc(GC_FREE, list->data[i], GC_SUBSHELL);
+			list->data[i] = node;
+		}
+	}
+}
+
+
+StringList *string_list_merge(StrList *list) {
+	da_create(new, StringList, sizeof(Str *), GC_SUBSHELL);
+	da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
+	for (size_t i = 0; i < list->size; i++) {
+		Str *curr = list->data[i];
+		Str *next = (i < list->size - 1) ? list->data[i + 1] : NULL;
+		if (curr->kind == EXP_WORD) {
+			ss_push_string(ss, curr->str);
+			if (!next || next->kind == EXP_WORD) {
+				da_push(ss, '\0');
+				da_push(new, ft_strdup(ss->data));
+				da_clear(ss);
+			}
+		} else {
+			Str *node = curr;
+			while (node) {
+				ss_push_string(ss, node->str);
+				if (!(node->next == NULL && next)) {
+					da_push(ss, '\0');
+					da_push(new, ft_strdup(ss->data));
+					da_clear(ss);
+				}
+				node = node->next;
+			}
+		}
+	}
+	return new;
+}
+
+void string_list_push_list(StringList *lhs, StringList *rhs) {
+	for (size_t i = 0; i < rhs->size; i++) {
+		da_push(lhs, rhs->data[i]);
+	}
+}
+
+void string_erase_nulls(StrList *list) {
+	for (size_t i = 0; i < list->size;) {
+		Str *curr = list->data[i];
+		if (!curr || !curr->str) {
+			da_erase_index(list, i);
+			if (list->data[i])
+				list->data[i]->kind = EXP_SUB;
+			continue;
+		} else {
+			i++;
+		}
+	}
 }
 
 SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
+
+	SimpleCommand *command = gc_unique(SimpleCommand, GC_SUBSHELL);
+	da_create(arg_list, StringList, sizeof(Str), GC_SUBSHELL);
 	for (size_t it = 0; it < tl->size; it++) {
 		Token *candidate = get_candidate(tl, it);
 		if (!candidate)
 			continue;
-		parse_candidate(candidate, shell_vars);
+		StrList *string_list = get_range_list(candidate);
+		// da_print(string_list);
+		string_list_consume(string_list, shell_vars);
+		string_list_split(string_list, shell_vars);
+		string_erase_nulls(string_list);
+		StringList *final = string_list_merge(string_list);
+		// da_print(string_list);
+		string_list_push_list(arg_list, final);
 	}
+	// for (size_t i = 0; i < arg_list->size; i++) {
+	// 	dprintf(2, "[%02zu]: %s\n", i, arg_list->data[i]);
+	// }
+	command->bin = arg_list->data[0];
+	command->args = arg_list->data;
+
 	TokenList *command_vars = parser_eat_variables(tl);
 	RedirectionList *redirs = parser_get_redirection(tl);
-	SimpleCommand *command = parser_get_command(tl);
+	// SimpleCommand *command = parser_get_command(tl);
 	command->redir_list = redirs;
 
 	if (command->bin == NULL && command_vars->size != 0) {
