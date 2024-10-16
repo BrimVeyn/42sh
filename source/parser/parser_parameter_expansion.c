@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 13:46:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/16 17:24:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,25 +118,25 @@ static bool is_parameter_balanced(char *string){
 	return (regex_match("\\$\\{", string).re_start != -1 || regex_match("\\}", string).re_start != -1);
 }
 
-static bool is_bad_substitution(Token *el, int pos){
-	int format_pos = get_format_pos(el->w_infix);
+static bool is_bad_substitution(char *str, int pos){
+	int format_pos = get_format_pos(str);
 	char *before_format = NULL;
 
 	if (format_pos == -1){
-		before_format = ft_strdup(el->w_infix);
+		before_format = ft_strdup(str);
 	} else {
-		char *tmp = ft_substr(el->w_infix, 0, format_pos);
-		before_format = ft_strjoin(tmp, &el->w_infix[ft_strlen(el->w_infix) - 1]);
+		char *tmp = ft_substr(str, 0, format_pos);
+		before_format = ft_strjoin(tmp, &str[ft_strlen(str) - 1]);
 		free(tmp);
 	}
 
 	if (regex_match("\\$\\{\\}", before_format).re_start == pos ||
-		regex_match("\\$\\{.*:\\}", el->w_infix).re_start == pos ||
-		regex_match("\\$\\{[^\\}]*$", el->w_infix).re_start == pos ||
-		(regex_match("\\$\\{[A-Za-z_][A-Za-z0-9_]*[#%:].*\\}", el->w_infix).re_start != pos &&
-		regex_match("\\$\\{[\\?#]\\}", el->w_infix).re_start != pos &&
-		(regex_match("\\$\\{#?[A-Za-z_][A-Za-z0-9_]*\\}", el->w_infix).re_start != pos &&
-		is_parameter_balanced(el->w_infix))))
+		regex_match("\\$\\{.*:\\}", str).re_start == pos ||
+		regex_match("\\$\\{[^\\}]*$", str).re_start == pos ||
+		(regex_match("\\$\\{[A-Za-z_][A-Za-z0-9_]*[#%:].*\\}", str).re_start != pos &&
+		regex_match("\\$\\{[\\?#]\\}", str).re_start != pos &&
+		(regex_match("\\$\\{#?[A-Za-z_][A-Za-z0-9_]*\\}", str).re_start != pos &&
+		is_parameter_balanced(str))))
 	{ 
 		dprintf(2, "${}: bad substitution\n");
 		g_exitno = 1;
@@ -147,66 +147,61 @@ static bool is_bad_substitution(Token *el, int pos){
 	return false;
 }
 
-bool parser_parameter_expansion(TokenList *tl, Vars *shell_vars){
-	for (uint16_t i = 0; i < tl->size; i++){
-		Token *el = tl->data[i];
+char *parser_parameter_expansion(char *str, Vars *shell_vars){
+	//TODO: Get ~ expansion out of here and think about a btter approach to factorize the code
+	regex_match_t result;
+	char *value = NULL;
 
-		if (el->tag == T_WORD){
-			regex_match_t result;
-			char *value = NULL;
-			
-			char *home = shell_vars_get_value(shell_vars, "HOME");
-			do {
-				int index = ft_strstr(el->w_infix, "~");
-				if (index == -1)
-					break;
-				char *start = (index == 0) ? ft_strdup("") : ft_substr(el->w_infix, 0, index - 1);
-				char *end = ((size_t)index == ft_strlen(el->w_infix)) ? ft_strdup("") : ft_substr(el->w_infix, index + 1, ft_strlen(el->w_infix) - index);
-				char *start_and_home = ft_strjoin(start, home);
-				char *new_string = gc(GC_ADD, ft_strjoin(home, end), GC_SUBSHELL);
-				gc(GC_FREE, el->w_infix, GC_SUBSHELL);
-				el->w_infix = new_string;
+	char *home = shell_vars_get_value(shell_vars, "HOME");
+	do {
+		int index = ft_strstr(str, "~");
+		if (index == -1)
+			break;
+		char *start = (index == 0) ? ft_strdup("") : ft_substr(str, 0, index - 1);
+		char *end = ((size_t)index == ft_strlen(str)) ? ft_strdup("") : ft_substr(str, index + 1, ft_strlen(str) - index);
+		char *start_and_home = ft_strjoin(start, home);
+		char *new_string = gc(GC_ADD, ft_strjoin(home, end), GC_SUBSHELL);
+		gc(GC_FREE, str, GC_SUBSHELL);
+		str = new_string;
 
-				// char value[MAX_WORD_LEN] = {0};
-				// ft_memset(value, 0, MAX_WORD_LEN);
-				// ft_sprintf(value, "%s%s%s", start, home, end);
-				// el->w_infix = gc(GC_ADD, ft_strdup(value), GC_SUBSHELL);
-				// printf("VALUE: %s\n", value);
-				FREE_POINTERS(start, end, start_and_home);
-			} while (1);
+		// char value[MAX_WORD_LEN] = {0};
+		// ft_memset(value, 0, MAX_WORD_LEN);
+		// ft_sprintf(value, "%s%s%s", start, home, end);
+		// str = gc(GC_ADD, ft_strdup(value), GC_SUBSHELL);
+		// printf("VALUE: %s\n", value);
+		FREE_POINTERS(start, end, start_and_home);
+	} while (1);
 
-			do{
-				result = regex_match ("\\$\\{", el->w_infix);
-				if (result.re_start == -1){
-					break;
-				}
-				if (is_bad_substitution(el, result.re_start) == true){
-					return false;
-				}
-
-				result = regex_match("\\$\\{\\?\\}", el->w_infix);
-				if (result.re_start != -1)
-					value = ft_itoa(g_exitno);
-				else {
-					result = regex_match ("\\$\\{[^\\$]*\\}", el->w_infix);
-					if (result.re_start != -1){
-						value = parser_get_variable_value(gc(GC_ADD, ft_substr(el->w_infix, result.re_start + 2, result.re_end - result.re_start - 3), GC_SUBSHELL), shell_vars);
-						// printf("value: %s\n", value);	
-					} else
-						break;
-				}
-				// printf("HELLO %s\n", el->w_infix);	
-					
-				char *re_start = ft_substr(el->w_infix, 0, result.re_start);
-				char *re_end = ft_substr(el->w_infix, result.re_end, ft_strlen(el->w_infix));
-				char *tmp = ft_strjoin(re_start, value);
-				
-				el->w_infix = gc(GC_ADD, ft_strjoin(tmp, re_end), GC_GENERAL);
-				free(tmp); free(re_start); free(re_end);
-				// printf("string: %s\n\n", el->w_infix);
-
-			} while(true);
+	do{
+		result = regex_match ("\\$\\{", str);
+		if (result.re_start == -1){
+			break;
 		}
-	}
-	return true;
+		if (is_bad_substitution(str, result.re_start) == true){
+			return NULL;
+		}
+
+		result = regex_match("\\$\\{\\?\\}", str);
+		if (result.re_start != -1)
+			value = ft_itoa(g_exitno);
+		else {
+			result = regex_match ("\\$\\{[^\\$]*\\}", str);
+			if (result.re_start != -1){
+				value = parser_get_variable_value(gc(GC_ADD, ft_substr(str, result.re_start + 2, result.re_end - result.re_start - 3), GC_SUBSHELL), shell_vars);
+				// printf("value: %s\n", value);	
+			} else
+			break;
+		}
+		// printf("HELLO %s\n", str);	
+
+		char *re_start = ft_substr(str, 0, result.re_start);
+		char *re_end = ft_substr(str, result.re_end, ft_strlen(str));
+		char *tmp = ft_strjoin(re_start, value);
+
+		str = gc(GC_ADD, ft_strjoin(tmp, re_end), GC_GENERAL);
+		free(tmp); free(re_start); free(re_end);
+		// printf("string: %s\n\n", str);
+
+	} while(true);
+	return ft_strdup(str);
 }

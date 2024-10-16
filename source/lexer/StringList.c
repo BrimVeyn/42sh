@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 17:00:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/16 15:05:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ bool string_list_update(StringList *sl, char *var) {
 
 void string_list_add_or_update(StringList *sl, char *var) {
 	if (!string_list_update(sl, var))
-		da_push(sl, var);
+		da_push(sl, gc(GC_ADD, ft_strdup(var), GC_ENV));
 }
 
 char *string_list_get_value(StringList *sl, char *id) {
@@ -119,7 +119,8 @@ char *shell_vars_get_value(Vars *shell_vars, char *id) {
 void string_list_print(const StringList *list) {
 	for (size_t i = 0; i < list->size; i++) {
 		char *eql = ft_strchr(list->data[i], '=');
-		if (!eql) continue;
-		printf("%s\n", list->data[i]);
+		if (!eql)
+			continue;
+		printf("[%03zu]: %s\n", i, list->data[i]);
 	}
 }

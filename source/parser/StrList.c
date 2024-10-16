@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:12:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/15 15:18:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/16 10:46:37 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,13 @@
 #include "colors.h"
 #include <stdio.h>
  
-Str *str_init(const ExpKind kind, char *str) {
+Str *str_init(const ExpKind kind, char *str, bool add_to_gc) {
 	Str *self = gc_unique(Str, GC_SUBSHELL);
 	self->kind = kind;
-	self->str = gc(GC_ADD, str, GC_SUBSHELL);
+	if (add_to_gc)
+		self->str = gc(GC_ADD, str, GC_SUBSHELL);
+	else 
+		self->str = str;
 	self->next = NULL;
 	return self;
 }

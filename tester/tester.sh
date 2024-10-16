@@ -14,6 +14,7 @@ if [[ $1 ]]; then
 else
 	test_lists=(
 		"test"
+		"redirections"
 		"syntax"
 		"expand"
 		"subshell"
@@ -37,6 +38,9 @@ RED="\e[0;31m"
 RESET="\033[0m"
 CINNABAR="\033[0;38;2;244;68;46m"
 SANDY_BROWN="\033[0;38;2;252;158;79m"
+BITTERSWEET="\033[0;38;2;255;81;84m"
+SGBUS="\033[0;38;2;124;223;100m"
+SELECTIVE_YELLOW="\033[0;38;2;255;188;31m"
 
 mkdir -p ./outfiles
 mkdir -p ./42sh_outfiles
@@ -101,27 +105,27 @@ do
 
 		buffer_error+=$(printf "\n${BLUE}${BOLD}Test %4s: ${YELLOW}${line}\n${RESET}" $i);
 		if [[ "$EXEC_OUTPUT" != "$BASH_OUTPUT" ]]; then
-			buffer_error+=$(printf "42sh output: %.100s\n${RESET}" "$EXEC_OUTPUT");
-			buffer_error+=$(printf "bash output: %.100s\n${RESET}" "$BASH_OUTPUT");
+			buffer_error+=$(printf "${BITTERSWEET}${BOLD}STDOUT: %.100s\n${RESET}" "$EXEC_OUTPUT");
+			buffer_error+=$(printf "${SGBUS}${BOLD}STDOUT: %.100s\n${RESET}" "$BASH_OUTPUT");
 		fi
 		if [[ "$EXEC_ERROR" != "$BASH_ERROR" && debug -eq 1 ]]; then
-			buffer_error+=$(printf "42sh error: %s\n${RESET}" "$EXEC_ERROR");
-			buffer_error+=$(printf "bash error: %s\n${RESET}" "$BASH_ERROR");
+			buffer_error+=$(printf "${BITTERSWEET}${BOLD}STDERR: %s\n${RESET}" "$EXEC_ERROR");
+			buffer_error+=$(printf "${SGBUS}${BOLD}STDERR: %s\n${RESET}" "$BASH_ERROR");
 		fi
 		if [[ "$EXEC_EXITNO" != "$BASH_EXITNO" ]]; then
-			buffer_error+=$(printf "42sh exitno: %s\n${RESET}" "$EXEC_EXITNO");
-			buffer_error+=$(printf "bash exitno: %s\n${RESET}" "$BASH_EXITNO");
+			buffer_error+=$(printf "${BITTERSWEET}${BOLD}Exitno: ${SELECTIVE_YELLOW}%s\n${RESET}" "$EXEC_EXITNO");
+			buffer_error+=$(printf "${SGBUS}${BOLD}Exitno: ${SELECTIVE_YELLOW}%s\n${RESET}" "$BASH_EXITNO");
 		fi
 		if [[ "$EXEC_COPY" != "$BASH_COPY" ]]; then
-			buffer_error+=$(printf "42sh file copy: %s\n${RESET}" "$EXEC_COPY");
-			buffer_error+=$(printf "bash file copy: %s\n${RESET}" "$BASH_COPY");
+			buffer_error+=$(printf "${BITTERSWEET}${BOLD}File copy: %s\n${RESET}" "$EXEC_COPY");
+			buffer_error+=$(printf "${SGBUS}${BOLD}File copy: %s\n${RESET}" "$BASH_COPY");
 		fi
 		if [[ "$FILE_DIFF" ]];then
-			echo $FILE_DIFF
-			printf "42sh files:\n"
-			cat 42sh_outfiles/*
-			printf "\nbash files:\n"
-			cat bash_outfiles/*
+			buffer_error+=$(echo $FILE_DIFF)
+			buffer_error+="\n${BITTERSWEET}${BOLD}Files:${RESET}\n";
+			buffer_error+=$({ cat 42sh_outfiles/* | head -n 5 ;} 2>/dev/null);
+			buffer_error+="\n${SGBUS}${BOLD}Files:${RESET}\n";
+			buffer_error+=$({ cat bash_outfiles/* | head -n 5 ;} 2>/dev/null);
 		fi
 
 		printf "$RESET"

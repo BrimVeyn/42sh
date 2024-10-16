@@ -6,13 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 17:03:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/16 15:29:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "arithmetic.h"
-#include "ast.h"
-#include "debug.h"
 #include "lexer.h"
 #include "libft.h"
 #include "parser.h"
@@ -36,7 +34,8 @@ static operator_precedence get_precedence(const AToken *token) {
 	};
 
 	for (size_t i = 0; i < sizeof(pre) / sizeof(pre[0]); i++) {
-		if (token->operator == pre[i].OP) return pre[i].P;
+		if (token->operator == pre[i].OP)
+			return pre[i].P;
 	}
 	return P0;
 }

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 17:11:38 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/10 15:44:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/16 11:54:27 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ char *sigStr(const int sig) {
         int signo;
         char *str;
     } table[] = {
-        { 1, "SIGHUP" },       // Hangup
+		{ 1, "SIGHUP" },       // Hangup
         { 2, "SIGINT" },       // Interrupt from keyboard
         { 3, "SIGQUIT" },      // Quit from keyboard
         { 4, "SIGILL" },       // Illegal Instruction
