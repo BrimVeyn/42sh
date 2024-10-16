@@ -69,6 +69,9 @@ all: $(NAME)
 $(NAME): $(OBJDIR) $(OBJS)
 	@$(AR) $(NAME) $(OBJS)
 	@$(LIB) $(NAME) 
+	@printf "$(GREEN)╭────────────────────────────────────────────╮\n"
+	@printf "│          Libft Created Successfully        │\n"
+	@printf "╰────────────────────────────────────────────╯\n$(RESET)"
 
 $(OBJDEST)/%.o: sources/%.c
 	@printf "$(BLUE)"
