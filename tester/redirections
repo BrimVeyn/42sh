@@ -30,3 +30,4 @@ cat < ./infiles/file1 10000>&1 > ./outfiles/test61.txt | echo error 5000>&2 >> .
 ls non_existing_file 3>&1 > ./outfiles/test62.txt 4>&2 | echo handled >&99 >> ./outfiles/test62.txt
 echo a > ./outfiles/test63.txt 77>&1 | ls non_existing_file 88>&2 >> ./outfiles/test63.txt
 echo a > ./outfiles/test65.txt 3333>&1 | ls non_existing_file 4444>&2 >> ./outfiles/test65.txt
+echo a >./outfiles/$(echo test2)

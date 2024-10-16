@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:20 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/12 20:33:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/16 16:45:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,8 @@ bool is_subshell_closed(TokenList *tokens, size_t *it) {
 bool check_cmdgrp_closed(TokenList *tokens, size_t *it) {
 	(*it) -= 2; //pass ';' '}'
 	
-	//TODO: find a better way, size_t is problematic here
-	while (true) {
+	size_t it_cpy = *it;
+	while (*it <= it_cpy) {
 		if (is_end_cmdgrp(tokens, it)) {
 			if (!check_cmdgrp_closed(tokens, it))
 				return false;

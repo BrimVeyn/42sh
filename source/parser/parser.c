@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/16 10:19:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/16 16:32:55 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,13 +56,12 @@ bool heredoc_detector(TokenList *data) {
 
 void add_redirection_from_token(RedirectionList *redir_list, const Token *el) {
 	const Token *next = (el->tag == T_WORD && el->w_postfix->tag == T_REDIRECTION) ? el->w_postfix : el;
-	Redirection *current_redir = (Redirection *) gc(GC_ADD, ft_calloc(1, sizeof(Redirection)), GC_SUBSHELL);
+	Redirection *current_redir = gc_unique(Redirection, GC_SUBSHELL); 
 
 	current_redir->prefix_fd = (next != el) ? ft_atol(el->w_infix) : -1;
 	current_redir->r_type = next->r_type;
 	if (is_number(next->r_postfix->w_infix) &&
-		(next->r_type == R_DUP_OUT ||
-		next->r_type == R_DUP_IN)) {
+		(next->r_type == R_DUP_OUT || next->r_type == R_DUP_IN)) {
 		current_redir->su_type = R_FD;
 		current_redir->fd = ft_atol(next->r_postfix->w_infix);
 	} else {
@@ -183,12 +182,14 @@ void string_list_consume(StrList *str_list, Vars *shell_vars) {
 		switch (kind) {
 			case EXP_CMDSUB: { result = parser_command_substitution(curr->str, shell_vars); break;}
 			case EXP_ARITHMETIC: {result = parser_arithmetic_expansion(curr->str, shell_vars); break;}
-			case EXP_VARIABLE: {result = gc(GC_ADD, ft_strdup(""), GC_SUBSHELL); break;}
+			case EXP_VARIABLE: {result = parser_parameter_expansion(curr->str, shell_vars); break;}
 			default: {}
 		}
 		if (result) {
 			gc(GC_FREE, str_list->data[i]->str, GC_SUBSHELL);
 			str_list->data[i]->str = gc(GC_ADD, result, GC_SUBSHELL);
+		} else {
+			str_list->data[i]->str = NULL;
 		}
 	}
 }
@@ -207,13 +208,14 @@ ExpKind identify_exp_begin(char *str) {
 	}
 }
 
-ExpKind identify_exp_end(char *str, ExpKind context) {
-	if (str[0] == ')' && (context == EXP_CMDSUB || context == EXP_SUB)) {
+typedef struct ContextMap {
+	char *begin;
+	char *end;
+} ContextMap;
+
+ExpKind identify_exp_end(const char *str, const ContextMap *context_map, const ExpKind context) {
+	if (!ft_strncmp(str, context_map[context].end, ft_strlen(context_map[context].end))) {
 		return context;
-	} else if (!ft_strncmp(str, "))", 2)) {
-		return EXP_ARITHMETIC;
-	} else if (str[0] == '}' && (context == EXP_VARIABLE)) {
-		return EXP_VARIABLE;
 	} else {
 		return EXP_WORD;
 	}
@@ -227,26 +229,36 @@ typedef struct {
 	size_t size_of_element;
 } ExpKindList;
 
-StrList *get_range_list(Token *candidate) {
-	da_create(self, StrList, sizeof(Str *), GC_SUBSHELL);
-	da_create(word, StringStream, sizeof(char), GC_SUBSHELL);
-	da_create(cache_stack, StringStream, sizeof(char), GC_SUBSHELL);
-	for (size_t i = 0; candidate->w_infix[i]; i++) {
-		da_push(word, candidate->w_infix[i]);
+char *ss_get_owned_slice(StringStream *ss) {
+	da_push(ss, '\0');
+	char *str = ss->data;
+	ss->data = gc(GC_ALLOC, ss->capacity, sizeof(char), GC_SUBSHELL);
+	ss->size = 0;
+	return str;
+}
+
+void ss_push_string(StringStream *ss, char *str) {
+	for (size_t i = 0; str[i]; i++) {
+		da_push(ss, str[i]);
 	}
+}
+
+StrList *get_range_list(Token *candidate, bool *error) {
 	
-	static const struct {
-		char *begin;
-		char *end;
-	} map[] = {
+	static const ContextMap map[] = {
 		[EXP_ARITHMETIC] = { "$((", "))" },
 		[EXP_CMDSUB] = { "$(", ")"},
-		[EXP_VARIABLE] = { "${", ")" },
+		[EXP_VARIABLE] = { "${", "}" },
 		[EXP_SUB] = { "(", ")" },
 	};
 
+	da_create(self, StrList, sizeof(Str *), GC_SUBSHELL);
 	da_create(exp_stack, ExpKindList, sizeof(ExpKind), GC_SUBSHELL);
+	da_create(word, StringStream, sizeof(char), GC_SUBSHELL);
+	da_create(cache_stack, StringStream, sizeof(char), GC_SUBSHELL);
+	ss_push_string(word, candidate->w_infix);
 	bool can_push = false;
+
 	while (word->size) {
 		ExpKind maybe_begin = 0;
 		ExpKind maybe_end = 0;
@@ -254,11 +266,7 @@ StrList *get_range_list(Token *candidate) {
 
 		if ((maybe_begin = identify_exp_begin(word->data)) != EXP_WORD) {
 			if (!exp_stack->size && can_push) {
-				Str *res = gc_unique(Str, GC_SUBSHELL);
-				res->kind = EXP_WORD;
-				da_push(cache_stack, '\0');
-				res->str = gc(GC_ADD, ft_strdup(cache_stack->data), GC_SUBSHELL);
-				da_clear(cache_stack);
+				Str *res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
 				da_push(self, res);
 			}
 			da_push(exp_stack, maybe_begin);
@@ -267,16 +275,15 @@ StrList *get_range_list(Token *candidate) {
 			}
 			continue;
 		}
-		if (exp_stack->size && (maybe_end = identify_exp_end(word->data, context)) != EXP_WORD) {
+		if (exp_stack->size && (maybe_end = identify_exp_end(word->data, map, context)) != EXP_WORD) {
 			if (maybe_end == context) {
 				da_pop(exp_stack);
 				for (size_t i = 0; i < ft_strlen(map[maybe_end].end); i++) {
 					da_push(cache_stack, da_pop_front(word));
 				}
 				if (!exp_stack->size) {
-					da_push(cache_stack, '\0');
-					da_push(self, str_init(maybe_end, ft_strdup(cache_stack->data)));
-					da_clear(cache_stack);
+					Str *res = str_init(maybe_end, ss_get_owned_slice(cache_stack), false);
+					da_push(self, res);
 				}
 			} 
 			can_push = false;
@@ -286,22 +293,19 @@ StrList *get_range_list(Token *candidate) {
 		}
 	}
 	if (can_push) {
-		Str *res = gc_unique(Str, GC_SUBSHELL);
-		res->kind = EXP_WORD;
-		da_push(cache_stack, '\0');
-		res->str = gc(GC_ADD, ft_strdup(cache_stack->data), GC_SUBSHELL);
+		Str *res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
 		da_push(self, res);
+	}
+	if (exp_stack->size) {
+		UNEXPECTED_EOF(')');
+		g_exitno = 2;
+		*error = true;
 	}
 	gc(GC_FREE, cache_stack->data, GC_SUBSHELL);
 	gc(GC_FREE, word->data, GC_SUBSHELL);
 	return self;
 }
 
-void ss_push_string(StringStream *ss, char *str) {
-	for (size_t i = 0; str[i]; i++) {
-		da_push(ss, str[i]);
-	}
-}
 
 char	*ft_strchrany(const char *string, const char *searchedChars) {
 	if (!searchedChars)
@@ -367,9 +371,9 @@ void string_list_split(StrList *list, Vars *shell_vars) {
 				const char match_char = curr_str[it];
 
 				if (start == end && !(match_char == ' ' || match_char == '\n' || match_char == '\t')) {
-					str_add_back(&node, str_init(list->data[i]->kind, ft_strdup("")));
+					str_add_back(&node, str_init(list->data[i]->kind, ft_strdup(""), true));
 				} else if (start != end) {
-					str_add_back(&node, str_init(list->data[i]->kind, ft_substr(curr_str, start, end - start)));
+					str_add_back(&node, str_init(list->data[i]->kind, ft_substr(curr_str, start, end - start), true));
 				}
 			}
 			gc(GC_FREE, list->data[i]->str, GC_SUBSHELL);
@@ -378,6 +382,7 @@ void string_list_split(StrList *list, Vars *shell_vars) {
 		}
 	}
 }
+
 
 
 StringList *string_list_merge(StrList *list) {
@@ -389,18 +394,14 @@ StringList *string_list_merge(StrList *list) {
 		if (curr->kind == EXP_WORD) {
 			ss_push_string(ss, curr->str);
 			if (!next || next->kind == EXP_WORD) {
-				da_push(ss, '\0');
-				da_push(new, ft_strdup(ss->data));
-				da_clear(ss);
+				da_push(new, ss_get_owned_slice(ss));
 			}
 		} else {
 			Str *node = curr;
 			while (node) {
 				ss_push_string(ss, node->str);
 				if (!(node->next == NULL && next)) {
-					da_push(ss, '\0');
-					da_push(new, ft_strdup(ss->data));
-					da_clear(ss);
+					da_push(new, ss_get_owned_slice(ss));
 				}
 				node = node->next;
 			}
@@ -429,33 +430,65 @@ void string_erase_nulls(StrList *list) {
 	}
 }
 
-SimpleCommand *parser_parse_current(TokenList *tl, Vars *shell_vars) {
+bool is_variable_declaration(Token *token, bool *can_be_variable) {
+	if (*can_be_variable && regex_match("^[_a-zA-Z][a-zA-Z1-9_]*=", token->w_infix).is_found) {
+		return true;
+	} else {
+		*can_be_variable = false;
+		return false;
+	}
+}
 
+SimpleCommand *parser_parse_current(TokenList *list, Vars *shell_vars) {
+
+	bool error = false;
+	bool can_be_variable = true;
 	SimpleCommand *command = gc_unique(SimpleCommand, GC_SUBSHELL);
+	da_create(redirs, RedirectionList, sizeof(Redirection *), GC_SUBSHELL);
+	da_create(command_vars, TokenList, sizeof(Token *), GC_SUBSHELL);
 	da_create(arg_list, StringList, sizeof(Str), GC_SUBSHELL);
-	for (size_t it = 0; it < tl->size; it++) {
-		Token *candidate = get_candidate(tl, it);
+	//TODO: better type managment
+
+	for (size_t it = 0; it < list->size; it++) {
+		int type = 0;
+		if (is_variable_declaration(list->data[it], &can_be_variable)) {
+			type = 1;
+		}
+		if (is_redirection(list, &it)) {
+			type = 2;
+		}
+		Token *candidate = get_candidate(list, it);
 		if (!candidate)
 			continue;
-		StrList *string_list = get_range_list(candidate);
-		// da_print(string_list);
+		StrList *string_list = get_range_list(candidate, &error);
+		if (error) 
+			return NULL;
 		string_list_consume(string_list, shell_vars);
-		string_list_split(string_list, shell_vars);
+		if (type == 0) {
+			string_list_split(string_list, shell_vars);
+		}
 		string_erase_nulls(string_list);
 		StringList *final = string_list_merge(string_list);
-		// da_print(string_list);
-		string_list_push_list(arg_list, final);
+		if (type == 0) {
+			string_list_push_list(arg_list, final);
+		} else if (type == 1) {
+			list->data[it]->w_infix = final->data[0];
+			da_push(command_vars, list->data[it]);
+		} else if (type == 2) {
+			list->data[it]->r_postfix->w_infix = final->data[0];
+			add_redirection_from_token(redirs, list->data[it]);
+		}
 	}
-	// for (size_t i = 0; i < arg_list->size; i++) {
-	// 	dprintf(2, "[%02zu]: %s\n", i, arg_list->data[i]);
-	// }
+
 	command->bin = arg_list->data[0];
 	command->args = arg_list->data;
-
-	TokenList *command_vars = parser_eat_variables(tl);
-	RedirectionList *redirs = parser_get_redirection(tl);
-	// SimpleCommand *command = parser_get_command(tl);
 	command->redir_list = redirs;
+
+	// printCommand(command);
+	
+	// TokenList *command_vars = parser_eat_variables(tl);
+	// RedirectionList *redirs = parser_get_redirection(tl);
+	// SimpleCommand *command = parser_get_command(tl);
 
 	if (command->bin == NULL && command_vars->size != 0) {
 		add_vars_to_set(shell_vars, command_vars);

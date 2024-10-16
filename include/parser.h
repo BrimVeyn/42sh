@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:23:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/15 14:47:14 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/16 15:33:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #define UNCLOSED_SUBSHELL_STR "42sh: syntax error: unclosed subshell, expected "
 #define UNCLOSED_COMMAND_SUB_STR "42sh: syntax error: unclosed command substitution, expected `)\n"
 #define UNCLOSED_QUOTES_STR "42sh: syntax error: unclosed quotes, expected "
+#define UNEXPECTED_EOF(c) dprintf(STDERR_FILENO, "42sh: unexpected EOF while looking for matching `%c'\n", c);
 //------------------------------------------------------------------------------------------------------
 
 //-----------------------------ARITHMETIC EXPANSION----------------------------------------------------
@@ -98,7 +99,7 @@ typedef struct {
 	int		gc_level;
 } StrList;
 
-Str					*str_init(const ExpKind kind, char *str);
+Str *str_init(const ExpKind kind, char *str, bool add_to_gc);
 void				str_list_print(const StrList *list);
 //---------------------------------------------------------------//
 
@@ -109,7 +110,7 @@ SimpleCommand		*parser_parse_current(TokenList *tl, Vars *shell_vars);
 bool				heredoc_detector(TokenList *data);
 
 //-------------------Parser modules------------//
-bool				parser_parameter_expansion(TokenList *tl, Vars *shell_vars);
+char				*parser_parameter_expansion(char *str, Vars *shell_vars);
 char				*parser_command_substitution(char *str, Vars *shell_vars);
 char				*parser_arithmetic_expansion(char *str, Vars *shell_vars);
 

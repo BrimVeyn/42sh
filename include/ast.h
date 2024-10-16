@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:44 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 17:02:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/16 17:04:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,11 +79,6 @@ typedef struct Job {
 	struct termios tmodes; //saved terminal modes
 } Job;
 
-typedef struct {
-	Process **data;
-	uint16_t size;
-	uint16_t capacity;
-} ExecuterList;
 
 typedef struct {
 	Node **data;
@@ -110,8 +105,6 @@ Process				*process_init(Node *node, TokenList *list);
 void				process_push_back(Process **lst, Process *new_value);
 
 //----------------Job List------------------//
-ExecuterList		*build_executer_list(TokenList *list);
-ExecuterList		*executer_list_init(void);
-void				executer_list_push(ExecuterList *tl, Process *process);
+Process *build_executer_list(TokenList *token_list);
 
 #endif // !AST_H
