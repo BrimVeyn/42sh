@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 11:26:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/15 15:41:53 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/16 15:59:56 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "c_string.h"
 #include "libft.h"
 #include <linux/limits.h>
+#include <readline/keymaps.h>
 #include <stdio.h>
 #include <termios.h>
 #include <termcap.h>
@@ -70,13 +71,26 @@ void disable_raw_mode()
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
 
-void update_cursor_x(size_t n) {
+void update_cursor_x(ssize_t n) {
     size_t cols = get_col();
-    rl_state.cursor_x += n;
+    ssize_t new_cursor_x = rl_state.cursor_x + n;
 
-    if (rl_state.cursor_x + rl_state.offset_x >= cols) {
-        rl_state.cursor_y += (rl_state.cursor_x + rl_state.offset_x) / cols;
-        rl_state.cursor_x = (rl_state.cursor_x + rl_state.offset_x) % cols;
+    if (new_cursor_x < 0) {//back
+        ssize_t lines_up = (-new_cursor_x + cols - 1) / cols;
+        rl_state.cursor_y -= lines_up;
+
+        new_cursor_x = cols + new_cursor_x - ((rl_state.cursor_y == 0) ? rl_state.offset_x : 0);
+        rl_state.cursor_x = (size_t)new_cursor_x;
+    } else if (rl_state.cursor_y == 0 && new_cursor_x + rl_state.offset_x >= cols){
+		rl_state.cursor_y++;
+		rl_state.cursor_x = 0;
+	}
+    else if ((size_t)new_cursor_x >= cols){//newline
+        rl_state.cursor_y = rl_state.cursor_y + new_cursor_x / cols;
+        rl_state.cursor_x = new_cursor_x % cols;
+    } 
+    else {//normal
+        rl_state.cursor_x = (size_t)new_cursor_x;
     }
 }
 
@@ -107,6 +121,11 @@ void move_cursor(int x, int y) {
 		// free(cursor_position);
         fflush(stdout);
     }
+}
+
+void set_cursor_position() {
+    int adjusted_x = rl_state.cursor_x + (rl_state.cursor_y == 0 ? rl_state.offset_x : 0);
+    move_cursor(adjusted_x, rl_state.cursor_y + rl_state.offset_y);
 }
 
 void ft_readline_clean(){
@@ -143,11 +162,19 @@ void get_cursor_pos(){
 }
 
 void update_line(string *line){
+	int cols = get_col();
+    int tchars = line->size + rl_state.offset_x;  //total chars
+    int nlines = tchars / cols; //number lines
+	
 	move_cursor(0, rl_state.offset_y);
-    write(1, "\033[2K\r", 5);
+	for (int i = 0; i <= nlines; i++){
+		write(1, "\033[2K", 4);
+		move_cursor(0, rl_state.offset_y + i + 1);
+	}
+	move_cursor(0, rl_state.offset_y);
     write(1, get_prompt(), ft_strlen(get_prompt()));
     write(1, line->data, str_length(line));
-	move_cursor(rl_state.cursor_x + rl_state.offset_x, rl_state.cursor_y + rl_state.offset_y);
+	set_cursor_position();
 }
 
 void init_readline(const char *prompt){
@@ -175,9 +202,16 @@ void init_readline(const char *prompt){
 	write(STDOUT_FILENO, get_prompt(), ft_strlen(get_prompt()));
 
 }
-
+/*
+42sh> dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+ddddddddddddddddddddddddd
+*/
 
 int handle_normal_keys(char c, string *line, int interactive){
+
+	int pos = rl_state.cursor_y * get_col() - rl_state.offset_x;
+	pos += rl_state.cursor_x + ((rl_state.cursor_y == 0) ? rl_state.offset_x : 0);
+
     if (c == '\n' || c == '\0'){
 		if (interactive){
 			write(1, "\n", 1);
@@ -188,29 +222,30 @@ int handle_normal_keys(char c, string *line, int interactive){
 		}
         return 1;
     }
-    if (c == 127 && !rl_state.cursor_x){
+    if (c == 127 && !pos){
         return 2;
     }
 
-    if (!interactive || (rl_state.cursor_x == str_length(line))){
+    if (!interactive || (pos == str_length(line))){
         if (c == 127) {
             str_pop_back(line);
-            rl_state.cursor_x -= 2;
+			update_cursor_x(-2);
         }
         else {
             str_push_back(line, c);
         }
     } else {
         if (c == 127) {
-            str_erase(line, rl_state.cursor_x - 1, 1);
-            rl_state.cursor_x -= 2;
+            str_erase(line, pos - 1, 1);
+			update_cursor_x(-2);
         } else {
-            str_insert(line, c, rl_state.cursor_x);
+            str_insert(line, c, pos);
         }
     }
-    rl_state.cursor_x++;
+    update_cursor_x(1);
     return 0;
 }
+
 int can_go_left(void){
 	if (rl_state.cursor_y == 0)
 		return rl_state.cursor_x > 0;
@@ -218,15 +253,25 @@ int can_go_left(void){
 		return rl_state.cursor_x > -(int)rl_state.offset_x;
 }
 
-int can_go_right(string *line){
-    int cols = get_col();
+int can_go_right(string *line) {
+    int cols = get_col(); //number collums
+    int tchars = line->size + rl_state.offset_x;  //total chars
+    int nlines = tchars / cols; //number lines
+    int nchar_on_last_line = tchars % cols; 
 
-	int nlines = line->size / cols;
-	int nchar = line->size % cols;
-	if (rl_state.cursor_y == nlines)
-		return rl_state.cursor_x <= nchar;
-	else
-		return rl_state.cursor_x < cols;
+    if (rl_state.cursor_y == 0) {
+        if (nlines >= 1) {
+            return rl_state.cursor_x < (int)(cols - rl_state.offset_x);
+        } else {
+            return rl_state.cursor_x < (int)(nchar_on_last_line - rl_state.offset_x);
+        }
+    }
+    
+    if (rl_state.cursor_y == nlines) {
+        return rl_state.cursor_x < nchar_on_last_line;
+    } 
+    
+    return rl_state.cursor_x < cols;
 }
 
 int handle_special_keys(string *line){
@@ -244,11 +289,11 @@ int handle_special_keys(string *line){
         }
         else if (seq[1] == 'D' && can_go_left()){
 			update_cursor_x(-1);
-			move_cursor(rl_state.cursor_x + rl_state.offset_x, rl_state.cursor_y + rl_state.offset_y);
+			set_cursor_position();
         }
         else if (seq[1] == 'C' && can_go_right(line)){
 			update_cursor_x(1);
-			move_cursor(rl_state.cursor_x + rl_state.offset_x, rl_state.cursor_y + rl_state.offset_y);
+			set_cursor_position();
         }
         else if (seq[1] == 'B' && history->offset < history->length - 1){
             history->offset++;
@@ -281,7 +326,7 @@ char *ft_readline(const char *prompt) {
     do {
         if (interactive) {
             update_line(line);
-            move_cursor(rl_state.cursor_x + rl_state.offset_x, rl_state.cursor_y + rl_state.offset_y);
+			set_cursor_position();
         }
 
         ssize_t bytes_read = read(STDIN_FILENO, &c, 1);
