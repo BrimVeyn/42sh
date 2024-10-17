@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:29:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 16:30:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/17 10:58:10 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,12 @@ void signal_sigint_exec(int code) {
 }
 
 void signal_prompt_mode(void) {
-	signal(SIGINT, signal_sigint_prompt);
+    struct sigaction sa;
+    sa.sa_handler = signal_sigint_prompt;
+    sa.sa_flags = 0;
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGINT, &sa, NULL);
+
 	signal(SIGQUIT, SIG_IGN);
 	signal(SIGTSTP, SIG_IGN);
 	signal(SIGTTIN, SIG_IGN);
