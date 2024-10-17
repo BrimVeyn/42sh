@@ -1,0 +1,21 @@
+;;
+;<>><;
+;
+&
+||
+|||||||||||||||
+>>>>>>>>>>>>>>
+<<<><><><>
+<<<1>@>>>
+{
+;}
+{ echo salut mec
+echo salut mec ;}
+()
+echo $()
+$(false)
+echo ${}; echo salut
+echo $(); echo salut;
+echo $((; echo salut;
+dcjeidjiejd; dekodkeodke; echo salut;
+(echo salut; deode ) | echo mec

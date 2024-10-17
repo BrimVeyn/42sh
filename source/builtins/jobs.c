@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 17:11:38 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/16 11:54:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/17 12:51:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define ERROR_NO_SUCH_JOB(arg) dprintf(STDERR_FILENO, "42sh: jobs: %s: no such job\n", arg);
 
 char *sigStr(const int sig) {
     static const struct {
@@ -114,7 +113,7 @@ void builtin_jobs(const SimpleCommand *command, __attribute__((unused)) Vars *sh
 			int maybe_num = ft_atoi(command->args[i]);
 			if (!is_number(command->args[i]) || maybe_num == 0 || maybe_num > (int) job_list->size) {
 				g_exitno = 1;
-				ERROR_NO_SUCH_JOB(command->args[i]);
+				ERROR_NO_SUCH_JOB("jobs", command->args[i]);
 			} else {
 				print_job_entry(buffer, maybe_num - 1, opts);
 			}

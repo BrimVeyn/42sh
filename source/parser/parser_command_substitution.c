@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/16 16:48:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/17 14:37:27 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ char *parser_command_substitution(char *str, Vars *shell_vars) {
 
 	dup2(output_fd, STDOUT_FILENO); close(output_fd);
 	if (!execute_command_sub(str, shell_vars)) { 
+		dup2(STDOUT_SAVE, STDOUT_FILENO);
 		return NULL;
 	}
 	dup2(STDOUT_SAVE, STDOUT_FILENO); close(STDOUT_SAVE);
