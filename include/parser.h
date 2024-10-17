@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:23:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/16 15:33:48 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/17 12:31:01 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@
 #define HASH_BIN_NOT_FOUND(s) dprintf(STDERR_FILENO, "bash: hash: %s: not found\n", s);
 #define HASH_OPTION_REQUIRES_ARG dprintf(STDERR_FILENO, "bash: hash: -d: option requires an argument\n"); 
 //------------------------------------------------------------------------------------------------------
+#define ERROR_NO_SUCH_JOB(builtin, arg) dprintf(STDERR_FILENO, "42sh: %s: %s: no such job\n", builtin, arg);
 
 //------------------------------Redirections---------------------//
 

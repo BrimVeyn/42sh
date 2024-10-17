@@ -13,15 +13,15 @@ if [[ $1 ]]; then
 	)
 else
 	test_lists=(
-		"test"
-		"redirections"
-		"syntax"
-		"expand"
-		"subshell"
-		"command_sub"
-		"command_group"
-		"arithmetic_expansion"
-		"builtin_export"
+		"src/test"
+		"src/redirections"
+		"src/syntax"
+		"src/expand"
+		"src/subshell"
+		"src/command_sub"
+		"src/command_group"
+		"src/arithmetic_expansion"
+		"src/builtin_export"
 	)
 fi
 

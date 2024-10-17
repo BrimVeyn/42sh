@@ -136,6 +136,7 @@ int main(const int ac, const char *av[], const char *env[]) {
 			}
 			Lexer_p lexer = lexer_init(input);
 			TokenList *tokens = lexer_lex_all(lexer);
+			// tokenListToString(tokens);
 			if (lexer_syntax_error(tokens))
 				continue; 
 			heredoc_detector(tokens);

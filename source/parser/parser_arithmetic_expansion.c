@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/16 15:29:39 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/17 14:31:41 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,8 +130,13 @@ char *parser_arithmetic_expansion(char *str, Vars *shell_vars) {
 	Lexer_p lexer = lexer_init(str);
 	ATokenStack *token_stack = lexer_arithmetic_exp_lex_all(lexer);
 
-	if (!token_stack) { g_exitno = 1; return false; }
-	if (!token_stack->size) { goto empty; }
+	if (!token_stack) { 
+		g_exitno = 1;
+		return NULL; 
+	}
+	if (!token_stack->size) {
+		goto empty;	
+	}
 	if (!arithmetic_syntax_check(token_stack)) {
 		return NULL;
 	}

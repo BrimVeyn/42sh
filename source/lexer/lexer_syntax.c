@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:20 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/16 16:45:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/17 13:20:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,8 @@ bool lexer_syntax_error(TokenList *tokens) {
 		return true;
 	for (size_t it = 0; it < tokens->size; it++) {
 		if (is_subshell(tokens, &it)) {
-			if (is_end_sub(tokens, &(size_t){it + 1})) {
+			size_t it_1 = it + 1;
+			if (is_end_sub(tokens, &it_1)) {
 				dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagStr((type_of_separator) S_SUB_CLOSE));
 				return true;
             }

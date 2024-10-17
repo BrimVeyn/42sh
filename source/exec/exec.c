@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/16 17:17:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/17 14:37:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "ast.h"
+#include "debug.h"
 #include "lexer.h"
 #include "parser.h"
 #include "signals.h"
@@ -80,7 +81,7 @@ bool apply_all_redirect(RedirectionList *redirections) {
 	return true;
 }
 
-char *find_bin_location(char *bin, StringList *env){
+char *find_bin_location(char *bin, StringList *env, bool *absolute){
 	struct stat file_stat;
 	if (stat(bin, &file_stat) != -1 && ft_strchr(bin, '/')) {
 
@@ -90,6 +91,7 @@ char *find_bin_location(char *bin, StringList *env){
 			return (NULL);
 		}
 		if (file_stat.st_mode & S_IXUSR) {
+			*absolute = true;
 			return bin;
 		}
 		else {
@@ -183,9 +185,11 @@ void resolve_bin(SimpleCommand *command, Vars *shell_vars) {
 		hash_interface(HASH_ADD_USED, command->bin, shell_vars);
 		command->bin = maybe_bin;
 	} else {
-		maybe_bin = find_bin_location(command->bin, shell_vars->env);
+		bool absolute = false;
+		maybe_bin = find_bin_location(command->bin, shell_vars->env, &absolute);
 		if (maybe_bin) {
-			hash_interface(HASH_ADD_USED, command->bin, shell_vars);
+			if (absolute == false)
+				hash_interface(HASH_ADD_USED, command->bin, shell_vars);
 			command->bin = maybe_bin;
 		} else {
 			command->bin = NULL;
@@ -309,15 +313,10 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 	return true;
 }
 
-Job *job_init(Process *first_process) {
-	Job *self = gc(GC_CALLOC, 1, sizeof(Job), GC_SUBSHELL);
-	self->first_process = first_process;
-	return self;
-}
-
 int exec_node(Node *node, Vars *shell_vars, bool foreground) {
 	Process *proc = build_executer_list(node->value.operand);
-	Job *job = job_init(proc);
+	Job *job = gc_unique(Job, GC_SUBSHELL);
+	job->first_process = proc;
 
 	launch_job(job, shell_vars, foreground);
 
