@@ -4,7 +4,6 @@ var1=5; var2=10; echo $(($var1 + $var2 - 3))
 var=1; echo $((var + 1)); echo $((var++)); echo $((++var))
 echo $(echo $(echo $(echo $(echo nesting))))
 (echo Level1 && (echo Level2 || (echo Level3 && echo Level4))) || echo Final
-echo "Text with space" > file.txt; echo $(cat file.txt)
 ls && echo success || echo failure
 false || true && echo correct || echo wrong
 echo $(echo $(echo $(echo A) && echo B || echo C))
