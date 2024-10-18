@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/18 17:32:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/18 18:09:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,8 @@ static bool execute_command_sub(char *input, Vars *shell_vars) {
 	if (!pid) {
 		Lexer_p lexer = lexer_init(input);
 		TokenList *tokens = lexer_lex_all(lexer);
-		if (lexer_syntax_error(tokens))  {
+		if (lexer_syntax_error(tokens))
 			clean_sub();
-			return false;
-		}
 		heredoc_detector(tokens);
 		Node *AST = ast_build(tokens);
 		ast_execute(AST, shell_vars, true);
