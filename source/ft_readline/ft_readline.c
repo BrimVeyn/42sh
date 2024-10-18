@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 11:26:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/17 14:53:33 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/18 12:08:59 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,13 +32,14 @@ void signal_prompt_mode(void);
 
 typedef struct s_readline_state {
     char *prompt;
+	size_t offset_prompt;
 	size_t offset_x;
 	size_t offset_y;
     int cursor_x;
     int cursor_y;
 } readline_state_t;
 
-readline_state_t rl_state = {NULL, 0, 0, 0, 0};
+readline_state_t rl_state = {NULL, 0, 0, 0, 0, 0};
 
 void set_prompt(const char *new_prompt) {
     if (rl_state.prompt)
@@ -115,7 +116,7 @@ void ft_rl_newline() {
 	write(1, "\n", 1);
 	rl_state.cursor_y = 0;
 	rl_state.cursor_x = 0;
-	write(1, get_prompt(), ft_strlen(get_prompt()));
+	// write(1, get_prompt(), ft_strlen(get_prompt()));
 }
 
 void move_cursor(int x, int y) {
@@ -163,7 +164,7 @@ void get_cursor_pos(){
 		
         result = regex_match(";[0-9]*$", buf);
         char *tmp_x = ft_substr( buf, result.re_start + 1, result.re_end - result.re_start);
-        rl_state.offset_x = ft_atoi(tmp_x);
+        rl_state.offset_prompt = ft_atoi(tmp_x);
         free(tmp_x);
     }
 }
@@ -173,13 +174,13 @@ void update_line(string *line){
     int tchars = line->size + rl_state.offset_x;  //total chars
     int nlines = tchars / cols; //number lines
 	
-	move_cursor(0, rl_state.offset_y);
+	move_cursor(rl_state.offset_x, rl_state.offset_y);
 	for (int i = 0; i <= nlines; i++){
-		write(1, "\033[2K", 4);
-		move_cursor(0, rl_state.offset_y + i + 1);
+		write(1, "\033[0K", 4);
+		move_cursor(rl_state.offset_x, rl_state.offset_y + i + 1);
 	}
-	move_cursor(0, rl_state.offset_y);
-    write(1, get_prompt(), ft_strlen(get_prompt()));
+	move_cursor(rl_state.offset_x, rl_state.offset_y);
+    // write(1, get_prompt(), ft_strlen(get_prompt()));
     write(1, line->data, str_length(line));
 	set_cursor_position();
 }
@@ -203,10 +204,10 @@ void init_readline(const char *prompt){
 
 	get_cursor_pos();
 	rl_state.offset_y--;
-	rl_state.offset_x = ft_strlen(get_prompt());
-	move_cursor(0, rl_state.offset_y);
+	rl_state.offset_prompt--;
+	move_cursor(rl_state.offset_prompt, rl_state.offset_y);
 	write(STDOUT_FILENO, get_prompt(), ft_strlen(get_prompt()));
-
+	rl_state.offset_x = rl_state.offset_prompt + ft_strlen(get_prompt());
 }
 /*
 42sh> dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
@@ -221,7 +222,7 @@ int handle_normal_keys(char c, string *line, int interactive){
     if (c == '\n' || c == '\0'){
 		if (interactive){
 			write(1, "\n", 1);
-			write(1, "\033[2K\r", 5);
+			write(1, "\033[0K\r", 5);
 			rl_state.offset_y++;
 			rl_state.cursor_y = 0;
 			rl_state.cursor_x = 0;
@@ -317,10 +318,14 @@ void handle_control_keys(char char_c){
 		write(STDOUT_FILENO, "\033[2J", 4);
 		rl_state.cursor_y = 0;
 		rl_state.offset_y = 0;
+		rl_state.offset_prompt = 0;
+		rl_state.offset_x = ft_strlen(get_prompt());
+		move_cursor(0, 0);
+		write(STDOUT_FILENO, get_prompt(), ft_strlen(get_prompt()));
 	}
 	if (char_c == 18){
 		char c = 0;
-		string word = STRING_L("");
+		// string word = STRING_L("");
 		do {
 			ssize_t bytes_read = read(STDIN_FILENO, &c, 1);
 
