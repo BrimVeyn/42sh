@@ -6,29 +6,40 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/17 14:37:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/18 12:10:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "lexer.h"
 #include "parser.h"
 #include "utils.h" 
 #include "ast.h" 
 #include "ft_regex.h"
 
 #include <stdio.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
 
 static bool execute_command_sub(char *input, Vars *shell_vars) {
-	Lexer_p lexer = lexer_init(input);
-	TokenList *tokens = lexer_lex_all(lexer);
-	if (lexer_syntax_error(tokens))  {
-		return false;
+	pid_t pid = fork();
+	dprintf(2, "%s\n", string_list_get_value(shell_vars->set, "IFS"));
+	if (!pid) {
+		Lexer_p lexer = lexer_init(input);
+		TokenList *tokens = lexer_lex_all(lexer);
+		if (lexer_syntax_error(tokens))  {
+			return false;
+		}
+		heredoc_detector(tokens);
+		Node *AST = ast_build(tokens);
+		ast_execute(AST, shell_vars, true);
+	} else {
+		int status;
+		waitpid(pid, &status, 0);
+		g_exitno = WEXITSTATUS(status);
 	}
-	heredoc_detector(tokens);
-	Node *AST = ast_build(tokens);
-	ast_execute(AST, shell_vars, true);
+	dprintf(2, "%s\n", string_list_get_value(shell_vars->set, "IFS"));
 
 	return true;
 }

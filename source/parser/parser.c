@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/17 14:38:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/18 11:28:28 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -281,7 +281,7 @@ void str_add_back(Str **lst, Str *new_value) {
 
 
 void string_list_split(StrList *list, Vars *shell_vars) {
-	char *IFS = string_list_get_value(shell_vars->env, "IFS");
+	char *IFS = string_list_get_value(shell_vars->set, "IFS");
 	if (!IFS) {
 		IFS = "\n\t ";
 	}
@@ -403,6 +403,7 @@ SimpleCommand *parser_parse_current(TokenList *list, Vars *shell_vars) {
 		if (!candidate)
 			continue;
 		StrList *string_list = get_range_list(candidate, &error);
+		da_print(string_list);
 		if (error) 
 			return NULL;
 		string_list_consume(string_list, shell_vars);
