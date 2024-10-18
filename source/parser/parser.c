@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/18 11:28:28 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/18 13:35:38 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -403,7 +403,7 @@ SimpleCommand *parser_parse_current(TokenList *list, Vars *shell_vars) {
 		if (!candidate)
 			continue;
 		StrList *string_list = get_range_list(candidate, &error);
-		da_print(string_list);
+		// da_print(string_list);
 		if (error) 
 			return NULL;
 		string_list_consume(string_list, shell_vars);

@@ -6,11 +6,11 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 09:18:06 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/09 10:17:14 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/16 10:48:47 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include <string.h>
 #include "c_string.h"
 
 string str_substr(string *str, size_t pos, size_t len){
