@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 11:26:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/18 12:08:59 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/18 15:53:54 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,9 +114,12 @@ void update_cursor_x(string *line, ssize_t n) {
 void ft_rl_newline() {
     write(1, "^C", 2);
 	write(1, "\n", 1);
+	rl_state.offset_y++;
+	rl_state.offset_prompt = 0;
+	rl_state.offset_x = ft_strlen(get_prompt());
 	rl_state.cursor_y = 0;
 	rl_state.cursor_x = 0;
-	// write(1, get_prompt(), ft_strlen(get_prompt()));
+	write(1, get_prompt(), ft_strlen(get_prompt()));
 }
 
 void move_cursor(int x, int y) {
@@ -221,8 +224,7 @@ int handle_normal_keys(char c, string *line, int interactive){
 
     if (c == '\n' || c == '\0'){
 		if (interactive){
-			write(1, "\n", 1);
-			write(1, "\033[0K\r", 5);
+			write(1, "\033[2K\r", 6);
 			rl_state.offset_y++;
 			rl_state.cursor_y = 0;
 			rl_state.cursor_x = 0;
@@ -336,7 +338,9 @@ void handle_control_keys(char char_c){
 	}
 }
 
+#include <time.h>
 char *ft_readline(const char *prompt) {
+	// clock_t start = clock();
     char c = '\0';
     string *line = NULL;
     int result = 0;
@@ -362,12 +366,15 @@ char *ft_readline(const char *prompt) {
 		// move_cursor(0,0);
 		// printf("%d %d\n", (int)get_row(), rl_state.cursor_y + (int)rl_state.offset_y);
 		// set_cursor_position();
-        ssize_t bytes_read = read(STDIN_FILENO, &c, 1);
-		if (rl_done){
-			break;
+        // ssize_t bytes_read = read(STDIN_FILENO, &c, 1);
+		c = getchar();
+		if (rl_done) {
+			ft_rl_newline();
+			rl_done = 0;
+			continue;
 		}
 
-        if (bytes_read == 0 || c == VEOF) {
+        if ( c == VEOF) {
             if (line->data[0] == '\0') {
                 if (interactive) {
                     write(1, "\n", 1);
@@ -387,7 +394,7 @@ char *ft_readline(const char *prompt) {
 
         if (result == 1)
             break;
-    } while (!rl_done);
+    } while (true);
     
     if (interactive)
         disable_raw_mode();
@@ -405,6 +412,9 @@ char *ft_readline(const char *prompt) {
     if (rl_done) {
         return ft_strdup("");
     }
+	// clock_t end = clock();
+	// double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+	// printf("Time spent in read(): %f seconds\n", time_spent);
     
     return str;
 }
