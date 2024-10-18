@@ -1,0 +1,561 @@
+echo $((1 + 2))
+echo $((;))
+echo a$((            ))b
+echo $((1 + 2 * 4 / 2))
+echo $((5 - 3 + 8))        
+echo $((2 * 3 + 4 / 2))    
+echo $((10 % 3))           
+echo $(( (3 + 5) * 2 ))    
+echo $((7 > 5))            
+echo $((4 < 2))            
+echo $((10 == 10))         
+echo $((5 != 5))           
+echo $((10 / 0))           
+echo $((10 % 0))           
+var=0; echo $((var++)); echo $((var));
+var=0; echo $((++var)); echo $((var));
+var=0; echo $((++var++)); echo $((var));
+var=0; echo $((++ +)); echo $((var));
+var1=10; var2=3; echo $((var1 + var2))
+var1=20; var2=5; echo $((var1 - var2 * var1 / var2))
+echo $((2 + 3 * 5))         
+echo $(( (2 + 3) * 5 ))     
+echo $((8 / 2 + 3 * 4 - 1)) 
+echo $((5 - 8))             
+echo $((1 + 2))             
+echo $((5 - 3))             
+echo $((4 * 2))             
+echo $((8 / 4))             
+echo $((7 % 3))             
+var1=10; var2=3; echo $((var1 + var2))      
+var1=15; var2=4; echo $((var1 * var2))      
+var1=20; var2=5; echo $((var1 / var2))      
+var=5; echo $((++var))      
+var=5; echo $((var++))      
+var=5; echo $((--var))      
+var=5; echo $((var--))      
+echo $((5 > 3))             
+echo $((2 < 5))             
+echo $((4 >= 4))            
+echo $((3 <= 2))            
+echo $((3 == 3))            
+echo $((4 != 5))            
+echo $((1 && 1))            
+echo $((1 && 0))            
+echo $((0 || 1))            
+echo $((0 || 0))            
+echo $((2 + 3 * 5))         
+echo $(( (2 + 3) * 5 ))     
+echo $((8 / 2 + 3 * 4))     
+echo $((10 % 3))            
+echo $((20 % 4))            
+echo $((17 % 5))            
+echo $((1 / 0))             
+echo $((1 % 0))             
+echo $((5 > 3 && 2 < 4))    
+echo $((5 > 6 || 2 < 1))    
+var1=4; var2=2; echo $(( (var1 + 1) * (var2 + 3) / (var1 - 1) ))
+echo $(( 10 + ($((1 + 3))) + $((1 + 5))))
+echo $(())
+echo pref$(())suff
+echo pref$((1 + 2))suff$((1 + 3))bool
+echo $(echo salut)$((1 + 2))${?}
+echo $(( 1 + 2            
+echo $(( 5 3 ))            
+echo $(( 4 + ))            
+echo $(( 1 + $(( 3 + 2 ))  
+echo $(( 3 + a ))          
+echo $(( 5 / 0 ))          
+echo $(( 3 + () ))         
+echo $(( 2 + 3) + 5 ))     
+echo $(( ( 2 + 3 + 5 ))    
+echo $(( ++ ))             
+echo $(( -- ))             
+echo $(( var + ++ ))       
+echo $(( ++ 3 ))           
+echo $(( 1 && ))           
+echo $(( || 2 ))           
+echo $(( 5 > ))            
+echo $(( >= 3 ))           
+echo $(( 5 * 2 ))         
+echo $(( 5 <<< 2 ))        
+echo $((5))
+echo $((7147483649))
+var=12; echo $((++var + 2 - var + 1))
+echo $(( 10 - 3 + 2 ))      
+echo $(( 4 * 3 - 2 ))       
+echo $(( 8 / 2 + 1 ))       
+echo $(( 9 % 4 + 1 ))       
+echo $(( 6 + (3 * 2) ))     
+echo $(( (5 + 5) / 2 ))     
+echo $(( 15 - (5 * 3) ))    
+echo $(( (4 + 4) * 2 ))     
+echo $(( 8 - 4 + 2 ))       
+echo $(( 20 / 5 * 3 ))      
+echo $(( 7 + 3 > 8 ))       
+echo $(( 6 < 2 ))            
+echo $(( 5 * 2 >= 10 ))     
+echo $(( 4 != 5 ))           
+echo $(( 7 > 10 ))           
+echo $(( 6 < 3 ))            
+echo $(( 8 % 3 ))            
+echo $(( 7 - 7 ))            
+echo $(( 3 * 3 ))            
+echo $(( 4 / 2 ))            
+echo $(( 9 - 3 * 2 ))       
+echo $(( 4 * 2 / 4 ))        
+echo $(( 11 % 4 ))           
+echo $(( 6 + 2 * 2 ))       
+echo $(( 2 * 5 + 5 ))       
+echo $(( 9 + 3 - 4 ))       
+echo $(( 8 / 4 * 2 ))       
+echo $(( 1 + 1 == 2 ))      
+echo $(( 2 != 2 ))           
+echo $(( 10 / 2 == 5 ))     
+echo $(( 5 > 2 && 3 < 5 ))  
+echo $(( 0 || 1 ))           
+echo $(( 1 && 0 ))           
+echo $(( (3 * 3) == 9 ))    
+echo $(( 8 / 2 == 4 ))      
+echo $(( 1 + 2 * 3 ))       
+echo $(( (5 + 5) < 20 ))    
+echo $(( 5 * 2 > 6 ))       
+echo $(( 10 / 5 < 3 ))      
+echo $(( (7 - 3) * 2 ))     
+echo $(( 3 + 2 * (4 - 1) )) 
+echo $(( 6 > 5 && 4 < 3 ))  
+echo $(( 5 + (3 * 2) - 4 )) 
+echo $(( (10 / 2) + 1 ))    
+echo $(( (3 + 5) * 2 ))     
+echo $(( 12 / (2 + 2) ))    
+echo $(( 3 * 4 - (6 - 2) )) 
+echo $(( (2 + 2) * 2 ))     
+echo $(( 8 / 4 * 2 ))       
+echo $(( 3 < 5 && 2 < 4 ))  
+echo $(( 7 - 8 + 2 ))       
+echo $(( (1 + 2) * 3 ))     
+echo $(( (10 - 2) / 2 ))    
+echo $(( 8 % 5 ))            
+echo $(( (5 + 5) == 10 ))   
+echo $(( 1 / 0 ))            
+echo $(( 10 - 11 ))         
+echo $(( 5 / 0 ))            
+echo $(( (1 + 2) + (3 + 4))) 
+echo $(( 5 * (3 + 2) ))     
+echo $(( 3 + 4 * 2 ))       
+echo $(( 12 - (5 + 2) ))    
+echo $(( (7 - 1) > (4 + 1))) 
+echo $(( 5 + 3 ))                      
+echo $(( 10 - 4 ))                     
+echo $(( 3 * 4 ))                      
+echo $(( 20 / 4 ))                     
+echo $(( 7 % 3 ))                      
+echo $(( (5 + 3) * 2 ))                
+echo $(( (10 - 2) / 2 ))               
+echo $(( 6 + (2 * 3) ))                
+echo $(( 5 > 3 && 4 < 5 ))             
+echo $(( 5 == 5 ))                     
+echo $(( 7 * 2 - 3 ))                  
+echo $(( 8 / 2 + 1 ))                  
+echo $(( 5 + ))                        
+echo $(( 5 * (2 + 3) ))                
+echo $(( (3 + 2 )) + )                 
+echo $(( 5 >>> 2 ))                    
+echo $(( 5 <=> 2 ))                    
+echo $(( (5 + 3 ))                      
+echo $(( (3 * (4 + 1) ))               
+echo $(( 10 / 0 ))                     
+echo $(( 5 % 0 ))                      
+echo $(( var + 1 ))                     
+echo $(( 5 * (2 + 3) ))                 
+echo $(( (3 + 5) * ))                   
+echo $(( (2 + 3) ))                     
+echo $(( (5 + (3 * 2)) ))               
+echo $(( (4 + 2) * (5 - 2) ))           
+echo $(( (1 + 2) + 3 * ))               
+echo $(( (5 * 2 - 1) > 8 ))             
+echo $(( 4 * 2 ))                       
+echo $(( 3 / 0 ))                       
+echo $(( (5 + 1)) + (2 * 2) ))          
+echo $(( (3 + 2)) + 3 ))                
+echo $(( (3 + 2) * (2 + 1) ))           
+echo $(( (5 - 2) / (2 - 2) ))           
+echo $(( 4 / 0 ))                       
+echo $(( 10 - ))                       
+echo $(( --2 ))                         
+echo $(( 5 > 2 && 3 < 1 ))              
+echo $(( 2 < 3 || 4 < 1 ))              
+echo $(( 5 * 3 < 10 ))                  
+echo $(( 5 * 3 > 10 ))                  
+export =;
+export b;
+export c=dekoi;
+export __1238293jdiekj=deidej;
+export 122132deji=dejide a=b;
+type ls export shell else
+type djiejde 
+type type
+type echo
+{ echo salut && { echo mec ;} ; } && { echo salut ;}
+{ echo salut; } >./outfiles/test
+echo {
+echo { echo salut ;}
+{ echo salut; echo mec ;} | ls; echo salut && echo cava
+{ echo salut ;} && { echo salut;};
+{ echo hello && { echo world ;} ; } && { echo welcome ;}
+{ echo one ; echo two ; } && { echo three ; }
+{ { echo group1 ; } && echo group2 ; } || echo group3
+echo { echo nested ; } && { echo check ;}
+{ { echo inner1; } ; echo inner2 ; } | grep inner
+{ echo first ; echo second ; } | tee ./outfiles/test1
+{ echo command1 ; } >./outfiles/test2 && { echo command2 ; } >./outfiles/test3
+{ echo start ; echo end ; } && ls
+{ { echo one; echo two; } ; echo three; } | cat
+{ echo chain1 && echo chain2 ; } && { echo chain3 ; }
+echo  salut && { echo braces ; }
+{ echo block1 ; echo block2 ; echo block3 ; } && echo complete
+{ { echo start1; echo start2; } && { echo blockA && echo blockB ; } ; } && { echo final ; }
+{ echo chain1 ; { echo chain2 && { echo nested1 ; echo nested2 ; } ; } ; echo end ; }
+{ { echo first && echo second ; } || echo fallback ; } && { echo success ; } || { echo fail ; }
+{ { echo nestedGroup1 ; echo nestedGroup2; } && echo outerGroup1 ; } || echo outerGroup2
+{ echo begin ; { echo inner1 ; { echo inner2 && echo inner3 ; } ; echo outer ; } ; } && echo done
+{ echo test ; { { echo mid1 && echo mid2 ; } || echo alt ; } && echo after ; }
+{ { echo a && { echo b && echo c ; } ; } && echo d ; } || echo e
+{ { echo commandA ; } && { { echo commandB && echo commandC ; } ; echo commandD ; } ; } && echo done
+{ echo multi-level ; { echo level2 ; { echo level3 && echo level4 ; } ; echo end ; } ; } || echo fail
+{ { echo alpha && echo beta ; } ; echo gamma ; echo delta ; } && echo endchain
+{ { echo pre1 && { echo pre2 || echo altPre ;} ;      } && echo main ;} && echo final
+{ { { echo doubleNested ; } && echo outer ; } || echo altOuter ; } && echo finish
+{ echo pipeline ; { echo pipeStart && echo pipeMid ; } | grep pipeStart && echo pipelineDone ; }
+{ { echo redirecting ; echo toFile ; } > ./outfiles/testoutput ; } | ls && cat ./outfiles/testoutput
+{ { { echo deep1 ; } && { echo deep2 ; echo deep3 ; } ; } || { echo fallback ; } ; } && echo completed
+{ { echo stage1 ; echo stage2 ; } | tee ./outfiles/stage && { echo log1 ; echo log2 ; } | grep log ; } && echo finished
+{ { echo level1 && { echo level2 ; echo level3 ; } ; } | { grep level ; echo passed ; } ; } || echo failed
+{ { echo a1 ; echo a2 ; } && { echo b1 ; { echo b2 && echo b3 ; } ; } ; } || { echo c1 ; echo c2 ; }
+{ echo part1 ; { echo part2 ; { echo sub1 && echo sub2 ; } || echo altSub ; } ; } && echo final
+{ echo first ; { { echo second && { echo third ; echo fourth ; } ; echo fifth ; } ; echo sixth ; } && echo seventh
+{ { echo outer1 && { echo inner1 || echo altInner1 ; } ; } || { echo outerFallback ; echo outerEnd ; } ; } && echo finished
+{ { echo test1 | grep test1 ; echo test2 | grep test2 ; } && echo success ; } || echo failure
+{ { { echo pipe1 && echo pipe2 ; } | grep pipe1 ; } && echo pipeDone ; } || echo pipeFail
+{ echo check1 && { echo check2 ; { echo check3 || echo altCheck3 ; } ; } || echo fallback ; } && echo finalCheck
+{ { echo redirectionTest ; echo moreTest ; } > ./outfiles/testRedirect && cat ./outfiles/testRedirect ; } && echo complete
+{ { echo cmdA && echo cmdB ; } | { echo cmdC && echo cmdD ; } ; } && echo pipelineDone
+{ { { echo one && echo two ; } | { echo three && echo four ; } ; } || echo fallback1 ; } && echo sequenceComplete
+{ echo startChain ; { echo chain1 && { echo chain2 && echo chain3 ; } ; echo chainEnd ; } ; } || echo failedChain
+{ { echo set1 && { echo set2 || echo altSet2 ; } ; } && echo doneSet ; } && echo finalSet
+{ echo firstBlock ; { echo secondBlock && { echo thirdBlock ; echo fourthBlock ; } ; } ; echo fifthBlock ; } && echo endBlock
+{ { echo innerStart && { { echo middleStart ; echo middleEnd ; } || echo middleAlt ; } ; } || echo failCase ; } && echo successCase
+{ { { echo layer1 && echo layer2 ; } && { echo layer3 || echo altLayer3 ; } ; } && echo allLayers ; } || echo someFailed
+{ { echo fileWrite ; { echo fileWriteInner && echo toFile ; } > ./outfiles/complexOutput ; } && cat ./outfiles/complexOutput ; } || echo writeFailed
+{ echo scriptStart ; { echo scriptStep1 ; { echo scriptStep2 && echo scriptStep3 ; } ; echo scriptEnd ; } && echo success ; } || echo scriptFail
+echo $(ls)
+echo $(echo Hello)
+echo $(echo First command; echo Second command)
+echo $(ls && echo Listing succeeded || echo Listing failed)
+echo Files in directory | cat - $(ls)
+echo $(echo start; ls | grep .c; echo done)
+echo $(mkdir test_dir && echo Directory created || echo Directory creation failed)
+echo $(rm non_existent_file || echo File not found)
+echo $(echo $(echo nested; ls) | echo Finished)
+echo $(echo $(echo salut; echo prout) | echo salut)
+$(cd /nonexistent | echo Changed dir || echo Failed to change dir; echo Command complete)
+echo $(echo salut; echo salut) | ls
+echo $(ls /etc | head -n 5)
+echo $(uname -a && echo Kernel info)
+echo $(echo $(ls | wc -l) | cat - $(echo Done))
+echo $(ls /etc && ls /nonexistentdir || echo Dir not found)
+echo $(echo Pipe test && ls /usr | grep bin | wc -l)
+echo $(cat /dev/null && echo Empty file || echo Fallback)
+echo $(mkdir newdir && ls && rmdir newdir && echo Dir test complete)
+echo $(find /usr -maxdepth 1 -type d | xargs ls | grep bin && echo Dir listing done)
+echo $(seq 1 10 | xargs -I {} echo {} | wc -l && echo Xargs done)
+echo $(ls /etc | grep conf | wc -l)
+echo $(find /etc | grep conf | head -n 3)
+echo $(echo Test done; echo $(ls /usr | head -n 5))
+echo $(false && echo Fail || echo Success)
+echo $(ls /bin | grep bash && echo Found bash || echo Not found)
+echo $(echo Begin test; ls /etc | grep conf | wc -l)
+echo $(ls | grep txt && echo Text files found || echo No text files)
+echo $(echo Start; echo $(echo $(ls /etc | grep conf) | wc -l) && echo Finish)
+echo $(mkdir tempdir && echo Dir created; rmdir tempdir && echo Dir removed)
+echo prefix$(echo salut)suffix
+echo count:$(ls | wc -l)files
+echo first file:$(ls | head -n 1)
+echo kernel:$(uname -r)version
+echo path:$(echo /usr/bin | grep bin)found
+echo current user:$(whoami)
+echo check:$(echo $(ls /etc | grep conf)config files)
+echo listing:$(echo $(ls /usr/home | grep sh))done
+echo last command:$(echo $(ls /etc | wc -l))files found
+echo $(echo $(echo $(uname)))suffix
+echo status:$(ls /etc | grep $(whoami) | wc -l)processes running
+echo result:$(mkdir testdir && echo created || echo failed)directory
+echo result:$(echo $(ls /usr | grep lib))libraries found
+echo FirstPrefix$(echo salut)FirstSuffix$(echo salut)EndSuffix
+echo $(echo FirstPrefix$(echo $(echo hey))FirstSuffix$(echo salut)EndSuffix)
+echo $(echo $(mkdir tempdir && echo Dir created && (rmdir tempdir && echo Dir removed)))
+echo prefix$(echo $(echo inside subshell))suffix
+echo files:$(ls | (wc -l))listed
+echo first file:$(ls | (head -n 1))found
+echo $(echo $(echo $(ls | wc -l)) files in current directory)
+echo username:$(whoami | (echo $(grep -o .)))
+echo current dir:$(pwd | (echo $(ls $(pwd) | grep $(basename $(pwd)))))
+echo file check:$(echo $(ls /etc | (grep conf && echo configuration files)))done
+echo full check:$(echo $(echo prefix$(uname)postfix))suffix
+echo $(mkdir dirtest && echo Directory made && (rmdir dirtest && echo Directory removed))complete
+echo result:$(echo $(ls /usr | (grep bin && echo binaries found)))
+echo nesting:$(echo $(echo $(echo inner level reached)))done
+echo dir test:$(echo $(mkdir newdir && echo dir created && (rmdir newdir && echo dir removed)))complete
+echo process count:$(ps aux | (grep $(whoami) && echo $(ps aux | wc -l)))processes running
+echo $(ls | (echo first:$(head -n 1) && echo last:$(tail -n 1)))file list complete
+echo result:$(echo $(echo kernel:$(uname -r)))system details
+echo test case:$(echo $(echo $(mkdir $(echo tempdir) && echo dir created && (rmdir tempdir && echo dir removed))))nested
+echo directories:$(echo $(echo $(ls / | (grep home && echo home found))))
+echo deep nesting:$(echo $(echo $(echo $(echo $(uname)))))suffix
+echo match count:$(echo $(ls /usr | (grep bin && echo found))items located)
+echo path validation:$(echo $(echo $(echo $(echo /usr/bin | (grep usr))))valid)
+echo $(echo $(echo $(mkdir testdir && echo created && (rmdir testdir && echo removed))))status
+echo ${}
+echo ${VAR:-}
+echo ${VAR:}
+echo ${:VAR}
+echo ${DEFINED_VAR:-${NESTED_VARIABLE:-}
+echo ${:VAR:=default_value}
+echo ${VAR:-${NESTED_VAR}
+echo ${:-VAR}
+echo ${PATH}
+echo ${8PATH}
+echo ${PATH${salut}}
+echo ${?}
+echo ${PATH}d1${PATH}d2${PATH}
+echo ${UNDEFINED:-default_value} | rev
+echo ${PATH:-/default/path}
+echo ${UNDEFINED:-NoValue} | cat
+echo ${HOME:-/home/unknown}
+echo ${PATH:-/tmp} | rev
+echo ${HOME:=salut}; echo ${HOME}
+echo ${UNDEFINED:=salut}; echo ${UNDEFINED}
+echo ${HOME:?salut}; echo ${HOME}
+echo ${UNDEFINED:? variable is not set or has no value}; echo ${UNDEFINED}
+echo ${EMPTY:-default_value}
+echo ${DEFINED_VARIABLE:-fallback_value}
+echo ${UNSET_VARIABLE:=assigned_value}; echo ${UNSET_VARIABLE}
+echo ${MISSING_VARIABLE:?variable is not set or has no value}
+echo ${DEFINED_VAR:?variable is not set or has no value}
+echo ${DEFINED_VAR:-${NESTED_VARIABLE:-fallback}}
+echo ${UNDEFINED_VAR:=new_default}; echo ${UNDEFINED_VAR}
+echo ${NUMBER:-123}
+echo ${UNDEFINED_NUMBER:-999} | rev
+echo ${VARIABLE_WITH_SPACE:-default_value}
+echo ${UNDEFINED_VAR:-Empty_Value} | cat
+echo ${HOME_VAR:-/default/home}
+echo ${UNDEFINED_VAR:=temporary}; echo ${UNDEFINED_VAR}
+echo ${HOME_SET:?Home is not set}; echo ${HOME_SET}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##/home}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%/home}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%/home}
+echo ${#PATH}
+echo ${PATH:}
+echo ${#PATH:-DSADAS}
+echo ${#DFPASDAS}
+echo ${#}
+echo a > ./outfiles/test1.txt; echo b >> ./outfiles/test1.txt
+cat < ./infiles/file1 > ./outfiles/test2.txt
+ls non_existing_file &> ./outfiles/test3.txt
+ls non_existing_file &>> ./outfiles/test4.txt; echo Command completed &>> ./outfiles/test4.txt
+echo a > ./outfiles/test5.txt; ls non_existing_file &>> ./outfiles/test5.txt
+cat < ./infiles/empty | echo b > ./outfiles/test7.txt
+ls non_existing_file &> ./outfiles/test9.txt | echo Error handled &>> ./outfiles/test9.txt
+echo a > ./outfiles/test10.txt; echo b < ./infiles/file1 >> ./outfiles/test10.txt
+cat < ./infiles/no_perms > ./outfiles/test11.txt; echo Perm issue &>> ./outfiles/test11.txt
+cat < ./infiles/file1 | echo b > ./outfiles/test14.txt
+echo a > ./outfiles/test15.txt; cat < ./infiles/empty >> ./outfiles/test15.txt
+ls non_existing_file &>> ./outfiles/test16.txt; echo b &>> ./outfiles/test16.txt
+echo a > ./outfiles/test17.txt | ls non_existing_file &>> ./outfiles/test17.txt
+echo a > ./outfiles/test18.txt; echo b >> ./outfiles/test18.txt | ls non_existing_file &>> ./outfiles/test18.txt
+echo a &>> ./outfiles/test20.txt; echo b &>> ./outfiles/test20.txt
+ls non_existing_file &>> ./outfiles/test21.txt; echo Handled &>> ./outfiles/test21.txt
+echo a > ./outfiles/test22.txt | ls non_existing_file &>> ./outfiles/test22.txt
+ls non_existing_file &> ./outfiles/test24.txt | echo error check &>> ./outfiles/test24.txt
+echo a > ./outfiles/test28.txt | ls non_existing_file &>> ./outfiles/test28.txt
+echo a > ./outfiles/test30.txt; echo b > ./outfiles/test30.txt 2>&1
+echo a &> ./outfiles/test34.txt; echo b <&1 &>> ./outfiles/test34.txt
+cat < ./infiles/file1 >&2 > ./outfiles/test35.txt
+echo a < ./infiles/file1 >&1 > ./outfiles/test38.txt
+cat < ./infiles/empty >&1 > ./outfiles/test39.txt
+echo errors
+cat < ./infiles/file1 300>&1 > ./outfiles/test58.txt | echo c >&5 >> ./outfiles/test58.txt
+ls non_existing_file 1024>&2 > ./outfiles/test59.txt | echo File not found 512>&1 >> ./outfiles/test59.txt
+echo a > ./outfiles/test60.txt -10>&2 | ls non_existing_file -20>&1 >> ./outfiles/test60.txt
+cat < ./infiles/file1 10000>&1 > ./outfiles/test61.txt | echo error 5000>&2 >> ./outfiles/test61.txt
+ls non_existing_file 3>&1 > ./outfiles/test62.txt 4>&2 | echo handled >&99 >> ./outfiles/test62.txt
+echo a > ./outfiles/test63.txt 77>&1 | ls non_existing_file 88>&2 >> ./outfiles/test63.txt
+echo a > ./outfiles/test65.txt 3333>&1 | ls non_existing_file 4444>&2 >> ./outfiles/test65.txt
+echo a >./outfiles/$(echo test2)
+(echo Hello World)
+(echo Hello; echo World)
+(echo Start; (echo Nested; echo Subshell); echo End)
+(echo This && echo That)
+(false || echo This ran because the first command failed)
+(echo First && false || echo Fallback)
+(echo This will run && echo And then this)
+(false && echo Wont run || echo But this will)
+((echo Outer && (echo Inner || echo Fallback)) || echo Outer fallback)
+(echo Start && false || echo Continue; echo End)
+(echo Outer && (false || echo Inner) && echo Final)
+(false && (echo Wont run && echo Neither will this) || echo This will run)
+((echo A && echo B) || (echo C && echo D) && echo E)
+(echo Start && false || (echo Intermediate && echo End))
+(false || (echo Subshell ran && echo hey)) && echo This wont print
+((echo Check && true) && echo Passed || echo Failed)
+(echo A && (echo B && echo C) || (echo D && echo E))
+(false && (echo F && echo G) || (echo H && echo I) && (false || echo J))
+(echo Start && (false || (echo Mid && (echo End || false))))
+(echo A; (echo B && false) || (echo C && echo D); echo E)
+(false && (echo A && echo B) || (false || echo C && (echo D && echo E)))
+((echo A && (echo B || echo C)) || echo D; (echo E && false || echo F))
+(echo A && (false || (echo B && echo C) && echo D) || echo E)
+((false || (echo A && echo B) || (false && echo C)) && echo D)
+(echo A || (echo B && (false || echo C)) && echo D; echo E)
+((echo A && false) || (false && echo B) || (echo C && (echo D || echo E)))
+(echo A && (echo B; echo C && echo D || (false && echo E)); echo F)
+((false && echo A) || (echo B && echo C) && (echo D || false) && echo E)
+(echo A && echo B || (echo C && echo D) && (false || echo E))
+(echo A; (false || (echo B && false || echo C)); echo D)
+((echo A && (echo B || echo C)) && (false || echo D); echo E)
+(false || (echo A && (echo B && false || echo C)) && echo D)
+(echo A && echo B || (false && echo C) && (echo D && false) || echo E)
+((false || echo A) && echo B || (echo C && echo D); echo E)
+(echo A && false) || echo B
+(echo A | echo B)
+(echo First | (echo Second && echo Third) || echo Fourth)
+((echo PipeTest | echo TestSuccess) && echo Done || echo Failed)
+(echo Start && echo Proceed || echo Fallback | echo End)
+(echo A && (echo B | echo C) && echo D)
+((false || (echo PipeOne | echo PipeTwo)) && echo Continue)
+(echo First; echo Second | echo Third; echo Fourth)
+((false && echo FailOne) || (echo PassOne | echo PassTwo))
+(echo A && (echo B && (echo C | echo D)) || echo E)
+(echo Init && (false || echo Mid | echo End))
+(echo A | (echo B && (false || echo C)) && echo D)
+(echo A || (echo B && echo C) | (echo D || echo E); echo F)
+((echo A | echo B) || (false && echo Fail) || echo Continue)
+(echo Start | echo Mid && echo Next || (echo Fallback | echo Final))
+((echo StepOne && false) || (echo StepTwo | echo StepThree))
+(false || echo A | (echo B && echo C) || echo D)
+(echo Outer && (false || (echo InnerOne | echo InnerTwo)) && echo Final)
+(echo First; (echo Second | (echo Third && echo Fourth)); echo Last)
+(echo A && (echo B || echo C) && echo D | echo E)
+(echo First | false || (echo Second && echo Third))
+((false || (echo A | echo B)) && (echo C && echo D) || echo F)
+(echo A && echo B | (false && echo Fail || echo Success))
+((false || echo A | echo B) && (echo C || echo D) && echo E)
+(echo A || (echo B && false | echo C) && echo D)
+(echo A | (false || echo B) && echo C && echo D)
+((echo Init && false) || (echo Mid | (echo End && echo Done)))
+(false && (echo X | echo Y) || echo Z | echo Final)
+(echo TestOne | (false || echo TestTwo) && echo TestThree)
+(echo A; (false || echo B | echo C) && echo D)
+(echo A && (false || echo B) && echo C | echo D)
+(echo A | (echo B && false) || echo C && echo D)
+(echo X && (false || (echo Y && echo Z | echo W)))
+((echo A && echo B) || (echo C | (echo D && echo E)) && echo F)
+(echo Start && ((echo InnerOne | echo InnerTwo) && false || echo Fallback) && echo End)
+(((echo A | echo B) && (false || (echo C && echo D))) || echo E; echo FinalStep)
+(echo First | (false || (echo Second && (echo Third || echo Fourth))) && echo End)
+((echo OuterStart && (echo MidOne | false || echo MidTwo)) || (echo OuterEnd && echo FinalCheck))
+(echo TestOne && (false || (echo TestTwo | echo TestThree)) && (echo PassOne || echo FailOne) && echo Result)
+((echo ComplexA || (echo ComplexB && echo ComplexC)) && echo ComplexEnd | (false && echo FailStep || echo SuccessStep))
+(echo StartOne && echo StartTwo || ((echo PipeOne && false) || echo PipeTwo | echo PipeThree) && echo FinalTest)
+((echo Alpha | (false || echo Beta && echo Gamma)) && (echo Delta || echo Epsilon) && (echo FinalOne || echo FinalTwo))
+(((echo DeepA | echo DeepB) && echo DeepC) || (false || (echo DeepD && echo DeepE | echo DeepF)))
+(echo ChainOne && echo ChainTwo | (echo ChainThree && (false || echo ChainFour)) && echo ChainFinal)
+(echo A | (echo B && (false || (echo C | echo D) && echo E)) || (echo F && false) || echo G)
+((echo OuterLayer && (echo MidLayer || (echo InnerLayerOne | false && echo InnerLayerTwo))) && echo CompleteTest)
+(echo PreStep && (false || (echo MidStep | echo NextStep && echo FinalStep)) || echo AltStep)
+(((echo BaseOne | (false && echo BaseTwo) || echo BaseThree) && echo BaseFour) || (echo LastOne && echo LastTwo))
+((echo A || (false && (echo B | echo C)) && (echo D || echo E)) && echo F | echo G)
+(echo StartLevelOne && ((false || echo MidLevelTwo) && (echo FinalLevelThree | echo AltLevelFour)) || echo LastLevelFive)
+((echo Begin && echo Process) || (false && echo Error) || (echo Recover && echo Continue) | echo WrapUp)
+(((false || echo X && echo Y) | echo Z) && echo EndOne || echo EndTwo)
+((echo StepOne && false || echo StepTwo) && (echo StepThree || echo StepFour | (false && echo StepFive)) && echo StepFinal)
+(echo Init && (false || (echo ProcessOne && (echo ProcessTwo || echo ProcessThree)) || echo FallbackProcess))
+((echo AlphaStep | echo BetaStep) && (false || echo GammaStep && echo DeltaStep) || echo EpsilonStep)
+((false || echo EarlyExit) && echo MidProcess || (echo LateProcess && echo FinalOutcome))
+(echo OuterStart | (false && (echo InnerFail && echo InnerCheck)) || echo OuterSuccess && echo FinalCheck)
+((false && echo FailOne || echo PassOne) && (echo PassTwo || (echo PassThree | echo PassFour)) && echo FinalCheck)
+(((echo TestOne || false) && echo TestTwo) || (echo TestThree && (echo TestFour | echo TestFive)) && echo Result)
+(echo BeginSequence && (false || (echo SubStepOne && echo SubStepTwo || echo SubStepThree)) && echo FinalStep)
+((false && echo SkipOne || echo RunOne) && (echo RunTwo && (false || echo RunThree | echo RunFour)) && echo CompleteRun)
+((echo StartPath && (false || echo MidPathOne && echo MidPathTwo)) || (echo FailPath && echo AltPath) && echo EndPath)
+(echo FirstLayer | (false || (echo SecondLayer && echo ThirdLayer) && (echo FourthLayer || false) | echo FifthLayer))
+((echo EntryOne && false || echo EntryTwo) && (echo EntryThree || (echo EntryFour | false && echo EntryFive)) && echo EndEntry)
+(echo salut; ls) | echo hey
+((echo EntryOne && false | echo EntryTwo) | (echo EntryThree || (echo EntryFour | false && echo EntryFive)) && echo EndEntry)
+(echo salut mec; echo hey !) >./outfiles/test
+(echo salut mec; (echo inside nested shell; echo another line)) > ./outfiles/test2
+(echo $(echo inside substitution); echo outside) > ./outfiles/test3
+(echo salut mec; echo error >&2; echo finished) > ./outfiles/test4 2>&1
+(echo salut mec; (echo nested output | rev); echo finished) > ./outfiles/test5
+(echo first level; (echo second level; (echo third level))) > ./outfiles/test6
+(echo starting process; echo background complete) > ./outfiles/test7
+(echo salut mec | rev; echo other output) > ./outfiles/test8
+(cat; (echo inside nested shell)) < ../Makefile > ./outfiles/test9
+(echo salut mec || echo fallback; echo hey !) > ./outfiles/test1
+(echo salut mec && (echo inside nested shell && echo another line)) > ./outfiles/test2
+(echo $(echo inside substitution) | rev; echo outside) > ./outfiles/test3
+(echo salut mec || echo fallback; echo error >&2; echo finished) > ./outfiles/test4 2>&1
+(echo salut mec; (echo nested output | rev) | grep tuptuo; echo finished) > ./outfiles/test5
+(echo first level && (echo second level || (echo third level))) > ./outfiles/test6
+(echo starting process || echo this won’t run; ls; echo background complete) > ./outfiles/test7
+(echo salut mec | rev && echo other output) > ./outfiles/test8
+(cat && (echo inside nested shell && echo all done)) < ../Makefile > ./outfiles/test9
+(echo first output && (echo nested | rev) | grep detsen) > ./outfiles/test10
+(echo hello world | rev || echo failure) > ./outfiles/test11
+(echo outer shell && (echo nested shell | rev || echo fallback | tr a-z A-Z)) > ./outfiles/test12
+(echo salut mec | (echo nested inside | rev && echo other output || echo alternate)) > ./outfiles/test13
+(cat | rev || echo failed to reverse) < ../Makefile > ./outfiles/test14
+(echo running first && echo next command || echo won’t run | rev && echo done) > ./outfiles/test15
+(echo first command || (echo second command | rev) || echo fallback) > ./outfiles/test16
+(echo process start && ls || echo process failed; echo done) > ./outfiles/test17
+(cat && (echo inside nested && echo still going) | rev) < ./infiles/file1 > ./outfiles/test18
+(echo salut mec && (echo mec salut | rev) && echo success) > ./outfiles/test19
+(echo salut mec | (echo mec salut | rev) || echo fallback) > ./outfiles/test20
+;;
+;<>><;
+;
+&
+||
+|||||||||||||||
+>>>>>>>>>>>>>>
+<<<><><><>
+<<<1>@>>>
+{
+;}
+{ echo salut mec
+echo salut mec ;}
+()
+echo $()
+$(false)
+echo ${}; echo salut
+echo $(); echo salut;
+echo $((; echo salut;
+dcjeidjiejd; dekodkeodke; echo salut;
+(echo salut; deode ) | echo mec
+echo Hello World
+ls | ls | ls
+ls > ./outfiles/ls
+4<../Makefile cat 5<&4 <&5 | rev | sort | >./outfiles/test >./outfiles/test >./outfiles/test >./outfiles/test2 cat
+echo 0 ; echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
+echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
+echo 1 | (echo 2 && echo 3) | echo 4
+echo 1; echo 2 | echo 3
+(echo 1 && echo 2 && echo 3 || echo 4) | djeidj
+(cat ../Makefile | rev | sort | rev) && notfound 2>/dev/null || echo Yes
+10<../Makefile cat <&10 >./outfiles/test | rev && (echo salut);
+echo A || echo B; echo A || echo B

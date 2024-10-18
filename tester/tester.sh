@@ -22,6 +22,7 @@ else
 		"src/command_group"
 		"src/arithmetic_expansion"
 		"src/builtin_export"
+		"src/mixed"
 	)
 fi
 
