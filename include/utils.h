@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/16 16:34:24 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/18 16:10:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,8 @@ typedef struct {
 	_Generic((array), \
 		StrList *: str_list_print, \
 		StringList *: string_list_print, \
-		TokenList *: tokenListToString \
+		TokenList *: tokenListToString, \
+		ExpKindList *: exp_kind_list_print \
 	)((array))
 
 #define da_pop_front(array) \

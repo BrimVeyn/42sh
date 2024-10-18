@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/18 13:39:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/18 17:32:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,23 +22,29 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
+static void clean_sub(void) {
+	gc(GC_CLEANUP, GC_ENV);
+	gc(GC_CLEANUP, GC_SUBSHELL);
+	free(((Garbage *)gc(GC_GET))[GC_GENERAL].garbage);
+	exit(g_exitno);
+}
+
 static bool execute_command_sub(char *input, Vars *shell_vars) {
 	pid_t pid = fork();
 	if (!pid) {
 		Lexer_p lexer = lexer_init(input);
 		TokenList *tokens = lexer_lex_all(lexer);
 		if (lexer_syntax_error(tokens))  {
+			clean_sub();
 			return false;
 		}
 		heredoc_detector(tokens);
 		Node *AST = ast_build(tokens);
 		ast_execute(AST, shell_vars, true);
-		gc(GC_CLEANUP, GC_ENV);
-		gc(GC_CLEANUP, GC_SUBSHELL);
-		free(((Garbage *)gc(GC_GET))[GC_GENERAL].garbage);
-		exit(g_exitno);
+		clean_sub();
 	} else {
 		//TODO: must be backgrounable
+		//parsed in the children ?
 		int status;
 		waitpid(pid, &status, 0);
 		g_exitno = WEXITSTATUS(status);

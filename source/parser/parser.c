@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/18 13:35:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/18 17:57:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,7 +194,36 @@ void ss_push_string(StringStream *ss, char *str) {
 	}
 }
 
-StrList *get_range_list(Token *candidate, bool *error) {
+void ss_cut(StringStream *ss, size_t new_size) {
+	ft_memset(&ss->data[new_size], 0, ss->size - new_size);
+	ss->size = new_size;
+}
+
+void exp_kind_list_print(ExpKindList *list) {
+	static const char *map[] = {
+		[EXP_WORD] = "EXP_WORD",
+		[EXP_CMDSUB] = "EXP_CMDSUB",
+		[EXP_ARITHMETIC] = "EXP_ARITHMETIC",
+		[EXP_VARIABLE] = "EXP_VARIABLE",
+		[EXP_SUB] = "EXP_SUB",
+	};
+
+	for (size_t i = 0; i < list->size; i++) {
+		dprintf(2, "[%zu]: %s\n", i, map[list->data[i]]);
+	}
+}
+
+bool is_var_expand_context(ExpKindList *exp_stack) {
+	bool	var_expand = (exp_stack->size != 0);
+	for (size_t i = 0; exp_stack->size && i < exp_stack->size - 1; i++) {
+		if (exp_stack->data[i] != EXP_ARITHMETIC) {
+			var_expand = false;
+		}
+	}
+	return var_expand;
+}
+
+StrList *get_range_list(Token *candidate, Vars *shell_vars, bool *error) {
 	
 	static const ContextMap map[] = {
 		[EXP_ARITHMETIC] = { .begin = "$((", .end = "))" },
@@ -213,7 +242,9 @@ StrList *get_range_list(Token *candidate, bool *error) {
 	while (word->size) {
 		ExpKind maybe_begin = 0;
 		ExpKind maybe_end = 0;
-		ExpKind context = da_peak_back(exp_stack);
+		ExpKind top_context = da_peak_back(exp_stack);
+		ExpKind bottom_context = da_peak_front(exp_stack);
+		bool	var_expand = is_var_expand_context(exp_stack);
 
 		if ((maybe_begin = identify_exp_begin(word->data)) != EXP_WORD) {
 			if (!exp_stack->size && can_push) {
@@ -226,11 +257,36 @@ StrList *get_range_list(Token *candidate, bool *error) {
 			}
 			continue;
 		}
-		if (exp_stack->size && (maybe_end = identify_exp_end(word->data, map, context)) != EXP_WORD) {
-			if (maybe_end == context) {
+		if (exp_stack->size && (maybe_end = identify_exp_end(word->data, map, top_context)) != EXP_WORD) {
+			if (maybe_end == top_context) {
 				da_pop(exp_stack);
 				for (size_t i = 0; i < ft_strlen(map[maybe_end].end); i++) {
 					da_push(cache_stack, da_pop_front(word));
+				}
+				if (bottom_context == EXP_ARITHMETIC && top_context == EXP_CMDSUB) {
+					da_push(cache_stack, 0);
+					size_t idx = ft_strrstr(cache_stack->data, map[top_context].begin);
+					char *tmp = ft_substr(&cache_stack->data[idx], 2, ft_strlen(&cache_stack->data[idx]) - 2 - 1);
+					char *result = parser_command_substitution(tmp, shell_vars);
+					free(tmp);
+					// dprintf(2, "result: %s\n", result);
+					ss_cut(cache_stack, idx);
+					ss_push_string(cache_stack, result);
+					free(result);
+					// dprintf(2, "cache: %s\n", cache_stack->data);
+				}
+				if (var_expand && top_context == EXP_VARIABLE) {
+					da_push(cache_stack, 0);
+					size_t idx = ft_strrstr(cache_stack->data, map[top_context].begin);
+					char *result = parser_parameter_expansion(&cache_stack->data[idx], shell_vars);
+					if (result) {
+						ss_cut(cache_stack, idx);
+						ss_push_string(cache_stack, result);
+						free(result);
+					} else {
+						ss_cut(cache_stack, idx);
+						ss_push_string(cache_stack, "");
+					}
 				}
 				if (!exp_stack->size) {
 					Str *res = str_init(maybe_end, ss_get_owned_slice(cache_stack), false);
@@ -402,7 +458,7 @@ SimpleCommand *parser_parse_current(TokenList *list, Vars *shell_vars) {
 		Token *candidate = get_candidate(list, it);
 		if (!candidate)
 			continue;
-		StrList *string_list = get_range_list(candidate, &error);
+		StrList *string_list = get_range_list(candidate, shell_vars, &error);
 		// da_print(string_list);
 		if (error) 
 			return NULL;

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:20 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/17 13:20:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/18 16:57:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,8 @@ bool cmdgrp_parity(TokenList *tokens, size_t it) {
 }
 
 bool lexer_syntax_error(TokenList *tokens) {
+	//TODO: wrong syntax error detection on subshells that arents rightly placed
+	//ex : echo (ehjdiejd)
 	if (is_whitespace_only(tokens)) 
 		return true;
 	for (size_t it = 0; it < tokens->size; it++) {
