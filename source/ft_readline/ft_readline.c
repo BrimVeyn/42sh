@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 11:26:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/18 12:08:59 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/20 17:44:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,16 +107,16 @@ void update_cursor_x(string *line, ssize_t n) {
     }
 	if (rl_state.cursor_y + (int)rl_state.offset_y >= (int)rows){
 		rl_state.offset_y = rows - 1 - ((nlines > 0) ? nlines : 1);
-		write(1, "\n", 1);
+		write(STDOUT_FILENO, "\n", 1);
 	}
 }
 
 void ft_rl_newline() {
-    write(1, "^C", 2);
-	write(1, "\n", 1);
+    write(STDOUT_FILENO, "^C", 2);
+	write(STDOUT_FILENO, "\n", 1);
 	rl_state.cursor_y = 0;
 	rl_state.cursor_x = 0;
-	// write(1, get_prompt(), ft_strlen(get_prompt()));
+	// write(STDOUT_FILENO, get_prompt(), ft_strlen(get_prompt()));
 }
 
 void move_cursor(int x, int y) {
@@ -176,12 +176,12 @@ void update_line(string *line){
 	
 	move_cursor(rl_state.offset_x, rl_state.offset_y);
 	for (int i = 0; i <= nlines; i++){
-		write(1, "\033[0K", 4);
+		write(STDOUT_FILENO, "\033[0K", 4);
 		move_cursor(rl_state.offset_x, rl_state.offset_y + i + 1);
 	}
 	move_cursor(rl_state.offset_x, rl_state.offset_y);
-    // write(1, get_prompt(), ft_strlen(get_prompt()));
-    write(1, line->data, str_length(line));
+    // write(STDOUT_FILENO, get_prompt(), ft_strlen(get_prompt()));
+    write(STDOUT_FILENO, line->data, str_length(line));
 	set_cursor_position();
 }
 
@@ -221,8 +221,8 @@ int handle_normal_keys(char c, string *line, int interactive){
 
     if (c == '\n' || c == '\0'){
 		if (interactive){
-			write(1, "\n", 1);
-			write(1, "\033[0K\r", 5);
+			write(STDOUT_FILENO, "\n", 1);
+			write(STDOUT_FILENO, "\033[0K\r", 5);
 			rl_state.offset_y++;
 			rl_state.cursor_y = 0;
 			rl_state.cursor_x = 0;
@@ -249,7 +249,8 @@ int handle_normal_keys(char c, string *line, int interactive){
             str_insert(line, c, pos);
         }
     }
-    update_cursor_x(line, 1);
+	if (interactive)
+		update_cursor_x(line, 1);
     return 0;
 }
 
@@ -352,6 +353,7 @@ char *ft_readline(const char *prompt) {
         *line = STRING_L("");
     }
 
+
     rl_done = 0;
     do {
         if (interactive) {
@@ -363,6 +365,7 @@ char *ft_readline(const char *prompt) {
 		// printf("%d %d\n", (int)get_row(), rl_state.cursor_y + (int)rl_state.offset_y);
 		// set_cursor_position();
         ssize_t bytes_read = read(STDIN_FILENO, &c, 1);
+		// dprintf(2, "c: %d %c\n", c, c);
 		if (rl_done){
 			break;
 		}
@@ -370,7 +373,7 @@ char *ft_readline(const char *prompt) {
         if (bytes_read == 0 || c == VEOF) {
             if (line->data[0] == '\0') {
                 if (interactive) {
-                    write(1, "\n", 1);
+                    write(STDOUT_FILENO, "\n", 1);
                     pop_history();
                 }
                 str_destroy(line);
