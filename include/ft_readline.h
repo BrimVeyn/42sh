@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 11:31:11 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 13:38:17 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/21 14:33:35 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ void destroy_history();
 void add_history(const char *str);
 void pop_history();
 void str_info(const string *str);
+void set_prompt(const char *new_prompt);
 
 char *ft_readline(const char *prompt);
 void ft_readline_clean();

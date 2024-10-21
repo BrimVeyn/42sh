@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/15 17:20:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/21 15:55:37 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-static bool execute_command_sub(char *input, Vars *shell_vars) {
+bool execute_command_sub(char *input, Vars *shell_vars) {
 	Lexer_p lexer = lexer_init(input);
 	TokenList *tokens = lexer_lex_all(lexer);
 	if (lexer_syntax_error(tokens))  {

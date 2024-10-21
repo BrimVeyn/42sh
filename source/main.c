@@ -107,6 +107,62 @@ ShellInfos *shell(int mode) {
 	return NULL;
 }
 
+void exec_config_file(Vars *shell_vars) {
+    char *home = string_list_get_value(shell_vars->env, "HOME");
+    char config_filename[1024] = {0};
+    ft_sprintf(config_filename, "%s/.42shrc", home);
+
+    int fd = open(config_filename, O_RDWR | O_CREAT, 0644);
+    if (fd == -1) {
+        perror("Can't open config file");
+        return;
+    }
+
+    struct stat st;
+    if (fstat(fd, &st) == -1) {
+        perror("Can't get config's file stats");
+        close(fd);
+        return;
+    }
+
+    size_t file_size = st.st_size;
+
+    if (file_size == 0) {
+		// write(fd, "PS1=42sh", 9); //tmp
+		// execute_command_sub("PS1=42sh", shell_vars);
+		// exec_shell(ft_strdup("PS1=42sh\n"), shell_vars);
+		close(fd);
+		return;
+    }
+
+    char *buffer = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (buffer == MAP_FAILED) {
+        perror("mmap failed");
+        close(fd);
+        return;
+    }
+
+    char *start = buffer;
+    char *end = buffer; 
+    while (end < buffer + file_size) {
+        if (*end == '\n') {
+            size_t line_length = end - start;
+            if (line_length > 0) {
+                char *tmp = (char *)malloc(line_length + 1);
+                memcpy(tmp, start, line_length);
+                tmp[line_length] = '\0';
+                // exec_shell(tmp, shell_vars);
+                free(tmp);
+            }
+            start = end + 1;
+        }
+        end++;
+    }
+
+    munmap(buffer, file_size);
+    close(fd);
+}
+
 int main(const int ac, const char *av[], const char *env[]) {
 	(void) av; (void) ac; (void) env;
 
@@ -118,13 +174,20 @@ int main(const int ac, const char *av[], const char *env[]) {
 	int history_fd = -1;
 	ShellInfos *self = shell(SHELL_GET);
 
-	if (self->interactive) 
+	if (self->interactive){
 		history_fd = get_history();
+		// exec_config_file(shell_vars);
+	}
 
-	char *input = NULL;
+	char *input = "PS1=45555sh";
+	int nathan = false;
 	//display the prompt, init signals if shell in interactive and reads input
 	while (true) {
-		input = init_prompt_and_signals(input, self->interactive);
+		if (!nathan) {
+			signal_manager(SIG_PROMPT);
+		} else {
+			input = init_prompt_and_signals(input, self->interactive);
+		}
 		if (self->interactive)
 			do_job_notification();
 		if (input) {
@@ -132,8 +195,7 @@ int main(const int ac, const char *av[], const char *env[]) {
 				if (history_expansion(&input, history_fd) == false){
 					continue;
 				}
-				if (input[0])
-					add_input_to_history(input, &history_fd);
+				add_input_to_history(input, &history_fd);
 			}
 			Lexer_p lexer = lexer_init(input);
 			TokenList *tokens = lexer_lex_all(lexer);
@@ -157,6 +219,7 @@ int main(const int ac, const char *av[], const char *env[]) {
 			}
 			break;
 		}
+		nathan = true;
 	}
 	if (isatty(STDIN_FILENO))
 		destroy_history();

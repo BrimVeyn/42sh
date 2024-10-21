@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 11:26:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/21 13:50:34 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/21 16:01:37 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -422,3 +422,4 @@ char *ft_readline(const char *prompt) {
 
 //TODO:add calloc in garbage collector
 //TODO:$PS1
+
