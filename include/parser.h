@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:23:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/15 14:47:14 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/21 15:55:58 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,7 @@ void				str_list_print(const StrList *list);
 
 //-------------------SimpleCommand-----------------------//
 SimpleCommand		*parser_parse_current(TokenList *tl, Vars *shell_vars);
+bool				execute_command_sub(char *input, Vars *shell_vars);
 
 //-------------------Here_doc-----------------------//
 bool				heredoc_detector(TokenList *data);
