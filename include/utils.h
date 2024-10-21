@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/18 16:10:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/21 11:33:37 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,6 +158,12 @@ void			ft_dprintf(int fd, const char *fmt, ...);
 long			ft_atol(const char *str);
 char			*ft_ltoa(long n);
 char			string_stream_pop_front(StringStream *ss);
+//------------------------------------------//
+
+//----------------StringStream------------------//
+char			*ss_get_owned_slice(StringStream *ss);
+void			ss_push_string(StringStream *ss, char *str);
+void			ss_cut(StringStream *ss, size_t new_size);
 //------------------------------------------//
 
 //----------------File Utils--------------------//

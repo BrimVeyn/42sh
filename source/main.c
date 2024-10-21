@@ -24,7 +24,7 @@
 int g_debug = 0;
 JobList *job_list = NULL;
 
-void	*init_prompt_and_signals(char *input, bool shell_is_interactive) {
+void *init_prompt_and_signals(char *input, bool shell_is_interactive) {
 	if (shell_is_interactive)
 		signal_manager(SIG_PROMPT);
 	
@@ -36,7 +36,7 @@ void	*init_prompt_and_signals(char *input, bool shell_is_interactive) {
 }
 
 void env_to_string_list(StringList *env_list, const char **env){
-	for (uint16_t i = 0; env[i]; i++)
+	for (size_t i = 0; env[i]; i++)
 		string_list_add_or_update(env_list, gc(GC_ADD, ft_strdup(env[i]), GC_ENV));
 }
 
@@ -129,13 +129,13 @@ int main(const int ac, const char *av[], const char *env[]) {
 			do_job_notification();
 		if (input) {
 			if (self->interactive) {
-				if (history_expansion(&input, history_fd) == false){
+				if (history_expansion(&input, history_fd) == false) {
 					continue;
 				}
 				add_input_to_history(input, &history_fd);
 			}
-			Lexer_p lexer = lexer_init(input);
-			TokenList *tokens = lexer_lex_all(lexer);
+			lexer_tokenize(input);
+			TokenList *tokens = lexer_lex_all(input);
 			// tokenListToString(tokens);
 			if (lexer_syntax_error(tokens))
 				continue; 
@@ -158,7 +158,7 @@ int main(const int ac, const char *av[], const char *env[]) {
 			break;
 		}
 	}
-	if (isatty(STDIN_FILENO))
+	if (self->interactive)
 		destroy_history();
 	gc(GC_CLEANUP, GC_ALL);
 	close_all_fds();
