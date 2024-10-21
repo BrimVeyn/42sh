@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 13:01:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/04 12:05:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/21 15:44:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ type_of_token get_token_tag(Lexer_p l) {
 		|| !ft_strncmp("&>>", &l->input[l->position], 3)) {
 		return T_REDIRECTION;
 	}
-	if (ft_strchr("&|;()\"\n)", l->ch)) {
+	if (ft_strchr("&|;()\n)", l->ch)) {
 		return T_SEPARATOR;
 	}
 	return T_WORD;

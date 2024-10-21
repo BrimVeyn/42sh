@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:16:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/18 19:27:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/21 17:26:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,138 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+typedef struct {
+	unsigned char bit0 : 1; 
+	unsigned char bit1 : 1; 
+	unsigned char bit2 : 1; 
+	unsigned char bit3 : 1; 
+	unsigned char bit4 : 1; 
+	unsigned char bit5 : 1; 
+	unsigned char bit6 : 1; 
+	unsigned char bit7 : 1; 
+	unsigned char bit8 : 1; 
+	unsigned char bit9 : 1; 
+	unsigned char bit10 : 1; 
+	unsigned char bit11 : 1; 
+	unsigned char bit12 : 1; 
+	unsigned char bit13 : 1; 
+	unsigned char bit14 : 1; 
+	unsigned char bit15 : 1; 
+	unsigned char bit16 : 1; 
+	unsigned char bit17 : 1; 
+	unsigned char bit18 : 1; 
+	unsigned char bit19 : 1; 
+	unsigned char bit20 : 1; 
+	unsigned char bit21 : 1; 
+	unsigned char bit22 : 1; 
+	unsigned char bit23 : 1; 
+	unsigned char bit24 : 1; 
+	unsigned char bit25 : 1; 
+	unsigned char bit26 : 1; 
+	unsigned char bit27 : 1; 
+	unsigned char bit28 : 1; 
+	unsigned char bit29 : 1; 
+	unsigned char bit30 : 1; 
+	unsigned char bit31 : 1; 
+} BitMap32;
+
+typedef enum {
+	IF, THEN, ELSE, ELIF, FI,
+	CASE, ESAC, WHILE, FOR, SELECT, UNTIL,
+	DO, DONE, IN,
+	FUNCTION,
+	TIME,
+	L_CURLY_BRACKET, R_CURLY_BRACKET,
+	L_SQUARE_BRACKET, R_SQUARE_BRACKET,
+	NOT_KEYWORD,
+} KeyWord;
+
+typedef struct {
+	KeyWord end;
+	BitMap32 bitmap;
+} KeyWordsBounds;
+
+#define IF_MAP (BitMap32) {1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define THEN_MAP (BitMap32) {1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+typedef enum {
+	LEXER_COMMAND,
+	LEXER_EOF,
+	LEXER_SUBSHELL,
+	LEXER_CMDGRP,
+	LEXER_FOR,
+	LEXER_WHILE,
+	LEXER_IF,
+	LEXER_CASE,
+} LexerContext;
+
+typedef struct {
+	char *start;
+	char *end;
+} LexerContextBounds;
+
+typedef struct {
+	char	*data;
+	size_t	size;
+	size_t	capacity;
+	size_t	size_of_element;
+	int		gc_level;
+} LexerContextList;
+
+typedef enum {
+	WORD_WORD,
+	WORD_CMD_SUB,
+	WORD_SUBSHELL,
+	WORD_PARAM,
+	WORD_ARITHMETIC,
+	WORD_ARITHMETIC_PAREN,
+	WORD_SINGLE_QUOTE,
+	WORD_DOUBLE_QUOTE,
+	NONE,
+} WordContext;
+
+typedef struct {
+	unsigned char bit0 : 1; //DOUBLE_QUOTE
+	unsigned char bit1 : 1; //SINGLE_QUOTE
+	unsigned char bit2 : 1; //ARITHMETIC_PAREN
+	unsigned char bit3 : 1; //ARITHMETIC
+	unsigned char bit4 : 1; //PARAM
+	unsigned char bit5 : 1; //SUBSHELL
+	unsigned char bit6 : 1; //CMD_SUB
+	unsigned char bit7 : 1; //WORD ignored
+} BitMap8;
+
+
+
+typedef struct {
+	char *start;
+	char *end;
+	BitMap8 bitmap;
+} WordContextBounds;
+
+typedef struct {
+	char	*data;
+	size_t	size;
+	size_t	capacity;
+	size_t	size_of_element;
+	int		gc_level;
+} WordContextList;
+
+#define WORD_MAP (BitMap8) {0, 1, 0, 1, 1, 0, 1, 1}
+#define PARAM_MAP (BitMap8) {0, 0, 0, 1, 0, 0, 0, 0}
+#define CMD_SUB_MAP (BitMap8) {0, 1, 1, 1, 1, 0, 1, 1}
+#define SUBSHELL_MAP (BitMap8) {0, 1, 1, 1, 1, 0, 1, 1}
+#define ARITHMETIC_MAP (BitMap8) {0, 1, 0, 1, 1, 1, 0, 0}
+#define ARITHMETIC_PAREN_MAP (BitMap8) {0, 1, 0, 1, 1, 1, 0, 0}
+#define SINGLE_QUOTE_MAP (BitMap8) {0, 0, 0, 0, 0, 0, 0, 0}
+#define DOUBLE_QUOTE_MAP (BitMap8) {0, 1, 0, 1, 1, 0, 0, 0}
+
 typedef enum {
 	T_REDIRECTION,
 	T_WORD, 
 	T_SEPARATOR,
+	T_FOR,
+	T_WHILE,
+	T_CASE,
 	T_NONE, // Generic none token when no prefix/suffix
 } type_of_token;
 
@@ -42,10 +170,8 @@ typedef enum {
 	S_BG, // &
 	S_NEWLINE, // \n
 	S_EOF, // \0
-	S_CMD_SUB, // $(
 	S_SUB_OPEN, // (
 	S_SUB_CLOSE, // )
-	S_DQ, //"
 	S_DEFAULT,
 } type_of_separator;
 
@@ -60,17 +186,12 @@ typedef enum {
 	R_DUP_BOTH_APPEND, //&>>[ex]
 } type_of_redirection;
 
-typedef enum {
-	C_BUILTIN, //echo, etc...
-	C_SHELL, //grep, etc...
-} type_of_command;
-
 typedef struct {
 	char		*input;
 	short		ch;
-	uint16_t	input_len;
-	uint16_t	position;
-	uint16_t	read_position;
+	size_t	input_len;
+	size_t	position;
+	size_t	read_position;
 } Lexer;
 
 typedef Lexer * Lexer_p;
@@ -123,7 +244,8 @@ typedef enum {
 } type_of_history_event;
 
 //-----------------Lexer------------------//
-TokenList		*lexer_lex_all(Lexer_p l);
+void			lexer_tokenize(char *in);
+TokenList		*lexer_lex_all(char *input);
 Token			*lexer_get_next_token(Lexer_p l);
 Lexer_p			lexer_init(char *input);
 void			lexer_debug(Lexer_p lexer);

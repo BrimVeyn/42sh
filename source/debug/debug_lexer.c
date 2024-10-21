@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:53:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/12 20:20:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/21 11:07:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,8 @@
 void lexer_debug(Lexer_p lexer) {
 	dprintf(2, "--- Lexer state ---\n");
 	dprintf(2, "Input = |%s|\n", lexer->input);
-	dprintf(2, "Position = %d\n", lexer->position);
-	dprintf(2, "Read_position = %d\n", lexer->read_position);
+	dprintf(2, "Position = %zu\n", lexer->position);
+	dprintf(2, "Read_position = %zu\n", lexer->read_position);
 	dprintf(2, "Ch = %c | %d\n", lexer->ch, lexer->ch);
 	dprintf(2, "-------------------\n");
 }
