@@ -132,7 +132,8 @@ int main(const int ac, const char *av[], const char *env[]) {
 				if (history_expansion(&input, history_fd) == false){
 					continue;
 				}
-				add_input_to_history(input, &history_fd);
+				if (input[0])
+					add_input_to_history(input, &history_fd);
 			}
 			Lexer_p lexer = lexer_init(input);
 			TokenList *tokens = lexer_lex_all(lexer);
