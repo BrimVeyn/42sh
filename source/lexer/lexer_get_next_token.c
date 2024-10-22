@@ -6,20 +6,21 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:19:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/21 17:34:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/22 17:36:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "lexer.h"
 #include "utils.h"
 #include "libft.h"
+#include <readline/chardefs.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #define BITMAP8_SIZE 8
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
-#define IS_ON(ptr, context) ((*byteptr) & (1 << (int) context)) > 0
+#define IS_ON(ptr, context) ((*ptr) & (1 << (int) context)) > 0
 
 WordContext get_context(const StringStream *input, WordContextBounds *map, const WordContext context) {
 	const unsigned char *byteptr = (unsigned char *)&map[context].bitmap;
@@ -123,52 +124,205 @@ void skip_whitespaces(StringStream *input) {
 	}
 }
 
-KeyWord get_keyword(StringStream *cache) {
+Lexem get_lexem(StringStream *cache, LexemInfos *context) {
 
+	if (!*cache->data) {
+		return CEOF;
+	}
 
-	static const char *keywords[] = {
-		"if", "then", "else", "elif", "fi",
-		"case", "esac", "while", "for", "select",
-		"until", "do", "done", "in", "function", "time",
-		"{", "}", "[", "]"
+	static const struct {
+		Lexem lexem;
+		char  *value;
+	} litterals[] = {
+		{IF, "if"}, {THEN, "then"}, {ELSE, "else"},
+	    {ELIF, "elif"}, {FI, "fi"}, {CASE, "case"},
+		{ESAC, "esac"}, {WHILE, "while"}, {FOR, "for"},
+		{SELECT, "select"}, {UNTIL, "until"}, {DO, "do"},
+		{DONE, "done"}, {IN, "in"}, {FUNCTION, "function"},
+		{TIME, "time"}, {L_CURLY_BRACKET, "{"}, {R_CURLY_BRACKET, "}"},
+		{L_SQUARE_BRACKET, "["}, {R_SQUARE_BRACKET, "]"},
+		{SEMI_COLUMN, ";"},
 	};
 
-	for (size_t i = 0; i < ARRAY_SIZE(keywords); i++) {
-		if (!ft_strcmp(cache->data, keywords[i])) {
-			return i;
+	for (size_t i = 0; i < ARRAY_SIZE(litterals); i++) {
+		if (!ft_strcmp(cache->data, litterals[i].value)) {
+			if ((context->ctx_allowed & litterals[i].lexem) > 0 || (context->ctx_end & litterals[i].lexem) > 0) {
+				return litterals[i].lexem;
+			} else {
+				dprintf(2, "FATAL LEXEM ROCOGNITION\n");
+				exit(EXIT_FAILURE);
+			}
 		}
 	}
-	return NOT_KEYWORD;
+	if (context->lexem == COMMAND) {
+		return UNTAGGED;
+	}
+	return COMMAND;
 }
 
+#define CONTEXT_END true
+#define CONTEXT_NEW false
+
+bool is_valid_context(LexemInfos *current_context, Lexem next_lexem, bool where) {
+	if (where == CONTEXT_END && (current_context->ctx_end & next_lexem) > 0) {
+		return true;
+	}
+	if (where == CONTEXT_NEW && (current_context->ctx_allowed & next_lexem) > 0) {
+		return true;
+	}
+	return false;
+}
+
+char *LexemStr(Lexem lexem) {
+
+	static const struct {
+		Lexem lexem;
+		char  *value;
+	} litterals[] = {
+		{LNONE, "stack_bottom"}, {IF, "if"}, {THEN, "then"}, {ELSE, "else"},
+	    {ELIF, "elif"}, {FI, "fi"}, {CASE, "case"},
+		{ESAC, "esac"}, {WHILE, "while"}, {FOR, "for"},
+		{SELECT, "select"}, {UNTIL, "until"}, {DO, "do"},
+		{DONE, "done"}, {IN, "in"}, {FUNCTION, "function"},
+		{TIME, "time"}, {L_CURLY_BRACKET, "{"}, {R_CURLY_BRACKET, "}"},
+		{L_SQUARE_BRACKET, "["}, {R_SQUARE_BRACKET, "]"},
+		{SEMI_COLUMN, ";"}, {COMMAND, "CMD"}, {NEWLINE, "\n"},
+		{CEOF, "EOF"}, {UNTAGGED, "bin/arg"},
+	};
+
+	for (size_t i = 0; i < ARRAY_SIZE(litterals); i++) {
+		if (lexem == litterals[i].lexem) {
+			return litterals[i].value;
+		}
+	}
+	return "INVALID";
+}
+
+#include "colors.h"
+
+void printContextStack(LexemContextStack *stack) {
+	dprintf(2, C_LIGHT_RED"--------Lexem Stack--------"C_RESET"\n");
+	for (size_t i = 0; i < stack->size; i++) {
+		dprintf(2, "[%zu]: %s\n",i, LexemStr(stack->data[i]->lexem));
+	}
+	dprintf(2, C_LIGHT_RED"---------------------------"C_RESET"\n");
+}
+
+LexemInfos *get_lexem_infos(LexemInfos *map, size_t map_size, Lexem lexem) {
+	for (size_t i = 0; i < map_size; i++) {
+		if (map[i].lexem == lexem) {
+			LexemInfos *ptr = gc_unique(LexemInfos, GC_SUBSHELL);
+			ft_memcpy(ptr, &map[i], sizeof(LexemInfos));
+			return ptr;
+		}
+	}
+	return NULL;
+}
+
+void printLexemState(LexemInfos *infos) {
+	if (!infos) 
+		return ;
+	char buffer[MAX_WORD_LEN] = {0};
+	ft_sprintf(buffer, C_BRIGHT_CYAN"%s"C_RESET": "C_BRIGHT_YELLOW, LexemStr(infos->lexem));
+	for (size_t i = 0; i < 31; i++) {
+		if ((infos->ctx_mandatory & (1 << i)) > 0) {
+			ft_sprintf(buffer, "%s ", LexemStr(1 << i));
+		}
+	}
+	ft_sprintf(buffer, C_RESET"\n");
+	ft_putstr_fd(buffer, 2);
+}
+
+void printStackStates(LexemContextStack *stack) {
+	dprintf(2, C_LIGHT_YELLOW"------STATES------"C_RESET"\n");
+	for (size_t i = 0; i < stack->size; i++) {
+		printLexemState(stack->data[i]);
+	}
+	dprintf(2, C_LIGHT_YELLOW"------------------"C_RESET"\n");
+}
+
+typedef struct {
+	TokenList **conditions;
+	TokenList **bodys;
+	TokenList *else_body;
+} IfNode;
 
 void lexer_tokenize(char *in) {
 	da_create(input, StringStream, sizeof(char), GC_SUBSHELL);
 	da_create(cache, StringStream, sizeof(char), GC_SUBSHELL);
 	ss_push_string(input, in);
 
-	da_create(context_stack, LexerContextList, sizeof(LexerContext), GC_SUBSHELL);
-	da_push(context_stack, LEXER_COMMAND);
 
-	static KeyWordsBounds map[] = {
-		[IF] = {.end = FI, .bitmap = IF_MAP},
+	static LexemInfos map[] = {
+		{.lexem = LNONE,   .ctx_end = 0,                    .ctx_allowed = (COMMAND | IF),        .ctx_mandatory = 0,                .parent = 0},
+		{.lexem = IF,      .ctx_end = (FI),                 .ctx_allowed = (COMMAND | THEN | IF), .ctx_mandatory = (COMMAND | THEN), .parent = 0},
+		{.lexem = ELIF,	   .ctx_end = (FI),					.ctx_allowed = (COMMAND | THEN | IF), .ctx_mandatory = (COMMAND | THEN), .parent = IF},
+		{.lexem = THEN,    .ctx_end = (ELSE | ELIF | FI),   .ctx_allowed = (COMMAND | IF),        .ctx_mandatory = (COMMAND),        .parent = IF},
+		{.lexem = ELSE,    .ctx_end = (FI),                 .ctx_allowed = (COMMAND | IF),        .ctx_mandatory = (COMMAND),        .parent = IF},
+		{.lexem = COMMAND, .ctx_end = (SEMI_COLUMN | CEOF), .ctx_allowed = 0,			          .ctx_mandatory = 0,                .parent = 0},
+		{.lexem = SEMI_COLUMN, .ctx_end = 0,                .ctx_allowed = 0,                     .ctx_mandatory = 0,                .parent = 0},
 	};
 
 	da_create(token_list, TokenList, sizeof(Token *), GC_SUBSHELL);
-	(void)map;
+	da_create(context_stack, LexemContextStack, sizeof(LexemInfos *), GC_SUBSHELL);
 
-	while (input->size) {
+	Lexem rd_lexem = LNONE;
+	LexemInfos *stack_bottom_infos = get_lexem_infos(map, ARRAY_SIZE(map), LNONE);
+	da_push(context_stack, stack_bottom_infos);
+
+	while (rd_lexem != CEOF) {
+		da_clear(cache);
 		skip_whitespaces(input);
-		//check for subshell or redirection
-		//how do we determine if its a keyword or not ?
-		//either we're at the start of the line or we didn't find any bin yet ? 
-		//cuz if if if if is valid
 		parse_word(input, cache);
 
-		KeyWord maybe_keyword = get_keyword(cache);
-		(void)maybe_keyword;
-		//if its an opening keyword, push to context
-		//if it matches the end of context, pop context and push construct ?
+		printStackStates(context_stack);
+		rd_lexem = get_lexem(cache, da_peak_back(context_stack));
+		dprintf(2, "result: |%s|, value: %s\n", cache->data, LexemStr(rd_lexem));
+		if (rd_lexem == UNTAGGED)
+			continue;
+		LexemInfos *rd_lexem_infos = get_lexem_infos(map, ARRAY_SIZE(map), rd_lexem);
+		// printContextStack(context_stack);
+		if (!context_stack->size) {
+			if (rd_lexem == CEOF)
+				break;
+			dprintf(2, "RootContext: "C_BRIGHT_YELLOW"%s"C_RESET"\n", LexemStr(rd_lexem)); 
+			da_push(context_stack, rd_lexem_infos);
+			continue;
+		} else {
+			if (is_valid_context(da_peak_back(context_stack), rd_lexem, CONTEXT_NEW)) {
+				dprintf(2, "NestedContext: "C_BRIGHT_YELLOW"%s"C_RESET"\n", LexemStr(rd_lexem));
+				LexemInfos *top_context = da_peak_back(context_stack);
+				if ((top_context->ctx_mandatory & rd_lexem) > 0) {
+					top_context->ctx_mandatory ^= rd_lexem;
+				}
+				da_push(context_stack, rd_lexem_infos);
+				continue;
+			} 
+		}
+
+		if (is_valid_context(da_peak_back(context_stack), rd_lexem, CONTEXT_END)) {
+			dprintf(2, "ContextEnd: "C_BRIGHT_YELLOW"%s"C_RESET"\n", LexemStr(da_peak_back(context_stack)->lexem));
+			LexemInfos *top_context = da_peak_back(context_stack);
+			Lexem parent = top_context->parent; 
+			if (top_context->ctx_mandatory == 0) {
+				da_pop(context_stack);
+			}
+			if (parent) {
+				da_pop(context_stack);
+				LexemInfos *nested_parent = da_peak_back(context_stack);
+				//TODO: add a check to actually prove parent is the target
+				while (nested_parent != NULL && nested_parent->parent) {
+					da_pop(context_stack);
+					nested_parent = da_peak_back(context_stack);
+				}
+			}
+			continue;
+		}
+	}
+
+	if (context_stack->size > 1) {
+		printContextStack(context_stack);
+		dprintf(2, C_DARK_RED"Unexpected token near somewhere !"C_RESET"\n");
 	}
 }
 
