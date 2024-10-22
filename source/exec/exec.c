@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/13 11:15:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/17 14:37:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "ast.h"
+#include "debug.h"
 #include "lexer.h"
 #include "parser.h"
 #include "signals.h"
@@ -80,9 +81,9 @@ bool apply_all_redirect(RedirectionList *redirections) {
 	return true;
 }
 
-char *find_bin_location(char *bin, StringList *env){
+char *find_bin_location(char *bin, StringList *env, bool *absolute){
 	struct stat file_stat;
-	if (stat(bin, &file_stat) != -1) {
+	if (stat(bin, &file_stat) != -1 && ft_strchr(bin, '/')) {
 
 		if (S_ISDIR(file_stat.st_mode)) {
 			dprintf(2, "%s: Is a directory\n", bin);
@@ -90,6 +91,7 @@ char *find_bin_location(char *bin, StringList *env){
 			return (NULL);
 		}
 		if (file_stat.st_mode & S_IXUSR) {
+			*absolute = true;
 			return bin;
 		}
 		else {
@@ -97,7 +99,6 @@ char *find_bin_location(char *bin, StringList *env){
 			g_exitno = 126;
 			return (NULL);
 		}
-
 	}
 	else if (stat(bin, &file_stat) == -1 && ft_strchr(bin, '/')) {
 		dprintf(2, "%s: No such file or directory\n", bin);
@@ -154,21 +155,15 @@ void close_saved_fds(int *saved_fds) {
 
 void launch_process(SimpleCommand *command, Vars *shell_vars,  pid_t pgid, bool foreground) {
 	ShellInfos *shell_infos = shell(SHELL_GET);
-	pid_t pid;
 	if (shell_infos->interactive)
 	{
-		/* Put the process into the process group and give the process group
-		 the terminal, if appropriate.
-		 This has to be done both by the shell and in the individual
-		 child processes because of potential race conditions.  */
-		pid = getpid ();
+		pid_t pid = getpid ();
 		if (pgid == 0) pgid = pid;
 		setpgid (pid, pgid);
 
 		if (foreground)
 			tcsetpgrp (shell_infos->shell_terminal, pgid);
 
-		/* Set the handling for job control signals back to the default.  */
 		signal_manager(SIG_EXEC);
 	}
 	close_all_fds();
@@ -179,21 +174,25 @@ void launch_process(SimpleCommand *command, Vars *shell_vars,  pid_t pgid, bool 
 }
 
 void resolve_bin(SimpleCommand *command, Vars *shell_vars) {
-	if (command && command->bin) {
-		char *maybe_bin = hash_interface(HASH_FIND, command->bin, shell_vars);
-		if (!is_builtin(command->bin)) {
-			if (maybe_bin) {
+	if (!command || !command->bin) {
+		return ;
+	}
+	char *maybe_bin = hash_interface(HASH_FIND, command->bin, shell_vars);
+	if (is_builtin(command->bin)) {
+		return ;
+	}
+	if (maybe_bin) {
+		hash_interface(HASH_ADD_USED, command->bin, shell_vars);
+		command->bin = maybe_bin;
+	} else {
+		bool absolute = false;
+		maybe_bin = find_bin_location(command->bin, shell_vars->env, &absolute);
+		if (maybe_bin) {
+			if (absolute == false)
 				hash_interface(HASH_ADD_USED, command->bin, shell_vars);
-				command->bin = maybe_bin;
-			} else {
-				maybe_bin = find_bin_location(command->bin, shell_vars->env);
-				if (maybe_bin) {
-					hash_interface(HASH_ADD_USED, command->bin, shell_vars);
-					command->bin = maybe_bin;
-				} else {
-					command->bin = NULL;
-				}
-			}
+			command->bin = maybe_bin;
+		} else {
+			command->bin = NULL;
 		}
 	}
 }
@@ -262,21 +261,26 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 		}
 
 		if (proc->data_tag == DATA_TOKENS) {
-			SimpleCommand *command = parser_parse_current(proc->s_data, shell_vars);
+			proc->command = parser_parse_current(proc->s_data, shell_vars);
 			// printCommand(command);
-			proc->command = command;
-			if (!command && pipefd[0] == -1){
+			if (!proc->command && pipefd[0] == -1){
 				close_all_fds();
 				return false;
 			}
-			resolve_bin(command, shell_vars);
-			//if its a not a pipeline, try to execute a builtin w/o forking
-			if (pipefd[0] == -1 && builtin_executer(command, shell_vars))
+			resolve_bin(proc->command, shell_vars);
+			
+			//TODO: Better error managment for non-piped builtins
+
+			if (pipefd[0] == -1 && apply_all_redirect(proc->command->redir_list) && builtin_executer(proc->command, shell_vars)) {
+				dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
+				dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
+				dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
 				break;
+            }
 
 			pids[i] = secure_fork();
 			if (pids[i] == 0) {
-				launch_process(command, shell_vars, job->pgid, foreground);
+				launch_process(proc->command, shell_vars, job->pgid, foreground);
 			} else {
 				// Parent process
 				proc->pid = pids[i];
@@ -309,16 +313,11 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 	return true;
 }
 
-Job *job_init(Process *first_process) {
-	Job *self = gc(GC_CALLOC, 1, sizeof(Job), GC_SUBSHELL);
-	self->first_process = first_process;
-	return self;
-}
-
 int exec_node(Node *node, Vars *shell_vars, bool foreground) {
-	// TODO: remove ExecuterList, became useless
-	const ExecuterList *list = build_executer_list(node->value.operand);
-	Job *job = job_init(list->data[0]);
+	Process *proc = build_executer_list(node->value.operand);
+	Job *job = gc_unique(Job, GC_SUBSHELL);
+	job->first_process = proc;
+
 	launch_job(job, shell_vars, foreground);
 
 	/*

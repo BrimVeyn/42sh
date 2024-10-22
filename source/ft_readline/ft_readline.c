@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/08 11:26:40 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/21 16:01:37 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/10/21 16:15:39 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/10/22 15:27:18 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,18 @@
 #include "c_string.h"
 #include "libft.h"
 #include <linux/limits.h>
-#include <readline/keymaps.h>
 #include <stdio.h>
 #include <termios.h>
 #include <termcap.h>
 #include <unistd.h>
 #include <ncurses.h> 
 #include <sys/ioctl.h>
+#include <sys/time.h>
 
+
+//TODO:Limiter history -> HIST_SIZE
+//HistFileSize HistFile
+//$PS2
 int rl_done = 0;
 
 void move_cursor(int x, int y);
@@ -37,9 +41,10 @@ typedef struct s_readline_state {
 	size_t offset_y;
     int cursor_x;
     int cursor_y;
+	bool ctrl_r;
 } readline_state_t;
 
-readline_state_t rl_state = {NULL, 0, 0, 0, 0, 0};
+readline_state_t rl_state = {NULL, 0, 0, 0, 0, 0, false};
 
 void set_prompt(const char *new_prompt) {
     if (rl_state.prompt)
@@ -107,7 +112,7 @@ void update_cursor_x(string *line, ssize_t n) {
     }
 	if (rl_state.cursor_y + (int)rl_state.offset_y >= (int)rows){
 		rl_state.offset_y = rows - 1 - ((nlines > 0) ? nlines : 1);
-		write(1, "\n", 1);
+		write(STDOUT_FILENO, "\n", 1);
 	}
 }
 
@@ -146,29 +151,52 @@ void ft_readline_clean(){
 	destroy_history();
 }
 
-void get_cursor_pos(){
+void get_cursor_pos() {
     char buf[32];
     unsigned int i = 0;
-	
+    int rows = 0, cols = 0;
+    int parse_mode = 0; // 0 = looking for rows, 1 = looking for columns
+
+    // Send the escape sequence to query cursor position
     write(STDOUT_FILENO, "\033[6n", 4);
 
+    // Read the response into buf
     while (i < sizeof(buf) - 1) {
         if (read(STDIN_FILENO, &buf[i], 1) != 1 || buf[i] == 'R') {
             break;
         }
         i++;
     }
-    buf[i] = '\0';
+    buf[i] = '\0'; // Null-terminate the string
+
+    // Verify that the response starts with ESC [
     if (buf[0] == '\033' && buf[1] == '[') {
-        regex_match_t result = regex_match("\\[[0-9]*;", buf);
-        char *tmp_y = ft_substr( buf, result.re_start + 1, result.re_end - result.re_start);
-        rl_state.offset_y = ft_atoi(tmp_y);
-        free(tmp_y);
-		
-        result = regex_match(";[0-9]*$", buf);
-        char *tmp_x = ft_substr( buf, result.re_start + 1, result.re_end - result.re_start);
-        rl_state.offset_prompt = ft_atoi(tmp_x);
-        free(tmp_x);
+        // Start parsing after the escape sequence
+        for (i = 2; buf[i] != '\0'; i++) {
+            if (buf[i] == ';') {
+                // Switch to parsing columns when ';' is encountered
+                parse_mode = 1;
+                continue;
+            }
+            if (buf[i] == 'R') {
+                break; // End of the response
+            }
+
+            // Parse rows or columns depending on the mode
+            if (parse_mode == 0) {
+                rows = rows * 10 + (buf[i] - '0');
+            } else {
+                cols = cols * 10 + (buf[i] - '0');
+            }
+        }
+        // Assign the parsed values to the rl_state
+        rl_state.offset_y = rows;
+        rl_state.offset_prompt = cols;
+    } else {
+        // Handle case where the response is malformed
+        rl_state.offset_y = 0;
+        rl_state.offset_prompt = 0;
+		printf("ERROOR\n");
     }
 }
 
@@ -178,22 +206,36 @@ void update_line(string *line) {
     int tchars = line->size + rl_state.offset_x;
     int nlines = tchars / cols;
 
-	move_cursor(rl_state.offset_x, rl_state.offset_y);
-	write(1, "\033[0K", 4);
-	for (int i = rl_state.cursor_y; i <= nlines; i++) {
-		write(1, "\033[0K", 4);
-		move_cursor(0, rl_state.offset_y + i + 1);
+	move_cursor(rl_state.offset_prompt, rl_state.offset_y);
+	for (int i = 0; i <= nlines; i++){
+		write(STDOUT_FILENO, "\033[0K", 4);
+		move_cursor(rl_state.offset_x, rl_state.offset_y + i + 1);
 	}
-	move_cursor(rl_state.offset_x, rl_state.offset_y);
-	// write(1, get_prompt(), ft_strlen(get_prompt()));
-	if (line->size){
-		write(1, line->data, line->size);
+	if (rl_state.ctrl_r == false){
+		move_cursor(rl_state.offset_prompt, rl_state.offset_y);
+		write(STDOUT_FILENO, rl_state.prompt, ft_strlen(rl_state.prompt));
+		write(STDOUT_FILENO, line->data, str_length(line));
+	} else {
+		move_cursor(0, rl_state.offset_y);
+		char *word = NULL;
+		if (line->data[0])
+			word = search_in_history(line->data);
+		if (!word){
+			rl_state.offset_x = sizeof("(failed reverse-i-search)`") - 1;
+			write(STDOUT_FILENO, "(failed reverse-i-search)`", 27);
+		}
+		else{
+			rl_state.offset_x = sizeof("(reverse-i-search)`") - 1;
+			write(STDOUT_FILENO, "(reverse-i-search)`", 20);
+		}
+		write(STDOUT_FILENO, line->data, str_length(line));
+		write(STDOUT_FILENO, "':", 2);
+		write(STDOUT_FILENO, word, ft_strlen(word));
 	}
 }
 
-//TODO:change offset_x (echo -n)
 void init_readline(const char *prompt){
-    char buffer[2048];
+    char buffer[2048] = {0};
 
     set_prompt(prompt);
 	tgetent(buffer, getenv("TERM"));
@@ -209,27 +251,35 @@ void init_readline(const char *prompt){
 	enable_raw_mode();
 
 	get_cursor_pos();
-	rl_state.offset_y--;
-	rl_state.offset_prompt--;
+	rl_state.offset_y--; //rm line break
+	rl_state.offset_prompt--; // same problem
+	size_t prompt_len = ft_strlen(rl_state.prompt);
 	move_cursor(rl_state.offset_prompt, rl_state.offset_y);
-	write(STDOUT_FILENO, get_prompt(), ft_strlen(get_prompt()));
-	rl_state.offset_x = rl_state.offset_prompt + ft_strlen(get_prompt());
+	write(STDOUT_FILENO, rl_state.prompt, prompt_len);
+	rl_state.offset_x = rl_state.offset_prompt + prompt_len;
 }
 
 int handle_normal_keys(char c, string *line, int interactive){
-
+	
 	int pos = rl_state.cursor_y * get_col() - rl_state.offset_x;
 	pos += rl_state.cursor_x + ((rl_state.cursor_y == 0) ? rl_state.offset_x : 0);
 
-    if (c == '\n' || c == '\0'){
+	if (c == '\n' || c == '\0'){
 		if (interactive){
-			write(1, "\n\033[2K\r", 6);
-			rl_state.offset_y++;
+			size_t nrows = get_row();
+			if (rl_state.offset_y + rl_state.cursor_y == nrows - 1) {
+				write(STDOUT_FILENO, "\n", 1);
+				rl_state.offset_y = nrows - 1;
+			} else {
+				rl_state.offset_y++;
+			}
 			rl_state.cursor_y = 0;
 			rl_state.cursor_x = 0;
+			move_cursor(0, rl_state.offset_y + rl_state.cursor_y);
 		}
-        return 1;
-    }
+		return 1;
+	}
+
     if (c == 127 && !pos){
         return 2;
     }
@@ -250,7 +300,8 @@ int handle_normal_keys(char c, string *line, int interactive){
             str_insert(line, c, pos);
         }
     }
-    update_cursor_x(line, 1);
+	if (interactive)
+		update_cursor_x(line, 1);
     return 0;
 }
 
@@ -288,6 +339,10 @@ int handle_special_keys(string *line){
     if (read(STDIN_FILENO, &seq[1], 1) == 0) return 1;
 
     if (seq[0] == '['){
+		if (rl_state.ctrl_r == true){
+			rl_state.ctrl_r = false;
+			rl_state.offset_x = ft_strlen(rl_state.prompt);
+		}
         if (seq[1] == 'A' && history->offset > 0){//left
             history->offset--;
             rl_state.cursor_x = history->entries[history->offset]->line.size;
@@ -325,76 +380,84 @@ void handle_control_keys(char char_c){
 		write(STDOUT_FILENO, get_prompt(), ft_strlen(get_prompt()));
 	}
 	if (char_c == 18){
-		char c = 0;
-		// string word = STRING_L("");
-		do {
-			ssize_t bytes_read = read(STDIN_FILENO, &c, 1);
-
-			if (bytes_read == 0 || c == VEOF) {}//exit
-			
-			
-		} while (c != '\n');
+		rl_state.ctrl_r = true;
 	}
 }
 
-#include <time.h>
+int should_process_enter() {
+	static struct timeval last_enter_time = {0};
+    struct timeval current_time;
+    gettimeofday(&current_time, NULL);
 
+    long time_diff = (current_time.tv_sec - last_enter_time.tv_sec) * 1000 + 
+                     (current_time.tv_usec - last_enter_time.tv_usec) / 1000;
+
+    if (time_diff > 75){
+        last_enter_time = current_time;
+        return 1;
+    }
+    return 0;
+}
+
+
+//TODO: Enter ctrl + R
 char *ft_readline(const char *prompt) {
-	// clock_t start = clock();
-    char c = '\0';
-    string *line = NULL;
-    int result = 0;
     const int interactive = isatty(STDIN_FILENO);
 
     if (interactive)
-        init_readline(prompt);
+		init_readline(prompt);
 
-    line = malloc(sizeof(string));
+	string *line = malloc(sizeof(string));
     if (interactive) {
         *line = str_strdup(&history->entries[history->length - 1]->line);
     } else {
         *line = STRING_L("");
     }
-
     rl_done = 0;
-    do {
-	
-        ssize_t bytes_read = read(STDIN_FILENO, &c, 1);
-		// move_cursor(0,1);
-		// printf("%d\n", c);
-		// set_cursor_position();
 
-		if (rl_done) {
+    do {
+		char c = '\0';
+        ssize_t bytes_read = read(STDIN_FILENO, &c, 1);
+		set_cursor_position();
+
+		if (c == '\n' && !should_process_enter()) {
+			continue;
+		}
+
+		if (rl_done){
 			ft_rl_newline();
 			rl_done = 0;
 			continue;
 		}
 
-        if ( bytes_read == 0 || c == VEOF) {
+		int result = 0;
+        if (bytes_read == 0 || c == VEOF) {
             if (line->data[0] == '\0') {
                 if (interactive) {
-                    write(1, "\n", 1);
+                    write(STDOUT_FILENO, "\n", 1);
                     pop_history();
                 }
                 str_destroy(line);
                 free(line);
                 return NULL;
             }
-		} else if (c == 12 || c == 18){ //^L | ^R
+		} else if (c == 12 || c == 18) { // ^L | ^R
 			handle_control_keys(c);
         } else if (c == '\033') {
             result = handle_special_keys(line);
         } else {
             result = handle_normal_keys(c, line, interactive);
         }
-
-        if (result == 1)
+		
+        if (result == 1) {
 			break;
-
-        if (interactive){
-				update_line(line);
+		}
+		
+		if (interactive) {
+			update_line(line);
 			set_cursor_position();
-        }
+		}
+
     } while (true);
     
     if (interactive)
@@ -413,13 +476,9 @@ char *ft_readline(const char *prompt) {
     if (rl_done) {
         return ft_strdup("");
     }
-	// clock_t end = clock();
-	// double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-	// printf("Time spent in read(): %f seconds\n", time_spent);
     
     return str;
 }
 
 //TODO:add calloc in garbage collector
-//TODO:$PS1
 

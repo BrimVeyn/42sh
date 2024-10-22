@@ -3,33 +3,50 @@
 /*                                                        :::      ::::::::   */
 /*   parser_command_substitution.c                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/21 15:55:37 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/10/21 16:17:49 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/10/21 16:18:08 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "lexer.h"
 #include "parser.h"
 #include "utils.h" 
 #include "ast.h" 
 #include "ft_regex.h"
 
 #include <stdio.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
 
-bool execute_command_sub(char *input, Vars *shell_vars) {
-	Lexer_p lexer = lexer_init(input);
-	TokenList *tokens = lexer_lex_all(lexer);
-	if (lexer_syntax_error(tokens))  {
-		return false;
-	}
-	heredoc_detector(tokens);
-	Node *AST = ast_build(tokens);
-	ast_execute(AST, shell_vars, true);
+static void clean_sub(void) {
+	gc(GC_CLEANUP, GC_ENV);
+	gc(GC_CLEANUP, GC_SUBSHELL);
+	free(((Garbage *)gc(GC_GET))[GC_GENERAL].garbage);
+	exit(g_exitno);
+}
 
+bool execute_command_sub(char *input, Vars *shell_vars) {
+	pid_t pid = fork();
+	if (!pid) {
+		Lexer_p lexer = lexer_init(input);
+		TokenList *tokens = lexer_lex_all(lexer);
+		if (lexer_syntax_error(tokens))
+			clean_sub();
+		heredoc_detector(tokens);
+		Node *AST = ast_build(tokens);
+		ast_execute(AST, shell_vars, true);
+		clean_sub();
+	} else {
+		//TODO: must be backgrounable
+		//parsed in the children ?
+		int status;
+		waitpid(pid, &status, 0);
+		g_exitno = WEXITSTATUS(status);
+	}
 	return true;
 }
 
@@ -50,8 +67,8 @@ char *parser_command_substitution(char *str, Vars *shell_vars) {
 	int STDOUT_SAVE = dup(STDOUT_FILENO);
 
 	dup2(output_fd, STDOUT_FILENO); close(output_fd);
-	//TODO: handle error correctly
 	if (!execute_command_sub(str, shell_vars)) { 
+		dup2(STDOUT_SAVE, STDOUT_FILENO);
 		return NULL;
 	}
 	dup2(STDOUT_SAVE, STDOUT_FILENO); close(STDOUT_SAVE);

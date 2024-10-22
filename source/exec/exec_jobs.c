@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/10 15:48:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/17 13:14:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,28 +53,28 @@ void put_job_in_background (Job *j) {
 void put_job_in_foreground (Job *j, int cont) {
 	ShellInfos *self = shell(SHELL_GET);
 	/* Put the job into the foreground.  */
-	tcsetpgrp (self->shell_terminal, j->pgid);
+	tcsetpgrp(self->shell_terminal, j->pgid);
 	/* Send the job a continue signal, if necessary.  */
 	if (cont) {
 		j->notified = false;
-		tcsetattr (self->shell_terminal, TCSADRAIN, &j->tmodes);
-		if (kill (- j->pgid, SIGCONT) < 0)
-			perror ("kill (SIGCONT)");
+		tcsetattr(self->shell_terminal, TCSADRAIN, &j->tmodes);
+		if (kill(-j->pgid, SIGCONT) < 0)
+			fatal("SIGCONT failed\n", 255);
 	}
 	/* Wait for it to report.  */
-	wait_for_job (j);
+	wait_for_job(j);
 	/* Put the self->shell back in the foreground.  */
-	tcsetpgrp (self->shell_terminal, self->shell_pgid);
+	tcsetpgrp(self->shell_terminal, self->shell_pgid);
 	/* Restore the self->shell’s terminal modes.  */
-	tcgetattr (self->shell_terminal, &j->tmodes);
-	tcsetattr (self->shell_terminal, TCSADRAIN, &self->shell_tmodes);
+	tcgetattr(self->shell_terminal, &j->tmodes);
+	tcsetattr(self->shell_terminal, TCSADRAIN, &self->shell_tmodes);
 }
 
 void update_status(void) {
 	int status;
 	pid_t pid;
 
-	if (!job_list) return ;
+	if (!job_list || !job_list->size) return ;
 	do {
 		pid = waitpid (WAIT_ANY, &status, WUNTRACED|WNOHANG);
 	} while (!mark_process_status(job_list, pid, status));

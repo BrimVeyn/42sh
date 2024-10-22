@@ -6,13 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 17:03:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/17 14:31:41 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "arithmetic.h"
-#include "ast.h"
-#include "debug.h"
 #include "lexer.h"
 #include "libft.h"
 #include "parser.h"
@@ -36,7 +34,8 @@ static operator_precedence get_precedence(const AToken *token) {
 	};
 
 	for (size_t i = 0; i < sizeof(pre) / sizeof(pre[0]); i++) {
-		if (token->operator == pre[i].OP) return pre[i].P;
+		if (token->operator == pre[i].OP)
+			return pre[i].P;
 	}
 	return P0;
 }
@@ -131,8 +130,13 @@ char *parser_arithmetic_expansion(char *str, Vars *shell_vars) {
 	Lexer_p lexer = lexer_init(str);
 	ATokenStack *token_stack = lexer_arithmetic_exp_lex_all(lexer);
 
-	if (!token_stack) { g_exitno = 1; return false; }
-	if (!token_stack->size) { goto empty; }
+	if (!token_stack) { 
+		g_exitno = 1;
+		return NULL; 
+	}
+	if (!token_stack->size) {
+		goto empty;	
+	}
 	if (!arithmetic_syntax_check(token_stack)) {
 		return NULL;
 	}

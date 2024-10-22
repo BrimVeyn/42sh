@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:33:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 13:46:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/16 17:23:34 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,12 +52,11 @@ void builtin_export(const SimpleCommand *command, Vars *shell_vars) {
 	size_t args_len = 0;
 	for (; command->args[args_len]; args_len++) {}
 
-	//TODO: update with regex to handle -pppppp -pppp -p...
-	if (!ft_strcmp(command->args[1], "-p")) {
-		if (args_len == 2) {
+	for (; command->args[i] && regex_match("^-p*$", command->args[i]).is_found ; i++) {
+		if (args_len == i + 1) {
 			print_export_p(shell_vars->env);
 			return ;
-		} else i += 1;
+		}
 	}
 	
 	for (; command->args[i]; i++) {

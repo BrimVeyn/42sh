@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 13:24:16 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/22 11:20:19 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,4 +72,13 @@ void pop_history(){
 		history->entries[history->length - 1] = NULL;
 		history->length--;
 	}
+}
+
+char *search_in_history(char *str){
+	for (int i = history->length - 1; i > 0; i--){
+		if (ft_strstr(history->entries[i]->line.data, str) != -1){
+			return history->entries[i]->line.data;
+		}
+	}
+	return NULL;
 }
