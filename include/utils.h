@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/15 16:23:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/18 16:10:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,6 @@ extern int g_exitno;
             free(ptrs[i]); \
         } \
     } \
-
-//TODO: Delete this structure
-typedef struct {
-	int start;
-	int end;
-} Range;
 
 //----------------Garbage-------------------//
 
@@ -131,11 +125,15 @@ typedef struct {
 #define da_peak_back(array) \
 	(array->size) == 0 ? 0 : (array)->data[(array)->size - 1] \
 
+#define da_peak_front(array) \
+	(array->size) == 0 ? 0 : (array)->data[0] \
+
 #define da_print(array) \
 	_Generic((array), \
 		StrList *: str_list_print, \
 		StringList *: string_list_print, \
-		TokenList *: tokenListToString \
+		TokenList *: tokenListToString, \
+		ExpKindList *: exp_kind_list_print \
 	)((array))
 
 #define da_pop_front(array) \

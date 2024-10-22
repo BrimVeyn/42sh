@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/14 16:23:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/21 15:55:58 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/10/21 16:15:48 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/10/21 16:15:48 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #define UNCLOSED_SUBSHELL_STR "42sh: syntax error: unclosed subshell, expected "
 #define UNCLOSED_COMMAND_SUB_STR "42sh: syntax error: unclosed command substitution, expected `)\n"
 #define UNCLOSED_QUOTES_STR "42sh: syntax error: unclosed quotes, expected "
+#define UNEXPECTED_EOF(c) dprintf(STDERR_FILENO, "42sh: unexpected EOF while looking for matching `%c'\n", c);
 //------------------------------------------------------------------------------------------------------
 
 //-----------------------------ARITHMETIC EXPANSION----------------------------------------------------
@@ -39,6 +40,7 @@
 #define HASH_BIN_NOT_FOUND(s) dprintf(STDERR_FILENO, "bash: hash: %s: not found\n", s);
 #define HASH_OPTION_REQUIRES_ARG dprintf(STDERR_FILENO, "bash: hash: -d: option requires an argument\n"); 
 //------------------------------------------------------------------------------------------------------
+#define ERROR_NO_SUCH_JOB(builtin, arg) dprintf(STDERR_FILENO, "42sh: %s: %s: no such job\n", builtin, arg);
 
 //------------------------------Redirections---------------------//
 
@@ -98,7 +100,7 @@ typedef struct {
 	int		gc_level;
 } StrList;
 
-Str					*str_init(const ExpKind kind, char *str);
+Str *str_init(const ExpKind kind, char *str, bool add_to_gc);
 void				str_list_print(const StrList *list);
 //---------------------------------------------------------------//
 
@@ -110,7 +112,7 @@ bool				execute_command_sub(char *input, Vars *shell_vars);
 bool				heredoc_detector(TokenList *data);
 
 //-------------------Parser modules------------//
-bool				parser_parameter_expansion(TokenList *tl, Vars *shell_vars);
+char				*parser_parameter_expansion(char *str, Vars *shell_vars);
 char				*parser_command_substitution(char *str, Vars *shell_vars);
 char				*parser_arithmetic_expansion(char *str, Vars *shell_vars);
 

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 17:00:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/18 19:30:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,28 @@ bool string_list_update(StringList *sl, char *var) {
 
 void string_list_add_or_update(StringList *sl, char *var) {
 	if (!string_list_update(sl, var))
-		da_push(sl, var);
+		da_push(sl, gc(GC_ADD, ft_strdup(var), GC_ENV));
+}
+
+void string_list_append(StringList *sl, char *var) {
+	size_t plus_pos = ft_strstr(var, "+");
+	char *var_id = ft_substr(var, 0, plus_pos);
+	char *var_tail = &var[plus_pos + 2];
+	if (!var_tail)
+		return ;
+	for (size_t i = 0; i < sl->size; i++) {
+		size_t equal_pos = ft_strstr(sl->data[i], "=");
+		char *curr_id = ft_substr(sl->data[i], 0, equal_pos);
+		if (!ft_strcmp(curr_id, var_id)) {
+			free(curr_id);
+			free(var_id);
+			char *hold = sl->data[i];
+			sl->data[i] = gc(GC_ADD, ft_strjoin(sl->data[i], var_tail), GC_ENV);
+			gc(GC_FREE, hold, GC_ENV);
+			return ;
+		}
+		free(curr_id);
+	}
 }
 
 char *string_list_get_value(StringList *sl, char *id) {
@@ -119,7 +140,8 @@ char *shell_vars_get_value(Vars *shell_vars, char *id) {
 void string_list_print(const StringList *list) {
 	for (size_t i = 0; i < list->size; i++) {
 		char *eql = ft_strchr(list->data[i], '=');
-		if (!eql) continue;
-		printf("%s\n", list->data[i]);
+		if (!eql)
+			continue;
+		printf("[%03zu]: %s\n", i, list->data[i]);
 	}
 }

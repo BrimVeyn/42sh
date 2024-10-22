@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:52:42 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 10:26:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/17 12:12:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void secure_pipe2(int pipefd[2], int flags){
 
 void secure_execve(const char *pathname, char **const argv, char **const envp){
 	if (execve(pathname, argv, envp) == -1){
-		printf("%s: command not found\n", argv[0]);
+		dprintf(2, "%s: command not found\n", argv[0]);
 		gc(GC_CLEANUP, GC_ALL);
 		exit(EXIT_FAILURE);
 	}

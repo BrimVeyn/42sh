@@ -56,7 +56,7 @@ echo $(mkdir dirtest && echo Directory made && (rmdir dirtest && echo Directory 
 echo result:$(echo $(ls /usr | (grep bin && echo binaries found)))
 echo nesting:$(echo $(echo $(echo inner level reached)))done
 echo dir test:$(echo $(mkdir newdir && echo dir created && (rmdir newdir && echo dir removed)))complete
-echo process count:$(ps aux | (grep $(whoami) && echo $(ps aux | wc -l)))processes running
+echo process count:$(ps aux | (grep $(whoami) | head -n 10 && echo $(ps aux | wc -l)))processes running
 echo $(ls | (echo first:$(head -n 1) && echo last:$(tail -n 1)))file list complete
 echo result:$(echo $(echo kernel:$(uname -r)))system details
 echo test case:$(echo $(echo $(mkdir $(echo tempdir) && echo dir created && (rmdir tempdir && echo dir removed))))nested

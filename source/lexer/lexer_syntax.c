@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:12:20 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/12 20:33:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/18 16:57:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,8 @@ bool is_subshell_closed(TokenList *tokens, size_t *it) {
 bool check_cmdgrp_closed(TokenList *tokens, size_t *it) {
 	(*it) -= 2; //pass ';' '}'
 	
-	//TODO: find a better way, size_t is problematic here
-	while (true) {
+	size_t it_cpy = *it;
+	while (*it <= it_cpy) {
 		if (is_end_cmdgrp(tokens, it)) {
 			if (!check_cmdgrp_closed(tokens, it))
 				return false;
@@ -76,11 +76,14 @@ bool cmdgrp_parity(TokenList *tokens, size_t it) {
 }
 
 bool lexer_syntax_error(TokenList *tokens) {
+	//TODO: wrong syntax error detection on subshells that arents rightly placed
+	//ex : echo (ehjdiejd)
 	if (is_whitespace_only(tokens)) 
 		return true;
 	for (size_t it = 0; it < tokens->size; it++) {
 		if (is_subshell(tokens, &it)) {
-			if (is_end_sub(tokens, &(size_t){it + 1})) {
+			size_t it_1 = it + 1;
+			if (is_end_sub(tokens, &it_1)) {
 				dprintf(2, UNEXPECTED_TOKEN_STR"`%s\'\n", tagStr((type_of_separator) S_SUB_CLOSE));
 				return true;
             }

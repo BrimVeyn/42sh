@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:18:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 13:25:14 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/17 13:05:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ int		exec_node(Node *node, Vars *shell_vars, bool foreground);
 void	add_vars_to_local(StringList *list, TokenList *vars);
 void	add_vars_to_set(Vars *shell_vars, TokenList *vars);
 
-char	*find_bin_location(char *bin, StringList *env);
+char *find_bin_location(char *bin, StringList *env, bool *absolute);
 
 //------------------------Jobs---------------------------------//
 
@@ -113,6 +113,7 @@ void builtin_cd(const SimpleCommand *command, Vars *shell_vars);
 void builtin_unset(const SimpleCommand *command, Vars *shell_vars);
 void builtin_jobs(const SimpleCommand *command, Vars *shell_vars);
 void builtin_fg(const SimpleCommand *command, Vars *shell_vars);
+void builtin_bg(const SimpleCommand *command, Vars *shell_vars);
 //-------------------------------------------------------------//
 
 #endif

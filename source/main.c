@@ -24,11 +24,15 @@
 int g_debug = 0;
 JobList *job_list = NULL;
 
-void	*init_prompt_and_signals(char *input, bool shell_is_interactive) {
+void	*init_prompt_and_signals(char *input, bool shell_is_interactive, Vars *shell_vars) {
 	if (shell_is_interactive)
 		signal_manager(SIG_PROMPT);
 	
-	input = ft_readline("42sh > ");
+	char *prompt = string_list_get_value(shell_vars->set, "PS1");
+	if (prompt)
+		input = ft_readline(prompt);
+	else
+		input = ft_readline("42sh> ");
 	if (!input) {
 		return NULL;
 	}
@@ -107,6 +111,7 @@ ShellInfos *shell(int mode) {
 	return NULL;
 }
 
+//TODO:Default file propre, syntax errors for 42shrc
 void exec_config_file(Vars *shell_vars) {
     char *home = string_list_get_value(shell_vars->env, "HOME");
     char config_filename[1024] = {0};
@@ -130,7 +135,6 @@ void exec_config_file(Vars *shell_vars) {
     if (file_size == 0) {
 		// write(fd, "PS1=42sh", 9); //tmp
 		// execute_command_sub("PS1=42sh", shell_vars);
-		// exec_shell(ft_strdup("PS1=42sh\n"), shell_vars);
 		close(fd);
 		return;
     }
@@ -141,23 +145,14 @@ void exec_config_file(Vars *shell_vars) {
         close(fd);
         return;
     }
-
-    char *start = buffer;
-    char *end = buffer; 
-    while (end < buffer + file_size) {
-        if (*end == '\n') {
-            size_t line_length = end - start;
-            if (line_length > 0) {
-                char *tmp = (char *)malloc(line_length + 1);
-                memcpy(tmp, start, line_length);
-                tmp[line_length] = '\0';
-                // exec_shell(tmp, shell_vars);
-                free(tmp);
-            }
-            start = end + 1;
-        }
-        end++;
-    }
+	
+	Lexer_p lexer = lexer_init(buffer);
+	TokenList *tokens = lexer_lex_all(lexer);
+	// if (lexer_syntax_error(tokens))
+	// 	clean_sub();
+	// heredoc_detector(tokens);
+	Node *AST = ast_build(tokens);
+	ast_execute(AST, shell_vars, true);
 
     munmap(buffer, file_size);
     close(fd);
@@ -176,18 +171,14 @@ int main(const int ac, const char *av[], const char *env[]) {
 
 	if (self->interactive){
 		history_fd = get_history();
-		// exec_config_file(shell_vars);
+		signal_manager(SIG_PROMPT);
+		exec_config_file(shell_vars);
 	}
 
-	char *input = "PS1=45555sh";
-	int nathan = false;
+	char *input = NULL;
 	//display the prompt, init signals if shell in interactive and reads input
 	while (true) {
-		if (!nathan) {
-			signal_manager(SIG_PROMPT);
-		} else {
-			input = init_prompt_and_signals(input, self->interactive);
-		}
+		input = init_prompt_and_signals(input, self->interactive, shell_vars);
 		if (self->interactive)
 			do_job_notification();
 		if (input) {
@@ -199,6 +190,7 @@ int main(const int ac, const char *av[], const char *env[]) {
 			}
 			Lexer_p lexer = lexer_init(input);
 			TokenList *tokens = lexer_lex_all(lexer);
+			// tokenListToString(tokens);
 			if (lexer_syntax_error(tokens))
 				continue; 
 			heredoc_detector(tokens);
@@ -219,7 +211,6 @@ int main(const int ac, const char *av[], const char *env[]) {
 			}
 			break;
 		}
-		nathan = true;
 	}
 	if (isatty(STDIN_FILENO))
 		destroy_history();

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 11:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 16:56:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/17 14:46:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,6 @@ bool fill_operand(AToken *self, Lexer_p l) {
 	}
 	if (!is_number(var) && regex_match("^[_a-zA-Z][a-zA-Z1-9_]*", var).re_start == -1) {
 		free(var);
-		dprintf(2, "ici !\n");
 		return false;
 	}
 	if (is_number(var)) {

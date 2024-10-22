@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/08 11:31:11 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/21 14:33:35 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/10/22 10:20:41 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ void add_history(const char *str);
 void pop_history();
 void str_info(const string *str);
 void set_prompt(const char *new_prompt);
+char *search_in_history(char *str);
 
 char *ft_readline(const char *prompt);
 void ft_readline_clean();

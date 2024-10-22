@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/17 15:09:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 13:51:14 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/16 17:03:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,10 @@
 #include "lexer.h"
 #include "parser.h"
 #include "utils.h"
+
 #include <sys/mman.h>
+#include <unistd.h>
+#include <stdio.h>
 
 void parser_skip_subshell(TokenList *list, size_t *j) {
 	(*j)++;
@@ -125,9 +128,6 @@ Node *extract_command_group(TokenList *list, size_t *i) {
 	return AST;
 }
 
-#include <unistd.h>
-#include <stdio.h>
-#include "debug.h"
 
 Node *extract_subshell(TokenList *list, size_t *i) {
 	// printf("ici !\n");
@@ -181,29 +181,28 @@ type_of_separator next_separator(TokenList *list, size_t *i) {
 	return S_EOF;
 }
 
-ExecuterList *build_executer_list(TokenList *list) {
+#include <fcntl.h>
+
+Process *build_executer_list(TokenList *token_list) {
 	// if (true){
 	// 	printf(C_RED"----------Before EXECUTER-------------"C_RESET"\n");
-	// 	tokenListToString(list); //Debug
+	// 	tokenListToString(token_list); //Debug
 	// }
-	ExecuterList *self = executer_list_init();
 	size_t i = 0;
-	while (i < list->size) {
-		Process *executer = NULL;
-		type_of_separator next_sep = next_separator(list, &i);
+	Process *process_list = NULL;
+	type_of_separator next_sep = next_separator(token_list, &i);
 
-		if (next_sep == S_PIPE) {
-			while (next_separator(list, &i) == S_PIPE) {
-				create_executer_and_push(&executer, list, &i);
-			}
-			if (i < list->size) {
-				create_executer_and_push(&executer, list, &i);
-			}
+	if (next_sep == S_PIPE) {
+		while (next_separator(token_list, &i) == S_PIPE) {
+			create_executer_and_push(&process_list, token_list, &i);
 		}
-		if (i < list->size && (next_sep == S_EOF || next_sep == S_SEMI_COLUMN)) {
-			create_executer_and_push(&executer, list, &i);
+		if (i < token_list->size) {
+			create_executer_and_push(&process_list, token_list, &i);
 		}
-		executer_list_push(self, executer);
 	}
-	return self;
+	if (i < token_list->size && (next_sep == S_EOF || next_sep == S_SEMI_COLUMN)) {
+		create_executer_and_push(&process_list, token_list, &i);
+	}
+
+	return process_list;
 }
