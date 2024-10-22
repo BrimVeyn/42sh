@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:16:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/21 17:26:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/22 16:59:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,82 +17,56 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef struct {
-	unsigned char bit0 : 1; 
-	unsigned char bit1 : 1; 
-	unsigned char bit2 : 1; 
-	unsigned char bit3 : 1; 
-	unsigned char bit4 : 1; 
-	unsigned char bit5 : 1; 
-	unsigned char bit6 : 1; 
-	unsigned char bit7 : 1; 
-	unsigned char bit8 : 1; 
-	unsigned char bit9 : 1; 
-	unsigned char bit10 : 1; 
-	unsigned char bit11 : 1; 
-	unsigned char bit12 : 1; 
-	unsigned char bit13 : 1; 
-	unsigned char bit14 : 1; 
-	unsigned char bit15 : 1; 
-	unsigned char bit16 : 1; 
-	unsigned char bit17 : 1; 
-	unsigned char bit18 : 1; 
-	unsigned char bit19 : 1; 
-	unsigned char bit20 : 1; 
-	unsigned char bit21 : 1; 
-	unsigned char bit22 : 1; 
-	unsigned char bit23 : 1; 
-	unsigned char bit24 : 1; 
-	unsigned char bit25 : 1; 
-	unsigned char bit26 : 1; 
-	unsigned char bit27 : 1; 
-	unsigned char bit28 : 1; 
-	unsigned char bit29 : 1; 
-	unsigned char bit30 : 1; 
-	unsigned char bit31 : 1; 
-} BitMap32;
-
 typedef enum {
-	IF, THEN, ELSE, ELIF, FI,
-	CASE, ESAC, WHILE, FOR, SELECT, UNTIL,
-	DO, DONE, IN,
-	FUNCTION,
-	TIME,
-	L_CURLY_BRACKET, R_CURLY_BRACKET,
-	L_SQUARE_BRACKET, R_SQUARE_BRACKET,
-	NOT_KEYWORD,
-} KeyWord;
+	LNONE = 0,
+	IF = 1,
+	THEN = 1 << 1,
+	ELSE = 1 << 2,
+	ELIF = 1 << 3,
+	FI = 1 << 4,
+	CASE = 1 << 5,
+	ESAC = 1 << 6,
+	WHILE = 1 << 7,
+	FOR = 1 << 8,
+	SELECT = 1 << 9,
+	UNTIL = 1 << 10,
+	DO = 1 << 11,
+	DONE = 1 << 12,
+	IN = 1 << 13,
+	FUNCTION = 1 << 14,
+	TIME = 1 << 15,
+	L_CURLY_BRACKET = 1 << 16,
+	R_CURLY_BRACKET = 1 << 17,
+	L_SQUARE_BRACKET = 1 << 18,
+	R_SQUARE_BRACKET = 1 << 19,
+	COMMAND = 1 << 20,
+	SEMI_COLUMN = 1 << 21,
+	NEWLINE = 1 << 22,
+	CEOF = 1 << 23,
+	UNTAGGED = 1 << 24,
+} Lexem;
 
 typedef struct {
-	KeyWord end;
-	BitMap32 bitmap;
-} KeyWordsBounds;
+	Lexem		 lexem;
+	unsigned int ctx_end;
+	unsigned int ctx_allowed;
+	unsigned int ctx_mandatory;
+	unsigned int parent;
+} LexemInfos;
 
-#define IF_MAP (BitMap32) {1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-#define THEN_MAP (BitMap32) {1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-typedef enum {
-	LEXER_COMMAND,
-	LEXER_EOF,
-	LEXER_SUBSHELL,
-	LEXER_CMDGRP,
-	LEXER_FOR,
-	LEXER_WHILE,
-	LEXER_IF,
-	LEXER_CASE,
-} LexerContext;
+#define IF_MAP (unsigned int) (COMMAND | THEN)
+#define THEN_MAP (unsigned int) (COMMAND | IF)
+#define ELIF_MAP (unsigned int) (COMMAND | IF)
+#define ELSE_MAP (unsigned int) (COMMAND | IF)
+#define COMMAND_MAP (unsigned int) (0)
 
 typedef struct {
-	char *start;
-	char *end;
-} LexerContextBounds;
-
-typedef struct {
-	char	*data;
+	LexemInfos	**data;
 	size_t	size;
 	size_t	capacity;
 	size_t	size_of_element;
 	int		gc_level;
-} LexerContextList;
+} LexemContextStack;
 
 typedef enum {
 	WORD_WORD,

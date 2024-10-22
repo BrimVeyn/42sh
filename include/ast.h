@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:44 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/16 17:04:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/22 16:12:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ typedef struct Node {
 	type_of_tree	tree_tag;
 	RedirectionList *redirs;
 	union {
-		TokenList *operand;
+		TokenList			*operand;
 		type_of_separator	operator;
 	} value;
 	struct Node		*left;
