@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/22 10:20:41 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/23 14:52:30 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,33 @@ typedef struct _hist_state {
   int capacity;             /* Number of slots allocated to this array. */
 } HISTORY_STATE;
 
+typedef enum {
+	RL_GET,
+	RL_SET,
+} manage_rl_state_mode;
+
+typedef struct s_position{
+    int x;
+    int y;
+} position_t;
+
+typedef struct s_search_mode {
+	char *word_found;
+	bool active;
+} search_mode_t;
+
+typedef struct s_readline_state {
+	string prompt;
+	position_t cursor_offset;
+	position_t cursor;
+	search_mode_t search_mode;
+	bool interactive;
+	// size_t offset_prompt;
+	// size_t offset_x;
+	// size_t offset_y;
+    // int cursor_x;
+    // int cursor_y;
+} readline_state_t;
 extern int rl_done;
 extern HISTORY_STATE *history;
 extern bool history_defined;
@@ -40,7 +67,7 @@ void destroy_history();
 void add_history(const char *str);
 void pop_history();
 void str_info(const string *str);
-void set_prompt(const char *new_prompt);
+void set_prompt(readline_state_t *rl_state, const char *new_prompt);
 char *search_in_history(char *str);
 
 char *ft_readline(const char *prompt);

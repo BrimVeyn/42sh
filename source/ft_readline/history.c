@@ -6,12 +6,13 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/22 11:20:19 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/23 16:16:23 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_readline.h"
 #include "42sh.h"
+#include "utils.h"
 
 bool history_defined = false;
 HISTORY_STATE *history;
@@ -28,7 +29,7 @@ void init_history(){
 void destroy_history(){
 	for (int i = 0; i < history->length; i++){
 		str_destroy(&history->entries[i]->line);
-		free(history->entries[i]);
+		gc(GC_FREE, history->entries[i], GC_GENERAL);
 	}
 	free(history->entries);
 	free(history);
@@ -54,13 +55,13 @@ void add_history(const char *str) {
     }
 	history_realloc();
 
-    if (!history->entries[history->length]) {
-        history->entries[history->length] = malloc(sizeof(HIST_ENTRY));
-        if (!history->entries[history->length]) {
-            return;
-        }
-    }
+ //    if (!history->entries[history->length]) {
+ //        if (!history->entries[history->length]) {
+ //            return;
+ //        }
+	// }
 
+	history->entries[history->length] = gc(GC_CALLOC, 1, sizeof(HIST_ENTRY), GC_GENERAL);
     history->entries[history->length]->line = STRING_L(str);
     history->length++;
 }
@@ -68,7 +69,7 @@ void add_history(const char *str) {
 void pop_history(){
 	if (history->length > 0){
 		str_destroy(&history->entries[history->length - 1]->line);
-		free(history->entries[history->length - 1]);
+		gc(GC_FREE, history->entries[history->length - 1], GC_GENERAL);
 		history->entries[history->length - 1] = NULL;
 		history->length--;
 	}
