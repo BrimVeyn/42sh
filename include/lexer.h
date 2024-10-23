@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:16:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/22 16:59:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/23 14:06:41 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ typedef enum {
 	COMMAND = 1 << 20,
 	SEMI_COLUMN = 1 << 21,
 	NEWLINE = 1 << 22,
-	CEOF = 1 << 23,
+	ENDOFFILE = 1 << 23,
 	UNTAGGED = 1 << 24,
 } Lexem;
 
@@ -52,6 +52,8 @@ typedef struct {
 	unsigned int ctx_allowed;
 	unsigned int ctx_mandatory;
 	unsigned int parent;
+	size_t		 line;
+	size_t		 column;
 } LexemInfos;
 
 #define IF_MAP (unsigned int) (COMMAND | THEN)

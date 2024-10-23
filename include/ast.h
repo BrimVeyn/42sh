@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:44 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/22 16:12:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/23 17:23:13 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ typedef struct {
 typedef enum {
 	N_OPERAND,
 	N_OPERATOR,
+	N_IF,
 } type_of_node;
 
 typedef enum {
@@ -42,12 +43,26 @@ typedef struct Node {
 	type_of_tree	tree_tag;
 	RedirectionList *redirs;
 	union {
-		TokenList			*operand;
+		TokenList			*operand; // or process *
 		type_of_separator	operator;
 	} value;
 	struct Node		*left;
 	struct Node		*right;
 } Node;
+
+typedef struct {
+	Node **data;
+	size_t size;
+	size_t capacity;
+	size_t	size_of_element;
+	int		gc_level;
+} NodeStack;
+
+typedef struct IfNode {
+	NodeStack *conditions;
+	NodeStack *bodies;
+	Node	  *else_body;
+} IfNode;
 
 typedef enum {
 	DATA_NODE,
@@ -63,8 +78,8 @@ typedef struct Process {
 
 	type_of_data data_tag;
 	union {
-		Node *n_data;
-		TokenList *s_data;
+		Node		*n_data;
+		TokenList	*s_data;
 	};
 	SimpleCommand *command;
 } Process;
@@ -79,14 +94,6 @@ typedef struct Job {
 	struct termios tmodes; //saved terminal modes
 } Job;
 
-
-typedef struct {
-	Node **data;
-	size_t size;
-	size_t capacity;
-	size_t	size_of_element;
-	int		gc_level;
-} NodeStack;
 
 
 //----------------AST-----------------//

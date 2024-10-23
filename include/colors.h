@@ -2,6 +2,8 @@
 #ifndef COLORS_H
 #define COLORS_H
 
+#define C_BOLD			"\033[1m"
+
 // Standard Colors
 #define C_BLACK         "\033[30m"
 #define C_RED           "\033[31m"
