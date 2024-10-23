@@ -34,32 +34,44 @@
 # 	fi;
 # 	echo test third if;
 # fi;
+#
+
+
+# struct Node {
+# 	tagged union {
+# 		TokensList *;
+# 	}
+# }
+
 
 if true; then
-	echo outer_true;
-	if true; then
-		echo inner_true;
-	fi
-elif true; then
-	echo outer_second_true;
-else
-	echo outer_false;
-fi
+	echo 1 | (if true; then echo 2; fi)
+elif false; then
+	echo 3;
+fi | cat | rev && echo salut; test 1 + 1
 
-if AST1; then
-	AST2;
-elif AST3; then
-	AST4;
-else
-	AST5;
-fi
+struct Node {
+	?? data;
+	Node *lhs;
+	Node *rhs;
+}
 
-AST1 = SimpleCommand("true");
-AST2 = SimpleCommand("echo outer_true;") --> IFNODE;
-AST3 = SimpleCommand("true")
-AST4 = SimpleCommand("echo outer_second_true");
-AST5 = SimpleCommand("outer_false");
+struct Expr {
+	tagged union {
+		TokenList *;
+		IfStruct *;
+		Separator ;
+		SubShell ;
+	}
+}
 
-if isTruthy(AST1.execute) then AST2.execute
-else if isTruthy(AST3) then AST4.execute
-else AST5.execute
+Expr(IfStruct({
+	.condition = Epxr(TokenList) Expr(;)
+	.body = Expr(TokenList) Expr(|) Expr(IfStruct({
+	.condition = Expr(SubShell(IfStruct({
+		.condition = Expr(TokenLisT) Expr(;)
+		.body = Expr(TokenLisT) Expr(;)
+		.else = Nil
+	}))) Expr(;)
+	.else = Nil
+})) Expr(|) Expr(TokenLisT) Expr(|) Expr(TokenLisT) Expr(;) Expr(TokenList)

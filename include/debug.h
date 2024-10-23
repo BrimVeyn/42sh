@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 16:39:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/09 09:31:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/23 12:07:38 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 #include "parser.h"
 #include "lexer.h"
 #include "../source/parser/arithmetic.h"
+
+#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 extern int g_debug;
 
@@ -41,6 +43,11 @@ void aTokenListToString(ATokenStack *tokens);
 void lexer_debug(Lexer_p lexer);
 void tokenToString(Token *token, size_t offset);
 void tokenListToString(TokenList *list);
+char *LexemStr(Lexem lexem);
+void printLexemState(LexemInfos *infos);
+void printStackStates(LexemContextStack *stack, char *color);
+void printContextStack(LexemContextStack *stack);
+char *get_line_x(char *in, const size_t n);
 
 //---------------AST----------------------//
 void printTree(Node *self);

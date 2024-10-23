@@ -6,15 +6,82 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:53:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/21 11:07:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/23 14:06:55 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "debug.h"
 #include "colors.h"
+#include "libft.h"
+#include "utils.h"
 
 #include <stdio.h>
 
+char *get_line_x(char *in, const size_t n) {
+	char *line_ptr = in;
+	for (size_t i = 0; i < n; i++) {
+		line_ptr = ft_strchr(line_ptr, '\n');
+	}
+
+	char *end = ft_strchr(line_ptr, '\n');
+	char *return_line = ft_substr(in, (line_ptr - in), (end - line_ptr));
+	return return_line;
+}
+
+void printContextStack(LexemContextStack *stack) {
+	dprintf(2, C_LIGHT_RED"--------Lexem Stack--------"C_RESET"\n");
+	for (size_t i = 0; i < stack->size; i++) {
+		dprintf(2, "[%zu]: %s\n",i, LexemStr(stack->data[i]->lexem));
+	}
+	dprintf(2, C_LIGHT_RED"---------------------------"C_RESET"\n");
+}
+
+char *LexemStr(Lexem lexem) {
+
+	static const struct {
+		Lexem lexem;
+		char  *value;
+	} litterals[] = {
+		{LNONE, "stack_bottom"}, {IF, "if"}, {THEN, "then"}, {ELSE, "else"},
+	    {ELIF, "elif"}, {FI, "fi"}, {CASE, "case"},
+		{ESAC, "esac"}, {WHILE, "while"}, {FOR, "for"},
+		{SELECT, "select"}, {UNTIL, "until"}, {DO, "do"},
+		{DONE, "done"}, {IN, "in"}, {FUNCTION, "function"},
+		{TIME, "time"}, {L_CURLY_BRACKET, "{"}, {R_CURLY_BRACKET, "}"},
+		{L_SQUARE_BRACKET, "["}, {R_SQUARE_BRACKET, "]"},
+		{SEMI_COLUMN, ";"}, {COMMAND, "CMD"}, {NEWLINE, "\n"},
+		{ENDOFFILE, "EOF"}, {UNTAGGED, "bin/arg"},
+	};
+
+	for (size_t i = 0; i < ARRAY_SIZE(litterals); i++) {
+		if (lexem == litterals[i].lexem) {
+			return litterals[i].value;
+		}
+	}
+	return "INVALID";
+}
+
+void printLexemState(LexemInfos *infos) {
+	if (!infos) 
+		return ;
+	char buffer[MAX_WORD_LEN] = {0};
+	ft_sprintf(buffer, C_BRIGHT_CYAN"%s"C_RESET": "C_BRIGHT_YELLOW, LexemStr(infos->lexem));
+	for (size_t i = 0; i < 31; i++) {
+		if ((infos->ctx_mandatory & (1 << i)) > 0) {
+			ft_sprintf(buffer, "%s ", LexemStr(1 << i));
+		}
+	}
+	ft_sprintf(buffer, C_RESET"\n");
+	ft_putstr_fd(buffer, 2);
+}
+
+void printStackStates(LexemContextStack *stack, char *color) {
+	dprintf(2, "%s------STATES------"C_RESET"\n", color);
+	for (size_t i = 0; i < stack->size; i++) {
+		printLexemState(stack->data[i]);
+	}
+	dprintf(2, "%s------------------"C_RESET"\n", color);
+}
 void lexer_debug(Lexer_p lexer) {
 	dprintf(2, "--- Lexer state ---\n");
 	dprintf(2, "Input = |%s|\n", lexer->input);
