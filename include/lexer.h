@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:16:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/23 14:06:41 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/24 14:02:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,14 +43,19 @@ typedef enum {
 	SEMI_COLUMN = 1 << 21,
 	NEWLINE = 1 << 22,
 	ENDOFFILE = 1 << 23,
-	UNTAGGED = 1 << 24,
+	ARGS = 1 << 24,
 } Lexem;
+
+typedef struct MandatoryLexemList {
+	unsigned int value;
+	struct MandatoryLexemList *next;
+} MandatoryLexemList;
 
 typedef struct {
 	Lexem		 lexem;
 	unsigned int ctx_end;
 	unsigned int ctx_allowed;
-	unsigned int ctx_mandatory;
+	MandatoryLexemList *ctx_mandatory;
 	unsigned int parent;
 	size_t		 line;
 	size_t		 column;
@@ -92,8 +97,6 @@ typedef struct {
 	unsigned char bit6 : 1; //CMD_SUB
 	unsigned char bit7 : 1; //WORD ignored
 } BitMap8;
-
-
 
 typedef struct {
 	char *start;
@@ -197,6 +200,57 @@ typedef struct Token {
 		}; //word
 	};
 } Token;
+
+typedef enum {
+	SEP_AND,
+	SEP_OR,
+	SEP_SEMI,
+	SEP_BG,
+	SEP_NEWLINE,
+	SEP_PIPE,
+} SeparatorType;
+
+typedef struct {
+	SeparatorType type;
+	char *litteral;
+} Separator;
+
+typedef struct {
+	struct ExprArrayArray *conditions;
+	struct ExprArrayArray *bodies;
+	struct ExprArray *else_body;
+} IfStruct;
+
+typedef struct ExprArray {
+	struct Expr	**data;
+	size_t	size;
+	size_t	capacity;
+	size_t	size_of_element;
+	int		gc_level;
+} ExprArray;
+
+typedef struct ExprArrayArray {
+	struct ExprArray **data;
+	size_t	size;
+	size_t	capacity;
+	size_t	size_of_element;
+	int		gc_level;
+} ExprArrayArray;
+
+typedef struct {
+	char *litteral;
+} Word;
+
+typedef struct Expr {
+	enum {EXPR_WORD, EXPR_IF, EXPR_SEP, EXPR_SUB, EXPR_REDIR} type;
+	union {
+		// Redirection *redir;
+		Word		*word;
+		IfStruct  	*ifstruct;
+		ExprArray 	*subshell;
+		Separator 	*sep;
+	};
+} Expr;
 
 typedef struct TokenList {
 	Token		**data;

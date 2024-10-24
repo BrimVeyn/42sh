@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/21 11:14:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/24 09:05:13 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,14 +172,6 @@ ExpKind identify_exp_end(const char *str, const ContextMap *context_map, const E
 	}
 }
 
-typedef struct {
-	ExpKind *data;
-	int gc_level;
-	size_t size;
-	size_t capacity;
-	size_t size_of_element;
-} ExpKindList;
-
 char *ss_get_owned_slice(StringStream *ss) {
 	da_push(ss, '\0');
 	char *str = ss->data;
@@ -199,19 +191,6 @@ void ss_cut(StringStream *ss, size_t new_size) {
 	ss->size = new_size;
 }
 
-void exp_kind_list_print(ExpKindList *list) {
-	static const char *map[] = {
-		[EXP_WORD] = "EXP_WORD",
-		[EXP_CMDSUB] = "EXP_CMDSUB",
-		[EXP_ARITHMETIC] = "EXP_ARITHMETIC",
-		[EXP_VARIABLE] = "EXP_VARIABLE",
-		[EXP_SUB] = "EXP_SUB",
-	};
-
-	for (size_t i = 0; i < list->size; i++) {
-		dprintf(2, "[%zu]: %s\n", i, map[list->data[i]]);
-	}
-}
 
 bool is_var_expand_context(ExpKindList *exp_stack) {
 	bool	var_expand = (exp_stack->size != 0);

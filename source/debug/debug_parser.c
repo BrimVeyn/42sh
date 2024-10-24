@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:50:32 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/13 10:24:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/24 09:05:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,20 @@
 #include "../../include/colors.h"
 
 #include <stdio.h>
+
+void exp_kind_list_print(ExpKindList *list) {
+	static const char *map[] = {
+		[EXP_WORD] = "EXP_WORD",
+		[EXP_CMDSUB] = "EXP_CMDSUB",
+		[EXP_ARITHMETIC] = "EXP_ARITHMETIC",
+		[EXP_VARIABLE] = "EXP_VARIABLE",
+		[EXP_SUB] = "EXP_SUB",
+	};
+
+	for (size_t i = 0; i < list->size; i++) {
+		dprintf(2, "[%zu]: %s\n", i, map[list->data[i]]);
+	}
+}
 
 void printRedirList(RedirectionList *rl) {
 	dprintf(2,C_BRONZE"------ "C_LIGHT_BROWN"Redir list"C_BRONZE"----\n"C_RESET);

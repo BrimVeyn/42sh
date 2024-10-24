@@ -6,16 +6,62 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:53:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/23 14:06:55 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/24 14:53:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "debug.h"
 #include "colors.h"
+#include "lexer.h"
 #include "libft.h"
 #include "utils.h"
 
 #include <stdio.h>
+
+void ifStructPrint(IfStruct *cf) {
+	dprintf(2, "IF:{\n");
+	for (size_t i = 0; i < cf->conditions->size; i++) {
+		dprintf(2, ".condition[%zu]: ", i);
+		expr_array_print(cf->conditions->data[i]);
+		dprintf(2, "\n");
+	}
+	for (size_t i = 0; i < cf->bodies->size; i++) {
+		dprintf(2, ".body[%zu]: ", i);
+		expr_array_print(cf->bodies->data[i]);
+		dprintf(2, "\n");
+	}
+	if (cf->else_body->size) {
+		expr_array_print(cf->else_body);
+		dprintf(2, "\n");
+    }
+	dprintf(2, "}");
+}
+
+void expr_print(Expr *expr) {
+	dprintf(2, "Expr(");
+	switch (expr->type) {
+		case EXPR_WORD: {
+			dprintf(2, "WORD:{%s}", expr->word->litteral);
+			break;
+		}
+		case EXPR_SEP: {
+			dprintf(2, "SEP:{%s}", expr->sep->litteral);
+			break;
+		}
+		case EXPR_IF: {
+			ifStructPrint(expr->ifstruct);
+			break;
+		}
+		default: break;
+	}
+	dprintf(2, ") ");
+}
+
+void expr_array_print(ExprArray *array) {
+	for (size_t i = 0; i < array->size; i++) {
+		expr_print(array->data[i]);
+	}
+}
 
 char *get_line_x(char *in, const size_t n) {
 	char *line_ptr = in;
@@ -49,8 +95,8 @@ char *LexemStr(Lexem lexem) {
 		{DONE, "done"}, {IN, "in"}, {FUNCTION, "function"},
 		{TIME, "time"}, {L_CURLY_BRACKET, "{"}, {R_CURLY_BRACKET, "}"},
 		{L_SQUARE_BRACKET, "["}, {R_SQUARE_BRACKET, "]"},
-		{SEMI_COLUMN, ";"}, {COMMAND, "CMD"}, {NEWLINE, "\n"},
-		{ENDOFFILE, "EOF"}, {UNTAGGED, "bin/arg"},
+		{SEMI_COLUMN, ";"}, {COMMAND, "CMD"}, {NEWLINE, "CR"},
+		{ENDOFFILE, "EOF"}, {ARGS, "bin/arg"},
 	};
 
 	for (size_t i = 0; i < ARRAY_SIZE(litterals); i++) {
@@ -67,7 +113,7 @@ void printLexemState(LexemInfos *infos) {
 	char buffer[MAX_WORD_LEN] = {0};
 	ft_sprintf(buffer, C_BRIGHT_CYAN"%s"C_RESET": "C_BRIGHT_YELLOW, LexemStr(infos->lexem));
 	for (size_t i = 0; i < 31; i++) {
-		if ((infos->ctx_mandatory & (1 << i)) > 0) {
+		if (infos->ctx_mandatory && (infos->ctx_mandatory->value & (1 << i)) > 0) {
 			ft_sprintf(buffer, "%s ", LexemStr(1 << i));
 		}
 	}
