@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/23 16:38:17 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/24 09:56:07 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 
 //TODO:Limiter history -> HIST_SIZE
 //HistFileSize HistFile
+//ctrl + v multiline
 //$PS2
 int rl_done = 0;
 
@@ -194,19 +195,20 @@ void get_cursor_pos(position_t *position){
 
 void update_line(readline_state_t *rl_state, string *line) {
 	(void)line;
-	int cols = get_col();
-    int tchars = line->size + rl_state->prompt.size;
-    int nlines = tchars / cols;
+	// int cols = get_col();
+ //    int tchars = line->size + rl_state->prompt.size;
+    // int nlines = tchars / cols;
 
 	move_cursor(rl_state->cursor_offset.x, rl_state->cursor_offset.y);
-	for (int i = 0; i <= nlines; i++){
-		write(STDOUT_FILENO, "\033[0K", 4);
-		move_cursor(rl_state->prompt.size, rl_state->cursor_offset.y + i + 1);
-	}
+	write(STDOUT_FILENO, "\033[0J", 4);
+	// for (int i = 0; i <= nlines; i++){
+	// 	write(STDOUT_FILENO, "\033[0K", 4);
+	// 	move_cursor(rl_state->prompt.size, rl_state->cursor_offset.y + i + 1);
+	// }
 	if (rl_state->search_mode.active == false){
 		move_cursor(rl_state->cursor_offset.x, rl_state->cursor_offset.y);
 		rl_print_prompt(STDOUT_FILENO, rl_state);
-		write(STDOUT_FILENO, line->data, str_length(line));
+		write(STDOUT_FILENO, line->data, line->size);
 	} else {
 		move_cursor(0, rl_state->cursor_offset.y);
 		if (line->data[0]){
@@ -256,6 +258,15 @@ int handle_normal_keys(readline_state_t *rl_state, char c, string *line){
 	pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->prompt.size : 0);
 
 	if (c == '\n' || c == '\0'){
+		if (rl_state->search_mode.active){
+			rl_state->search_mode.active = false;
+			rl_state->prompt.size = ft_strlen(rl_state->prompt.data);
+			if (rl_state->search_mode.word_found){
+				str_destroy(line);
+				*line = string_init_str(rl_state->search_mode.word_found);
+			}
+			update_line(rl_state, line);
+		}
 		if (rl_state->interactive){
 			int nrows = get_row();
 			if (rl_state->cursor_offset.y + rl_state->cursor.y == nrows - 1) {
@@ -267,11 +278,6 @@ int handle_normal_keys(readline_state_t *rl_state, char c, string *line){
 			rl_state->cursor.y = 0;
 			rl_state->cursor.x = 0;
 			move_cursor(0, rl_state->cursor_offset.y + rl_state->cursor.y);
-		}
-		if (rl_state->search_mode.active && rl_state->search_mode.word_found){
-			str_destroy(line);
-			*line = string_init_str(rl_state->search_mode.word_found);
-			rl_state->search_mode.active = false;
 		}
 		return 1;
 	}
