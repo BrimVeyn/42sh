@@ -295,8 +295,8 @@ int main(const int ac, char *av[], const char *env[]) {
 		if (self->interactive == 2)
 			break;
 	}
-	if (self->interactive)
-		destroy_history();
+	// if (self->interactive)
+	// 	gc(GC_CLEANUP)
 	gc(GC_CLEANUP, GC_ALL);
 	close_all_fds();
 	return (EXIT_SUCCESS);

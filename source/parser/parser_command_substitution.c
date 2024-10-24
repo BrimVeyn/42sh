@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:17:49 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/21 16:18:08 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/24 13:39:21 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 static void clean_sub(void) {
 	gc(GC_CLEANUP, GC_ENV);
 	gc(GC_CLEANUP, GC_SUBSHELL);
+	gc(GC_CLEANUP, GC_READLINE);
 	free(((Garbage *)gc(GC_GET))[GC_GENERAL].garbage);
 	exit(g_exitno);
 }
