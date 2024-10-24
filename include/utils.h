@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/21 11:33:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/24 10:56:32 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,17 +123,21 @@ typedef struct {
 	(array)->size == 0 ? 0 : (array)->data[--(array)->size] \
 
 #define da_peak_back(array) \
-	(array->size) == 0 ? 0 : (array)->data[(array)->size - 1] \
+	(array)->size == 0 ? 0 : (array)->data[(array)->size - 1] \
 
 #define da_peak_front(array) \
-	(array->size) == 0 ? 0 : (array)->data[0] \
+	(array)->size == 0 ? 0 : (array)->data[0] \
+
+#define da_peak_index (array, index) \
+	(array)->size > index ? (array)->data[index] : 0 \
 
 #define da_print(array) \
 	_Generic((array), \
 		StrList *: str_list_print, \
 		StringList *: string_list_print, \
 		TokenList *: tokenListToString, \
-		ExpKindList *: exp_kind_list_print \
+		ExpKindList *: exp_kind_list_print, \
+		ExprArray *: expr_array_print \
 	)((array))
 
 #define da_pop_front(array) \

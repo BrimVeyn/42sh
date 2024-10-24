@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:23:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/17 12:31:01 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/24 08:56:01 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,14 @@ typedef struct {
 	size_t	size_of_element;
 	int		gc_level;
 } StrList;
+
+typedef struct {
+	ExpKind *data;
+	int gc_level;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+} ExpKindList;
 
 Str *str_init(const ExpKind kind, char *str, bool add_to_gc);
 void				str_list_print(const StrList *list);

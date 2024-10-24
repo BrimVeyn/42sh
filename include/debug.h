@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 16:39:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/23 12:07:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/24 09:05:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ char *get_line_x(char *in, const size_t n);
 
 //---------------AST----------------------//
 void printTree(Node *self);
+void expr_array_print(ExprArray *array);
+void exp_kind_list_print(ExpKindList *list);
 
 #define tagName(param) _Generic((param),					\
 	type_of_token: get_tag_name_token,						\
