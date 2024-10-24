@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/24 09:56:07 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/24 14:19:51 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "ft_regex.h"
 #include "c_string.h"
 #include "libft.h"
+#include "utils.h"
 #include <linux/limits.h>
 #include <stdio.h>
 #include <termios.h>
@@ -36,8 +37,9 @@ void set_cursor_position(readline_state_t *rl_state);
 void signal_prompt_mode(void);
 
 void set_prompt(readline_state_t *rl_state, const char *new_prompt) {
-	str_destroy(&rl_state->prompt);
+	gc(GC_FREE, rl_state->prompt.data, GC_READLINE);
 	rl_state->prompt = string_init_str(new_prompt);
+	gc(GC_ADD, rl_state->prompt.data, GC_READLINE);
 }
 
 size_t get_col(void){
@@ -147,10 +149,10 @@ void set_cursor_position(readline_state_t *rl_state) {
 
 void ft_readline_clean(){
 	readline_state_t *rl_state = manage_rl_state(RL_GET, NULL);
-	if (rl_state->prompt.data){
-		free(rl_state->prompt.data);
-	}
+
+	gc(GC_FREE, rl_state->prompt.data, GC_READLINE);
 	destroy_history();
+	gc(GC_FREE, rl_state, GC_READLINE);
 }
 
 void get_cursor_pos(position_t *position){
@@ -262,8 +264,9 @@ int handle_normal_keys(readline_state_t *rl_state, char c, string *line){
 			rl_state->search_mode.active = false;
 			rl_state->prompt.size = ft_strlen(rl_state->prompt.data);
 			if (rl_state->search_mode.word_found){
-				str_destroy(line);
+				gc(GC_FREE, line->data, GC_READLINE);
 				*line = string_init_str(rl_state->search_mode.word_found);
+				gc(GC_ADD, line->data, GC_READLINE);
 			}
 			update_line(rl_state, line);
 		}
@@ -348,8 +351,9 @@ int handle_special_keys(readline_state_t *rl_state, string *line){
         if (seq[1] == 'A' && history->offset > 0){//left
             history->offset--;
             rl_state->cursor.x = history->entries[history->offset]->line.size;
-			str_destroy(line);
+			gc(GC_FREE, line->data, GC_READLINE);
             *line = str_strdup(&history->entries[history->offset]->line);
+			gc(GC_ADD, line->data, GC_READLINE);
             return 2;
         }
         else if (seq[1] == 'D' && can_go_left(rl_state)){
@@ -363,8 +367,9 @@ int handle_special_keys(readline_state_t *rl_state, string *line){
         else if (seq[1] == 'B' && history->offset < history->length - 1){
             history->offset++;
             rl_state->cursor.x = history->entries[history->offset]->line.size;
-			str_destroy(line);
+			gc(GC_FREE, line->data, GC_READLINE);
             *line = str_strdup(&history->entries[history->offset]->line);
+			gc(GC_ADD, line->data, GC_READLINE);
             return 2;
         }
     }
@@ -403,29 +408,38 @@ int should_process_enter() {
 
 //TODO: Enter ctrl + R
 char *ft_readline(const char *prompt) {
-	readline_state_t rl_state;
+	readline_state_t *rl_state = NULL;
+	
+	if (manage_rl_state(RL_GET, NULL)){
+		rl_state = manage_rl_state(RL_GET, NULL);
+	} else {
+		rl_state = gc_unique(readline_state_t, GC_READLINE);
+		rl_state->cursor.x = 0;
+		rl_state->cursor.y = 0;
+		rl_state->cursor_offset.x = 0;
+		rl_state->cursor_offset.y = 0;
 
-	rl_state.cursor.x = 0;
-	rl_state.cursor.y = 0;
-	rl_state.cursor_offset.x = 0;
-	rl_state.cursor_offset.y = 0;
+		rl_state->search_mode.active = 0;
+		rl_state->search_mode.word_found = NULL;	
 
-	rl_state.search_mode.active = 0;
-	rl_state.search_mode.word_found = NULL;
+		rl_state->prompt = string_init_str("");
+		gc(GC_ADD, rl_state->prompt.data, GC_READLINE);
+	}
 
-	rl_state.prompt = string_init_str("");
 	
 	ShellInfos *self = shell(SHELL_GET);
-    rl_state.interactive = self->interactive;
+    rl_state->interactive = self->interactive;
 
-    if (rl_state.interactive)
-		init_readline(&rl_state, prompt);
+    if (rl_state->interactive)
+		init_readline(rl_state, prompt);
 
-	string *line = malloc(sizeof(string));
-    if (rl_state.interactive) {
+	string *line = gc(GC_ALLOC, 1, sizeof(string), GC_READLINE);
+    if (rl_state->interactive) {
         *line = str_strdup(&history->entries[history->length - 1]->line);
+		gc(GC_ADD, line->data, GC_READLINE);
     } else {
         *line = STRING_L("");
+		gc(GC_ADD, line->data, GC_READLINE);
     }
     rl_done = 0;
 
@@ -448,46 +462,46 @@ char *ft_readline(const char *prompt) {
 		int result = 0;
         if (bytes_read == 0 || c == VEOF) {
             if (line->data[0] == '\0') {
-                if (rl_state.interactive) {
+                if (rl_state->interactive) {
                     write(STDOUT_FILENO, "\n", 1);
                     pop_history();
                 }
-                str_destroy(line);
-                free(line);
+                gc(GC_FREE, line->data, GC_READLINE);
+				gc(GC_FREE, line, GC_READLINE);
                 return NULL;
             }
 		} else if (c == 12 || c == 18) { // ^L | ^R
-			handle_control_keys(&rl_state, c);
+			handle_control_keys(rl_state, c);
         } else if (c == '\033') {
-            result = handle_special_keys(&rl_state, line);
+            result = handle_special_keys(rl_state, line);
         } else {
-            result = handle_normal_keys(&rl_state, c, line);
+            result = handle_normal_keys(rl_state, c, line);
         }
 		
 		if (result == 1) {
 			break;
 		}
 		
-		if (rl_state.interactive) {
-			update_line(&rl_state, line);
-			set_cursor_position(&rl_state);
+		if (rl_state->interactive) {
+			update_line(rl_state, line);
+			set_cursor_position(rl_state);
 		}
 
 
     } while (true);
     
-    if (rl_state.interactive)
+    if (rl_state->interactive)
         disable_raw_mode();
     
     char *str = NULL;
-    if (!rl_done)
-        str = ft_strdup(line->data);
+	if (!rl_done)
+		str = ft_strdup(line->data);
     
-    str_destroy(line);
-	str_destroy(&rl_state.prompt);
-    free(line);
-    
-    if (rl_state.interactive)
+	gc(GC_FREE, rl_state->prompt.data, GC_READLINE);
+	gc(GC_FREE, line->data, GC_READLINE);
+	gc(GC_FREE, line, GC_READLINE);
+
+    if (rl_state->interactive)
         pop_history();
     
     if (rl_done) {

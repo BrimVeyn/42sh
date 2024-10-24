@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/18 16:10:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/24 10:31:03 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ extern int g_exitno;
 
 typedef enum {
 	GC_GENERAL,
+	GC_READLINE,
 	GC_ENV,
 	GC_SUBSHELL,
 	GC_ALL,

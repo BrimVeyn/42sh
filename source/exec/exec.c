@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/17 14:37:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/24 13:38:40 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,12 +242,14 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 					if (proc->n_data->redirs != NULL) {
 						if (!apply_all_redirect(proc->n_data->redirs)) {
 							gc(GC_CLEANUP, GC_SUBSHELL);
+							gc(GC_CLEANUP, GC_READLINE);
 							exit(g_exitno);
 						}
 					}
 					g_exitno = ast_execute(proc->n_data, shell_vars, foreground);
 					gc(GC_CLEANUP, GC_ENV);
 					gc(GC_CLEANUP, GC_SUBSHELL);
+					gc(GC_CLEANUP, GC_READLINE);
 					free(((Garbage *)gc(GC_GET))[GC_GENERAL].garbage);
 					exit(g_exitno);
 				} else {

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/23 14:52:30 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/24 13:32:38 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,11 +52,6 @@ typedef struct s_readline_state {
 	position_t cursor;
 	search_mode_t search_mode;
 	bool interactive;
-	// size_t offset_prompt;
-	// size_t offset_x;
-	// size_t offset_y;
-    // int cursor_x;
-    // int cursor_y;
 } readline_state_t;
 extern int rl_done;
 extern HISTORY_STATE *history;
