@@ -1,0 +1,22 @@
+result: |echo|, value: CMD | 1048576
+[95m------STATES------[0m
+[96mstack_bottom[0m: [93m[0m
+[96mCMD[0m: [93m[0m
+[95m------------------[0m
+yes arithmetic
+yes cmd_sub
+yes cmd_sub
+result: |$(($(echo 3 + 7) + $(echo 1 + 4)))|, value: bin/arg | 16777216
+[95m------STATES------[0m
+[96mstack_bottom[0m: [93m[0m
+[96mCMD[0m: [93m[0m
+[96mbin/arg[0m: [93m[0m
+[95m------------------[0m
+result: ||, value: EOF | 8388608
+[95m------STATES------[0m
+[96mstack_bottom[0m: [93m[0m
+[96mCMD[0m: [93m[0m
+[95m------------------[0m
+Expr(WORD:{echo}) Expr(WORD:{$(($(echo 3 + 7) + $(echo 1 + 4)))}) [38;5;180m------STATES------[0m
+[96mstack_bottom[0m: [93m[0m
+[38;5;180m------------------[0m
