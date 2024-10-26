@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 16:39:47 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/24 09:05:26 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/26 15:24:40 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,10 +43,6 @@ void aTokenListToString(ATokenStack *tokens);
 void lexer_debug(Lexer_p lexer);
 void tokenToString(Token *token, size_t offset);
 void tokenListToString(TokenList *list);
-char *LexemStr(Lexem lexem);
-void printLexemState(LexemInfos *infos);
-void printStackStates(LexemContextStack *stack, char *color);
-void printContextStack(LexemContextStack *stack);
 char *get_line_x(char *in, const size_t n);
 
 //---------------AST----------------------//

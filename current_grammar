@@ -1,0 +1,32 @@
+AND_IF	"&&"
+OR_IO	"||"
+NEWLINE '\n'
+
+
+compound_list    : linebreak term
+			     | linebreak term separator
+
+term		     : term separator and_or
+			     | and_or
+
+and_or           : command
+			     | and_or AND_IF linebreak command
+			     | and_or OR_IF  linebreak command
+
+command		     : simple_command
+			     | compound_command
+
+compound_command : if_clause
+
+simple_command   : WORD
+				 
+separator_op     : '&'
+			     | ';'
+
+newline_list     : NEWLINE
+			     | newline_list NEWLINE
+
+separator        : separator_op linebreak
+			     | newline_list
+
+if_clause        : IF compound_list THEN compound_list FI
