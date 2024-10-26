@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:16:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/24 14:02:02 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/26 15:19:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,63 +17,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef enum {
-	LNONE = 0,
-	IF = 1,
-	THEN = 1 << 1,
-	ELSE = 1 << 2,
-	ELIF = 1 << 3,
-	FI = 1 << 4,
-	CASE = 1 << 5,
-	ESAC = 1 << 6,
-	WHILE = 1 << 7,
-	FOR = 1 << 8,
-	SELECT = 1 << 9,
-	UNTIL = 1 << 10,
-	DO = 1 << 11,
-	DONE = 1 << 12,
-	IN = 1 << 13,
-	FUNCTION = 1 << 14,
-	TIME = 1 << 15,
-	L_CURLY_BRACKET = 1 << 16,
-	R_CURLY_BRACKET = 1 << 17,
-	L_SQUARE_BRACKET = 1 << 18,
-	R_SQUARE_BRACKET = 1 << 19,
-	COMMAND = 1 << 20,
-	SEMI_COLUMN = 1 << 21,
-	NEWLINE = 1 << 22,
-	ENDOFFILE = 1 << 23,
-	ARGS = 1 << 24,
-} Lexem;
-
-typedef struct MandatoryLexemList {
-	unsigned int value;
-	struct MandatoryLexemList *next;
-} MandatoryLexemList;
-
-typedef struct {
-	Lexem		 lexem;
-	unsigned int ctx_end;
-	unsigned int ctx_allowed;
-	MandatoryLexemList *ctx_mandatory;
-	unsigned int parent;
-	size_t		 line;
-	size_t		 column;
-} LexemInfos;
-
-#define IF_MAP (unsigned int) (COMMAND | THEN)
-#define THEN_MAP (unsigned int) (COMMAND | IF)
-#define ELIF_MAP (unsigned int) (COMMAND | IF)
-#define ELSE_MAP (unsigned int) (COMMAND | IF)
-#define COMMAND_MAP (unsigned int) (0)
-
-typedef struct {
-	LexemInfos	**data;
-	size_t	size;
-	size_t	capacity;
-	size_t	size_of_element;
-	int		gc_level;
-} LexemContextStack;
 
 typedef enum {
 	WORD_WORD,

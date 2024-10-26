@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/24 09:05:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/26 16:28:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,7 +175,7 @@ ExpKind identify_exp_end(const char *str, const ContextMap *context_map, const E
 char *ss_get_owned_slice(StringStream *ss) {
 	da_push(ss, '\0');
 	char *str = ss->data;
-	ss->data = gc(GC_ALLOC, ss->capacity, sizeof(char), GC_SUBSHELL);
+	ss->data = gc(GC_CALLOC, ss->capacity, sizeof(char), GC_SUBSHELL);
 	ss->size = 0;
 	return str;
 }
