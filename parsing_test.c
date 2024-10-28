@@ -77,26 +77,6 @@ int TokenStates[9][4] = {
 	{0},
 };
 
-/*
-
-S -> id |    University of Wisconsin's parsing examples and error detection approaches
-
-
-	|    Action   | Goto |
-	id	+	*	$	S
-0						
-1					
-2
-3
-4
-5
-6
-7
-8
-
-
-*/
-
 // int main(void) {
 // 	tokens[0] = (Token){TOKEN_ID, 'a'};
 // 	tokens[1] = (Token){TOKEN_PLUS, '+'};
