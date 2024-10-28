@@ -1,5 +1,5 @@
 AND_IF	"&&"
-OR_IO	"||"
+OR_IF	"||"
 NEWLINE '\n'
 
 
@@ -19,9 +19,13 @@ command		     : simple_command
 compound_command : if_clause
 
 simple_command   : WORD
-				 
+
 separator_op     : '&'
 			     | ';'
+
+
+linebreak		 : newline_list
+				 | /* empty */ (Ԑ)
 
 newline_list     : NEWLINE
 			     | newline_list NEWLINE
@@ -30,3 +34,47 @@ separator        : separator_op linebreak
 			     | newline_list
 
 if_clause        : IF compound_list THEN compound_list FI
+
+
+IF = "if", THEN = "then", FI = "fi", NEWLINE = "\n", AMPER = "&", SEMI = ";" 
+
+Formula to find the LA --> A α.Bβ,a
+					   --> FIRSTOF[β, a]
+
+--------------- I0 ---------------
+start_symbol -> • compound_list, $
+compound_list  -> • linebreak term
+compound_list  -> • linebreak term separator
+term -> • term separator and_or
+term -> • and_or
+and_or -> • command
+and_or -> • and_or AND_IF linebreak command
+and_or -> • and_or OR_IF linebreak command
+command -> • simple_command
+command -> • compound_command
+simple_command -> • WORD
+compound_command -> • if_clause
+separator -> • AMPER
+separator -> • SEMI
+linebreak -> • newline_list
+linebreak -> • Ԑ
+newline_list -> • NEWLINE
+newline_list -> • newline_list NEWLINE
+if_clause -> • IF compound_list THEN compound_list FI
+
+
+
+Formula to find the LA --> A α.Bβ,a
+					   --> FIRSTOF[β, a]
+
+--- Grammar ---
+S' -> S
+S -> S + S
+S -> S * S
+S -> (S)
+S -> id
+
+I0 = Closure (
+	S' -> .S, $
+	S -> .S + S, $
+)
