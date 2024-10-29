@@ -67,14 +67,39 @@ if_clause -> • IF compound_list THEN compound_list FI
 Formula to find the LA --> A α.Bβ,a
 					   --> FIRSTOF[β, a]
 
---- Grammar ---
-S' -> S
-S -> S + S
-S -> S * S
-S -> (S)
-S -> id
 
-I0 = Closure (
-	S' -> .S, $
-	S -> .S + S, $
-)
+list -> and_or
+list -> list separator and_or
+and_or -> command
+and_or -> and_or AND_IF command
+and_or -> and_or OR_IF command
+separator -> &
+separator -> ;
+command -> word_list
+word_list -> WORD
+word_list -> word_list WORD
+
+Terminals : { "&", ";", "WORD: [a-z]*", "AND_IF: &&", "OR_IF: ||" }
+
+Augmented grammar :
+
+(0) S -> list
+(1) list -> and_or
+(2) list -> list separator and_or
+(3) list -> list separator
+(4) and_or -> command
+(5) and_or -> and_or AND_IF command
+(6) and_or -> and_or OR_IF command
+(7) separator -> AMPER
+(8) separator -> SEMI
+(9) command -> word_list
+(10) word_list -> WORD
+(11) word_list -> word_list WORD
+
+S' -> start_symbol
+S -> list
+B -> and_or
+C -> separator
+D -> command
+E -> separator
+F -> word_list

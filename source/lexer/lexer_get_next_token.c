@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:19:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/28 09:58:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/29 17:28:55 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,85 +18,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-typedef enum {
-	SEMI,
-	AMPER,
-	NEWLINE,
-	ENDOFFILE,
-} SeparatorOp;
-
-typedef enum {
-	AND_IF,
-	OR_IF,
-} OperatorType;
-
-typedef enum {
-	IF, THEN, FI
-} Keyword;
-
-typedef struct TermNode TermNode;
-typedef struct AndOrNode AndOrNode;
-typedef struct CommandNode CommandNode;
-typedef struct SimpleCommandNode SimpleCommandNode;
-typedef struct CompoundCommandNode CompoundCommandNode;
-
-typedef struct {
-	TermNode *term;
-	TermNode *next;
-} CompoundListNode;
-
-struct TermNode {
-	AndOrNode *and_or;
-	SeparatorOp separator; // ';' | '&' | '\n'
-	AndOrNode *next;
-};
-
-struct AndOrNode {
-	CommandNode *command; // (simple_command | compound_command)*
-	OperatorType operator; // "&&" | "||"
-	CommandNode *next;
-};
-
-struct CommandNode {
-	enum {SIMPLE_CMD, COMPOUND_CMD} type;
-	union {
-		SimpleCommandNode *simple_cmd;
-		CompoundCommandNode *compound_cmd;
-	};
-};
-
-struct SimpleCommandNode {
-	char *word; // single word (echo | ls)
-};
-
-typedef struct {
-	CompoundListNode *condition;
-	CompoundListNode *body;
-} IfClauseNode;
-
-struct CompoundCommandNode {
-	enum {IF_CLAUSE} type;
-	IfClauseNode *if_clause;
-	//.... while for until select etc
-};
+typedef enum {LEX_SET, LEX_GET, LEX_PEAK, LEX_DEBUG} LexMode;
 
 void get_next_token(StringStream *input, StringStream *cache, size_t *line, size_t *column);
-
-void skip_whitespaces(StringStream *input, size_t *column) {
-	while (ft_strchr(" \t", input->data[0])) {
-		da_pop_front(input);
-		(*column)++;
-	}
-}
-
-TermNode *parse_term();
-AndOrNode *parse_and_or();
-CommandNode *parse_command();
-SimpleCommandNode *parse_simple_command();
-CompoundCommandNode *parse_compound_command();
-IfClauseNode *parse_if_clause();
-
-typedef enum {LEX_SET, LEX_GET, LEX_PEAK, LEX_DEBUG} LexMode;
 
 typedef struct {
 	StringStream *input;
@@ -137,69 +61,134 @@ char *lex_interface(LexMode mode, void *input) {
 	return NULL;
 }
 
+typedef enum { AND_IF, OR_IF, AMPER, SEMI, WORD, END } TokenType;
 
+typedef enum { SHIFT, REDUCE, ACCEPT, ERROR } Action;
 
-bool is_sep() {
-	char *peak = lex_interface(LEX_PEAK, NULL);
-	if (!ft_strcmp(";", peak) || !ft_strcmp("&", peak) || !ft_strcmp("\n", peak)) {
-		return true;
-	}
-	return false;
-}
+typedef struct {
+	Action action;
+	int value;
+} TableEntry;
 
-SeparatorOp parse_sep() {
-	char *sep = lex_interface(LEX_GET, NULL);
-	if (!ft_strcmp(";", sep))
-		return SEMI;
-	else if (!ft_strcmp("&", sep))
-		return AMPER;
-	else if (!ft_strcmp("\n", sep))
-		return NEWLINE;
-	else
-		return -1;
-}
+typedef enum { LIST, AND_OR, SEPARATOR, COMMAND, WORD_LIST } NonTerminal;
 
-bool is_operator() {
-	char *peak = lex_interface(LEX_PEAK, NULL);
-	if (!ft_strcmp("&&", peak) || !ft_strcmp("||", peak)) {
-		return true;
-	}
-	return false;
-}
+typedef struct {
+	TokenType type;
+	char	 *value;
+} Tokenn;
 
-OperatorType parse_operator() {
-	char *sep = lex_interface(LEX_GET, NULL);
-	if (!ft_strcmp("&&", sep))
+typedef struct {
+	Tokenn token;
+	int state;
+} StackEntry;
+
+typedef struct {
+	StackEntry **data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} TokenStack;
+
+TokenType identify_token(const char *value) {
+	if (!ft_strcmp("&&", value)) {
 		return AND_IF;
-	else if (!ft_strcmp("&", sep))
+	} else if (!ft_strcmp("||", value)) {
 		return OR_IF;
-	else
-		return -1;
-}
-
-bool is_simple_command() {
-	char *peak = lex_interface(LEX_PEAK, NULL);
-	if (ft_strcmp("if", peak)) {
-		return true;
+	} else if (!ft_strcmp("&", value)) {
+		return AMPER;
+	} else if (!ft_strcmp(";", value)) {
+		return SEMI;
+	} else {
+		return WORD;
 	}
-	return false;
 }
 
-bool is_compound_command() {
-	char *peak = lex_interface(LEX_PEAK, NULL);
-	if (!ft_strcmp("if", peak)) {
-		return true;
+StackEntry *parse(const char *expr) {
+	lex_interface(LEX_SET, (void *)expr);
+
+	static TableEntry parsingTable[15][6] = {
+		/*STATE    AND_IF       OR_IF        AMPER      SEMI        WORD         END     */
+		/* 0 */ { {ERROR, 0}, {ERROR, 0}, {ERROR, 0}, {ERROR, 0}, {SHIFT, 5}, {ERROR, 0} },
+		/* 1 */ { {ERROR, 0}, {ERROR, 0}, {SHIFT, 7}, {SHIFT, 8}, {ERROR, 0}, {ACCEPT, 0} },
+		/* 2 */ { {SHIFT, 9}, {SHIFT, 10}, {REDUCE, 1}, {REDUCE, 1}, {ERROR, 0}, {REDUCE, 1} },
+		/* 3 */ { {REDUCE, 4}, {REDUCE, 4}, {REDUCE, 4}, {REDUCE, 4}, {ERROR, 0}, {REDUCE, 4} },
+		/* 4 */ { {REDUCE, 9}, {REDUCE, 9}, {REDUCE, 9}, {REDUCE, 9}, {SHIFT, 11}, {REDUCE, 9} },
+		/* 5 */ { {REDUCE, 10}, {REDUCE, 10}, {REDUCE, 10}, {REDUCE, 10}, {REDUCE, 10}, {REDUCE, 10} },
+		/* 6 */ { {ERROR, 0}, {ERROR, 0}, {REDUCE, 3}, {REDUCE, 3}, {SHIFT, 5}, {REDUCE, 3} },
+		/* 7 */ { {ERROR, 0}, {ERROR, 0}, {REDUCE, 7}, {REDUCE, 7}, {REDUCE, 7}, {REDUCE, 7} },
+		/* 8 */ { {ERROR, 0}, {ERROR, 0}, {REDUCE, 8}, {REDUCE, 8}, {REDUCE, 8}, {REDUCE, 8} },
+		/* 9 */ { {ERROR, 0}, {ERROR, 0}, {ERROR, 0}, {ERROR, 0}, {SHIFT, 5}, {ERROR, 0} },
+		/*10 */ { {ERROR, 0}, {ERROR, 0}, {ERROR, 0}, {ERROR, 0}, {SHIFT, 5}, {ERROR, 0} },
+		/*11 */ { {REDUCE, 11}, {REDUCE, 11}, {REDUCE, 11}, {REDUCE, 11}, {REDUCE, 11}, {REDUCE, 11} },
+		/*12 */ { {SHIFT, 9}, {SHIFT, 10}, {REDUCE, 2}, {REDUCE, 2}, {ERROR, 0}, {REDUCE, 2} },
+		/*13 */ { {REDUCE, 5}, {REDUCE, 5}, {REDUCE, 5}, {REDUCE, 5}, {ERROR, 0}, {REDUCE, 5} },
+		/*14 */ { {REDUCE, 6}, {REDUCE, 6}, {REDUCE, 6}, {REDUCE, 6}, {ERROR, 0}, {REDUCE, 6} },
+	};
+
+	static int gotoTable[15][5] = {
+		/*       LIST     AND_OR   SEPARATOR  COMMMAND WORD_LIST */
+		/* 0 */ { 1,        2,       -1,        3,        4},
+		/* 1 */ {-1,       -1,        6,       -1,       -1},
+		/* 2 */ {-1,       -1,       -1,       -1,       -1},
+		/* 3 */ {-1,       -1,       -1,       -1,       -1},
+		/* 4 */ {-1,       -1,       -1,       -1,       -1},
+		/* 5 */ {-1,       -1,       -1,       -1,       -1},
+		/* 6 */ {-1,       12,       -1,        3,        4},
+		/* 7 */ {-1,       -1,       -1,       -1,       -1},
+		/* 8 */ {-1,       -1,       -1,       -1,       -1},
+		/* 9 */ {-1,       -1,       -1,       13,        4},
+		/*10 */ {-1,       -1,       -1,       14,        4},
+		/*11 */ {-1,       -1,       -1,       -1,       -1},
+		/*12 */ {-1,       -1,       -1,       -1,       -1},
+		/*13 */ {-1,       -1,       -1,       -1,       -1},
+		/*14 */ {-1,       -1,       -1,       -1,       -1},
+	};
+	
+	da_create(stack, TokenStack, sizeof(StackEntry), GC_SUBSHELL);
+
+	Tokenn token;
+	token.value = lex_interface(LEX_GET, NULL);
+	token.type = identify_token(token.value);
+
+	while (true) {
+		int state = da_peak_back(stack)->state;
+		TableEntry entry = parsingTable[state][token.type];
+
+		switch(entry.action) {
+			case SHIFT: {
+				StackEntry *new_entry = gc_unique(StackEntry, GC_SUBSHELL);
+				new_entry->token = token;
+				new_entry->state = entry.value;
+				da_push(stack, new_entry);
+				token.value = lex_interface(LEX_GET, NULL);
+				token.type = identify_token(token.value);
+				break;
+			}
+			case REDUCE: {
+				int rule = entry.value;
+				StackEntry *new_entry = gc_unique(StackEntry, GC_SUBSHELL);
+				switch (rule) {
+					case 1: {
+						da_pop(stack);
+					}
+				}
+			}
+			case ACCEPT: {
+				return da_pop(stack);
+				break;
+			}
+			case ERROR: {
+				break;
+			}
+		}
+
+
 	}
-	return false;
 }
 
 
-
-
-void lexer_tokenize(char *in) {
-	lex_interface(LEX_SET, in);
-	CompoundListNode *root = NULL;
-	dprintf(2, "tok: %s\n", root->term->and_or->command->simple_cmd->word);
-	(void) root;
-	//print this shit;
+void parse_input(char *in) {
+	parse(in);
 }
+
