@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:16:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/26 15:19:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/29 14:24:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,8 +216,9 @@ typedef enum {
 	H_NUMBER,
 } type_of_history_event;
 
+
 //-----------------Lexer------------------//
-void			lexer_tokenize(char *in);
+void parse_input(char *in);
 TokenList		*lexer_lex_all(char *input);
 Token			*lexer_get_next_token(Lexer_p l);
 Lexer_p			lexer_init(char *input);

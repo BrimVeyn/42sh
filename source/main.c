@@ -134,7 +134,7 @@ int main(const int ac, const char *av[], const char *env[]) {
 				}
 				add_input_to_history(input, &history_fd);
 			}
-			lexer_tokenize(input);
+			parse_input(input);
 			TokenList *tokens = lexer_lex_all(input);
 			// tokenListToString(tokens);
 			if (lexer_syntax_error(tokens))
