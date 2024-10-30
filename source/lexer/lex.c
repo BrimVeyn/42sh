@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/26 15:24:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/30 12:21:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "utils.h"
 #include "libft.h"
 #include "debug.h"
+#include <stdio.h>
 
 #define BITMAP8_SIZE 8
 #define IS_ON(ptr, context) ((*ptr) & (1 << (int) context)) > 0
@@ -105,21 +106,22 @@ void get_next_token(StringStream *input, StringStream *cache, size_t *line, size
 	}
 
 	if (!*cache->data) {
-		if (!ft_strcmp(input->data, "&&")) {
+		if (!ft_strncmp(input->data, "&&", 2)) {
 			da_push(cache, da_pop_front(input));
 			da_push(cache, da_pop_front(input));
 			(*column)++;
 			(*column)++;
-		} else if (!ft_strcmp(input->data, "||")) {
+			return ;
+		} else if (!ft_strncmp(input->data, "||", 2)) {
 			da_push(cache, da_pop_front(input));
 			da_push(cache, da_pop_front(input));
 			(*column)++;
 			(*column)++;
+			return ;
 		}
 		switch (input->data[0]) {
-			case ';' : da_push(cache, da_pop_front(input)); (*column)++; break;
-			case '&' : da_push(cache, da_pop_front(input)); (*column)++; break;
-			default: break;
+			case ';' : da_push(cache, da_pop_front(input)); (*column)++; return;
+			case '&' : da_push(cache, da_pop_front(input)); (*column)++; return;
 		}
 	}
 

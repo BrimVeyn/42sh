@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:16:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/29 14:24:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/30 13:06:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,6 +227,15 @@ void			lexer_deinit(Lexer_p lexer);
 void			lexer_read_char(Lexer_p l);
 void			lexer_read_x_char(Lexer_p l, uint16_t n);
 bool			lexer_syntax_error(TokenList *tokens);
+
+
+//-------------New Lexer--------------------//
+
+typedef enum {LEX_SET, LEX_GET, LEX_PEAK, LEX_DEBUG} LexMode;
+
+char *lex_interface(LexMode mode, void *input);
+
+//------------------------------------------//
 
 //-----------------Utils------------------//
 bool			is_whitespace(char c);
