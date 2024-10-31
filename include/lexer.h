@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:16:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/30 13:06:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/31 10:44:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -231,9 +231,6 @@ bool			lexer_syntax_error(TokenList *tokens);
 
 //-------------New Lexer--------------------//
 
-typedef enum {LEX_SET, LEX_GET, LEX_PEAK, LEX_DEBUG} LexMode;
-
-char *lex_interface(LexMode mode, void *input);
 
 //------------------------------------------//
 
