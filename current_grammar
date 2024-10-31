@@ -96,6 +96,19 @@ Augmented grammar :
 (10) word_list -> WORD
 (11) word_list -> word_list WORD
 
+S -> list
+list -> and_or
+list -> list separator and_or
+list -> list separator
+and_or -> command
+and_or -> and_or AND_IF command
+and_or -> and_or OR_IF command
+separator -> AMPER
+separator -> SEMI
+command -> word_list
+word_list -> WORD
+word_list -> word_list WORD
+
 S' -> start_symbol
 S -> list
 B -> and_or

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/26 16:28:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/31 10:41:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -467,7 +467,7 @@ SimpleCommand *parser_parse_current(TokenList *list, Vars *shell_vars) {
 	command->redir_list = redir_list;
 
 	// printCommand(command);
-	
+
 	if (command->bin == NULL && var_list->size != 0)
 		add_vars_to_set(shell_vars, var_list);
 	else
