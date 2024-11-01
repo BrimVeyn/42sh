@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/30 12:21:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/01 13:49:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,10 +53,16 @@ WordContext get_end_of_context(const StringStream *input, WordContextBounds *map
 	}
 }
 
+void da_transfer(StringStream *in, StringStream *out, int number) {
+	for (int i = 0; i < number; i++) {
+		da_push(in, da_pop_front(out));
+	}
+}
+
 void get_next_token(StringStream *input, StringStream *cache, size_t *line, size_t *column) {
 
 	static WordContextBounds map[] = {
-		[WORD_WORD] = {.start = "NONE", .end = " \t\n;&", .bitmap = WORD_MAP},
+		[WORD_WORD] = {.start = "NONE", .end = " \t\n;&|<>", .bitmap = WORD_MAP},
 		[WORD_CMD_SUB] = {"$(", ")", CMD_SUB_MAP},
 		[WORD_PARAM] = { "${", "}" , PARAM_MAP},
 		[WORD_SUBSHELL] = { "(", ")", SUBSHELL_MAP},
@@ -106,22 +112,22 @@ void get_next_token(StringStream *input, StringStream *cache, size_t *line, size
 	}
 
 	if (!*cache->data) {
-		if (!ft_strncmp(input->data, "&&", 2)) {
-			da_push(cache, da_pop_front(input));
-			da_push(cache, da_pop_front(input));
-			(*column)++;
-			(*column)++;
-			return ;
-		} else if (!ft_strncmp(input->data, "||", 2)) {
-			da_push(cache, da_pop_front(input));
-			da_push(cache, da_pop_front(input));
-			(*column)++;
-			(*column)++;
-			return ;
-		}
+		if (!ft_strncmp(input->data, "<<-", 3)) { da_transfer(cache, input, 3); (*column) += 3; return ; }
+		if (!ft_strncmp(input->data, "<&", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
+		if (!ft_strncmp(input->data, ">&", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
+		if (!ft_strncmp(input->data, "<<", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
+		if (!ft_strncmp(input->data, "<>", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
+		if (!ft_strncmp(input->data, ">>", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
+		if (!ft_strncmp(input->data, ">|", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
+		if (!ft_strncmp(input->data, ";;", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
+		if (!ft_strncmp(input->data, "&&", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
+		if (!ft_strncmp(input->data, "||", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
 		switch (input->data[0]) {
 			case ';' : da_push(cache, da_pop_front(input)); (*column)++; return;
 			case '&' : da_push(cache, da_pop_front(input)); (*column)++; return;
+			case '<' : da_push(cache, da_pop_front(input)); (*column)++; return;
+			case '>' : da_push(cache, da_pop_front(input)); (*column)++; return;
+			case '|' : da_push(cache, da_pop_front(input)); (*column)++; return;
 		}
 	}
 

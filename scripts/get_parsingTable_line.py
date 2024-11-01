@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 from prettytable import PrettyTable
 
 # Load HTML data from file
-with open("test.html", "r", encoding="utf-8") as file:
+with open("table.html", "r", encoding="utf-8") as file:
     html_data = file.read()
 
 # Parse HTML

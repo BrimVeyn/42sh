@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 16:43:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/31 14:12:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/01 13:59:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 /* HomeCooked bash LALR(1) Automaton */
 #include "final_parser.h"
+#include "utils.h"
 #include <unistd.h>
 
 char *tokenTypeStr(TokenType type) {
@@ -105,6 +106,7 @@ char *tokenTypeStr(TokenType type) {
 	}
 	return NULL;
 }
+
 
 char *actionStr(const Action action) {
 	switch (action) {

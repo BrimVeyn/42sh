@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/26 14:19:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/01 13:53:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,7 @@ typedef struct {
 	} while (0); \
 	
 #define da_pop(array) \
-	(array)->size == 0 ? 0 : (array)->data[--(array)->size] \
+	((array)->size == 0 ? 0 : (array)->data[--(array)->size]) \
 
 #define da_peak_back(array) \
 	(array)->size == 0 ? 0 : (array)->data[(array)->size - 1] \
