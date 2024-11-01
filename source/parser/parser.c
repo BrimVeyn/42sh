@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:27:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/18 18:10:20 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/01 15:35:58 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,22 @@
 #include "lexer.h"
 #include "exec.h"
 #include "debug.h"
+#include "ft_readline.h"
+#include "c_string.h"
 
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <readline/readline.h>
 
-char *here_doc(char *eof){
+char *here_doc(char *eof, Vars *shell_vars){
 	char *input = NULL;
+	char *prompt = string_list_get_value(shell_vars->set, "PS2");
+	if (!prompt){
+		prompt = ft_strdup("> ");
+		gc(GC_ADD, prompt, GC_SUBSHELL);
+	}
+
 	static int heredoc_number = 0;
 	char filename[50]; 
 	sprintf(filename, "/tmp/here_doc_%d", heredoc_number++);
@@ -33,21 +40,23 @@ char *here_doc(char *eof){
 	if (file_fd == -1) {
 		return NULL;
 	}
-	while((input = readline("> ")) && ft_strcmp(eof, input)){
+	while((input = ft_readline(prompt)) && ft_strcmp(eof, input)){
 		dprintf(file_fd, "%s\n", input);
+		free(input);
 	}
+	free(input);
 	close(file_fd);
 	return gc(GC_ADD, ft_strdup(filename), GC_GENERAL);
 }
 
-bool heredoc_detector(TokenList *data) {
+bool heredoc_detector(TokenList *data, Vars *shell_vars) {
 	for (uint16_t it = 0; it < data->size; it++) {
 		const Token *curr = data->data[it];
 		Token *const el = (curr->tag == T_WORD && curr->w_postfix->tag == T_REDIRECTION) ? curr->w_postfix : (Token *) curr;
 		if (el->tag == T_REDIRECTION && el->r_type == R_HERE_DOC) {
 			Token *filename = el->r_postfix;
 			el->r_type = R_INPUT;
-			filename->w_infix = here_doc(filename->w_infix);
+			filename->w_infix = here_doc(filename->w_infix, shell_vars);
 			if (!filename->w_infix) return false;
 		}
 	}
@@ -119,6 +128,21 @@ void remove_boundaries(Str *exp) {
 	exp->str = tmp;
 }
 
+char *parser_tilde_expansion(char *word, Vars *shell_vars) {
+	int result = -1;
+	string str = string_init_str(word);
+    char *home = string_list_get_value(shell_vars->env, "HOME");
+	while ((result = ft_strstr(str.data, "~")) != -1){
+		str_erase(&str, result, 1);
+		if (home){
+			str_insert_str(&str, home, result);
+		}
+	}
+	char *resultchar = ft_strdup(str.data);
+	free(str.data);
+	return resultchar;
+}
+
 void string_list_consume(StrList *str_list, Vars *shell_vars) {
 	for (size_t i = 0; i < str_list->size; i++) {
 		char *result = NULL;
@@ -130,6 +154,16 @@ void string_list_consume(StrList *str_list, Vars *shell_vars) {
 		else
 			remove_boundaries(curr);
 		// printf("trimmed: %s\n", curr->str);
+		result = parser_tilde_expansion(curr->str, shell_vars);
+		
+		printf("result: %s\n", result);
+		if (result) {
+			gc(GC_FREE, str_list->data[i]->str, GC_SUBSHELL);
+			str_list->data[i]->str = gc(GC_ADD, result, GC_SUBSHELL);
+		} else {
+			str_list->data[i]->str = NULL;
+		}
+
 		switch (kind) {
 			case EXP_CMDSUB: { result = parser_command_substitution(curr->str, shell_vars); break;}
 			case EXP_ARITHMETIC: {result = parser_arithmetic_expansion(curr->str, shell_vars); break;}
