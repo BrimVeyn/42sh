@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/24 14:19:51 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/01 16:31:30 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 //TODO:Limiter history -> HIST_SIZE
 //HistFileSize HistFile
 //ctrl + v multiline
-//$PS2
+
 int rl_done = 0;
 
 void move_cursor(int x, int y);
@@ -149,7 +149,8 @@ void set_cursor_position(readline_state_t *rl_state) {
 
 void ft_readline_clean(){
 	readline_state_t *rl_state = manage_rl_state(RL_GET, NULL);
-
+	
+	(void)rl_state;
 	gc(GC_FREE, rl_state->prompt.data, GC_READLINE);
 	destroy_history();
 	gc(GC_FREE, rl_state, GC_READLINE);
@@ -196,7 +197,6 @@ void get_cursor_pos(position_t *position){
 }
 
 void update_line(readline_state_t *rl_state, string *line) {
-	(void)line;
 	// int cols = get_col();
  //    int tchars = line->size + rl_state->prompt.size;
     // int nlines = tchars / cols;
@@ -289,7 +289,7 @@ int handle_normal_keys(readline_state_t *rl_state, char c, string *line){
         return 2;
     }
 
-    if (!rl_state->interactive || (pos == str_length(line))){
+    if (rl_state->interactive || (pos == str_length(line))){
         if (c == 127) {
             str_pop_back(line);
 			update_cursor_x(rl_state, line, -2);
@@ -338,58 +338,6 @@ int can_go_right(readline_state_t *rl_state, string *line) {
     return rl_state->cursor.x < cols;
 }
 
-int handle_special_keys(readline_state_t *rl_state, string *line){
-    char seq[2];
-    if (read(STDIN_FILENO, &seq[0], 1) == 0) return 1;
-    if (read(STDIN_FILENO, &seq[1], 1) == 0) return 1;
-
-    if (seq[0] == '['){
-		if (rl_state->search_mode.active == true){
-			rl_state->search_mode.active = false;
-			rl_state->prompt.size = ft_strlen(rl_state->prompt.data);
-		}
-        if (seq[1] == 'A' && history->offset > 0){//left
-            history->offset--;
-            rl_state->cursor.x = history->entries[history->offset]->line.size;
-			gc(GC_FREE, line->data, GC_READLINE);
-            *line = str_strdup(&history->entries[history->offset]->line);
-			gc(GC_ADD, line->data, GC_READLINE);
-            return 2;
-        }
-        else if (seq[1] == 'D' && can_go_left(rl_state)){
-			update_cursor_x(rl_state, line, -1);
-			set_cursor_position(rl_state);
-        }
-        else if (seq[1] == 'C' && can_go_right(rl_state, line)){
-			update_cursor_x(rl_state, line, 1);
-			set_cursor_position(rl_state);
-        }
-        else if (seq[1] == 'B' && history->offset < history->length - 1){
-            history->offset++;
-            rl_state->cursor.x = history->entries[history->offset]->line.size;
-			gc(GC_FREE, line->data, GC_READLINE);
-            *line = str_strdup(&history->entries[history->offset]->line);
-			gc(GC_ADD, line->data, GC_READLINE);
-            return 2;
-        }
-    }
-    return 0;
-}
-
-void handle_control_keys(readline_state_t *rl_state, char char_c){
-	if (char_c == 12){
-		write(STDOUT_FILENO, "\033[2J", 4);
-		rl_state->cursor.y = 0;
-		rl_state->cursor_offset.y = 0;
-		rl_state->cursor_offset.x = 0;
-		move_cursor(0, 0);
-		rl_print_prompt(STDOUT_FILENO, rl_state);
-	}
-	if (char_c == 18){
-		rl_state->search_mode.active = true;
-	}
-}
-
 int should_process_enter() {
 	static struct timeval last_enter_time = {0};
     struct timeval current_time;
@@ -406,7 +354,6 @@ int should_process_enter() {
 }
 
 
-//TODO: Enter ctrl + R
 char *ft_readline(const char *prompt) {
 	readline_state_t *rl_state = NULL;
 	
@@ -456,8 +403,7 @@ char *ft_readline(const char *prompt) {
 			ft_rl_newline();
 			rl_done = 0;
 			str_clear(line);
-			continue;
-		}
+			continue; }
 
 		int result = 0;
         if (bytes_read == 0 || c == VEOF) {
@@ -466,8 +412,8 @@ char *ft_readline(const char *prompt) {
                     write(STDOUT_FILENO, "\n", 1);
                     pop_history();
                 }
-                gc(GC_FREE, line->data, GC_READLINE);
-				gc(GC_FREE, line, GC_READLINE);
+                // gc(GC_FREE, line->data, GC_READLINE);
+				// gc(GC_FREE, line, GC_READLINE);
                 return NULL;
             }
 		} else if (c == 12 || c == 18) { // ^L | ^R
@@ -475,7 +421,7 @@ char *ft_readline(const char *prompt) {
         } else if (c == '\033') {
             result = handle_special_keys(rl_state, line);
         } else {
-            result = handle_normal_keys(rl_state, c, line);
+			result = handle_normal_keys(rl_state, c, line);
         }
 		
 		if (result == 1) {
@@ -486,8 +432,6 @@ char *ft_readline(const char *prompt) {
 			update_line(rl_state, line);
 			set_cursor_position(rl_state);
 		}
-
-
     } while (true);
     
     if (rl_state->interactive)
@@ -496,20 +440,16 @@ char *ft_readline(const char *prompt) {
     char *str = NULL;
 	if (!rl_done)
 		str = ft_strdup(line->data);
-    
-	gc(GC_FREE, rl_state->prompt.data, GC_READLINE);
+	else{
+		str = ft_strdup("");
+	}
+	
 	gc(GC_FREE, line->data, GC_READLINE);
 	gc(GC_FREE, line, GC_READLINE);
 
     if (rl_state->interactive)
         pop_history();
     
-    if (rl_done) {
-        return ft_strdup("");
-    }
-    
     return str;
 }
-
-//TODO:add calloc in garbage collector
 

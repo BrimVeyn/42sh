@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/16 17:24:39 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/10/31 12:55:25 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,29 +148,8 @@ static bool is_bad_substitution(char *str, int pos){
 }
 
 char *parser_parameter_expansion(char *str, Vars *shell_vars){
-	//TODO: Get ~ expansion out of here and think about a btter approach to factorize the code
 	regex_match_t result;
 	char *value = NULL;
-
-	char *home = shell_vars_get_value(shell_vars, "HOME");
-	do {
-		int index = ft_strstr(str, "~");
-		if (index == -1)
-			break;
-		char *start = (index == 0) ? ft_strdup("") : ft_substr(str, 0, index - 1);
-		char *end = ((size_t)index == ft_strlen(str)) ? ft_strdup("") : ft_substr(str, index + 1, ft_strlen(str) - index);
-		char *start_and_home = ft_strjoin(start, home);
-		char *new_string = gc(GC_ADD, ft_strjoin(home, end), GC_SUBSHELL);
-		gc(GC_FREE, str, GC_SUBSHELL);
-		str = new_string;
-
-		// char value[MAX_WORD_LEN] = {0};
-		// ft_memset(value, 0, MAX_WORD_LEN);
-		// ft_sprintf(value, "%s%s%s", start, home, end);
-		// str = gc(GC_ADD, ft_strdup(value), GC_SUBSHELL);
-		// printf("VALUE: %s\n", value);
-		FREE_POINTERS(start, end, start_and_home);
-	} while (1);
 
 	do{
 		result = regex_match ("\\$\\{", str);

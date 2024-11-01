@@ -274,7 +274,7 @@ int main(const int ac, char *av[], const char *env[]) {
 			// tokenListToString(tokens);
 			if (lexer_syntax_error(tokens))
 				continue; 
-			heredoc_detector(tokens);
+			heredoc_detector(tokens, shell_vars);
 			Node *AST = ast_build(tokens);
 			ast_execute(AST, shell_vars, true);
 			//update env '_' variable

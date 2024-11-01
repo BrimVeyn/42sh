@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/24 13:32:38 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/01 16:31:37 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,10 @@ typedef struct _hist_entry {
 } HIST_ENTRY;
 
 typedef struct _hist_state {
-  HIST_ENTRY **entries; /* Pointer to the entries themselves. */
-  int offset;           /* The location pointer within this array. */
-  int length;           /* Number of elements within this array. */
-  int capacity;             /* Number of slots allocated to this array. */
+	HIST_ENTRY **entries; /* Pointer to the entries themselves. */
+	int offset;           /* The location pointer within this array. */
+	int length;           /* Number of elements within this array. */
+	int capacity;             /* Number of slots allocated to this array. */
 } HISTORY_STATE;
 
 typedef enum {
@@ -68,5 +68,16 @@ char *search_in_history(char *str);
 char *ft_readline(const char *prompt);
 void ft_readline_clean();
 void ft_rl_newline();
+
+void update_line(readline_state_t *rl_state, string *line);
+void update_cursor_x(readline_state_t *rl_state, string *line, ssize_t n);
+
+size_t get_col(void);
+size_t get_row(void);
+void rl_print_prompt(int fd, readline_state_t *rl_state);
+
+void move_cursor(int x, int y);
+
+void set_cursor_position(readline_state_t *rl_state);
 
 #endif

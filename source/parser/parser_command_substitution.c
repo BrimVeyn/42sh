@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:17:49 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/24 13:39:21 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/01 16:20:51 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ bool execute_command_sub(char *input, Vars *shell_vars) {
 		TokenList *tokens = lexer_lex_all(lexer);
 		if (lexer_syntax_error(tokens))
 			clean_sub();
-		heredoc_detector(tokens);
+		heredoc_detector(tokens, shell_vars);
 		Node *AST = ast_build(tokens);
 		ast_execute(AST, shell_vars, true);
 		clean_sub();

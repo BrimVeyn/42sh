@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/24 14:17:04 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/01 16:21:26 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 
 bool history_defined = false;
 HISTORY_STATE *history;
+
 
 void init_history(){
 	history = gc(GC_ALLOC, 1, sizeof(HISTORY_STATE), GC_READLINE);

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:48 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/21 16:15:48 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/01 15:36:25 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ SimpleCommand		*parser_parse_current(TokenList *tl, Vars *shell_vars);
 bool				execute_command_sub(char *input, Vars *shell_vars);
 
 //-------------------Here_doc-----------------------//
-bool				heredoc_detector(TokenList *data);
+bool heredoc_detector(TokenList *data, Vars *shell_vars);
 
 //-------------------Parser modules------------//
 char				*parser_parameter_expansion(char *str, Vars *shell_vars);
@@ -125,5 +125,5 @@ int					get_history(void);
 void				parser_skip_subshell(TokenList *list, size_t *it);
 void				skip_cmdgrp(TokenList *self, TokenList *list, size_t *i);
 //---------------------------------------------------------------//
-
+//
 #endif // !PARSER_H

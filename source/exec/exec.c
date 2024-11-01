@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/24 13:38:40 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/01 15:31:25 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@
 #include "utils.h"
 #include "libft.h"
 
-#include <readline/history.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <termios.h>
@@ -32,7 +31,6 @@
 
 int g_exitno;
 
-//LARBIN add FD validity check (>1023)
 bool apply_redirect(const Redirection redirect) {
 	int fd = redirect.fd;
 	const int open_flag = (redirect.r_type == R_INPUT) * (O_RDONLY)
