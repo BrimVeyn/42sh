@@ -142,14 +142,14 @@ TokenType identify_token(const char *raw_value, const int table_row) {
 
 extern TableEntry parsingTable[182][86];
 
-RedirectionP *getRedirFromIOFile(Tokenn *filename, Tokenn *type) {
+RedirectionP *createRedirFromIOFile(Tokenn *filename, Tokenn *type) {
 	RedirectionP *self = gc_unique(RedirectionP, GC_SUBSHELL);
 	self->type = type->type;
 	self->filename = filename->filename->value;
 	return self;
 }
 
-SimpleCommandP *getSimpleCommand(void) {
+SimpleCommandP *createSimpleCommand(void) {
 	SimpleCommandP *command = gc_unique(SimpleCommandP, GC_SUBSHELL);
 	da_create(redir_list, RedirectionL, sizeof(RedirectionP *), GC_SUBSHELL);
 	da_create(word_list, StringListL, sizeof(char *), GC_SUBSHELL);
@@ -839,7 +839,7 @@ StackEntry *parse() {
 					}
 					case 74: { /* simple_command -> cmd_name */
 						char *word = da_pop(stack)->token.raw_value;
-						SimpleCommandP *command = getSimpleCommand();
+						SimpleCommandP *command = createSimpleCommand();
 						da_push(command->word_list, word);
 						reduced_entry->token.type = Simple_Command;
 						reduced_entry->token.simple_command = command;
@@ -865,7 +865,7 @@ StackEntry *parse() {
 					}
 					case 77: { /* cmd_prefix -> io_redirect */
 						RedirectionP *redir = da_pop(stack)->token.redir;
-						SimpleCommandP *command = getSimpleCommand();
+						SimpleCommandP *command = createSimpleCommand();
 						da_push(command->redir_list, redir);
 						reduced_entry->token.type = Cmd_Prefix;
 						reduced_entry->token.simple_command = command;
@@ -874,9 +874,11 @@ StackEntry *parse() {
 						break;
 					}
 					case 78: { /* cmd_prefix -> cmd_prefix io_redirect */
-						da_pop(stack);
-						da_pop(stack);
+						RedirectionP *redir = da_pop(stack)->token.redir;
+						SimpleCommandP *command = da_pop(stack)->token.simple_command;
+            da_push(command->redir_list, redir);
 						reduced_entry->token.type = Cmd_Prefix;
+            reduced_entry->token.simple_command = command;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Cmd_Prefix].value;
 						break;
@@ -898,7 +900,7 @@ StackEntry *parse() {
 					}
 					case 81: { /* cmd_suffix -> io_redirect */
 						RedirectionP *redir = da_pop(stack)->token.redir;
-						SimpleCommandP *command = getSimpleCommand();
+						SimpleCommandP *command = createSimpleCommand();
 						da_push(command->redir_list, redir);
 						reduced_entry->token.type = Cmd_Suffix;
 						reduced_entry->token.simple_command = command;
@@ -917,7 +919,7 @@ StackEntry *parse() {
 					}
 					case 83: { /* cmd_suffix -> WORD */
 						char *word = da_pop(stack)->token.raw_value;
-						SimpleCommandP *command = getSimpleCommand();
+						SimpleCommandP *command = createSimpleCommand();
 						da_push(command->word_list, word);
 						reduced_entry->token.type = Cmd_Suffix;
 						reduced_entry->token.simple_command = command;
@@ -983,7 +985,7 @@ StackEntry *parse() {
 						Tokenn filename = da_pop(stack)->token;
 						Tokenn type = da_pop(stack)->token;
 						reduced_entry->token.type = Io_File;
-						reduced_entry->token.redir = getRedirFromIOFile(&filename, &type);
+						reduced_entry->token.redir = createRedirFromIOFile(&filename, &type);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Io_File].value;
 						break;
@@ -993,7 +995,7 @@ StackEntry *parse() {
 						Tokenn filename = da_pop(stack)->token;
 						Tokenn type = da_pop(stack)->token;
 						reduced_entry->token.type = Io_File;
-						reduced_entry->token.redir = getRedirFromIOFile(&filename, &type);
+						reduced_entry->token.redir = createRedirFromIOFile(&filename, &type);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Io_Here].value;
 						break;
