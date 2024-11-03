@@ -804,10 +804,16 @@ StackEntry *parse() {
 						break;
 					}
 					case 70: { /* simple_command -> cmd_prefix cmd_word cmd_suffix */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						SimpleCommandP *suffix = da_pop(stack)->token.simple_command;
+						char *word = da_pop(stack)->token.raw_value;
+						SimpleCommandP *prefix = da_pop(stack)->token.simple_command;
+            da_push(prefix->word_list, word);
+            for (size_t i = 0; i < suffix->word_list->size; i++)
+              da_push(prefix->word_list, suffix->word_list->data[i]);
+            for (size_t i = 0; i < suffix->redir_list->size; i++)
+              da_push(prefix->redir_list, suffix->redir_list->data[i]);
 						reduced_entry->token.type = Simple_Command;
+            reduced_entry->token.simple_command = prefix;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Simple_Command].value;
 						break;
@@ -823,16 +829,19 @@ StackEntry *parse() {
 						break;
 					}
 					case 72: { /* simple_command -> cmd_prefix */
-						da_pop(stack);
+						SimpleCommandP *command = da_pop(stack)->token.simple_command;
 						reduced_entry->token.type = Simple_Command;
+            reduced_entry->token.simple_command = command;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Simple_Command].value;
 						break;
 					}
 					case 73: { /* simple_command -> cmd_name cmd_suffix */
-						da_pop(stack);
-						da_pop(stack);
+						SimpleCommandP *command = da_pop(stack)->token.simple_command;
+						char *word = da_pop(stack)->token.raw_value;
+            da_push(command->word_list, word);
 						reduced_entry->token.type = Simple_Command;
+            reduced_entry->token.simple_command = command;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Simple_Command].value;
 						break;
@@ -928,9 +937,11 @@ StackEntry *parse() {
 						break;
 					}
 					case 84: { /* cmd_suffix -> cmd_suffix WORD */
-						da_pop(stack);
-						da_pop(stack);
+						char *word = da_pop(stack)->token.raw_value;
+						SimpleCommandP *command = da_pop(stack)->token.simple_command;
+            da_push(command->word_list, word);
 						reduced_entry->token.type = Cmd_Suffix;
+            reduced_entry->token.simple_command = command;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Cmd_Suffix].value;
 						break;
