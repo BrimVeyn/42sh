@@ -1,112 +1,112 @@
-(1) program -> linebreak complete_commands linebreak
-(2) program -> linebreak
-(3) complete_commands -> complete_commands newline_list complete_command
-(4) complete_commands -> complete_command
-(5) complete_command -> list separator_op
-(6) complete_command -> list
-(7) list -> list separator_op and_or
-(8) list -> and_or
-(9) and_or -> pipeline
-(10) and_or -> and_or AND_IF linebreak pipeline
-(11) and_or -> and_or OR_IF linebreak pipeline
-(12) pipeline -> pipe_sequence
-(13) pipeline -> BANG pipe_sequence
-(14) pipe_sequence -> command
-(15) pipe_sequence -> pipe_sequence PIPE linebreak command
-(16) command -> simple_command
-(17) command -> compound_command
-(18) command -> compound_command redirect_list
-(19) command -> function_definition
-(20) compound_command -> brace_group
-(21) compound_command -> subshell
-(22) compound_command -> for_clause
-(23) compound_command -> case_clause
-(24) compound_command -> if_clause
-(25) compound_command -> while_clause
-(26) compound_command -> until_clause
-(27) subshell -> LPAREN compound_list RPAREN
-(28) compound_list -> linebreak term
-(29) compound_list -> linebreak term separator
-(30) term -> term separator and_or
-(31) term -> and_or
-(32) for_clause -> FOR name do_group
-(33) for_clause -> FOR name sequential_sep do_group
-(34) for_clause -> FOR name linebreak in sequential_sep do_group
-(35) for_clause -> FOR name linebreak in wordlist sequential_sep do_group
-(36) name -> NAME
-(37) in -> IN
-(38) wordlist -> wordlist WORD
-(39) wordlist -> WORD
-(40) case_clause -> CASE WORD linebreak in linebreak case_list ESAC
-(41) case_clause -> CASE WORD linebreak in linebreak case_list_ns ESAC
-(42) case_clause -> CASE WORD linebreak in linebreak ESAC
-(43) case_list_ns -> case_list case_item_ns
-(44) case_list_ns -> case_item_ns
-(45) case_list -> case_list case_item
-(46) case_list -> case_item
-(47) case_item_ns -> pattern RPAREN linebreak
-(48) case_item_ns -> pattern RPAREN compound_list
+(0) program -> linebreak complete_commands linebreak
+(1) program -> linebreak
+(2) complete_commands -> complete_commands newline_list complete_command
+(3) complete_commands -> complete_command
+(4) complete_command -> list separator_op
+(5) complete_command -> list
+(6) list -> list separator_op and_or
+(7) list -> and_or
+(8) and_or -> pipeline
+(9) and_or -> and_or AND_IF linebreak pipeline
+(10) and_or -> and_or OR_IF linebreak pipeline
+(11) pipeline -> pipe_sequence
+(12) pipeline -> BANG pipe_sequence
+(13) pipe_sequence -> command
+(14) pipe_sequence -> pipe_sequence PIPE linebreak command
+(15) command -> simple_command
+(16) command -> compound_command
+(17) command -> compound_command redirect_list
+(18) command -> function_definition
+(19) compound_command -> brace_group
+(20) compound_command -> subshell
+(21) compound_command -> for_clause
+(22) compound_command -> case_clause
+(23) compound_command -> if_clause
+(24) compound_command -> while_clause
+(25) compound_command -> until_clause
+(26) subshell -> LPAREN compound_list RPAREN
+(27) compound_list -> linebreak term
+(28) compound_list -> linebreak term separator
+(29) term -> term separator and_or
+(30) term -> and_or
+(31) for_clause -> FOR name do_group
+(32) for_clause -> FOR name sequential_sep do_group
+(33) for_clause -> FOR name linebreak in sequential_sep do_group
+(34) for_clause -> FOR name linebreak in wordlist sequential_sep do_group
+(35) name -> NAME
+(36) in -> IN
+(37) wordlist -> wordlist WORD
+(38) wordlist -> WORD
+(39) case_clause -> CASE WORD linebreak in linebreak case_list ESAC
+(40) case_clause -> CASE WORD linebreak in linebreak case_list_ns ESAC
+(41) case_clause -> CASE WORD linebreak in linebreak ESAC
+(42) case_list_ns -> case_list case_item_ns
+(43) case_list_ns -> case_item_ns
+(44) case_list -> case_list case_item
+(45) case_list -> case_item
+(46) case_item_ns -> pattern RPAREN linebreak
+(47) case_item_ns -> pattern RPAREN compound_list
+(48) case_item_ns -> LPAREN pattern RPAREN linebreak
 (49) case_item_ns -> LPAREN pattern RPAREN linebreak
-(50) case_item_ns -> LPAREN pattern RPAREN linebreak
-(51) case_item_ns -> LPAREN pattern RPAREN compound_list
-(52) case_item -> pattern RPAREN linebreak DSEMI linebreak
-(53) case_item -> pattern RPAREN compound_list DSEMI linebreak
-(54) case_item -> LPAREN pattern RPAREN linebreak DSEMI linebreak
-(55) case_item -> LPAREN pattern RPAREN compound_list DSEMI linebreak
-(56) pattern -> WORD
-(57) pattern -> pattern PIPE WORD
-(58) if_clause -> IF compound_list THEN compound_list else_part FI
-(59) if_clause -> IF compound_list THEN compound_list FI
-(60) else_part -> ELIF compound_list THEN compound_list
-(61) else_part -> ELIF compound_list THEN compound_list else_part
-(62) else_part -> ELSE compound_list
-(63) while_clause -> WHILE compound_list do_group
-(64) until_clause -> UNTIL compound_list do_group
-(65) function_definition -> fname LPAREN RPAREN linebreak function_body
-(66) function_body -> compound_command
-(67) function_body -> compound_command redirect_list
-(68) fname -> NAME
-(69) brace_group -> LBRACE compound_list RBRACE
-(70) do_group -> DO compound_list DONE
-(71) simple_command -> cmd_prefix cmd_word cmd_suffix
-(72) simple_command -> cmd_prefix cmd_word
-(73) simple_command -> cmd_prefix
-(74) simple_command -> cmd_name cmd_suffix
-(75) simple_command -> cmd_name
-(76) cmd_name -> WORD
-(77) cmd_word -> WORD
-(78) cmd_prefix -> io_redirect
-(79) cmd_prefix -> cmd_prefix io_redirect
-(80) cmd_prefix -> ASSIGNMENT_WORD
-(81) cmd_prefix -> cmd_prefix ASSIGNMENT_WORD
-(82) cmd_suffix -> io_redirect
-(83) cmd_suffix -> cmd_suffix io_redirect
-(84) cmd_suffix -> WORD
-(85) cmd_suffix -> cmd_suffix WORD
-(86) redirect_list -> io_redirect
-(87) redirect_list -> redirect_list io_redirect
-(88) io_redirect -> io_file
-(89) io_redirect -> IO_NUMBER io_file
-(90) io_redirect -> io_here
-(91) io_redirect -> IO_NUMBER io_here
-(92) io_file -> LESS filename
-(93) io_file -> LESSAND filename
-(94) io_file -> GREAT filename
-(95) io_file -> GREATAND filename
-(96) io_file -> DGREAT filename
-(97) io_file -> LESSGREAT filename
-(98) io_file -> CLOBBER filename
-(99) filename -> WORD
-(100) io_here -> DLESS here_end
-(101) io_here -> DLESSDASH here_end
-(102) here_end -> WORD
-(103) newline_list -> NEWLINE
-(104) newline_list -> newline_list NEWLINE
-(105) linebreak -> newline_list
-(106) linebreak -> ''
-(107) separator_op -> AMPER
-(108) separator_op -> SEMI
-(109) separator -> separator_op linebreak
-(110) separator -> newline_list
-(111) sequential_sep -> SEMI linebreak
-(112) sequential_sep -> newline_list
+(50) case_item_ns -> LPAREN pattern RPAREN compound_list
+(51) case_item -> pattern RPAREN linebreak DSEMI linebreak
+(52) case_item -> pattern RPAREN compound_list DSEMI linebreak
+(53) case_item -> LPAREN pattern RPAREN linebreak DSEMI linebreak
+(54) case_item -> LPAREN pattern RPAREN compound_list DSEMI linebreak
+(55) pattern -> WORD
+(56) pattern -> pattern PIPE WORD
+(57) if_clause -> IF compound_list THEN compound_list else_part FI
+(58) if_clause -> IF compound_list THEN compound_list FI
+(59) else_part -> ELIF compound_list THEN compound_list
+(60) else_part -> ELIF compound_list THEN compound_list else_part
+(61) else_part -> ELSE compound_list
+(62) while_clause -> WHILE compound_list do_group
+(63) until_clause -> UNTIL compound_list do_group
+(64) function_definition -> fname LPAREN RPAREN linebreak function_body
+(65) function_body -> compound_command
+(66) function_body -> compound_command redirect_list
+(67) fname -> NAME
+(68) brace_group -> LBRACE compound_list RBRACE
+(69) do_group -> DO compound_list DONE
+(70) simple_command -> cmd_prefix cmd_word cmd_suffix
+(71) simple_command -> cmd_prefix cmd_word
+(72) simple_command -> cmd_prefix
+(73) simple_command -> cmd_name cmd_suffix
+(74) simple_command -> cmd_name
+(75) cmd_name -> WORD
+(76) cmd_word -> WORD
+(77) cmd_prefix -> io_redirect
+(78) cmd_prefix -> cmd_prefix io_redirect
+(79) cmd_prefix -> ASSIGNMENT_WORD
+(80) cmd_prefix -> cmd_prefix ASSIGNMENT_WORD
+(81) cmd_suffix -> io_redirect
+(82) cmd_suffix -> cmd_suffix io_redirect
+(83) cmd_suffix -> WORD
+(84) cmd_suffix -> cmd_suffix WORD
+(85) redirect_list -> io_redirect
+(86) redirect_list -> redirect_list io_redirect
+(87) io_redirect -> io_file
+(88) io_redirect -> IO_NUMBER io_file
+(89) io_redirect -> io_here
+(90) io_redirect -> IO_NUMBER io_here
+(91) io_file -> LESS filename
+(92) io_file -> LESSAND filename
+(93) io_file -> GREAT filename
+(94) io_file -> GREATAND filename
+(95) io_file -> DGREAT filename
+(96) io_file -> LESSGREAT filename
+(97) io_file -> CLOBBER filename
+(98) filename -> WORD
+(99) io_here -> DLESS here_end
+(100) io_here -> DLESSDASH here_end
+(101) here_end -> WORD
+(102) newline_list -> NEWLINE
+(103) newline_list -> newline_list NEWLINE
+(104) linebreak -> newline_list
+(105) linebreak -> ''
+(106) separator_op -> AMPER
+(107) separator_op -> SEMI
+(108) separator -> separator_op linebreak
+(109) separator -> newline_list
+(110) sequential_sep -> SEMI linebreak
+(111) sequential_sep -> newline_list
