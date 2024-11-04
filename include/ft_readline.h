@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/01 16:31:37 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/04 15:07:58 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,9 @@
 #endif
 
 #include <stdbool.h>
+
+#define CTRL_L 12 
+#define CTRL_R 18
 
 typedef struct _hist_entry {
   string line;
@@ -64,6 +67,12 @@ void pop_history();
 void str_info(const string *str);
 void set_prompt(readline_state_t *rl_state, const char *new_prompt);
 char *search_in_history(char *str);
+
+int handle_special_keys(readline_state_t *rl_state, string *line);
+void handle_control_keys(readline_state_t *rl_state, char char_c);
+int handle_printable_keys(readline_state_t *rl_state, char c, string *line);
+int can_go_right(readline_state_t *rl_state, string *line);
+int can_go_left(readline_state_t *rl_state);
 
 char *ft_readline(const char *prompt);
 void ft_readline_clean();
