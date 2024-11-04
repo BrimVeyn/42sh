@@ -6,11 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:19:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/01 16:37:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/04 16:58:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "final_parser.h"
+#include "ft_regex.h"
 #include "utils.h"
 #include "libft.h"
 
@@ -40,6 +41,7 @@ typedef struct {
 	int	gc_level;
 } StringListL;
 
+
 typedef struct {
 	RedirectionL *redir_list;
 	StringListL	*word_list;
@@ -49,9 +51,66 @@ typedef struct {
 	char *value;
 } FilenameP;
 
+typedef struct IFClauseP IFClauseP;
+
 typedef struct {
 	TokenType type;
 	union {
+		SimpleCommandP *simple_command;
+		// BraceGroupP *brace_group;
+		// SubshellP *subshell;
+		// ForClause *for_clause;
+		// CaseClause *case_clause;
+		IFClauseP *if_clause;
+		// WhileClause *while_clause;
+		// UntilClasue *until_clause;
+	};
+} CommandP;
+
+typedef struct PipeLineP PipeLineP;
+typedef struct AndOrP AndOrP;
+typedef struct ListP ListP;
+
+struct PipeLineP {
+	bool banged;
+	CommandP *command;
+	PipeLineP *next;
+};
+
+struct AndOrP {
+	PipeLineP *pipeline;
+	TokenType separator;
+	AndOrP *next;
+};
+
+struct ListP {
+	AndOrP *and_or;
+	TokenType separator;
+	ListP *next;
+};
+
+typedef struct {
+	ListP **data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} ListPVect;
+
+struct IFClauseP {
+	ListPVect *conditions;
+	ListPVect *bodies;
+};
+
+typedef struct {
+	TokenType type;
+	union {
+		IFClauseP *if_clause;
+		TokenType separator_op;
+		ListP *list;
+		AndOrP *and_or;
+		PipeLineP *pipeline;
+		CommandP *command;
 		char *raw_value;
 		RedirectionP *redir;
 		FilenameP *filename;
@@ -74,30 +133,205 @@ typedef struct {
 } TokenStack;
 
 #include "colors.h"
+void	pipelineAddBack(PipeLineP **lst, PipeLineP *new_value) {
+	PipeLineP	*temp;
+
+	if (*lst == NULL)
+		*lst = new_value;
+	else {
+		temp = *lst;
+		while (temp->next)
+			temp = temp->next;
+		temp->next = new_value;
+	}
+}
+
+PipeLineP *pipelineNew(CommandP *command) {
+	PipeLineP *self = gc_unique(PipeLineP, GC_SUBSHELL);
+	self->command = command;
+	return self;
+}
+
+void	andOrAddBack(AndOrP **lst, AndOrP *new_value) {
+	AndOrP	*temp;
+
+	if (*lst == NULL)
+		*lst = new_value;
+	else {
+		temp = *lst;
+		while (temp->next)
+			temp = temp->next;
+		temp->next = new_value;
+	}
+}
+
+AndOrP *andOrNew(PipeLineP *pipeline, TokenType separator) {
+	AndOrP *self = gc_unique(AndOrP, GC_SUBSHELL);
+	self->pipeline = pipeline;
+	self->separator = separator;
+	return self;
+}
+
+void	listAddBack(ListP **lst, ListP *new_value) {
+	ListP	*temp;
+
+	if (*lst == NULL)
+		*lst = new_value;
+	else {
+		temp = *lst;
+		while (temp->next)
+			temp = temp->next;
+		temp->next = new_value;
+	}
+}
+
+ListP *listNew(AndOrP *and_or, TokenType separator) {
+	ListP *self = gc_unique(AndOrP, GC_SUBSHELL);
+	self->and_or = and_or;
+	self->separator = separator;
+	return self;
+}
+
+IFClauseP *IFClauseNew(ListP *condition, ListP *body) {
+	IFClauseP *self = gc_unique(IFClauseP, GC_SUBSHELL);
+	da_create(condition_list, ListPVect, sizeof(ListP *), GC_SUBSHELL);
+	da_push(condition_list, condition);
+	da_create(body_list, ListPVect, sizeof(ListP *), GC_SUBSHELL);
+	da_push(body_list, body);
+	self->conditions = condition_list;
+	self->bodies = body_list;
+	return self;
+}
+
+void print_if_clause(const IFClauseP *if_clause);
+
+void print_simple_command(const SimpleCommandP *self) {
+	dprintf(2, C_DARK_CYAN"  Words: "C_RESET C_SEA_GREEN"{"C_RESET);
+	for (size_t i = 0; i < self->word_list->size; i++) {
+		dprintf(2, "%s", self->word_list->data[i]);
+		if (i < self->word_list->size - 1) {
+			dprintf(2, ", ");
+		}
+	}
+	dprintf(2, C_SEA_GREEN"}"C_RESET"\n");
+	dprintf(2, C_DARK_CYAN"  Redirs: "C_RESET C_SEA_GREEN"{"C_RESET);
+	for (size_t i = 0; i < self->redir_list->size; i++) {
+		const RedirectionP *redir = self->redir_list->data[i];
+		if (redir->io_number) {
+			dprintf(2, C_MAGENTA"{"C_RESET"%s | %s | %s"C_MAGENTA"}"C_RESET, redir->io_number, tokenTypeStr(redir->type), redir->filename);
+		} else {
+			dprintf(2, C_MAGENTA"{"C_RESET"%s | %s"C_MAGENTA"}"C_RESET, tokenTypeStr(redir->type), redir->filename);
+		}
+		if (i < self->redir_list->size - 1) {
+			dprintf(2, ", ");
+		}
+	}
+	dprintf(2, C_SEA_GREEN"}"C_RESET"\n");
+}
+
+void print_command(CommandP *command) {
+	switch (command->type) {
+		case Simple_Command: print_simple_command(command->simple_command); break;
+		case If_Clause: print_if_clause(command->if_clause); break;
+		default: break;
+	}
+}
+
+void print_pipeline(const PipeLineP *pipeline) {
+	const PipeLineP *head = pipeline;
+	while (head) {
+		print_command(head->command);
+		head = head->next;
+	}
+}
+
+void print_andor(const AndOrP *and_or) {
+	const AndOrP *head = and_or;
+	while (head) {
+		print_pipeline(head->pipeline);
+		if (head->separator == AND_IF || head->separator == OR_IF) {
+			dprintf(2, C_CORAL"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(head->separator));
+		}
+		head = head->next;
+	}
+}
+
+void print_list(const ListP *list) {
+	const ListP *head = list;
+	while (head) {
+		print_andor(head->and_or);
+		if (head->separator == SEMI || head->separator == AMPER || head->separator == NEWLINE) {
+			dprintf(2, C_CORAL"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(head->separator));
+		}
+		head = head->next;
+	}
+}
+
+void print_if_clause(const IFClauseP *if_clause) {
+	dprintf(2, "\n"C_CERULEAN"Conditions: \n");
+	const ListPVect *conditions = if_clause->conditions;
+	for (size_t i = 0; i < conditions->size; i++) {
+		print_list(conditions->data[i]);
+		if (i < conditions->size - 1) {
+			dprintf(2, C_CERULEAN"---------------------------"C_RESET"\n");
+		}
+	}
+	dprintf(2, C_CERULEAN"Bodies: \n");
+	const ListPVect *bodies = if_clause->bodies;
+	for (size_t i = 0; i < bodies->size; i++) {
+		print_list(bodies->data[i]);
+		if (i < bodies->size - 1) {
+			dprintf(2, C_CERULEAN"---------------------------"C_RESET"\n");
+		}
+	}
+}
 
 void print_token_stack(const TokenStack *stack) {
 	for (size_t i = 0; i < stack->size; i++) {
 		const StackEntry *entry = stack->data[i];
 
-		if (entry->token.type <= END) {
+		if (entry->token.type <= END || entry->token.type == Filename) {
 			dprintf(2, "["C_LIGHT_BLUE"%zu"C_RESET"] "C_MAGENTA"%s"C_LIGHT_YELLOW": "C_TURQUOISE"%s"C_RESET"\n", i, tokenTypeStr(entry->token.type), entry->token.raw_value);
 		} else {
 			dprintf(2, "["C_LIGHT_BLUE"%zu"C_RESET"] "C_LIGHT_YELLOW"%s "C_RESET, i, tokenTypeStr(entry->token.type));
 			switch (entry->token.type) {
 				case Io_Redirect:
 				case Io_File: {
-					dprintf(2, C_MAGENTA"{"C_LIGHT_ORANGE"%s "C_RESET"|"C_LIGHT_ORANGE" %s "C_MAGENTA"}"C_RESET"\n", tokenTypeStr(entry->token.redir->type), entry->token.redir->filename);
+					dprintf(2, C_MAGENTA"{"C_LIGHT_ORANGE"%s "C_RESET"|"C_LIGHT_ORANGE" %s"C_MAGENTA"}"C_RESET"\n", tokenTypeStr(entry->token.redir->type), entry->token.redir->filename);
 					break;
 				}
 				case Cmd_Suffix:
 				case Simple_Command:
 				case Cmd_Prefix: {
-					dprintf(2, C_MAGENTA"{"C_LIGHT_ORANGE"%s "C_RESET"|"C_LIGHT_ORANGE" %zu "C_MAGENTA"}"C_RESET"\n", entry->token.simple_command->word_list->data[0], entry->token.simple_command->redir_list->size);
+					print_simple_command(entry->token.simple_command);
 					break;
 				}
 				case Cmd_Name:
 				case Cmd_Word: {
 					dprintf(2, C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", entry->token.raw_value);
+					break;
+				}
+				case Command: {
+					print_command(entry->token.command);
+					break;
+				}
+				case Pipe_Sequence:
+				case Pipeline: {
+					print_pipeline(entry->token.pipeline); 
+					break; 
+				}
+				case And_Or: { 
+					print_andor(entry->token.and_or);
+					break;
+				}
+				case Term:
+				case Compound_List:
+				case List: {
+					print_list(entry->token.list);
+					break;
+				}
+				case If_Clause: {
+					print_if_clause(entry->token.if_clause);
 					break;
 				}
 				default: dprintf(2, "\n");
@@ -114,7 +348,7 @@ TokenType identify_token(const char *raw_value, const int table_row) {
 
 	static const char *map[] = {
 		[AND_IF] = "&&", [OR_IF] = "||",
-		[BANG] = "!", [PIPE] = "pipe",
+		[BANG] = "!", [PIPE] = "|",
 		[LPAREN] = "(", [RPAREN] = ")",
 		[LBRACE] = "{", [RBRACE] = "}",
 		[FOR] = "for",
@@ -130,24 +364,27 @@ TokenType identify_token(const char *raw_value, const int table_row) {
 		[NEWLINE] = "\n", [AMPER] = "&", [SEMI] = ";",
 	};
 	   //NAME | WORD | IO_NUMBER | ASSIGNMENT_WORD
-	
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
-		if (!ft_strcmp(map[i], raw_value) && table_row != 27) {
+		if (!ft_strcmp(map[i], raw_value) && 
+			(table_row != 27 || i == PIPE 
+			|| i == AND_IF || i == OR_IF ||
+			i == SEMI || i == AMPER)) {
 			return i;
 		}
+	}
+
+	if (regex_match("[0-9]+", (char *)raw_value).is_found) {
+		char *peak = lex_interface(LEX_PEAK_CHAR, NULL);
+		if (peak)
+			dprintf(2, "PEAK: %c\n", *peak);
+		dprintf(2, "produce IONUMBR\n");
+		return IO_NUMBER;
 	}
 
 	return WORD;
 }
 
 extern TableEntry parsingTable[182][86];
-
-RedirectionP *createRedirFromIOFile(Tokenn *filename, Tokenn *type) {
-	RedirectionP *self = gc_unique(RedirectionP, GC_SUBSHELL);
-	self->type = type->type;
-	self->filename = filename->filename->value;
-	return self;
-}
 
 SimpleCommandP *createSimpleCommand(void) {
 	SimpleCommandP *command = gc_unique(SimpleCommandP, GC_SUBSHELL);
@@ -237,51 +474,51 @@ StackEntry *parse() {
 						break;
 					}
 					case 6: { /* list -> list separator_op and_or */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						AndOrP *and_or = da_pop(stack)->token.and_or;
+						TokenType sep = da_pop(stack)->token.separator_op;
+						ListP *list = da_pop(stack)->token.list;
+						list->separator = sep;
+						listAddBack(&list, listNew(and_or, END));
 						reduced_entry->token.type = List;
+						reduced_entry->token.list = list;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][List].value;
 						break;
 					}
 					case 7: { /* list -> and_or */
-						da_pop(stack);
+						AndOrP *and_or = da_pop(stack)->token.and_or;
+						reduced_entry->token.list = listNew(and_or, END);
 						reduced_entry->token.type = List;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][List].value;
 						break;
 					}
 					case 8: { /* and_or -> pipeline */
-						da_pop(stack);
+						PipeLineP *pipeline = da_pop(stack)->token.pipeline;
+						reduced_entry->token.and_or = andOrNew(pipeline, END);
 						reduced_entry->token.type = And_Or;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][And_Or].value;
 						break;
 					}
-					case 9: { /* and_or -> and_or AND_IF linebreak pipeline */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						reduced_entry->token.type = And_Or;
-						state = da_peak_back(stack)->state;
-						reduced_entry->state = parsingTable[state][And_Or].value;
-						break;
-					}
+					case 9: /* and_or -> and_or AND_IF linebreak pipeline */
 					case 10: { /* and_or -> and_or OR_IF linebreak pipeline */
+						PipeLineP *pipeline = da_pop(stack)->token.pipeline;
 						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						TokenType separator = da_pop(stack)->token.type;
+						AndOrP *and_or = da_pop(stack)->token.and_or;
+						and_or->separator = separator;
+						andOrAddBack(&and_or, andOrNew(pipeline, END));
 						reduced_entry->token.type = And_Or;
+						reduced_entry->token.and_or = and_or;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][And_Or].value;
 						break;
 					}
 					case 11: { /* pipeline -> pipe_sequence */
-						da_pop(stack);
+						PipeLineP *pipe_sequence = da_pop(stack)->token.pipeline;
 						reduced_entry->token.type = Pipeline;
+						reduced_entry->token.pipeline = pipe_sequence;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Pipeline].value;
 						break;
@@ -295,32 +532,39 @@ StackEntry *parse() {
 						break;
 					}
 					case 13: { /* pipe_sequence -> command */
-						da_pop(stack);
+						CommandP *command = da_pop(stack)->token.command;
 						reduced_entry->token.type = Pipe_Sequence;
+						reduced_entry->token.pipeline = pipelineNew(command);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Pipe_Sequence].value;
 						break;
 					}
 					case 14: { /* pipe_sequence -> pipe_sequence PIPE linebreak command */
+						CommandP *command = da_pop(stack)->token.command;
 						da_pop(stack);
 						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						PipeLineP *pipe_sequence = da_pop(stack)->token.pipeline;
+						pipelineAddBack(&pipe_sequence, pipelineNew(command));
 						reduced_entry->token.type = Pipe_Sequence;
+						reduced_entry->token.pipeline = pipe_sequence;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Pipe_Sequence].value;
 						break;
 					}
 					case 15: { /* command -> simple_command */
-						da_pop(stack);
+						SimpleCommandP *simple_command = da_pop(stack)->token.simple_command;
+						reduced_entry->token.command = gc_unique(CommandP, GC_SUBSHELL);
+						reduced_entry->token.command->type = Simple_Command;
+						reduced_entry->token.command->simple_command = simple_command;
 						reduced_entry->token.type = Command;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Command].value;
 						break;
 					}
 					case 16: { /* command -> compound_command */
-						da_pop(stack);
+						CommandP *command = da_pop(stack)->token.command;
 						reduced_entry->token.type = Command;
+						reduced_entry->token.command = command;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Command].value;
 						break;
@@ -369,7 +613,10 @@ StackEntry *parse() {
 						break;
 					}
 					case 23: { /* compound_command -> if_clause */
-						da_pop(stack);
+						IFClauseP *if_clause = da_pop(stack)->token.if_clause;
+						reduced_entry->token.command = gc_unique(CommandP, GC_SUBSHELL);
+						reduced_entry->token.command->type = If_Clause;
+						reduced_entry->token.command->if_clause = if_clause;
 						reduced_entry->token.type = Compound_Command;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Compound_Command].value;
@@ -407,10 +654,12 @@ StackEntry *parse() {
 						break;
 					}
 					case 28: { /* compound_list -> linebreak term separator */
+						TokenType sep = da_pop(stack)->token.separator_op;
+						ListP *list = da_pop(stack)->token.list;
 						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						list->separator = sep;
 						reduced_entry->token.type = Compound_List;
+						reduced_entry->token.list = list;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Compound_List].value;
 						break;
@@ -425,8 +674,9 @@ StackEntry *parse() {
 						break;
 					}
 					case 30: { /* term -> and_or */
-						da_pop(stack);
+						AndOrP *and_or = da_pop(stack)->token.and_or;
 						reduced_entry->token.type = Term;
+						reduced_entry->token.list = listNew(and_or, END);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Term].value;
 						break;
@@ -695,12 +945,14 @@ StackEntry *parse() {
 						break;
 					}
 					case 58: { /* if_clause -> IF compound_list THEN compound_list FI */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						da_pop(stack); //FI
+						ListP *body = da_pop(stack)->token.list;
+						da_pop(stack); //THEN
+						ListP *condition = da_pop(stack)->token.list;
+						print_list(condition);
+						da_pop(stack); //IF
 						reduced_entry->token.type = If_Clause;
+						reduced_entry->token.if_clause = IFClauseNew(condition, body);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][If_Clause].value;
 						break;
@@ -807,13 +1059,13 @@ StackEntry *parse() {
 						SimpleCommandP *suffix = da_pop(stack)->token.simple_command;
 						char *word = da_pop(stack)->token.raw_value;
 						SimpleCommandP *prefix = da_pop(stack)->token.simple_command;
-            da_push(prefix->word_list, word);
-            for (size_t i = 0; i < suffix->word_list->size; i++)
-              da_push(prefix->word_list, suffix->word_list->data[i]);
-            for (size_t i = 0; i < suffix->redir_list->size; i++)
-              da_push(prefix->redir_list, suffix->redir_list->data[i]);
+						da_push(prefix->word_list, word);
+						for (size_t i = 0; i < suffix->word_list->size; i++)
+							da_push(prefix->word_list, suffix->word_list->data[i]);
+						for (size_t i = 0; i < suffix->redir_list->size; i++)
+							da_push(prefix->redir_list, suffix->redir_list->data[i]);
 						reduced_entry->token.type = Simple_Command;
-            reduced_entry->token.simple_command = prefix;
+						reduced_entry->token.simple_command = prefix;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Simple_Command].value;
 						break;
@@ -831,7 +1083,7 @@ StackEntry *parse() {
 					case 72: { /* simple_command -> cmd_prefix */
 						SimpleCommandP *command = da_pop(stack)->token.simple_command;
 						reduced_entry->token.type = Simple_Command;
-            reduced_entry->token.simple_command = command;
+						reduced_entry->token.simple_command = command;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Simple_Command].value;
 						break;
@@ -839,9 +1091,9 @@ StackEntry *parse() {
 					case 73: { /* simple_command -> cmd_name cmd_suffix */
 						SimpleCommandP *command = da_pop(stack)->token.simple_command;
 						char *word = da_pop(stack)->token.raw_value;
-            da_push(command->word_list, word);
+						da_push_front(command->word_list, word);
 						reduced_entry->token.type = Simple_Command;
-            reduced_entry->token.simple_command = command;
+						reduced_entry->token.simple_command = command;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Simple_Command].value;
 						break;
@@ -885,9 +1137,9 @@ StackEntry *parse() {
 					case 78: { /* cmd_prefix -> cmd_prefix io_redirect */
 						RedirectionP *redir = da_pop(stack)->token.redir;
 						SimpleCommandP *command = da_pop(stack)->token.simple_command;
-            da_push(command->redir_list, redir);
+						da_push(command->redir_list, redir);
 						reduced_entry->token.type = Cmd_Prefix;
-            reduced_entry->token.simple_command = command;
+						reduced_entry->token.simple_command = command;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Cmd_Prefix].value;
 						break;
@@ -971,17 +1223,21 @@ StackEntry *parse() {
 						break;
 					}
 					case 88: { /* io_redirect -> IO_NUMBER io_file */
-						da_pop(stack);
-						da_pop(stack);
+						RedirectionP *io_file = da_pop(stack)->token.redir;
+						char *io_number = da_pop(stack)->token.raw_value;
+						io_file->io_number = io_number;
 						reduced_entry->token.type = Io_Redirect;
+						reduced_entry->token.redir = io_file;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Io_Redirect].value;
 						break;
 					}
 					case 90: { /* io_redirect -> IO_NUMBER io_here */
-						da_pop(stack);
-						da_pop(stack);
+						RedirectionP *io_here = da_pop(stack)->token.redir;
+						char *io_number = da_pop(stack)->token.raw_value;
+						io_here->io_number = io_number;
 						reduced_entry->token.type = Io_Redirect;
+						reduced_entry->token.redir = io_here;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Io_Redirect].value;
 						break;
@@ -996,17 +1252,21 @@ StackEntry *parse() {
 						Tokenn filename = da_pop(stack)->token;
 						Tokenn type = da_pop(stack)->token;
 						reduced_entry->token.type = Io_File;
-						reduced_entry->token.redir = createRedirFromIOFile(&filename, &type);
+						reduced_entry->token.redir = gc_unique(RedirectionP, GC_SUBSHELL);
+						reduced_entry->token.redir->filename = filename.raw_value;
+						reduced_entry->token.redir->type = type.type;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Io_File].value;
 						break;
 					}
 					case 99: /* io_here -> DLESS here_end */ /*      TODO: start here_doc */
 					case 100: { /* io_here -> DLESSDASH here_end */ //  TODO: start here_doc no expansions */
-						Tokenn filename = da_pop(stack)->token;
+						Tokenn here_end = da_pop(stack)->token;
 						Tokenn type = da_pop(stack)->token;
 						reduced_entry->token.type = Io_File;
-						reduced_entry->token.redir = createRedirFromIOFile(&filename, &type);
+						reduced_entry->token.redir = gc_unique(RedirectionP, GC_SUBSHELL);
+						reduced_entry->token.redir->filename = here_end.raw_value;
+						reduced_entry->token.redir->type = type.type;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Io_Here].value;
 						break;
@@ -1014,18 +1274,16 @@ StackEntry *parse() {
 					case 98: { /* filename -> WORD */
 						Tokenn word = da_pop(stack)->token;
 						reduced_entry->token.type = Filename;
-						reduced_entry->token.filename = gc_unique(FilenameP, GC_SUBSHELL);
-						reduced_entry->token.filename->value = word.raw_value;
+						reduced_entry->token.raw_value = word.raw_value;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Filename].value;
 						break;
 					}
 					case 101: { /* here_end -> WORD */
-						//TODO: Directly apply quote remove cuz of no expansions
+						//TODO: Directly apply quote removal cuz of no expansions
 						Tokenn word = da_pop(stack)->token;
-						reduced_entry->token.type = Filename;
-						reduced_entry->token.filename = gc_unique(FilenameP, GC_SUBSHELL);
-						reduced_entry->token.filename->value = word.raw_value;
+						reduced_entry->token.type = Here_End;
+						reduced_entry->token.raw_value = word.raw_value;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Here_End].value;
 						break;
@@ -1033,6 +1291,7 @@ StackEntry *parse() {
 					case 102: { /* newline_list -> NEWLINE */
 						da_pop(stack);
 						reduced_entry->token.type = Newline_List;
+						reduced_entry->token.separator_op = NEWLINE;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Newline_List].value;
 						break;
@@ -1041,6 +1300,7 @@ StackEntry *parse() {
 						da_pop(stack);
 						da_pop(stack);
 						reduced_entry->token.type = Newline_List;
+						reduced_entry->token.separator_op = NEWLINE;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Newline_List].value;
 						break;
@@ -1048,6 +1308,7 @@ StackEntry *parse() {
 					case 104: { /* linebreak -> newline_list */
 						da_pop(stack);
 						reduced_entry->token.type = Linebreak;
+						reduced_entry->token.separator_op = NEWLINE;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Linebreak].value;
 						break;
@@ -1055,6 +1316,7 @@ StackEntry *parse() {
 					case 105: { /* linebreak -> '' */
 						// da_pop(stack);
 						reduced_entry->token.type = Linebreak;
+						reduced_entry->token.separator_op = END;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Linebreak].value;
 						break;
@@ -1062,6 +1324,7 @@ StackEntry *parse() {
 					case 106: { /* separator_op -> AMPER */
 						da_pop(stack);
 						reduced_entry->token.type = Separator_Op;
+						reduced_entry->token.separator_op = AMPER;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Separator_Op].value;
 						break;
@@ -1069,14 +1332,16 @@ StackEntry *parse() {
 					case 107: { /* separator_op -> SEMI */
 						da_pop(stack);
 						reduced_entry->token.type = Separator_Op;
+						reduced_entry->token.separator_op = SEMI;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Separator_Op].value;
 						break;
 					}
 					case 108: { /* separator -> separator_op linebreak */
 						da_pop(stack);
-						da_pop(stack);
+						TokenType sep = da_pop(stack)->token.separator_op;
 						reduced_entry->token.type = Separator;
+						reduced_entry->token.separator_op = sep;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Separator].value;
 						break;
@@ -1084,6 +1349,7 @@ StackEntry *parse() {
 					case 109: { /* separator -> newline_list */
 						da_pop(stack);
 						reduced_entry->token.type = Separator;
+						reduced_entry->token.separator_op = NEWLINE;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Separator].value;
 						break;
@@ -1092,6 +1358,7 @@ StackEntry *parse() {
 						da_pop(stack);
 						da_pop(stack);
 						reduced_entry->token.type = Sequential_Sep;
+						reduced_entry->token.separator_op = SEMI;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Sequential_Sep].value;
 						break;
@@ -1099,6 +1366,7 @@ StackEntry *parse() {
 					case 111: { /* sequential_sep -> newline_list */
 						da_pop(stack);
 						reduced_entry->token.type = Sequential_Sep;
+						reduced_entry->token.separator_op = NEWLINE;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Sequential_Sep].value;
 						break;
