@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/01 16:31:30 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/04 15:08:33 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,62 +254,6 @@ void init_readline(readline_state_t *rl_state, const char *prompt){
 	manage_rl_state(RL_SET, rl_state);
 }
 
-int handle_normal_keys(readline_state_t *rl_state, char c, string *line){
-	
-	int pos = rl_state->cursor.y * get_col() - rl_state->prompt.size;
-	pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->prompt.size : 0);
-
-	if (c == '\n' || c == '\0'){
-		if (rl_state->search_mode.active){
-			rl_state->search_mode.active = false;
-			rl_state->prompt.size = ft_strlen(rl_state->prompt.data);
-			if (rl_state->search_mode.word_found){
-				gc(GC_FREE, line->data, GC_READLINE);
-				*line = string_init_str(rl_state->search_mode.word_found);
-				gc(GC_ADD, line->data, GC_READLINE);
-			}
-			update_line(rl_state, line);
-		}
-		if (rl_state->interactive){
-			int nrows = get_row();
-			if (rl_state->cursor_offset.y + rl_state->cursor.y == nrows - 1) {
-				write(STDOUT_FILENO, "\n", 1);
-				rl_state->cursor_offset.y = nrows - 1;
-			} else {
-				rl_state->cursor_offset.y++;
-			}
-			rl_state->cursor.y = 0;
-			rl_state->cursor.x = 0;
-			move_cursor(0, rl_state->cursor_offset.y + rl_state->cursor.y);
-		}
-		return 1;
-	}
-
-    if (c == 127 && !pos){
-        return 2;
-    }
-
-    if (rl_state->interactive || (pos == str_length(line))){
-        if (c == 127) {
-            str_pop_back(line);
-			update_cursor_x(rl_state, line, -2);
-        }
-        else {
-            str_push_back(line, c);
-        }
-    } else {
-        if (c == 127) {
-            str_erase(line, pos - 1, 1);
-			update_cursor_x(rl_state, line, -2);
-        } else {
-            str_insert(line, c, pos);
-        }
-    }
-	if (rl_state->interactive)
-		update_cursor_x(rl_state, line, 1);
-    return 0;
-}
-
 int can_go_left(readline_state_t *rl_state){
 	if (rl_state->cursor.y == 0)
 		return rl_state->cursor.x > 0;
@@ -416,12 +360,12 @@ char *ft_readline(const char *prompt) {
 				// gc(GC_FREE, line, GC_READLINE);
                 return NULL;
             }
-		} else if (c == 12 || c == 18) { // ^L | ^R
+		} else if (c == CTRL_L || c == CTRL_R) {
 			handle_control_keys(rl_state, c);
         } else if (c == '\033') {
             result = handle_special_keys(rl_state, line);
         } else {
-			result = handle_normal_keys(rl_state, c, line);
+			result = handle_printable_keys(rl_state, c, line);
         }
 		
 		if (result == 1) {
