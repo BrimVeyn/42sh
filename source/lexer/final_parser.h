@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 16:46:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/31 10:44:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/04 11:47:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ typedef struct TableEntry {
 char *tokenTypeStr(TokenType type);
 char *actionStr(const Action action);
 
-typedef enum {LEX_SET, LEX_GET, LEX_PEAK, LEX_DEBUG} LexMode;
+typedef enum {LEX_SET, LEX_GET, LEX_PEAK, LEX_PEAK_CHAR, LEX_DEBUG} LexMode;
 char *lex_interface(LexMode mode, void *input);
 
 #endif // !FINAL_PARSER
