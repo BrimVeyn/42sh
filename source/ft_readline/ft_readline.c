@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/04 15:08:33 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/05 09:40:19 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -297,7 +297,6 @@ int should_process_enter() {
     return 0;
 }
 
-
 char *ft_readline(const char *prompt) {
 	readline_state_t *rl_state = NULL;
 	
@@ -396,4 +395,3 @@ char *ft_readline(const char *prompt) {
     
     return str;
 }
-
