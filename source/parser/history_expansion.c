@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:17:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/16 10:17:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/05 13:45:21 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 
+//TODO:! tout seul ne doit pas trigger hist
 int get_history(void) {
 	char *home = getenv("HOME");
 	char history_filename[1024] = {0};
