@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/01 13:49:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/05 14:53:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ void da_transfer(StringStream *in, StringStream *out, int number) {
 void get_next_token(StringStream *input, StringStream *cache, size_t *line, size_t *column) {
 
 	static WordContextBounds map[] = {
-		[WORD_WORD] = {.start = "NONE", .end = " \t\n;&|<>", .bitmap = WORD_MAP},
+		[WORD_WORD] = {.start = "NONE", .end = " \t\n;&|<>()", .bitmap = WORD_MAP},
 		[WORD_CMD_SUB] = {"$(", ")", CMD_SUB_MAP},
 		[WORD_PARAM] = { "${", "}" , PARAM_MAP},
 		[WORD_SUBSHELL] = { "(", ")", SUBSHELL_MAP},
@@ -128,6 +128,8 @@ void get_next_token(StringStream *input, StringStream *cache, size_t *line, size
 			case '<' : da_push(cache, da_pop_front(input)); (*column)++; return;
 			case '>' : da_push(cache, da_pop_front(input)); (*column)++; return;
 			case '|' : da_push(cache, da_pop_front(input)); (*column)++; return;
+			case '(' : da_push(cache, da_pop_front(input)); (*column)++; return;
+			case ')' : da_push(cache, da_pop_front(input)); (*column)++; return;
 		}
 	}
 
