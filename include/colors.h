@@ -30,7 +30,7 @@
 // Gray Shades
 #define C_LIGHT_GRAY         "\033[37m"
 #define C_MEDIUM_GRAY        "\033[90m"
-#define C_DARK_GRAY          "\033[30m"
+#define C_DARK_GRAY_FG      "\033[48;5;235m"
 
 // Additional Red Shades
 #define C_LIGHT_RED          "\033[91m"
@@ -87,6 +87,7 @@
 #define C_DARK_CYAN          "\033[36;2m"
 #define C_TURQUOISE          "\033[38;5;80m"
 #define C_AQUAMARINE         "\033[38;5;86m"
+#define C_AQUAMARINE_FG         "\033[48;5;86m"
 #define C_ARCTIC             "\033[38;5;123m"
 
 // Additional Magenta/Purple Shades
@@ -105,6 +106,7 @@
 #define C_CHOCOLATE          "\033[38;5;58m"
 #define C_SIENNA             "\033[38;5;130m"
 #define C_UMBER              "\033[38;5;95m"
+#define C_UMBER_FG              "\033[48;5;95m"
 
 // Pink Shades
 #define C_LIGHT_PINK         "\033[38;5;218m"
