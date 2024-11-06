@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:30:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/22 11:09:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/06 16:35:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void ft_dprintf(int fd, const char *fmt, ...){
 	va_end(args);
 }
 
-void ft_sprintf(char *buffer, const char *fmt, ...) {
+int ft_sprintf(char *buffer, const char *fmt, ...) {
 	va_list			args;
 	va_start(args, fmt);
 
@@ -109,6 +109,7 @@ void ft_sprintf(char *buffer, const char *fmt, ...) {
 	}
 	buffer[buffer_len] = '\0';
 	va_end(args);
+	return buffer_len;
 }
 
 int ft_snprintf(char *buffer, const size_t size_of_buffer, const char *fmt, ...) {

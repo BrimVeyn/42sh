@@ -1,0 +1,10 @@
+offset: 60, message_offset: 55, lineno_offset: 52
+script.sh:8:14: error: unexpected token near: salut
+  8  |  					echo salut;
+     |					                 ^
+
+offset: 62, message_offset: 57, lineno_offset: 53
+script.sh:18:14: error: unexpected token near: salut
+  18  |  					echo salut;
+      |					                  ^
+

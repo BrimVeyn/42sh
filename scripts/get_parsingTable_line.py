@@ -42,7 +42,7 @@ desired_line = rows[3 + line_no]
 data_cells = desired_line.find_all('td')
 
 # Map headers to values in a 2D array format
-table_data = [[header, cell.get_text(strip=True)] for header, cell in zip(header_list, data_cells[1:])]
+table_data = ([header, cell.get_text(strip=True)] for header, cell in zip(header_list, data_cells[1:]))
 
 # Pretty print the table data
 pretty_table = PrettyTable()

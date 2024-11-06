@@ -6,12 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 16:46:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/04 11:47:11 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/06 16:05:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FINAL_PARSER
 # define FINAL_PARSER
+
+#include "utils.h"
 
 typedef enum TokenType {
 	AND_IF,
@@ -112,7 +114,15 @@ typedef struct TableEntry {
 char *tokenTypeStr(TokenType type);
 char *actionStr(const Action action);
 
-typedef enum {LEX_SET, LEX_GET, LEX_PEAK, LEX_PEAK_CHAR, LEX_DEBUG} LexMode;
-char *lex_interface(LexMode mode, void *input);
+typedef struct {
+	char *raw_input;
+	StringStream *input;
+	StringStream *peak;
+	size_t line; 
+	size_t column;
+} Lex;
+
+typedef enum {LEX_SET, LEX_GET, LEX_OWN, LEX_PEAK, LEX_PEAK_CHAR, LEX_DEBUG} LexMode;
+void *lex_interface(LexMode mode, void *input);
 
 #endif // !FINAL_PARSER

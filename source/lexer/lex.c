@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/05 14:53:24 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/06 16:39:08 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,11 @@ void get_next_token(StringStream *input, StringStream *cache, size_t *line, size
 	da_create(context_stack, WordContextList, sizeof(WordContext), GC_SUBSHELL);
 	da_push(context_stack, WORD_WORD);
 
+	while (*input->data && (*input->data == '\t' || *input->data == ' ')) {
+		da_pop_front(input);
+		(*column)++;
+	}
+
 	while (input->size) {
 		WordContext maybe_new_context = get_context(input, map, da_peak_back(context_stack));
 
@@ -130,6 +135,7 @@ void get_next_token(StringStream *input, StringStream *cache, size_t *line, size
 			case '|' : da_push(cache, da_pop_front(input)); (*column)++; return;
 			case '(' : da_push(cache, da_pop_front(input)); (*column)++; return;
 			case ')' : da_push(cache, da_pop_front(input)); (*column)++; return;
+			case '\n': da_push(cache, da_pop_front(input)); (*line)++; (*column) = 0; return;
 		}
 	}
 

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:53:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/26 15:23:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/06 16:08:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,16 +18,6 @@
 
 #include <stdio.h>
 
-char *get_line_x(char *in, const size_t n) {
-	char *line_ptr = in;
-	for (size_t i = 0; i < n; i++) {
-		line_ptr = ft_strchr(line_ptr, '\n');
-	}
-
-	char *end = ft_strchr(line_ptr, '\n');
-	char *return_line = ft_substr(in, (line_ptr - in), (end - line_ptr));
-	return return_line;
-}
 
 void lexer_debug(Lexer_p lexer) {
 	dprintf(2, "--- Lexer state ---\n");
