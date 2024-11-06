@@ -6,34 +6,31 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 13:04:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/04 11:51:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/06 16:17:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "utils.h"
 #include "final_parser.h"
 
 #include <stdio.h>
 
 void get_next_token(StringStream *input, StringStream *cache, size_t *line, size_t *column);
 
-typedef struct {
-	StringStream *input;
-	StringStream *peak;
-	size_t line; 
-	size_t column;
-} Lex;
-
-char *lex_interface(LexMode mode, void *input) {
+void *lex_interface(LexMode mode, void *input) {
 	static Lex *lexer = NULL;
 
 	switch (mode) {
+		case (LEX_OWN): {
+			return lexer;
+		}
 		case (LEX_SET): {
 			lexer = gc_unique(Lex, GC_SUBSHELL);
+			lexer->raw_input = input;
 			da_create(tmp, StringStream, sizeof(char), GC_SUBSHELL);
 			lexer->input = tmp;
 			da_create(tmp2, StringStream, sizeof(char), GC_SUBSHELL);
 			lexer->peak = tmp2;
+			lexer->line = 1;
 			ss_push_string(lexer->input, input);
 			break;
 		}

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:05:45 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/06 10:05:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/06 11:14:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,6 @@
 #define HASH_OPTION_REQUIRES_ARG dprintf(STDERR_FILENO, "bash: hash: -d: option requires an argument\n"); 
 //------------------------------------------------------------------------------------------------------
 #define ERROR_NO_SUCH_JOB(builtin, arg) dprintf(STDERR_FILENO, "42sh: %s: %s: no such job\n", builtin, arg);
-
 //------------------------------Redirections---------------------//
 
 typedef enum {

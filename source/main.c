@@ -247,11 +247,11 @@ int main(const int ac, char *av[], const char *env[]) {
 	char *input = NULL;
 	//display the prompt, init signals if shell in interactive and reads input
 	while (true) {
-		if (self->interactive < 2){
+		if (self->interactive < 2) {
 			input = init_prompt_and_signals(input, self->interactive, shell_vars);
 		} else {
 			input = open_read_file(av[1]);
-			if (ac > 2){
+			if (ac > 2) {
 				da_create(pos_args, StringList, sizeof(char *), GC_SUBSHELL);//definition of pos_args
 				for (int i = 2; i < ac; i++){
 					da_push(pos_args, av[i]);
@@ -269,6 +269,8 @@ int main(const int ac, char *av[], const char *env[]) {
 					add_input_to_history(input, &history_fd);
 			}
 			parse_input(input);
+			gc(GC_CLEANUP, GC_ALL);
+			exit(1);
 			TokenList *tokens = lexer_lex_all(input);
 			// tokenListToString(tokens);
 			if (lexer_syntax_error(tokens))

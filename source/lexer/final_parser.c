@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:19:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/06 10:14:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/06 17:26:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <time.h>
 #include <unistd.h>
 
 typedef struct {
@@ -42,6 +43,13 @@ typedef struct {
 	int	gc_level;
 } StringListL;
 
+typedef struct {
+	StringListL **data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} StringListVect;
 
 typedef struct {
 	RedirectionL *redir_list;
@@ -55,6 +63,7 @@ typedef struct {
 typedef struct IFClauseP IFClauseP;
 typedef struct ForClauseP ForClauseP;
 typedef struct WhileClauseP WhileClauseP;
+typedef struct CaseClauseP CaseClauseP;
 typedef struct PipeLineP PipeLineP;
 typedef struct AndOrP AndOrP;
 typedef struct ListP ListP;
@@ -68,8 +77,8 @@ typedef struct {
 		ForClauseP *for_clause;
 		IFClauseP *if_clause;
 		WhileClauseP *while_clause;
+		CaseClauseP *case_clause;
 		// BraceGroupP *brace_group;
-		// CaseClause *case_clause;
 	};
 } CommandP;
 
@@ -120,9 +129,16 @@ struct ForClauseP {
 	StringListL *word_list;
 };
 
+struct CaseClauseP {
+	char *expression;
+	StringListVect *patterns;
+	ListPVect *bodies;
+};
+
 typedef struct {
 	TokenType type;
 	union {
+		CaseClauseP *case_clause;
 		StringListL *word_list;
 		WhileClauseP *while_clause;
 		ForClauseP *for_clause;
@@ -155,6 +171,40 @@ typedef struct {
 } TokenStack;
 
 #include "colors.h"
+
+void pretty_error(char *raw_token) {
+	Lex *lexer = lex_interface(LEX_OWN, NULL);
+	//TODO: tty ? cmd_line : filename
+	char buffer[MAX_WORD_LEN] = {0};
+	int message_len = ft_sprintf(buffer, "script.sh:%ld:%ld: "C_BOLD C_BRIGHT_RED"error"C_RESET": unexpected token near: "C_BOLD C_WHITE"\'%s\'"C_RESET"\n", lexer->line, lexer->column, raw_token);
+	int lineno_len = ft_sprintf(buffer, "  %ld", lexer->line) - message_len;
+	ft_sprintf(buffer, "  |  ");
+	char *line = get_line_x(lexer->raw_input, lexer->line);
+	int tab_count = 0;
+	for (size_t i = 0; line[i]; i++) {
+		if (line[i] == '\t') {
+			// spacing_len -= 1;
+			tab_count += 1;
+		}
+	}
+	ft_sprintf(buffer, "%s\n", line);
+	for(int i = 0; i < lineno_len; i++) {
+		ft_sprintf(buffer, " ");
+	}
+	ft_sprintf(buffer, "  |  ");
+	for (size_t i = 0; i < lexer->column; i++) {
+		if (tab_count) {
+			ft_sprintf(buffer, "\t");
+			tab_count -= 1;
+		} else {
+			ft_sprintf(buffer, " ");
+		}
+	}
+	ft_sprintf(buffer, C_BOLD C_BRIGHT_RED"^"C_RESET"\n");
+	ft_dprintf(2, buffer);
+}
+
+
 void	pipelineAddBack(PipeLineP **lst, PipeLineP *new_value) {
 	PipeLineP	*temp;
 
@@ -227,6 +277,24 @@ IFClauseP *IFClauseNew(ListP *condition, ListP *body) {
 	return self;
 }
 
+CaseClauseP *CaseClauseNew(StringListL *pattern, ListP *body) {
+	CaseClauseP *self = gc_unique(CaseClauseP, GC_SUBSHELL);
+	da_create(pattern_list, StringListVect, sizeof(StringListL *), GC_SUBSHELL);
+	da_push(pattern_list, pattern);
+	da_create(bodies, ListPVect, sizeof(ListP *), GC_SUBSHELL);
+	da_push(bodies, body);
+	self->patterns = pattern_list;
+	self->bodies = bodies;
+	return self;
+}
+
+void CaseClauseMerge(CaseClauseP *parent, const CaseClauseP *child) {
+	while (child->patterns->size)
+		da_push(parent->patterns, da_pop(child->patterns));
+	while (child->bodies->size)
+		da_push(parent->bodies, da_pop(child->bodies));
+}
+
 void print_if_clause(const IFClauseP *if_clause);
 void print_while_clause(const WhileClauseP *while_clause);
 void print_list(const ListP *list);
@@ -247,19 +315,26 @@ void print_redir_list(const RedirectionL *redir_list) {
 	dprintf(2, C_SEA_GREEN"}"C_RESET"\n");
 }
 
-void print_word_list(const StringListL *word_list) {
-	dprintf(2, C_DARK_CYAN"  Words: "C_RESET C_SEA_GREEN"{"C_RESET);
+void print_word_list(const char *title, const StringListL *word_list) {
+	dprintf(2, C_DARK_CYAN"  %s: "C_RESET C_SEA_GREEN"{"C_RESET, title);
+	if (!word_list) {
+		dprintf(2, "(null)");
+		goto close_print;
+	}
 	for (size_t i = 0; i < word_list->size; i++) {
+		if (!word_list->data[i])
+			continue;
 		dprintf(2, "%s", word_list->data[i]);
 		if (i < word_list->size - 1) {
 			dprintf(2, ", ");
 		}
 	}
+close_print:
 	dprintf(2, C_SEA_GREEN"}"C_RESET"\n");
 }
 
 void print_simple_command(const SimpleCommandP *self) {
-	print_word_list(self->word_list);
+	print_word_list("Words", self->word_list);
 	print_redir_list(self->redir_list);
 }
 
@@ -272,9 +347,23 @@ void print_subshell(const ListP *subshell) {
 void print_for_clause(const ForClauseP *for_clause) {
 	dprintf(2, C_CERULEAN"----------ForClause---------"C_RESET"\n");
 	print_list(for_clause->body);
-	print_word_list(for_clause->word_list);
+	if (for_clause->word_list)
+		print_word_list("Enum", for_clause->word_list);
 	dprintf(2, C_DARK_CYAN"  Iterator:"C_RESET" %s\n", for_clause->iterator);
 	dprintf(2, C_CERULEAN"--------ForClauseEnd----------"C_RESET"\n");
+}
+
+void print_case_clause(const CaseClauseP *case_clause) {
+	dprintf(2, C_CERULEAN"----------CaseClause---------"C_RESET"\n");
+	dprintf(2, C_DARK_CYAN"  Expression:"C_RESET" %s\n", case_clause->expression);
+	for(size_t i = 0; i < case_clause->patterns->size; i++) {
+		print_word_list("Case", case_clause->patterns->data[i]);
+	}
+	for (size_t i = 0; i < case_clause->bodies->size; i++) {
+		print_list(case_clause->bodies->data[i]);
+	}
+	dprintf(2, C_CERULEAN"--------CaseClauseEnd----------"C_RESET"\n");
+
 }
 
 void print_command(CommandP *command) {
@@ -285,6 +374,7 @@ void print_command(CommandP *command) {
 		case Until_Clause: print_while_clause(command->while_clause); break;
 		case Subshell: print_subshell(command->subshell); break;
 		case For_Clause: print_for_clause(command->for_clause); break;
+		case Case_Clause: print_case_clause(command->case_clause); break;
 		default: break;
 	}
 	if (command->redir_list) {
@@ -315,6 +405,9 @@ void print_andor(const AndOrP *and_or) {
 
 void print_list(const ListP *list) {
 	const ListP *head = list;
+	if (!head) {
+		dprintf(2, "  Body: (null)\n");
+	}
 	while (head) {
 		print_andor(head->and_or);
 		if (head->separator == SEMI || head->separator == AMPER || head->separator == NEWLINE) {
@@ -412,6 +505,13 @@ void print_token_stack(const TokenStack *stack) {
 					print_while_clause(entry->token.while_clause);
 					break;
 				}
+				case Case_Item:
+				case Case_Item_Ns:
+				case Case_List:
+				case Case_List_Ns: {
+					print_case_clause(entry->token.case_clause);
+					break;
+				}
 				case Complete_Command: {
 					print_complete_command(entry->token.complete_command);
 					break;
@@ -445,12 +545,14 @@ TokenType identify_token(const char *raw_value, const int table_row) {
 		[LESSGREAT] = "<>", [CLOBBER] = ">|",
 		[NEWLINE] = "\n", [AMPER] = "&", [SEMI] = ";",
 	};
-	   //NAME | WORD | IO_NUMBER | ASSIGNMENT_WORD
+
+	//FIX: ASSIGNMENT_WORD
+
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
 			(table_row != 27 || i == PIPE 
 			|| i == AND_IF || i == OR_IF ||
-			i == SEMI || i == AMPER)) {
+			i == SEMI || i == AMPER || i == LPAREN || i == RPAREN)) {
 			return i;
 		}
 	}
@@ -492,8 +594,8 @@ StackEntry *parse() {
 	while (true && ++action_no < 200) {
 		int state = da_peak_back(stack)->state;
 		TableEntry entry = parsingTable[state][token.type];
-		// print_token_stack(stack);
-		// dprintf(2, C_DARK_GRAY_FG C_LIGHT_RED"[%zu] %s %d"C_RESET"\n", action_no, actionStr(entry.action), entry.value);
+		print_token_stack(stack);
+		dprintf(2, C_DARK_GRAY_FG C_LIGHT_RED"[%zu] %s %d"C_RESET"\n", action_no, actionStr(entry.action), entry.value);
 
 		switch(entry.action) {
 			case SHIFT: {
@@ -504,6 +606,7 @@ StackEntry *parse() {
 				da_push(stack, new_entry);
 				token.raw_value = lex_interface(LEX_GET, NULL);
 				token.type = identify_token(token.raw_value, entry.value);
+				// dprintf(2, "Token produced: %s\n, type: %s\n", token.raw_value, tokenTypeStr(token.type));
 				break;
 			}
 			case REDUCE: {
@@ -705,8 +808,11 @@ StackEntry *parse() {
 						break;
 					}
 					case 22: { /* compound_command -> case_clause */
-						da_pop(stack);
+						CaseClauseP *case_clause = da_pop(stack)->token.case_clause;
 						reduced_entry->token.type = Compound_Command;
+						reduced_entry->token.command = gc_unique(CommandP, GC_SUBSHELL);
+						reduced_entry->token.command->type = Case_Clause;
+						reduced_entry->token.command->case_clause = case_clause;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Compound_Command].value;
 						break;
@@ -763,7 +869,7 @@ StackEntry *parse() {
 					case 28: { /* compound_list -> linebreak term separator */
 						TokenType sep = da_pop(stack)->token.separator_op;
 						ListP *list = da_pop(stack)->token.list;
-						da_pop(stack);
+						da_pop(stack); //linebreak
 						list->separator = sep;
 						reduced_entry->token.type = Compound_List;
 						reduced_entry->token.list = list;
@@ -772,10 +878,12 @@ StackEntry *parse() {
 						break;
 					}
 					case 29: { /* term -> term separator and_or */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						AndOrP *and_or = da_pop(stack)->token.and_or;
+						TokenType sep = da_pop(stack)->token.separator_op;
+						ListP *term = da_pop(stack)->token.list;
+						listAddBack(&term, listNew(and_or, sep));
 						reduced_entry->token.type = Term;
+						reduced_entry->token.list = term;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Term].value;
 						break;
@@ -789,32 +897,41 @@ StackEntry *parse() {
 						break;
 					}
 					case 31: { /* for_clause -> FOR name do_group */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						ListP *do_group = da_pop(stack)->token.list;
+						char *name = da_pop(stack)->token.raw_value;
+						da_pop(stack); //FOR
 						reduced_entry->token.type = For_Clause;
+						reduced_entry->token.for_clause = gc_unique(ForClauseP, GC_SUBSHELL);
+						reduced_entry->token.for_clause->iterator = name;
+						reduced_entry->token.for_clause->body = do_group;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][For_Clause].value;
 						break;
 					}
 					case 32: { /* for_clause -> FOR name sequential_sep do_group */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						ListP *do_group = da_pop(stack)->token.list;
+						da_pop(stack); //sequential_sep
+						char *name = da_pop(stack)->token.raw_value;
+						da_pop(stack); //FOR
 						reduced_entry->token.type = For_Clause;
+						reduced_entry->token.for_clause = gc_unique(ForClauseP, GC_SUBSHELL);
+						reduced_entry->token.for_clause->body = do_group;
+						reduced_entry->token.for_clause->iterator = name;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][For_Clause].value;
 						break;
 					}
 					case 33: { /* for_clause -> FOR name linebreak in sequential_sep do_group */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						ListP *do_group = da_pop(stack)->token.list;
+						da_pop(stack); //sequential_sep
+						da_pop(stack); //in
+						da_pop(stack); //linebreak
+						char *name = da_pop(stack)->token.raw_value;
+						da_pop(stack); //FOR
 						reduced_entry->token.type = For_Clause;
+						reduced_entry->token.for_clause = gc_unique(ForClauseP, GC_SUBSHELL);
+						reduced_entry->token.for_clause->iterator = name;
+						reduced_entry->token.for_clause->body = do_group;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][For_Clause].value;
 						break;
@@ -872,179 +989,205 @@ StackEntry *parse() {
 						break;
 					}
 					case 39: { /* case_clause -> CASE WORD linebreak in linebreak case_list ESAC */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						da_pop(stack); //ESAC
+						CaseClauseP *case_list = da_pop(stack)->token.case_clause;
+						da_pop(stack); //linebreak
+						da_pop(stack); //in
+						da_pop(stack); //linebreak
+						char *expression = da_pop(stack)->token.raw_value;
+						da_pop(stack); //CASE
 						reduced_entry->token.type = Case_Clause;
+						reduced_entry->token.case_clause = case_list;
+						reduced_entry->token.case_clause->expression = expression;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Clause].value;
 						break;
 					}
 					case 40: { /* case_clause -> CASE WORD linebreak in linebreak case_list_ns ESAC */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						da_pop(stack); //ESAC
+						CaseClauseP *case_list = da_pop(stack)->token.case_clause;
+						da_pop(stack); //linebreak
+						da_pop(stack); //in
+						da_pop(stack); //linebreak
+						char *expression = da_pop(stack)->token.raw_value;
+						da_pop(stack); //CASE
 						reduced_entry->token.type = Case_Clause;
+						reduced_entry->token.case_clause = case_list;
+						reduced_entry->token.case_clause->expression = expression;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Clause].value;
 						break;
 					}
 					case 41: { /* case_clause -> CASE WORD linebreak in linebreak ESAC */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						da_pop(stack); //ESAC
+						da_pop(stack); //linebreak
+						da_pop(stack); //in
+						da_pop(stack); //linebreak
+						char *expression = da_pop(stack)->token.raw_value;
+						da_pop(stack); //CASE
 						reduced_entry->token.type = Case_Clause;
+						reduced_entry->token.case_clause = CaseClauseNew(NULL, NULL);
+						reduced_entry->token.case_clause->expression = expression;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Clause].value;
 						break;
 					}
 					case 42: { /* case_list_ns -> case_list case_item_ns */
-						da_pop(stack);
-						da_pop(stack);
+						CaseClauseP *case_list = da_pop(stack)->token.case_clause;
+						CaseClauseP *case_item_ns = da_pop(stack)->token.case_clause;
+						CaseClauseMerge(case_list, case_item_ns);
 						reduced_entry->token.type = Case_List_Ns;
+						reduced_entry->token.case_clause = case_list;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_List_Ns].value;
 						break;
 					}
 					case 43: { /* case_list_ns -> case_item_ns */
-						da_pop(stack);
+						CaseClauseP *case_item_ns = da_pop(stack)->token.case_clause;
 						reduced_entry->token.type = Case_List_Ns;
+						reduced_entry->token.case_clause = case_item_ns;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_List_Ns].value;
 						break;
 					}
 					case 44: { /* case_list -> case_list case_item */
-						da_pop(stack);
-						da_pop(stack);
+						CaseClauseP *case_list = da_pop(stack)->token.case_clause;
+						CaseClauseP *case_item = da_pop(stack)->token.case_clause;
+						CaseClauseMerge(case_list, case_item);
 						reduced_entry->token.type = Case_List;
+						reduced_entry->token.case_clause = case_list;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_List].value;
 						break;
 					}
 					case 45: { /* case_list -> case_item */
-						da_pop(stack);
+						CaseClauseP *case_item = da_pop(stack)->token.case_clause;
 						reduced_entry->token.type = Case_List;
+						reduced_entry->token.case_clause = case_item;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_List].value;
 						break;
 					}
 					case 46: { /* case_item_ns -> pattern RPAREN linebreak */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						da_pop(stack); //linebreak
+						da_pop(stack); //RPAREN
+						StringListL *pattern = da_pop(stack)->token.word_list;
 						reduced_entry->token.type = Case_Item_Ns;
+						reduced_entry->token.case_clause = CaseClauseNew(pattern, NULL);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item_Ns].value;
 						break;
 					}
 					case 47: { /* case_item_ns -> pattern RPAREN compound_list */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						ListP *body = da_pop(stack)->token.list;
+						da_pop(stack); //RPAREN
+						StringListL *pattern = da_pop(stack)->token.word_list;
 						reduced_entry->token.type = Case_Item_Ns;
+						reduced_entry->token.case_clause = CaseClauseNew(pattern, body);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item_Ns].value;
 						break;
 					}
 					case 48: { /* case_item_ns -> LPAREN pattern RPAREN linebreak */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						da_pop(stack); //linebreak
+						da_pop(stack); //RPAREN
+						StringListL *pattern = da_pop(stack)->token.word_list;
+						da_pop(stack); //LPAREN
 						reduced_entry->token.type = Case_Item_Ns;
+						reduced_entry->token.case_clause = CaseClauseNew(pattern, NULL);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item_Ns].value;
 						break;
 					}
 					case 49: { /* case_item_ns -> LPAREN pattern RPAREN linebreak */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						da_pop(stack); //linebreak
+						da_pop(stack); //RPAREN
+						StringListL *pattern = da_pop(stack)->token.word_list;
+						da_pop(stack); //LPAREN
 						reduced_entry->token.type = Case_Item_Ns;
+						reduced_entry->token.case_clause = CaseClauseNew(pattern, NULL);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item_Ns].value;
 						break;
 					}
 					case 50: { /* case_item_ns -> LPAREN pattern RPAREN compound_list */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						ListP *body = da_pop(stack)->token.list;
+						da_pop(stack); //RPAREN
+						StringListL *pattern = da_pop(stack)->token.word_list;
+						da_pop(stack); //LPAREN
 						reduced_entry->token.type = Case_Item_Ns;
+						reduced_entry->token.case_clause = CaseClauseNew(pattern, body);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item_Ns].value;
 						break;
 					}
 					case 51: { /* case_item -> pattern RPAREN linebreak DSEMI linebreak */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						da_pop(stack); //linebreak
+						da_pop(stack); //DSEMI
+						da_pop(stack); //linebreak
+						da_pop(stack); //RPAREN
+						StringListL *pattern = da_pop(stack)->token.word_list;
 						reduced_entry->token.type = Case_Item;
+						reduced_entry->token.case_clause = CaseClauseNew(pattern, NULL);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item].value;
 						break;
 					}
 					case 52: { /* case_item -> pattern RPAREN compound_list DSEMI linebreak */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						da_pop(stack); //linebreak
+						da_pop(stack); //DSEMI
+						ListP *body = da_pop(stack)->token.list;
+						da_pop(stack); //PAREN
+						StringListL *pattern = da_pop(stack)->token.word_list;
 						reduced_entry->token.type = Case_Item;
+						reduced_entry->token.case_clause = CaseClauseNew(pattern, body);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item].value;
 						break;
 					}
 					case 53: { /* case_item -> LPAREN pattern RPAREN linebreak DSEMI linebreak */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						da_pop(stack); //linebreak
+						da_pop(stack); //DSEMI
+						da_pop(stack); //linebreak
+						da_pop(stack); //RPAREN
+						StringListL *pattern = da_pop(stack)->token.word_list;
+						da_pop(stack); //LPAREN
 						reduced_entry->token.type = Case_Item;
+						reduced_entry->token.case_clause = CaseClauseNew(pattern, NULL);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item].value;
 						break;
 					}
 					case 54: { /* case_item -> LPAREN pattern RPAREN compound_list DSEMI linebreak */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						da_pop(stack); //linebreak
+						da_pop(stack); //DSEMI
+						ListP *body = da_pop(stack)->token.list;
+						da_pop(stack); //PAREN
+						StringListL *pattern = da_pop(stack)->token.word_list;
 						da_pop(stack);
 						reduced_entry->token.type = Case_Item;
+						reduced_entry->token.case_clause = CaseClauseNew(pattern, body);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item].value;
 						break;
 					}
 					case 55: { /* pattern -> WORD */
-						da_pop(stack);
+						char *word = da_pop(stack)->token.raw_value;
 						reduced_entry->token.type = Pattern;
+						da_create(word_list, StringListL, sizeof(char *), GC_SUBSHELL);
+						da_push(word_list, word);
+						reduced_entry->token.word_list = word_list;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Pattern].value;
 						break;
 					}
 					case 56: { /* pattern -> pattern PIPE WORD */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						char *word = da_pop(stack)->token.raw_value;
+						da_pop(stack); //PIPE
+						StringListL *pattern = da_pop(stack)->token.word_list;
+						da_push(pattern, word);
 						reduced_entry->token.type = Pattern;
+						reduced_entry->token.word_list = pattern;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Pattern].value;
 						break;
@@ -1518,7 +1661,7 @@ StackEntry *parse() {
 			}
 			case GOTO: 
 			case ERROR: {
-				dprintf(2, C_RED"ERROR"C_RESET"\n");
+				pretty_error(token.raw_value);
 				return NULL;
 				break;
 			}
@@ -1530,9 +1673,10 @@ StackEntry *parse() {
 
 void parse_input(char *in) {
 	lex_interface(LEX_SET, in);
-	// for (size_t i = 0; i < 10; i++) {
+	// dprintf(2, "input:\n%s", in);
+	// for (size_t i = 0; i < 100; i++) {
 	// 	char *value = lex_interface(LEX_GET, NULL);	
-	// 	TokenType type = identify_token(value);
+	// 	TokenType type = identify_token(value, 0);
 	// 	dprintf(2, "|%s| -> %s\n", value, tokenTypeStr(type));
 	// }
 	parse();

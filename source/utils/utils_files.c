@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 16:35:28 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/12 23:49:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/06 16:14:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,27 @@ void close_std_fds(void) {
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
+}
+
+char *get_line_x(char *in, const size_t n) {
+    if (!in || n == 0) return NULL;
+
+    char *line_ptr = in;
+    
+    for (size_t i = 0; i < n - 1; i++) {
+        line_ptr = ft_strchr(line_ptr, '\n');
+        if (!line_ptr) {
+			return NULL;
+		}
+        line_ptr++;
+    }
+
+    char *end = ft_strchr(line_ptr, '\n');
+    if (!end) {
+		end = line_ptr + strlen(line_ptr);  // If no newline, go to end of string
+	}
+
+    return ft_substr(in, (line_ptr - in), (end - line_ptr));
 }
 
 char *get_next_line(int fd) {

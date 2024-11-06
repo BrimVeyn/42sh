@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/06 10:08:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/06 16:35:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,7 +157,7 @@ char			**ft_strdupdup(const char **env);
 char			*replace_char_greedy(char *str, char c, char by);
 int				ft_strstr(char *haystack, char *needle);
 int				ft_strrstr(char *haystack, char *needle);
-void			ft_sprintf(char *buffer, const char *fmt, ...);
+int				ft_sprintf(char *buffer, const char *fmt, ...);
 int				ft_snprintf(char *buffer, const size_t size_of_buffer, const char *fmt, ...);
 void			ft_dprintf(int fd, const char *fmt, ...);
 long			ft_atol(const char *str);
@@ -174,12 +174,13 @@ void			ss_cut(StringStream *ss, size_t new_size);
 //----------------File Utils--------------------//
 char			*get_next_line(int fd);
 char			*read_whole_file(int fd);
-void			fatal(char *msg, int exit_code);
+char			*get_line_x(char *in, const size_t n);
 //------------------------------------------//
 
 void ss_push_string(StringStream *ss, char *str);
 char *ss_get_owned_slice(StringStream *ss);
 void ss_cut(StringStream *ss, size_t new_size);
 
+void			fatal(char *msg, int exit_code);
 
 #endif // !UTILS_H
