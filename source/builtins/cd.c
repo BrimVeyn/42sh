@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 15:10:45 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/05 16:27:33 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/06 10:04:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include <limits.h>
 #include <sys/stat.h>
 
-static void update_pwd(Vars *shell_vars){
+void update_pwd(Vars *shell_vars){
 	(void)shell_vars;
 	char cwd[PATH_MAX];
 	getcwd(cwd, sizeof(cwd));
@@ -81,27 +81,28 @@ char *search_in_cdpath(char *operand, Vars *shell_vars) {
 
 void builtin_cd(const SimpleCommand *command, Vars *shell_vars) {
 
-	char *curpath = NULL;
-	char *operand = command->args[1];
-	
-	if (!operand){
-		curpath = ft_strdup(string_list_get_value(shell_vars->env, "HOME"));
-		if (!curpath){
-			write(2, "42sh: cd: HOME not set\n", 24);
-			g_exitno = 1;
-			return;
-		}
-	}
-
-	if (operand[0] == '/') { //3
-		curpath = command->args[1];
-	} else {
-		if (operand[0] != '.'){
-			search_in_cdpath(operand);
-		}
-
-	}
-
-	g_exitno = go_to_path(curpath, shell_vars);
+	(void)command;(void)shell_vars;
+	// char *curpath = NULL;
+	// char *operand = command->args[1];
+	// 
+	// if (!operand){
+	// 	curpath = ft_strdup(string_list_get_value(shell_vars->env, "HOME"));
+	// 	if (!curpath){
+	// 		write(2, "42sh: cd: HOME not set\n", 24);
+	// 		g_exitno = 1;
+	// 		return;
+	// 	}
+	// }
+	//
+	// if (operand[0] == '/') { //3
+	// 	curpath = command->args[1];
+	// } else {
+	// 	if (operand[0] != '.'){
+	// 		search_in_cdpath(operand);
+	// 	}
+	//
+	// }
+	//
+	// g_exitno = go_to_path(curpath, shell_vars);
 	return;
 }
