@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:19:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/05 16:31:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/06 10:14:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -492,8 +492,8 @@ StackEntry *parse() {
 	while (true && ++action_no < 200) {
 		int state = da_peak_back(stack)->state;
 		TableEntry entry = parsingTable[state][token.type];
-		print_token_stack(stack);
-		dprintf(2, C_DARK_GRAY_FG C_LIGHT_RED"[%zu] %s %d"C_RESET"\n", action_no, actionStr(entry.action), entry.value);
+		// print_token_stack(stack);
+		// dprintf(2, C_DARK_GRAY_FG C_LIGHT_RED"[%zu] %s %d"C_RESET"\n", action_no, actionStr(entry.action), entry.value);
 
 		switch(entry.action) {
 			case SHIFT: {
