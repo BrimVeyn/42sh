@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/14 16:23:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/24 08:56:01 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/06 10:05:45 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/06 10:05:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,9 +114,10 @@ void				str_list_print(const StrList *list);
 
 //-------------------SimpleCommand-----------------------//
 SimpleCommand		*parser_parse_current(TokenList *tl, Vars *shell_vars);
+bool				execute_command_sub(char *input, Vars *shell_vars);
 
 //-------------------Here_doc-----------------------//
-bool				heredoc_detector(TokenList *data);
+bool heredoc_detector(TokenList *data, Vars *shell_vars);
 
 //-------------------Parser modules------------//
 char				*parser_parameter_expansion(char *str, Vars *shell_vars);
@@ -132,5 +133,5 @@ int					get_history(void);
 void				parser_skip_subshell(TokenList *list, size_t *it);
 void				skip_cmdgrp(TokenList *self, TokenList *list, size_t *i);
 //---------------------------------------------------------------//
-
+//
 #endif // !PARSER_H

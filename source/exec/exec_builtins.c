@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/17 14:35:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/05 10:25:14 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ bool builtin_executer(const SimpleCommand *command, Vars *shell_vars) {
 		{"type",  &builtin_type}, {"jobs",  &builtin_jobs},
 		/*{"pwd", &builtin_pwd},*/ {"unset", &builtin_unset},
 		{"fg", &builtin_fg},  {"bg", &builtin_bg},
+		{"cd", &builtin_cd},
 	};
 
 	int result_index = -1;

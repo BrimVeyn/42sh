@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:29:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/17 10:58:10 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/18 15:19:54 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,9 @@
 int g_signal;
 
 void signal_sigint_prompt(__attribute__((unused)) int code) {
-	ft_rl_newline();
 	rl_done = 1;
 	g_signal = code;
+
 }
 
 void signal_sigint_exec(int code) {

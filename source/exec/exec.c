@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/17 14:37:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/05 15:25:48 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@
 #include "utils.h"
 #include "libft.h"
 
-#include <readline/history.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <termios.h>
@@ -32,7 +31,6 @@
 
 int g_exitno;
 
-//LARBIN add FD validity check (>1023)
 bool apply_redirect(const Redirection redirect) {
 	int fd = redirect.fd;
 	const int open_flag = (redirect.r_type == R_INPUT) * (O_RDONLY)
@@ -242,12 +240,14 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 					if (proc->n_data->redirs != NULL) {
 						if (!apply_all_redirect(proc->n_data->redirs)) {
 							gc(GC_CLEANUP, GC_SUBSHELL);
+							gc(GC_CLEANUP, GC_READLINE);
 							exit(g_exitno);
 						}
 					}
 					g_exitno = ast_execute(proc->n_data, shell_vars, foreground);
 					gc(GC_CLEANUP, GC_ENV);
 					gc(GC_CLEANUP, GC_SUBSHELL);
+					gc(GC_CLEANUP, GC_READLINE);
 					free(((Garbage *)gc(GC_GET))[GC_GENERAL].garbage);
 					exit(g_exitno);
 				} else {

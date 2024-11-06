@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/16 16:31:07 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/21 11:05:20 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/06 10:08:11 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/06 10:08:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,17 +25,18 @@
 static void clean_sub(void) {
 	gc(GC_CLEANUP, GC_ENV);
 	gc(GC_CLEANUP, GC_SUBSHELL);
+	gc(GC_CLEANUP, GC_READLINE);
 	free(((Garbage *)gc(GC_GET))[GC_GENERAL].garbage);
 	exit(g_exitno);
 }
 
-static bool execute_command_sub(char *input, Vars *shell_vars) {
+bool execute_command_sub(char *input, Vars *shell_vars) {
 	pid_t pid = fork();
 	if (!pid) {
 		TokenList *tokens = lexer_lex_all(input);
 		if (lexer_syntax_error(tokens))
 			clean_sub();
-		heredoc_detector(tokens);
+		heredoc_detector(tokens, shell_vars);
 		Node *AST = ast_build(tokens);
 		ast_execute(AST, shell_vars, true);
 		clean_sub();

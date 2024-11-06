@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/08 11:31:11 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/20 17:18:53 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/11/04 15:07:58 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,17 +20,42 @@
 
 #include <stdbool.h>
 
+#define CTRL_L 12 
+#define CTRL_R 18
+
 typedef struct _hist_entry {
   string line;
 } HIST_ENTRY;
 
 typedef struct _hist_state {
-  HIST_ENTRY **entries; /* Pointer to the entries themselves. */
-  int offset;           /* The location pointer within this array. */
-  int length;           /* Number of elements within this array. */
-  int capacity;             /* Number of slots allocated to this array. */
+	HIST_ENTRY **entries; /* Pointer to the entries themselves. */
+	int offset;           /* The location pointer within this array. */
+	int length;           /* Number of elements within this array. */
+	int capacity;             /* Number of slots allocated to this array. */
 } HISTORY_STATE;
 
+typedef enum {
+	RL_GET,
+	RL_SET,
+} manage_rl_state_mode;
+
+typedef struct s_position{
+    int x;
+    int y;
+} position_t;
+
+typedef struct s_search_mode {
+	char *word_found;
+	bool active;
+} search_mode_t;
+
+typedef struct s_readline_state {
+	string prompt;
+	position_t cursor_offset;
+	position_t cursor;
+	search_mode_t search_mode;
+	bool interactive;
+} readline_state_t;
 extern int rl_done;
 extern HISTORY_STATE *history;
 extern bool history_defined;
@@ -40,9 +65,28 @@ void destroy_history();
 void add_history(const char *str);
 void pop_history();
 void str_info(const string *str);
+void set_prompt(readline_state_t *rl_state, const char *new_prompt);
+char *search_in_history(char *str);
+
+int handle_special_keys(readline_state_t *rl_state, string *line);
+void handle_control_keys(readline_state_t *rl_state, char char_c);
+int handle_printable_keys(readline_state_t *rl_state, char c, string *line);
+int can_go_right(readline_state_t *rl_state, string *line);
+int can_go_left(readline_state_t *rl_state);
 
 char *ft_readline(const char *prompt);
 void ft_readline_clean();
 void ft_rl_newline();
+
+void update_line(readline_state_t *rl_state, string *line);
+void update_cursor_x(readline_state_t *rl_state, string *line, ssize_t n);
+
+size_t get_col(void);
+size_t get_row(void);
+void rl_print_prompt(int fd, readline_state_t *rl_state);
+
+void move_cursor(int x, int y);
+
+void set_cursor_position(readline_state_t *rl_state);
 
 #endif
