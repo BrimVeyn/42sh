@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 17:32:31 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/14 10:28:14 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/10/24 11:38:06 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <string.h>
 
 #include "../include/c_string.h"
+void str_info(const string *str);
 
 void str_destroy(string *str){
     free(str->data);

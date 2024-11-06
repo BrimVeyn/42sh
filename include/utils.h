@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/19 09:02:04 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/01 13:53:06 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/06 10:08:18 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/06 10:08:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ extern int g_exitno;
 
 typedef enum {
 	GC_GENERAL,
+	GC_READLINE,
 	GC_ENV,
 	GC_SUBSHELL,
 	GC_ALL,
@@ -175,6 +176,10 @@ char			*get_next_line(int fd);
 char			*read_whole_file(int fd);
 void			fatal(char *msg, int exit_code);
 //------------------------------------------//
+
+void ss_push_string(StringStream *ss, char *str);
+char *ss_get_owned_slice(StringStream *ss);
+void ss_cut(StringStream *ss, size_t new_size);
 
 
 #endif // !UTILS_H
