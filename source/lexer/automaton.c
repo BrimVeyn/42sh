@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 16:43:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/01 13:59:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/07 17:01:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ char *tokenTypeStr(TokenType type) {
 		case Newline_List: return "Newline_List";
 		case Linebreak: return "Linebreak";
 		case Separator_Op: return "Separator_Op";
-		case Separator: return "Separator";
+		case Separatore: return "Separator";
 		case Sequential_Sep: return "Sequential_Sep";
 	}
 	return NULL;

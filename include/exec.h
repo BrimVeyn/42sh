@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:18:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/05 10:25:54 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/07 17:05:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ typedef struct ShellInfos {
 	int		shell_terminal;
 	struct termios shell_tmodes;
 } ShellInfos;
+
 
 ShellInfos *shell(int mode);
 //---------------------------------------//

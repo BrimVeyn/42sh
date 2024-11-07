@@ -132,7 +132,7 @@ test_lists=(
 	"src/mixed"
 )
 
-PS3="Enter a number to run associated tests, * for all: "
+PS3="Enter a number to run associated tests, * for all "
 select option in redirections syntax expand subshell command_sub command_group arithmetic_expansion builtin_export mixed
 do
     case $option in

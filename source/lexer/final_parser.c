@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:19:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/06 17:26:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/07 17:04:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,508 +21,11 @@
 #include <time.h>
 #include <unistd.h>
 
-typedef struct {
-	char *io_number;
-	TokenType type;
-	char *filename;
-} RedirectionP;
-
-typedef struct {
-	RedirectionP **data;
-	size_t size;
-	size_t capacity;
-	size_t size_of_element;
-	int	gc_level;
-} RedirectionL;
-
-typedef struct {
-	char **data;
-	size_t size;
-	size_t capacity;
-	size_t size_of_element;
-	int	gc_level;
-} StringListL;
-
-typedef struct {
-	StringListL **data;
-	size_t size;
-	size_t capacity;
-	size_t size_of_element;
-	int	gc_level;
-} StringListVect;
-
-typedef struct {
-	RedirectionL *redir_list;
-	StringListL	*word_list;
-} SimpleCommandP;
-
-typedef struct {
-	char *value;
-} FilenameP;
-
-typedef struct IFClauseP IFClauseP;
-typedef struct ForClauseP ForClauseP;
-typedef struct WhileClauseP WhileClauseP;
-typedef struct CaseClauseP CaseClauseP;
-typedef struct PipeLineP PipeLineP;
-typedef struct AndOrP AndOrP;
-typedef struct ListP ListP;
-
-typedef struct {
-	TokenType type;
-	RedirectionL *redir_list;
-	union {
-		SimpleCommandP *simple_command;
-		ListP *subshell;
-		ForClauseP *for_clause;
-		IFClauseP *if_clause;
-		WhileClauseP *while_clause;
-		CaseClauseP *case_clause;
-		// BraceGroupP *brace_group;
-	};
-} CommandP;
-
-typedef struct {
-	ListP *list;
-	TokenType separator;
-} CompleteCommandP;
-
-struct PipeLineP {
-	bool banged;
-	CommandP *command;
-	PipeLineP *next;
-};
-
-struct AndOrP {
-	PipeLineP *pipeline;
-	TokenType separator;
-	AndOrP *next;
-};
-
-struct ListP {
-	AndOrP *and_or;
-	TokenType separator;
-	ListP *next;
-};
-
-typedef struct {
-	ListP **data;
-	size_t size;
-	size_t capacity;
-	size_t size_of_element;
-	int	gc_level;
-} ListPVect;
-
-struct IFClauseP {
-	ListPVect *conditions;
-	ListPVect *bodies;
-};
-
-struct WhileClauseP {
-	ListP *condition;
-	ListP *body;
-};
-
-struct ForClauseP {
-	char *iterator;
-	ListP *body;
-	StringListL *word_list;
-};
-
-struct CaseClauseP {
-	char *expression;
-	StringListVect *patterns;
-	ListPVect *bodies;
-};
-
-typedef struct {
-	TokenType type;
-	union {
-		CaseClauseP *case_clause;
-		StringListL *word_list;
-		WhileClauseP *while_clause;
-		ForClauseP *for_clause;
-		IFClauseP *if_clause;
-		TokenType separator_op;
-		ListP *list;
-		AndOrP *and_or;
-		PipeLineP *pipeline;
-		CommandP *command;
-		char *raw_value;
-		RedirectionP *redir;
-		FilenameP *filename;
-		RedirectionL *redir_list;
-		SimpleCommandP *simple_command;
-		CompleteCommandP *complete_command;
-	};
-} Tokenn;
-
-typedef struct {
-	Tokenn token;
-	int state;
-} StackEntry;
-
-typedef struct {
-	StackEntry **data;
-	size_t size;
-	size_t capacity;
-	size_t size_of_element;
-	int	gc_level;
-} TokenStack;
-
 #include "colors.h"
 
-void pretty_error(char *raw_token) {
-	Lex *lexer = lex_interface(LEX_OWN, NULL);
-	//TODO: tty ? cmd_line : filename
-	char buffer[MAX_WORD_LEN] = {0};
-	int message_len = ft_sprintf(buffer, "script.sh:%ld:%ld: "C_BOLD C_BRIGHT_RED"error"C_RESET": unexpected token near: "C_BOLD C_WHITE"\'%s\'"C_RESET"\n", lexer->line, lexer->column, raw_token);
-	int lineno_len = ft_sprintf(buffer, "  %ld", lexer->line) - message_len;
-	ft_sprintf(buffer, "  |  ");
-	char *line = get_line_x(lexer->raw_input, lexer->line);
-	int tab_count = 0;
-	for (size_t i = 0; line[i]; i++) {
-		if (line[i] == '\t') {
-			// spacing_len -= 1;
-			tab_count += 1;
-		}
-	}
-	ft_sprintf(buffer, "%s\n", line);
-	for(int i = 0; i < lineno_len; i++) {
-		ft_sprintf(buffer, " ");
-	}
-	ft_sprintf(buffer, "  |  ");
-	for (size_t i = 0; i < lexer->column; i++) {
-		if (tab_count) {
-			ft_sprintf(buffer, "\t");
-			tab_count -= 1;
-		} else {
-			ft_sprintf(buffer, " ");
-		}
-	}
-	ft_sprintf(buffer, C_BOLD C_BRIGHT_RED"^"C_RESET"\n");
-	ft_dprintf(2, buffer);
-}
-
-
-void	pipelineAddBack(PipeLineP **lst, PipeLineP *new_value) {
-	PipeLineP	*temp;
-
-	if (*lst == NULL)
-		*lst = new_value;
-	else {
-		temp = *lst;
-		while (temp->next)
-			temp = temp->next;
-		temp->next = new_value;
-	}
-}
-
-PipeLineP *pipelineNew(CommandP *command) {
-	PipeLineP *self = gc_unique(PipeLineP, GC_SUBSHELL);
-	self->command = command;
-	return self;
-}
-
-void	andOrAddBack(AndOrP **lst, AndOrP *new_value) {
-	AndOrP	*temp;
-
-	if (*lst == NULL)
-		*lst = new_value;
-	else {
-		temp = *lst;
-		while (temp->next)
-			temp = temp->next;
-		temp->next = new_value;
-	}
-}
-
-AndOrP *andOrNew(PipeLineP *pipeline, TokenType separator) {
-	AndOrP *self = gc_unique(AndOrP, GC_SUBSHELL);
-	self->pipeline = pipeline;
-	self->separator = separator;
-	return self;
-}
-
-void	listAddBack(ListP **lst, ListP *new_value) {
-	ListP	*temp;
-
-	if (*lst == NULL)
-		*lst = new_value;
-	else {
-		temp = *lst;
-		while (temp->next)
-			temp = temp->next;
-		temp->next = new_value;
-	}
-}
-
-ListP *listNew(AndOrP *and_or, TokenType separator) {
-	ListP *self = gc_unique(AndOrP, GC_SUBSHELL);
-	self->and_or = and_or;
-	self->separator = separator;
-	return self;
-}
-
-IFClauseP *IFClauseNew(ListP *condition, ListP *body) {
-	IFClauseP *self = gc_unique(IFClauseP, GC_SUBSHELL);
-	da_create(condition_list, ListPVect, sizeof(ListP *), GC_SUBSHELL);
-	if (condition)
-		da_push(condition_list, condition);
-	da_create(body_list, ListPVect, sizeof(ListP *), GC_SUBSHELL);
-	if (body)
-		da_push(body_list, body);
-	self->conditions = condition_list;
-	self->bodies = body_list;
-	return self;
-}
-
-CaseClauseP *CaseClauseNew(StringListL *pattern, ListP *body) {
-	CaseClauseP *self = gc_unique(CaseClauseP, GC_SUBSHELL);
-	da_create(pattern_list, StringListVect, sizeof(StringListL *), GC_SUBSHELL);
-	da_push(pattern_list, pattern);
-	da_create(bodies, ListPVect, sizeof(ListP *), GC_SUBSHELL);
-	da_push(bodies, body);
-	self->patterns = pattern_list;
-	self->bodies = bodies;
-	return self;
-}
-
-void CaseClauseMerge(CaseClauseP *parent, const CaseClauseP *child) {
-	while (child->patterns->size)
-		da_push(parent->patterns, da_pop(child->patterns));
-	while (child->bodies->size)
-		da_push(parent->bodies, da_pop(child->bodies));
-}
-
-void print_if_clause(const IFClauseP *if_clause);
-void print_while_clause(const WhileClauseP *while_clause);
-void print_list(const ListP *list);
-
-void print_redir_list(const RedirectionL *redir_list) {
-	dprintf(2, C_DARK_CYAN"  Redirs: "C_RESET C_SEA_GREEN"{"C_RESET);
-	for (size_t i = 0; i < redir_list->size; i++) {
-		const RedirectionP *redir = redir_list->data[i];
-		if (redir->io_number) {
-			dprintf(2, C_MAGENTA"{"C_RESET"%s | %s | %s"C_MAGENTA"}"C_RESET, redir->io_number, tokenTypeStr(redir->type), redir->filename);
-		} else {
-			dprintf(2, C_MAGENTA"{"C_RESET"%s | %s"C_MAGENTA"}"C_RESET, tokenTypeStr(redir->type), redir->filename);
-		}
-		if (i < redir_list->size - 1) {
-			dprintf(2, ", ");
-		}
-	}
-	dprintf(2, C_SEA_GREEN"}"C_RESET"\n");
-}
-
-void print_word_list(const char *title, const StringListL *word_list) {
-	dprintf(2, C_DARK_CYAN"  %s: "C_RESET C_SEA_GREEN"{"C_RESET, title);
-	if (!word_list) {
-		dprintf(2, "(null)");
-		goto close_print;
-	}
-	for (size_t i = 0; i < word_list->size; i++) {
-		if (!word_list->data[i])
-			continue;
-		dprintf(2, "%s", word_list->data[i]);
-		if (i < word_list->size - 1) {
-			dprintf(2, ", ");
-		}
-	}
-close_print:
-	dprintf(2, C_SEA_GREEN"}"C_RESET"\n");
-}
-
-void print_simple_command(const SimpleCommandP *self) {
-	print_word_list("Words", self->word_list);
-	print_redir_list(self->redir_list);
-}
-
-void print_subshell(const ListP *subshell) {
-	dprintf(2, C_CERULEAN"----------Subshell---------"C_RESET"\n");
-	print_list(subshell);
-	dprintf(2, C_CERULEAN"--------SubShellEnd----------"C_RESET"\n");
-}
-
-void print_for_clause(const ForClauseP *for_clause) {
-	dprintf(2, C_CERULEAN"----------ForClause---------"C_RESET"\n");
-	print_list(for_clause->body);
-	if (for_clause->word_list)
-		print_word_list("Enum", for_clause->word_list);
-	dprintf(2, C_DARK_CYAN"  Iterator:"C_RESET" %s\n", for_clause->iterator);
-	dprintf(2, C_CERULEAN"--------ForClauseEnd----------"C_RESET"\n");
-}
-
-void print_case_clause(const CaseClauseP *case_clause) {
-	dprintf(2, C_CERULEAN"----------CaseClause---------"C_RESET"\n");
-	dprintf(2, C_DARK_CYAN"  Expression:"C_RESET" %s\n", case_clause->expression);
-	for(size_t i = 0; i < case_clause->patterns->size; i++) {
-		print_word_list("Case", case_clause->patterns->data[i]);
-	}
-	for (size_t i = 0; i < case_clause->bodies->size; i++) {
-		print_list(case_clause->bodies->data[i]);
-	}
-	dprintf(2, C_CERULEAN"--------CaseClauseEnd----------"C_RESET"\n");
-
-}
-
-void print_command(CommandP *command) {
-	switch (command->type) {
-		case Simple_Command: print_simple_command(command->simple_command); break;
-		case If_Clause: print_if_clause(command->if_clause); break;
-		case While_Clause: print_while_clause(command->while_clause); break;
-		case Until_Clause: print_while_clause(command->while_clause); break;
-		case Subshell: print_subshell(command->subshell); break;
-		case For_Clause: print_for_clause(command->for_clause); break;
-		case Case_Clause: print_case_clause(command->case_clause); break;
-		default: break;
-	}
-	if (command->redir_list) {
-		print_redir_list(command->redir_list);
-	}
-}
-
-void print_pipeline(const PipeLineP *pipeline) {
-	const PipeLineP *head = pipeline;
-	while (head) {
-		print_command(head->command);
-		if (head->next)
-			dprintf(2, C_ORCHID"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(PIPE));
-		head = head->next;
-	}
-}
-
-void print_andor(const AndOrP *and_or) {
-	const AndOrP *head = and_or;
-	while (head) {
-		print_pipeline(head->pipeline);
-		if (head->separator == AND_IF || head->separator == OR_IF) {
-			dprintf(2, C_CORAL"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(head->separator));
-		}
-		head = head->next;
-	}
-}
-
-void print_list(const ListP *list) {
-	const ListP *head = list;
-	if (!head) {
-		dprintf(2, "  Body: (null)\n");
-	}
-	while (head) {
-		print_andor(head->and_or);
-		if (head->separator == SEMI || head->separator == AMPER || head->separator == NEWLINE) {
-			dprintf(2, C_CORAL"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(head->separator));
-		}
-		head = head->next;
-	}
-}
-
-void print_complete_command(const CompleteCommandP *complete_command) {
-	print_list(complete_command->list);
-	if (complete_command->separator != END)
-		dprintf(2, C_CORAL"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(complete_command->separator));
-}
-
-void print_if_clause(const IFClauseP *if_clause) {
-	dprintf(2, C_CERULEAN"Conditions: \n");
-	const ListPVect *conditions = if_clause->conditions;
-	for (size_t i = 0; i < conditions->size; i++) {
-		print_list(conditions->data[i]);
-		dprintf(2, C_CERULEAN"---------------------------"C_RESET"\n");
-	}
-	dprintf(2, C_CERULEAN"Bodies: \n");
-	const ListPVect *bodies = if_clause->bodies;
-	for (size_t i = 0; i < bodies->size; i++) {
-		print_list(bodies->data[i]);
-		dprintf(2, C_CERULEAN"---------------------------"C_RESET"\n");
-	}
-}
-
-void print_while_clause(const WhileClauseP *while_clause) {
-	dprintf(2, C_EMERALD"---------------------------"C_RESET"\n");
-	print_list(while_clause->condition);
-	print_list(while_clause->body);
-	dprintf(2, C_EMERALD"---------------------------"C_RESET"\n");
-}
-
-void print_token_stack(const TokenStack *stack) {
-	for (size_t i = 0; i < stack->size; i++) {
-		const StackEntry *entry = stack->data[i];
-
-		if (entry->token.type <= END || entry->token.type == Filename) {
-			dprintf(2, "["C_LIGHT_BLUE"%zu"C_RESET"] "C_MAGENTA"%s"C_LIGHT_YELLOW": "C_TURQUOISE"%s"C_RESET"\n", i, tokenTypeStr(entry->token.type), entry->token.raw_value);
-		} else {
-			dprintf(2, "["C_LIGHT_BLUE"%zu"C_RESET"] "C_LIGHT_YELLOW"%s"C_RESET"\n", i, tokenTypeStr(entry->token.type));
-			switch (entry->token.type) {
-				case Io_Redirect:
-				case Io_File: {
-					dprintf(2, C_MAGENTA"{"C_LIGHT_ORANGE"%s "C_RESET"|"C_LIGHT_ORANGE" %s"C_MAGENTA"}"C_RESET"\n", tokenTypeStr(entry->token.redir->type), entry->token.redir->filename);
-					break;
-				}
-				case Cmd_Suffix:
-				case Simple_Command:
-				case Cmd_Prefix: {
-					print_simple_command(entry->token.simple_command);
-					break;
-				}
-				case Cmd_Name:
-				case Cmd_Word: {
-					dprintf(2, C_DARK_CYAN"  Value: "C_RESET C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", entry->token.raw_value);
-					break;
-				}
-				case Redirect_List: {
-					print_redir_list(entry->token.redir_list);
-					break;
-				}
-				case Compound_Command:
-				case Command: {
-					print_command(entry->token.command);
-					break;
-				}
-				case Pipe_Sequence:
-				case Pipeline: {
-					print_pipeline(entry->token.pipeline); 
-					break; 
-				}
-				case And_Or: { 
-					print_andor(entry->token.and_or);
-					break;
-				}
-				case Term:
-				case Compound_List:
-				case Do_Group:
-				case List: {
-					print_list(entry->token.list);
-					break;
-				}
-				case Else_Part:
-				case If_Clause: {
-					print_if_clause(entry->token.if_clause);
-					break;
-				}
-				case Until_Clause:
-				case While_Clause: {
-					print_while_clause(entry->token.while_clause);
-					break;
-				}
-				case Case_Item:
-				case Case_Item_Ns:
-				case Case_List:
-				case Case_List_Ns: {
-					print_case_clause(entry->token.case_clause);
-					break;
-				}
-				case Complete_Command: {
-					print_complete_command(entry->token.complete_command);
-					break;
-				}
-				default: break;
-			}
-		}
-	}
-}
-
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
+
+extern TableEntry parsingTable[182][86];
 
 TokenType identify_token(const char *raw_value, const int table_row) {
 	if (!*raw_value)
@@ -546,8 +49,6 @@ TokenType identify_token(const char *raw_value, const int table_row) {
 		[NEWLINE] = "\n", [AMPER] = "&", [SEMI] = ";",
 	};
 
-	//FIX: ASSIGNMENT_WORD
-
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
 			(table_row != 27 || i == PIPE 
@@ -558,40 +59,38 @@ TokenType identify_token(const char *raw_value, const int table_row) {
 	}
 
 	if (regex_match("^[0-9]+", (char *)raw_value).is_found) {
-		char *peak = lex_interface(LEX_PEAK_CHAR, NULL);
+		char *peak = lex_interface(LEX_PEAK_CHAR, NULL, NULL);
 		if (peak && (*peak == '<' || *peak == '>'))
 			return IO_NUMBER;
 	}
 
-	if (regex_match("^[a-zA-Z][a-zA-Z0-9]*$", (char *)raw_value).is_found) {
-		if (table_row == 30)
+	if (regex_match("^[a-zA-Z_][a-zA-Z0-9_]*=", (char *)raw_value).is_found) {
+		if (table_row != 66)
+			return ASSIGNMENT_WORD;
+	}
+
+	dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
+	if (regex_match("^[a-zA-Z_][a-zA-Z0-9_]*$", (char *)raw_value).is_found) {
+		if (table_row == 30 || 
+			(table_row == 48 && !ft_strcmp("(", lex_interface(LEX_PEAK, NULL, NULL))))
 			return NAME;
 	}
 
 	return WORD;
 }
 
-extern TableEntry parsingTable[182][86];
+#include "exec.h"
 
-SimpleCommandP *createSimpleCommand(void) {
-	SimpleCommandP *command = gc_unique(SimpleCommandP, GC_SUBSHELL);
-	da_create(redir_list, RedirectionL, sizeof(RedirectionP *), GC_SUBSHELL);
-	da_create(word_list, StringListL, sizeof(char *), GC_SUBSHELL);
-	command->word_list = word_list;
-	command->redir_list = redir_list;
-	return command;
-}
-
-StackEntry *parse() {
+StackEntry *parse(Vars *shell_vars) {
 
 	da_create(stack, TokenStack, sizeof(StackEntry), GC_SUBSHELL);
 
 	Tokenn token;
-	token.raw_value = lex_interface(LEX_GET, NULL);
+	token.raw_value = lex_interface(LEX_GET, NULL, NULL);
 	token.type = identify_token(token.raw_value, 0);
 
 	size_t action_no = 0;
-	while (true && ++action_no < 200) {
+	while (true && ++action_no < 2000) {
 		int state = da_peak_back(stack)->state;
 		TableEntry entry = parsingTable[state][token.type];
 		print_token_stack(stack);
@@ -604,9 +103,9 @@ StackEntry *parse() {
 				new_entry->token = token;
 				new_entry->state = entry.value;
 				da_push(stack, new_entry);
-				token.raw_value = lex_interface(LEX_GET, NULL);
+				token.raw_value = lex_interface(LEX_GET, NULL, NULL);
 				token.type = identify_token(token.raw_value, entry.value);
-				// dprintf(2, "Token produced: %s\n, type: %s\n", token.raw_value, tokenTypeStr(token.type));
+				// dprintf(2, "Token produced: %s, type: %s\n", token.raw_value, tokenTypeStr(token.type));
 				break;
 			}
 			case REDUCE: {
@@ -640,7 +139,8 @@ StackEntry *parse() {
 						break;
 					}
 					case 3: { /* complete_commands -> complete_command */
-						da_pop(stack);
+						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
+						execute_complete_command(complete_command, shell_vars);
 						reduced_entry->token.type = Complete_Commands;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Complete_Commands].value;
@@ -718,6 +218,7 @@ StackEntry *parse() {
 						break;
 					}
 					case 12: { /* pipeline -> BANG pipe_sequence */
+						//FIX: !
 						da_pop(stack);
 						da_pop(stack);
 						reduced_entry->token.type = Pipeline;
@@ -774,15 +275,19 @@ StackEntry *parse() {
 						break;
 					}
 					case 18: { /* command -> function_definition */
-						da_pop(stack);
+						CommandP *function_definition = da_pop(stack)->token.command;
 						reduced_entry->token.type = Command;
+						reduced_entry->token.command = function_definition;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Command].value;
 						break;
 					}
 					case 19: { /* compound_command -> brace_group */
-						da_pop(stack);
+						ListP *brace_group = da_pop(stack)->token.list;
 						reduced_entry->token.type = Compound_Command;
+						reduced_entry->token.command = gc_unique(CommandP, GC_SUBSHELL);
+						reduced_entry->token.command->brace_group = brace_group;
+						reduced_entry->token.command->type = Brace_Group;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Compound_Command].value;
 						break;
@@ -1026,7 +531,7 @@ StackEntry *parse() {
 						char *expression = da_pop(stack)->token.raw_value;
 						da_pop(stack); //CASE
 						reduced_entry->token.type = Case_Clause;
-						reduced_entry->token.case_clause = CaseClauseNew(NULL, NULL);
+						reduced_entry->token.case_clause = caseClauseNew(NULL, NULL);
 						reduced_entry->token.case_clause->expression = expression;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Clause].value;
@@ -1035,7 +540,7 @@ StackEntry *parse() {
 					case 42: { /* case_list_ns -> case_list case_item_ns */
 						CaseClauseP *case_list = da_pop(stack)->token.case_clause;
 						CaseClauseP *case_item_ns = da_pop(stack)->token.case_clause;
-						CaseClauseMerge(case_list, case_item_ns);
+						caseClauseMerge(case_list, case_item_ns);
 						reduced_entry->token.type = Case_List_Ns;
 						reduced_entry->token.case_clause = case_list;
 						state = da_peak_back(stack)->state;
@@ -1053,7 +558,7 @@ StackEntry *parse() {
 					case 44: { /* case_list -> case_list case_item */
 						CaseClauseP *case_list = da_pop(stack)->token.case_clause;
 						CaseClauseP *case_item = da_pop(stack)->token.case_clause;
-						CaseClauseMerge(case_list, case_item);
+						caseClauseMerge(case_list, case_item);
 						reduced_entry->token.type = Case_List;
 						reduced_entry->token.case_clause = case_list;
 						state = da_peak_back(stack)->state;
@@ -1073,7 +578,7 @@ StackEntry *parse() {
 						da_pop(stack); //RPAREN
 						StringListL *pattern = da_pop(stack)->token.word_list;
 						reduced_entry->token.type = Case_Item_Ns;
-						reduced_entry->token.case_clause = CaseClauseNew(pattern, NULL);
+						reduced_entry->token.case_clause = caseClauseNew(pattern, NULL);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item_Ns].value;
 						break;
@@ -1083,7 +588,7 @@ StackEntry *parse() {
 						da_pop(stack); //RPAREN
 						StringListL *pattern = da_pop(stack)->token.word_list;
 						reduced_entry->token.type = Case_Item_Ns;
-						reduced_entry->token.case_clause = CaseClauseNew(pattern, body);
+						reduced_entry->token.case_clause = caseClauseNew(pattern, body);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item_Ns].value;
 						break;
@@ -1094,7 +599,7 @@ StackEntry *parse() {
 						StringListL *pattern = da_pop(stack)->token.word_list;
 						da_pop(stack); //LPAREN
 						reduced_entry->token.type = Case_Item_Ns;
-						reduced_entry->token.case_clause = CaseClauseNew(pattern, NULL);
+						reduced_entry->token.case_clause = caseClauseNew(pattern, NULL);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item_Ns].value;
 						break;
@@ -1105,7 +610,7 @@ StackEntry *parse() {
 						StringListL *pattern = da_pop(stack)->token.word_list;
 						da_pop(stack); //LPAREN
 						reduced_entry->token.type = Case_Item_Ns;
-						reduced_entry->token.case_clause = CaseClauseNew(pattern, NULL);
+						reduced_entry->token.case_clause = caseClauseNew(pattern, NULL);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item_Ns].value;
 						break;
@@ -1116,7 +621,7 @@ StackEntry *parse() {
 						StringListL *pattern = da_pop(stack)->token.word_list;
 						da_pop(stack); //LPAREN
 						reduced_entry->token.type = Case_Item_Ns;
-						reduced_entry->token.case_clause = CaseClauseNew(pattern, body);
+						reduced_entry->token.case_clause = caseClauseNew(pattern, body);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item_Ns].value;
 						break;
@@ -1128,7 +633,7 @@ StackEntry *parse() {
 						da_pop(stack); //RPAREN
 						StringListL *pattern = da_pop(stack)->token.word_list;
 						reduced_entry->token.type = Case_Item;
-						reduced_entry->token.case_clause = CaseClauseNew(pattern, NULL);
+						reduced_entry->token.case_clause = caseClauseNew(pattern, NULL);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item].value;
 						break;
@@ -1140,7 +645,7 @@ StackEntry *parse() {
 						da_pop(stack); //PAREN
 						StringListL *pattern = da_pop(stack)->token.word_list;
 						reduced_entry->token.type = Case_Item;
-						reduced_entry->token.case_clause = CaseClauseNew(pattern, body);
+						reduced_entry->token.case_clause = caseClauseNew(pattern, body);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item].value;
 						break;
@@ -1153,7 +658,7 @@ StackEntry *parse() {
 						StringListL *pattern = da_pop(stack)->token.word_list;
 						da_pop(stack); //LPAREN
 						reduced_entry->token.type = Case_Item;
-						reduced_entry->token.case_clause = CaseClauseNew(pattern, NULL);
+						reduced_entry->token.case_clause = caseClauseNew(pattern, NULL);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item].value;
 						break;
@@ -1166,7 +671,7 @@ StackEntry *parse() {
 						StringListL *pattern = da_pop(stack)->token.word_list;
 						da_pop(stack);
 						reduced_entry->token.type = Case_Item;
-						reduced_entry->token.case_clause = CaseClauseNew(pattern, body);
+						reduced_entry->token.case_clause = caseClauseNew(pattern, body);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Case_Item].value;
 						break;
@@ -1215,7 +720,7 @@ StackEntry *parse() {
 						print_list(condition);
 						da_pop(stack); //IF
 						reduced_entry->token.type = If_Clause;
-						reduced_entry->token.if_clause = IFClauseNew(condition, body);
+						reduced_entry->token.if_clause = ifClauseNew(condition, body);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][If_Clause].value;
 						break;
@@ -1226,7 +731,7 @@ StackEntry *parse() {
 						ListP *condition = da_pop(stack)->token.list;
 						da_pop(stack); //ELIF
 						reduced_entry->token.type = Else_Part;
-						reduced_entry->token.if_clause = IFClauseNew(condition, body);
+						reduced_entry->token.if_clause = ifClauseNew(condition, body);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Else_Part].value;
 						break;
@@ -1249,7 +754,7 @@ StackEntry *parse() {
 						ListP *final_body = da_pop(stack)->token.list;
 						da_pop(stack); //ELSE
 						reduced_entry->token.type = Else_Part;
-						reduced_entry->token.if_clause = IFClauseNew(NULL, final_body);
+						reduced_entry->token.if_clause = ifClauseNew(NULL, final_body);
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Else_Part].value;
 						break;
@@ -1279,43 +784,55 @@ StackEntry *parse() {
 						break;
 					}
 					case 64: { /* function_definition -> fname LPAREN RPAREN linebreak function_body */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						CommandP *function_body = da_pop(stack)->token.command;
+						da_pop(stack); //linebreak
+						da_pop(stack); //RPAREN
+						da_pop(stack); //LPAREN
+						char *fname = da_pop(stack)->token.raw_value;
 						reduced_entry->token.type = Function_Definition;
+						reduced_entry->token.command = gc_unique(CommandP, GC_SUBSHELL);
+						reduced_entry->token.command->type = Function_Definition;
+						reduced_entry->token.command->function_definition = gc_unique(FunctionP, GC_SUBSHELL);
+						reduced_entry->token.command->function_definition->function_body = function_body;
+						reduced_entry->token.command->function_definition->function_name = fname;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Function_Definition].value;
 						break;
 					}
 					case 65: { /* function_body -> compound_command */
-						da_pop(stack);
+						CommandP *command = da_pop(stack)->token.command;
 						reduced_entry->token.type = Function_Body;
+						reduced_entry->token.command = command;
+						reduced_entry->token.command->type = Brace_Group;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Function_Body].value;
 						break;
 					}
 					case 66: { /* function_body -> compound_command redirect_list */
-						da_pop(stack);
-						da_pop(stack);
+						RedirectionL *redir_list = da_pop(stack)->token.redir_list;
+						CommandP *command = da_pop(stack)->token.command;
+						command->redir_list = redir_list;
 						reduced_entry->token.type = Function_Body;
+						reduced_entry->token.command = command;
+						reduced_entry->token.command->type = Brace_Group;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Function_Body].value;
 						break;
 					}
 					case 67: { /* fname -> NAME */
-						da_pop(stack);
+						char *name = da_pop(stack)->token.raw_value;
 						reduced_entry->token.type = Fname;
+						reduced_entry->token.raw_value = name;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Fname].value;
 						break;
 					}
 					case 68: { /* brace_group -> LBRACE compound_list RBRACE */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						da_pop(stack); //LBRACE
+						ListP *compound_list = da_pop(stack)->token.list;
+						da_pop(stack); //RBRACE
 						reduced_entry->token.type = Brace_Group;
+						reduced_entry->token.list = compound_list;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Brace_Group].value;
 						break;
@@ -1375,7 +892,7 @@ StackEntry *parse() {
 					}
 					case 74: { /* simple_command -> cmd_name */
 						char *word = da_pop(stack)->token.raw_value;
-						SimpleCommandP *command = createSimpleCommand();
+						SimpleCommandP *command = simpleCommandNew();
 						da_push(command->word_list, word);
 						reduced_entry->token.type = Simple_Command;
 						reduced_entry->token.simple_command = command;
@@ -1401,7 +918,7 @@ StackEntry *parse() {
 					}
 					case 77: { /* cmd_prefix -> io_redirect */
 						RedirectionP *redir = da_pop(stack)->token.redir;
-						SimpleCommandP *command = createSimpleCommand();
+						SimpleCommandP *command = simpleCommandNew();
 						da_push(command->redir_list, redir);
 						reduced_entry->token.type = Cmd_Prefix;
 						reduced_entry->token.simple_command = command;
@@ -1420,23 +937,28 @@ StackEntry *parse() {
 						break;
 					}
 					case 79: { /* cmd_prefix -> ASSIGNMENT_WORD */
-						da_pop(stack);
+						char *word = da_pop(stack)->token.raw_value;
+						SimpleCommandP *command = simpleCommandNew();
+						da_push(command->assign_list, word);
 						reduced_entry->token.type = Cmd_Prefix;
+						reduced_entry->token.simple_command = command;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Cmd_Prefix].value;
 						break;
 					}
 					case 80: { /* cmd_prefix -> cmd_prefix ASSIGNMENT_WORD */
-						da_pop(stack);
-						da_pop(stack);
+						char *word = da_pop(stack)->token.raw_value;
+						SimpleCommandP *command = da_pop(stack)->token.simple_command;
+						da_push(command->assign_list, word);	
 						reduced_entry->token.type = Cmd_Prefix;
+						reduced_entry->token.simple_command = command;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Cmd_Prefix].value;
 						break;
 					}
 					case 81: { /* cmd_suffix -> io_redirect */
 						RedirectionP *redir = da_pop(stack)->token.redir;
-						SimpleCommandP *command = createSimpleCommand();
+						SimpleCommandP *command = simpleCommandNew();
 						da_push(command->redir_list, redir);
 						reduced_entry->token.type = Cmd_Suffix;
 						reduced_entry->token.simple_command = command;
@@ -1455,7 +977,7 @@ StackEntry *parse() {
 					}
 					case 83: { /* cmd_suffix -> WORD */
 						char *word = da_pop(stack)->token.raw_value;
-						SimpleCommandP *command = createSimpleCommand();
+						SimpleCommandP *command = simpleCommandNew();
 						da_push(command->word_list, word);
 						reduced_entry->token.type = Cmd_Suffix;
 						reduced_entry->token.simple_command = command;
@@ -1620,18 +1142,18 @@ StackEntry *parse() {
 					case 108: { /* separator -> separator_op linebreak */
 						da_pop(stack); //linebreak
 						TokenType sep = da_pop(stack)->token.separator_op;
-						reduced_entry->token.type = Separator;
+						reduced_entry->token.type = Separatore;
 						reduced_entry->token.separator_op = sep;
 						state = da_peak_back(stack)->state;
-						reduced_entry->state = parsingTable[state][Separator].value;
+						reduced_entry->state = parsingTable[state][Separatore].value;
 						break;
 					}
 					case 109: { /* separator -> newline_list */
 						da_pop(stack); //newline_list
-						reduced_entry->token.type = Separator;
+						reduced_entry->token.type = Separatore;
 						reduced_entry->token.separator_op = NEWLINE;
 						state = da_peak_back(stack)->state;
-						reduced_entry->state = parsingTable[state][Separator].value;
+						reduced_entry->state = parsingTable[state][Separatore].value;
 						break;
 					}
 					case 110: { /* sequential_sep -> SEMI linebreak */
@@ -1671,13 +1193,13 @@ StackEntry *parse() {
 }
 
 
-void parse_input(char *in) {
-	lex_interface(LEX_SET, in);
+void parse_input(char *in, char *filename, Vars *shell_vars) {
+	lex_interface(LEX_SET, in, filename);
 	// dprintf(2, "input:\n%s", in);
 	// for (size_t i = 0; i < 100; i++) {
 	// 	char *value = lex_interface(LEX_GET, NULL);	
 	// 	TokenType type = identify_token(value, 0);
 	// 	dprintf(2, "|%s| -> %s\n", value, tokenTypeStr(type));
 	// }
-	parse();
+	parse(shell_vars);
 }

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 16:46:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/06 16:05:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/07 17:05:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 # define FINAL_PARSER
 
 #include "utils.h"
+
+#include <stdbool.h>
 
 typedef enum TokenType {
 	AND_IF,
@@ -100,7 +102,7 @@ typedef enum TokenType {
 	Newline_List,
 	Linebreak,
 	Separator_Op,
-	Separator,
+	Separatore,
 	Sequential_Sep,
 } TokenType;
 
@@ -111,10 +113,170 @@ typedef struct TableEntry {
 	int value;
 }	TableEntry;
 
+typedef struct {
+	char *io_number;
+	TokenType type;
+	char *filename;
+} RedirectionP;
+
+typedef struct {
+	RedirectionP **data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} RedirectionL;
+
+typedef struct {
+	char **data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} StringListL;
+
+typedef struct {
+	StringListL **data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} StringListVect;
+
+typedef struct {
+	char *bin;
+	RedirectionL *redir_list;
+	StringListL	*word_list;
+	StringListL *assign_list;
+} SimpleCommandP;
+
+typedef struct {
+	char *value;
+} FilenameP;
+
+typedef struct IFClauseP IFClauseP;
+typedef struct ForClauseP ForClauseP;
+typedef struct WhileClauseP WhileClauseP;
+typedef struct CaseClauseP CaseClauseP;
+typedef struct PipeLineP PipeLineP;
+typedef struct FunctionP FunctionP;
+typedef struct BraceGroupP BraceGroupP;
+typedef struct AndOrP AndOrP;
+typedef struct ListP ListP;
+
+typedef struct {
+	TokenType type;
+	RedirectionL *redir_list;
+	union {
+		SimpleCommandP *simple_command;
+		ListP *subshell;
+		ListP *brace_group;
+		WhileClauseP *while_clause;
+		CaseClauseP *case_clause;
+		ForClauseP *for_clause;
+		IFClauseP *if_clause;
+		FunctionP *function_definition;
+	};
+} CommandP;
+
+struct FunctionP {
+	char *function_name;
+	CommandP *function_body;
+};
+
+typedef struct {
+	ListP *list;
+	TokenType separator;
+} CompleteCommandP;
+
+struct PipeLineP {
+	bool banged;
+	CommandP *command;
+	PipeLineP *next;
+};
+
+struct AndOrP {
+	PipeLineP *pipeline;
+	TokenType separator;
+	AndOrP *next;
+};
+
+struct ListP {
+	AndOrP *and_or;
+	TokenType separator;
+	ListP *next;
+};
+
+typedef struct {
+	ListP **data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} ListPVect;
+
+struct IFClauseP {
+	ListPVect *conditions;
+	ListPVect *bodies;
+};
+
+struct WhileClauseP {
+	ListP *condition;
+	ListP *body;
+};
+
+struct ForClauseP {
+	char *iterator;
+	ListP *body;
+	StringListL *word_list;
+};
+
+struct CaseClauseP {
+	char *expression;
+	StringListVect *patterns;
+	ListPVect *bodies;
+};
+
+typedef struct {
+	TokenType type;
+	union {
+		CaseClauseP *case_clause;
+		StringListL *word_list;
+		WhileClauseP *while_clause;
+		ForClauseP *for_clause;
+		IFClauseP *if_clause;
+		TokenType separator_op;
+		ListP *list;
+		AndOrP *and_or;
+		PipeLineP *pipeline;
+		CommandP *command;
+		char *raw_value;
+		RedirectionP *redir;
+		FilenameP *filename;
+		RedirectionL *redir_list;
+		SimpleCommandP *simple_command;
+		CompleteCommandP *complete_command;
+	};
+} Tokenn;
+
+typedef struct {
+	Tokenn token;
+	int state;
+} StackEntry;
+
+typedef struct {
+	StackEntry **data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} TokenStack;
+
 char *tokenTypeStr(TokenType type);
 char *actionStr(const Action action);
 
 typedef struct {
+	char *filename; //either script name or cmd_line
 	char *raw_input;
 	StringStream *input;
 	StringStream *peak;
@@ -123,6 +285,47 @@ typedef struct {
 } Lex;
 
 typedef enum {LEX_SET, LEX_GET, LEX_OWN, LEX_PEAK, LEX_PEAK_CHAR, LEX_DEBUG} LexMode;
-void *lex_interface(LexMode mode, void *input);
+void		*lex_interface(LexMode mode, void *input, void *filename);
 
+void		pipelineAddBack(PipeLineP **lst, PipeLineP *new_value);
+PipeLineP	*pipelineNew(CommandP *command);
+
+void		andOrAddBack(AndOrP **lst, AndOrP *new_value);
+AndOrP		*andOrNew(PipeLineP *pipeline, TokenType separator);
+
+void		listAddBack(ListP **lst, ListP *new_value);
+ListP		*listNew(AndOrP *and_or, TokenType separator);
+
+IFClauseP	*ifClauseNew(ListP *condition, ListP *body);
+
+CaseClauseP *caseClauseNew(StringListL *pattern, ListP *body);
+void		caseClauseMerge(CaseClauseP *parent, const CaseClauseP *child);
+
+SimpleCommandP *simpleCommandNew(void);
+
+void pretty_error(char *raw_token);
+
+/*------------------------------DEBUG-----------------------*/
+void print_redir_list(const RedirectionL *redir_list);
+void print_word_list(const char *title, const StringListL *word_list);
+void print_simple_command(const SimpleCommandP *self);
+void print_subshell(const ListP *subshell);
+void print_brace_group(const ListP *subshell);
+void print_for_clause(const ForClauseP *for_clause);
+void print_case_clause(const CaseClauseP *case_clause);
+void print_command(const CommandP *command);
+void print_function(const FunctionP *function);
+void print_pipeline(const PipeLineP *pipeline);
+void print_andor(const AndOrP *and_or);
+void print_list(const ListP *list);
+void print_complete_command(const CompleteCommandP *complete_command);
+void print_if_clause(const IFClauseP *if_clause);
+void print_while_clause(const WhileClauseP *while_clause);
+void print_token_stack(const TokenStack *stack);
+/*----------------------------------------------------------*/
+
+
+#include "exec.h"
+
+void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars);
 #endif // !FINAL_PARSER

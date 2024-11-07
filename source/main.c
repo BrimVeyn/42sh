@@ -268,7 +268,7 @@ int main(const int ac, char *av[], const char *env[]) {
 				if (input[0])
 					add_input_to_history(input, &history_fd);
 			}
-			parse_input(input);
+			parse_input(input, av[1], shell_vars);
 			gc(GC_CLEANUP, GC_ALL);
 			exit(1);
 			TokenList *tokens = lexer_lex_all(input);
