@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:16:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/31 10:44:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/07 17:03:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,7 +218,7 @@ typedef enum {
 
 
 //-----------------Lexer------------------//
-void parse_input(char *in);
+void parse_input(char *in, char *filename, Vars *shell_vars);
 TokenList		*lexer_lex_all(char *input);
 Token			*lexer_get_next_token(Lexer_p l);
 Lexer_p			lexer_init(char *input);

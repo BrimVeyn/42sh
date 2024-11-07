@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 13:04:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/06 16:17:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/07 10:29:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 void get_next_token(StringStream *input, StringStream *cache, size_t *line, size_t *column);
 
-void *lex_interface(LexMode mode, void *input) {
+void *lex_interface(LexMode mode, void *input, void *filename) {
 	static Lex *lexer = NULL;
 
 	switch (mode) {
@@ -26,6 +26,7 @@ void *lex_interface(LexMode mode, void *input) {
 		case (LEX_SET): {
 			lexer = gc_unique(Lex, GC_SUBSHELL);
 			lexer->raw_input = input;
+			lexer->filename = (filename == NULL) ? "cmd_line" : filename;
 			da_create(tmp, StringStream, sizeof(char), GC_SUBSHELL);
 			lexer->input = tmp;
 			da_create(tmp2, StringStream, sizeof(char), GC_SUBSHELL);
