@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:19:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/06 10:14:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/07 13:50:51 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1518,7 +1518,7 @@ StackEntry *parse() {
 			}
 			case GOTO: 
 			case ERROR: {
-				dprintf(2, C_RED"ERROR"C_RESET"\n");
+				// dprintf(2, C_RED"ERROR"C_RESET"\n");
 				return NULL;
 				break;
 			}
