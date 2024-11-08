@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:19:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/07 17:04:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/08 17:09:49 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,12 @@
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 extern TableEntry parsingTable[182][86];
+
+bool is_keyword(TokenType type) {
+	return (type == IF || type == FI || type == CASE || type == ESAC ||
+		 type == FOR || type == IN || type == WHILE || type == UNTIL ||
+		 type == DONE || type == DO || type == LBRACE || type == RBRACE);
+}
 
 TokenType identify_token(const char *raw_value, const int table_row) {
 	if (!*raw_value)
@@ -51,9 +57,7 @@ TokenType identify_token(const char *raw_value, const int table_row) {
 
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
-			(table_row != 27 || i == PIPE 
-			|| i == AND_IF || i == OR_IF ||
-			i == SEMI || i == AMPER || i == LPAREN || i == RPAREN)) {
+			(table_row != 27 || !is_keyword(i))) {
 			return i;
 		}
 	}
@@ -93,8 +97,8 @@ StackEntry *parse(Vars *shell_vars) {
 	while (true && ++action_no < 2000) {
 		int state = da_peak_back(stack)->state;
 		TableEntry entry = parsingTable[state][token.type];
-		print_token_stack(stack);
-		dprintf(2, C_DARK_GRAY_FG C_LIGHT_RED"[%zu] %s %d"C_RESET"\n", action_no, actionStr(entry.action), entry.value);
+		// print_token_stack(stack);
+		// dprintf(2, C_DARK_GRAY_FG C_LIGHT_RED"[%zu] %s %d"C_RESET"\n", action_no, actionStr(entry.action), entry.value);
 
 		switch(entry.action) {
 			case SHIFT: {
@@ -139,7 +143,10 @@ StackEntry *parse(Vars *shell_vars) {
 						break;
 					}
 					case 3: { /* complete_commands -> complete_command */
+						// (void)shell_vars;
+						// da_pop(stack);
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
+						print_complete_command(complete_command);
 						execute_complete_command(complete_command, shell_vars);
 						reduced_entry->token.type = Complete_Commands;
 						state = da_peak_back(stack)->state;
@@ -386,7 +393,8 @@ StackEntry *parse(Vars *shell_vars) {
 						AndOrP *and_or = da_pop(stack)->token.and_or;
 						TokenType sep = da_pop(stack)->token.separator_op;
 						ListP *term = da_pop(stack)->token.list;
-						listAddBack(&term, listNew(and_or, sep));
+						term->separator = sep;
+						listAddBack(&term, listNew(and_or, END));
 						reduced_entry->token.type = Term;
 						reduced_entry->token.list = term;
 						state = da_peak_back(stack)->state;
@@ -1183,7 +1191,8 @@ StackEntry *parse(Vars *shell_vars) {
 			}
 			case GOTO: 
 			case ERROR: {
-				pretty_error(token.raw_value);
+				if (ft_strcmp(token.raw_value, ""))
+					pretty_error(token.raw_value);
 				return NULL;
 				break;
 			}

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:43:08 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/07 14:49:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/08 10:17:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,7 @@ close_print:
 }
 
 void print_simple_command(const SimpleCommandP *self) {
+	dprintf(2, "  Bin: %s\n", self->bin);
 	print_word_list("Vars", self->assign_list);
 	print_word_list("Words", self->word_list);
 	print_redir_list(self->redir_list);

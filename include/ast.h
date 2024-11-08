@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:44 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/23 17:23:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/08 10:40:25 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,12 +57,6 @@ typedef struct {
 	size_t	size_of_element;
 	int		gc_level;
 } NodeStack;
-
-typedef struct IfNode {
-	NodeStack *conditions;
-	NodeStack *bodies;
-	Node	  *else_body;
-} IfNode;
 
 typedef enum {
 	DATA_NODE,

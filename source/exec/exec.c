@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/07 17:00:25 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/08 15:03:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,7 +194,6 @@ void resolve_bin(SimpleCommand *command, Vars *shell_vars) {
 		}
 	}
 }
-
 
 int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 	ShellInfos *shell_infos = shell(SHELL_GET);
