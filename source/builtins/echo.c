@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 12:20:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/17 14:36:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/08 11:33:02 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void builtin_echo(const SimpleCommand *command, __attribute__((unused)) Vars *sh
 	bool newline = true;
 	size_t i = 1;
 
-	for (; command->args[i] && regex_match("^-n*$", command->args[i]).is_found ; i++) {
+	for (; command->args[i] && regex_match("^-n+$", command->args[i]).is_found ; i++) {
 		newline = false;
 	}
 

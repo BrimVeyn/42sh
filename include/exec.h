@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:18:00 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/05 10:25:54 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/08 11:20:01 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,11 @@ typedef enum {
 	HASH_GET,
 } hash_mode;
 
+typedef struct cdOpt {
+	int L;
+	int P;
+} cdOpt;
+
 void *hash_interface(hash_mode mode, char *arg, Vars *shell_vars);
 char *hash_find_bin(char *bin, Vars *shell_vars);
 
@@ -114,7 +119,6 @@ void builtin_unset(const SimpleCommand *command, Vars *shell_vars);
 void builtin_jobs(const SimpleCommand *command, Vars *shell_vars);
 void builtin_fg(const SimpleCommand *command, Vars *shell_vars);
 void builtin_bg(const SimpleCommand *command, Vars *shell_vars);
-void builtin_cd(const SimpleCommand *command, Vars *shell_vars);
 //-------------------------------------------------------------//
 
 #endif
