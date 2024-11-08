@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 16:46:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/07 17:05:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/08 12:51:36 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,9 @@
 #include "utils.h"
 
 #include <stdbool.h>
+#include <sys/types.h>
+#include <termios.h>
+
 
 typedef enum TokenType {
 	AND_IF,
@@ -191,14 +194,28 @@ typedef struct {
 
 struct PipeLineP {
 	bool banged;
-	CommandP *command;
 	PipeLineP *next;
+	//-----------Job_control-------//
+	pid_t pid;
+	bool completed;
+	bool stopped;
+	int status;
+	//-----------------------------//
+	CommandP *command;
 };
 
 struct AndOrP {
-	PipeLineP *pipeline;
-	TokenType separator;
 	AndOrP *next;
+	TokenType separator;
+	//-----------Job_control-------//
+	size_t id; //job control id
+	pid_t pgid; //process group id
+	bool notified;
+	bool bg; //bg/fg
+	int sig; //stopped by signo
+	struct termios tmodes; //saved tmodes
+	//-----------------------------//
+	PipeLineP *pipeline; //first_process
 };
 
 struct ListP {
@@ -324,6 +341,25 @@ void print_while_clause(const WhileClauseP *while_clause);
 void print_token_stack(const TokenStack *stack);
 /*----------------------------------------------------------*/
 
+typedef struct {
+	AndOrP **data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} JobListe;
+
+extern JobListe *jobList;
+
+int mark_process (JobListe *list, pid_t pid, int status);
+void put_job_background (AndOrP *job);
+void put_job_foreground (AndOrP *job, int cont);
+void job_wait (AndOrP *job);
+int job_stopped(AndOrP *j);
+int job_completed(AndOrP *j);
+void andor_move(AndOrP *job);
+void update_job_status(void);
+void job_notification(void);
 
 #include "exec.h"
 

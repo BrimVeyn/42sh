@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/06 16:39:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/08 17:08:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,12 @@ void da_transfer(StringStream *in, StringStream *out, int number) {
 }
 
 void get_next_token(StringStream *input, StringStream *cache, size_t *line, size_t *column) {
+
+	if (*input->data == '#') {
+		while (input->size && *input->data != '\n') {
+			da_pop_front(input);
+		}
+	}
 
 	static WordContextBounds map[] = {
 		[WORD_WORD] = {.start = "NONE", .end = " \t\n;&|<>()", .bitmap = WORD_MAP},

@@ -1,3 +1,4 @@
+#include "lexer/final_parser.h"
 #include "parser.h"
 #include "utils.h"
 #include "signals.h"
@@ -233,6 +234,8 @@ int main(const int ac, char *av[], const char *env[]) {
 	shell(SHELL_INIT);
 	g_signal = 0;
 	job_list = job_list_init();
+	da_create(jobListTmp, JobListe, sizeof(AndOrP *), GC_SUBSHELL);
+	jobList = jobListTmp;
 
 	Vars *shell_vars = vars_init(env);
 	int history_fd = -1;
