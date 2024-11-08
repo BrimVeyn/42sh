@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 15:10:45 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/07 17:16:38 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/08 16:55:33 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "parser.h"
 #include "libft.h"
 #include "utils.h"
+#include "exec.h"
 #include "regex.h"
 #include <linux/limits.h>
 #include <stdio.h>
@@ -23,42 +24,51 @@
 #include <limits.h>
 #include <sys/stat.h>
 
+#define CD_P 1
+#define CD_L 2
+
 typedef enum {
     VALID_DIRECTORY,
     ERROR_NO_SUCH_FILE,
     ERROR_NOT_A_DIRECTORY,
-    ERROR_PERMISSION_DENIED
+    ERROR_PERMISSION_DENIED,
+	ERROR_INVALID_OPTION,
+	ERROR_TOO_MANY_ARGUMENTS,
+	ERROR_HOME_NOT_SET,
+	ERROR_OLDPWD_NOT_SET
 } DirectoryStatus;
 
 DirectoryStatus cd_status;
 
-void print_cd_error(DirectoryStatus n, char *curpath){
-	ft_dprintf(2, "42sh: cd: %s: ", curpath);
+void print_cd_error(DirectoryStatus n, void **arg){
+	ft_dprintf(2, "42sh: cd: ");
 	switch (n) {
 		case ERROR_NO_SUCH_FILE:
-			ft_dprintf(2, "such file or directory\n");
+			ft_dprintf(2, "%s: such file or directory\n", (char *)*arg);
 			break;
 		case ERROR_NOT_A_DIRECTORY:
-			ft_dprintf(2, "Is not a directory\n");
+			ft_dprintf(2, "%s: Is not a directory\n", (char *)*arg);
 			break;
 		case ERROR_PERMISSION_DENIED:
-			ft_dprintf(2, "Permission Denied\n");
+			ft_dprintf(2, "%s: Permission Denied\n" );
+			break;
+		case ERROR_INVALID_OPTION: {
+			char option_str[2] = {(char)(*((int *)arg)), '\0'};
+			ft_dprintf(2, "-%s: Invalid option\n", option_str);
+			break;
+		}
+		case ERROR_TOO_MANY_ARGUMENTS:
+			ft_dprintf(2, "Too many arguments\n");
+			break;
+		case ERROR_HOME_NOT_SET:
+			ft_dprintf(2, "HOME not set\n");
+			break;
+		case ERROR_OLDPWD_NOT_SET:
+			ft_dprintf(2, "OLDPWD not set\n");
 			break;
 		default:
 			break;
 	}
-}
-
-void update_pwd(Vars *shell_vars){
-	(void)shell_vars;
-	char cwd[PATH_MAX];
-	getcwd(cwd, sizeof(cwd));
-	
-	char *pwd = ft_strjoin("OLDPWD=", string_list_get_value(shell_vars->env, "PWD"));
-	string_list_update(shell_vars->env, pwd); // Update OLDPWD
-	free(pwd);
-	pwd = ft_strjoin("PWD=", cwd);
-	string_list_update(shell_vars->env, pwd); // Update PWD
 }
 
 static DirectoryStatus is_valid_directory(const char *path){
@@ -125,14 +135,15 @@ void canonical_convertion(char **pcurpath){
 		FREE_POINTERS(first_split, second_part);
 	}
 
-	printf("curpath after cut ./: %s\n", curpath);
+	// regex_test("\\/?[^\\/]+", curpath);
 	
 	da_create(stack, StringList, sizeof(char *), GC_SUBSHELL);
 
 	while(1){
 		result = regex_match("\\/?[^\\/]+", curpath);
-		if (!result.is_found)
+		if (!result.is_found){
 			break;
+		}
 		char *next_directory = gc(GC_ADD, ft_substr(curpath, 0, result.re_end), GC_SUBSHELL);
 
 		//cut first elem in curpath
@@ -162,14 +173,16 @@ void canonical_convertion(char **pcurpath){
 		}
 		
 		char *full_path = build_path(stack);
+		// printf("full_path: %s\n", full_path);
 		cd_status = is_valid_directory(full_path);
 		free(full_path);
 		if (cd_status){
 			return;
 		}
 	}
-	
-	curpath = gc(GC_ADD, build_path(stack), GC_SUBSHELL);
+
+	if (stack->size)
+		curpath = gc(GC_ADD, build_path(stack), GC_SUBSHELL);
 
 	//removing trailing /
 	
@@ -178,9 +191,10 @@ void canonical_convertion(char **pcurpath){
 		curpath += result.re_end - 1;
 	}
 	result = regex_match("\\/+$", curpath);
-	if (result.is_found){
+	if (result.is_found && result.re_start != 0){
 		curpath[result.re_start] = '\0';
 	}
+	// printf("\ncurpath in canonical form: %s\n", curpath);
 	
 	while (1){
 		result = regex_match("\\/\\/+", curpath);
@@ -195,7 +209,6 @@ void canonical_convertion(char **pcurpath){
 		gc(GC_ADD, curpath, GC_SUBSHELL);
 		FREE_POINTERS(first, end);
 	}
-	printf("\ncurpath in canonical form: %s\n", curpath);
 	*pcurpath = curpath;
 }
 
@@ -203,21 +216,94 @@ void canonical_convertion(char **pcurpath){
 //TODO:get home dabord local etc
 //Error a gerer, error print operand et pas curpath
 //
+//
+
+int last_elem_is(const char *str, char c){
+	return (str[ft_strlen(str) - 1] == c);
+}
+
+int get_flags_and_operand(char **args, int *options, char **operand){
+	for (int i = 1; args[i]; i++){
+		if (args[i][0] == '-' && args[i][1]){ //args[i][1] for handling cd -
+			for (int j = 1; args[i][j]; j++){
+				if (args[i][j] == 'P'){
+					*options |= CD_P;
+				}
+				else if (args[i][j] == 'L'){
+					*options |= CD_L;
+				}
+				else {
+					cd_status = ERROR_INVALID_OPTION;
+					*options = args[i][j];
+					return -1;
+				}
+			}
+		} else if (*operand){
+			cd_status = ERROR_TOO_MANY_ARGUMENTS;
+			return -1;
+		} else {
+			*operand = gc(GC_ADD, ft_strdup(args[i]), GC_SUBSHELL);
+		}
+	}
+	return 0;
+}
+
+//local
+//env
+//set
+//
+
+static char *get_variable_in_bi(Vars *shell_vars, char *name){
+	char *result = string_list_get_value(shell_vars->local, name);
+	if (result) return result;
+	result = string_list_get_value(shell_vars->env, name);
+	if (result) return result;
+	result = string_list_get_value(shell_vars->set, name);
+	return result;
+}
+
 void builtin_cd(const SimpleCommand *command, Vars *shell_vars) {
 	cd_status = VALID_DIRECTORY;
 	char *curpath = NULL;
-	char *operand = (command->args[1] != NULL) ? ft_strdup(command->args[1]) : ft_strdup("");
-	gc(GC_ADD, operand, GC_SUBSHELL);
-	char *error_msg = NULL;
+
+	int options = 0;
+	char *operand = NULL;
+	if (get_flags_and_operand(command->args, &options, &operand) == -1){
+		print_cd_error(cd_status, (void **)&options);
+		g_exitno = 1;
+		return;
+	}
+
+	if (options > 2){
+		ft_dprintf(2, "42sh: cd: -%s: Invalid option\n", (char*)&options);
+		g_exitno = 1;
+		return;
+	}
 	
 	if (!operand){
-		curpath = gc(GC_ADD, ft_strdup(string_list_get_value(shell_vars->env, "HOME")), GC_SUBSHELL);
-		if (!curpath){
-			write(2, "42sh: cd: HOME not set\n", 24);
+		const char *home = get_variable_in_bi(shell_vars, "HOME");
+		if (!home){
 			g_exitno = 1;
+			cd_status = ERROR_OLDPWD_NOT_SET;
+			print_cd_error(ERROR_OLDPWD_NOT_SET, NULL);
 			return;
 		}
+		operand = gc(GC_ADD, ft_strdup(home), GC_SUBSHELL);
 	}
+
+	if (!ft_strcmp(operand, "-")){
+		const char *oldpwd = get_variable_in_bi(shell_vars, "OLDPWD");
+		if (!oldpwd){
+			g_exitno = 1;
+			cd_status = ERROR_OLDPWD_NOT_SET;
+			print_cd_error(ERROR_OLDPWD_NOT_SET, NULL);
+			return;
+		}
+		operand = gc(GC_ADD, ft_strdup(oldpwd), GC_SUBSHELL);
+		write(1, operand, ft_strlen(operand));
+		write(1, "\n", 1);
+	}
+	
 
 	if (operand[0] == '/') { //3
 		curpath = gc(GC_ADD, ft_strdup(operand), GC_SUBSHELL);
@@ -231,11 +317,13 @@ void builtin_cd(const SimpleCommand *command, Vars *shell_vars) {
 	}
 	
 	// if option -P -> 10
+	char *pwd = get_variable_in_bi(shell_vars, "PWD");
+	if (!pwd)
+		pwd = getcwd(NULL, PATH_MAX);
     if (curpath[0] != '/') {
-        const char *pwd = string_list_get_value(shell_vars->env, "PWD");
 
 		char buffer[MAX_WORD_LEN] = {0};
-		if (pwd && pwd[ft_strlen(pwd) - 1] != '/'){
+		if (pwd && !last_elem_is(pwd, '/')){
 			if (ft_snprintf(buffer, MAX_WORD_LEN, "%s/%s", pwd, curpath) == -1)
 				fatal("cd: FATAL", 255);
 		} else{
@@ -248,14 +336,26 @@ void builtin_cd(const SimpleCommand *command, Vars *shell_vars) {
 
 	canonical_convertion(&curpath);
 
-	
 	if (cd_status){
-		print_cd_error(cd_status, operand);
+		print_cd_error(cd_status, (void **)&operand);
 		g_exitno = 1;
 		return;
 	}
 	
-	if (ft_strlen(curpath) > PATH_MAX && ft_strlen(operand) < PATH_MAX)
+	char *new_pwd = ft_strjoin("PWD=", curpath);
+	char *new_oldpwd = ft_strjoin("OLDPWD=", pwd);
+	if (ft_strlen(curpath) > PATH_MAX && ft_strlen(operand) < PATH_MAX){
+		curpath += (last_elem_is(pwd, '/')) ? ft_strlen(pwd) : ft_strlen(pwd) + 1;
+	}
+
+	if (chdir(curpath) == -1){
+		fatal("cd: Fatal", 255);
+	}
+
+	// printf("curpath: %s\n", curpath);
+	string_list_update(shell_vars->env, new_pwd);
+	string_list_update(shell_vars->env, new_oldpwd);
 	//is valid
+	g_exitno = 0;
 	return;
 }

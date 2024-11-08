@@ -129,11 +129,12 @@ test_lists=(
 	"src/command_group"
 	"src/arithmetic_expansion"
 	"src/builtin_export"
+	"src/builtin_cd"
 	"src/mixed"
 )
 
 PS3="Enter a number to run associated tests, * for all: "
-select option in redirections syntax expand subshell command_sub command_group arithmetic_expansion builtin_export mixed
+select option in redirections syntax expand subshell command_sub command_group arithmetic_expansion builtin_export builtin_cd mixed
 do
     case $option in
         redirections)
@@ -166,6 +167,10 @@ do
             ;;
         builtin_export)
 			test_lists=("src/builtin_export");
+			start_tests;
+            ;;
+		builtin_cd)
+			test_lists=("src/builtin_cd");
 			start_tests;
             ;;
         mixed)

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/18 19:30:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/08 10:54:34 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ bool string_list_remove(StringList *sl, char *id) {
 	return false;
 }
 
-bool string_list_update(StringList *sl, char *var) {
+bool string_list_update(StringList *sl, const char *var) {
 	char *equal_ptr = ft_strchr(var, '=');
 	bool add_only = (!equal_ptr);
 	size_t equal_pos = equal_ptr - var;

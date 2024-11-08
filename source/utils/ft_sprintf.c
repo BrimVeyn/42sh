@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:30:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/22 11:09:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/08 15:40:57 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,7 @@ int ft_snprintf(char *buffer, const size_t size_of_buffer, const char *fmt, ...)
 	for (size_t i = 0; i < fmt_len;) {
 		if (!ft_strncmp(&fmt[i], "%s", 2)) {
 			const char *str = va_arg(args, char *);
+			if (!str) continue;
 			const size_t str_len = ft_strlen(str);
 			if (str_len + buffer_len > size_of_buffer)
 				return -1;
