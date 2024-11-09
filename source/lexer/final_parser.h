@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 16:46:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/08 12:51:36 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/09 17:37:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -302,7 +302,7 @@ typedef struct {
 } Lex;
 
 typedef enum {LEX_SET, LEX_GET, LEX_OWN, LEX_PEAK, LEX_PEAK_CHAR, LEX_DEBUG} LexMode;
-void		*lex_interface(LexMode mode, void *input, void *filename);
+void *lex_interface(LexMode mode, void *input, void *filename, bool *error);
 
 void		pipelineAddBack(PipeLineP **lst, PipeLineP *new_value);
 PipeLineP	*pipelineNew(CommandP *command);
