@@ -1,17 +1,17 @@
-# if false; then
-# 	ls;
-# elif false; then
-# 	printf yeahhhhhh;
-# else
-# 	printf saloperie;
-# fi
-#
+if false; then
+	ls;
+elif false; then
+	printf yeahhhhhh\n;
+else
+	printf saloperie\n;
+fi
+
 # printf salut\n; #Comment test
-#
 
-# ((( printf yeah
-#
+# printf $(salut
 
-while false; do
-	printf yeah
-done
+# ((( printf yeah\n )))
+
+# while false; do
+# 	printf yeah
+# done
