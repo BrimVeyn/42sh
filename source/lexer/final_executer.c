@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 15:02:22 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/09 17:47:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/10 18:17:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,6 +232,9 @@ void execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	bool hadPipe = false;
 	int pipefd[2] = {-1, -1};
 
+	const bool piped = (process->next != NULL);
+	(void) piped;
+
 	while (process) {
 		const bool hasPipe = (process->next != NULL);
 
@@ -314,6 +317,7 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars) {
 	ListP *list_head = complete_command->list;
 	ShellInfos *shell_infos = shell(SHELL_GET);
+	dprintf(2, "interactive: %d\n", shell_infos->interactive);
 
 	const bool background = (shell_infos->interactive && complete_command->separator == AMPER);
 
