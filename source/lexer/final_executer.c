@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 15:02:22 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/08 17:15:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/14 16:33:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,7 +198,6 @@ void execute_subshell(CommandP *command, Vars *shell_vars) {
 	//FIX: add background trigger
 	CompleteCommandP *wrapper = wrapcc(subshell);
 	execute_complete_command(wrapper, shell_vars);
-	exit(g_exitno);
 }
 
 void execute_if_clause(CommandP *command, Vars *shell_vars) {
@@ -233,6 +232,11 @@ void execute_while_clause(CommandP *command, Vars *shell_vars) {
 	}
 }
 
+void execute_single_command(PipeLineP *process) {
+	(void) process;
+	return ;
+}
+
 void execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	(void)background;
 	PipeLineP *process = job->pipeline;
@@ -245,6 +249,11 @@ void execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	bool hadPipe = false;
 	int pipefd[2] = {-1, -1};
 
+	if (!process->next) {
+		execute_single_command(process);
+		return ;
+	}
+
 	while (process) {
 		const bool hasPipe = (process->next != NULL);
 
@@ -253,47 +262,37 @@ void execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 		if (hadPipe) dup_input_and_close(pipefd[0]);
 		if (hasPipe) create_pipe(&hadPipe, pipefd);
 
-		switch (process->command->type) {
-			case Subshell:
-			case Simple_Command: {
-				pid_t pid = fork();
+		pid_t pid = fork();
 
-				if (IS_CHILD(pid)) {
-					close_all_fds();
-					if (process->command->type == Simple_Command)
-						execute_simple_command(process->command, pipefd, shell_vars);
-					if (process->command->type == Subshell)
+		if (IS_CHILD(pid)) {
+			close_all_fds();
+
+			switch (process->command->type) {
+				case Subshell: { 
+					// pid_t subPid = fork();
+					// if (IS_CHILD(subPid)) {
 						execute_subshell(process->command, shell_vars);
-				} else {
-					process->pid = pid;
-					if (!job->pgid)
-						job->pgid = pid;
-					setpgid(pid, job->pgid);
+						// exit(g_exitno);
+					// } else {
+					// 	if (!job->pgid)
+					// 		job->pgid = subPid;
+					// 	setpgid (subPid, job->pgid);
+					// }
+					break;
 				}
-				break;
+				case Simple_Command: { execute_simple_command(process->command, pipefd, shell_vars); break; }
+				case Brace_Group: break;
+				case If_Clause: { execute_if_clause(process->command, shell_vars); return ; }
+				case While_Clause: { execute_while_clause(process->command, shell_vars); return ; }
+				case Case_Clause: break;
+				case For_Clause: { break; }
+				default: break;
 			}
-			case Brace_Group:
-			case If_Clause: {
-				execute_if_clause(process->command, shell_vars);
-				dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
-				dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
-				dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
-				close_saved_fds(saved_fds);
-				return ;
-			}
-			case While_Clause: {
-				execute_while_clause(process->command, shell_vars);
-				dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
-				dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
-				dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
-				close_saved_fds(saved_fds);
-				return ;
-			}
-			case Case_Clause:
-			case For_Clause: {
-				break;
-			}
-			default: break;
+		} else {
+			process->pid = pid;
+			if (!job->pgid)
+				job->pgid = pid;
+			setpgid(pid, job->pgid);
 		}
 		process = process->next;
 
@@ -327,6 +326,7 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars) {
 	ListP *list_head = complete_command->list;
 	ShellInfos *shell_infos = shell(SHELL_GET);
+	// dprintf(2, "INTERFACTIVE: %d | %s\n", shell_infos->interactive, boolStr(shell_infos->interactive));
 
 	const bool background = (shell_infos->interactive && complete_command->separator == AMPER);
 

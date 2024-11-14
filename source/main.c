@@ -24,12 +24,8 @@
 
 int g_debug = 0;
 JobList *job_list = NULL;
-typedef enum { ARGS_GET, ARGS_SET } args_mode;
 
-void	*init_prompt_and_signals(char *input, bool shell_is_interactive, Vars *shell_vars) {
-	if (shell_is_interactive)
-		signal_manager(SIG_PROMPT);
-	
+void	*read_input_prompt(char *input, Vars *shell_vars) {
 	char *prompt = string_list_get_value(shell_vars->set, "PS1");
 	if (prompt)
 		input = ft_readline(prompt);
@@ -95,28 +91,8 @@ char *get_history_index(char *string, int index){
 	return NULL;
 }
 
-int manage_ac(args_mode mode, int new_ac){
-	static int ac;
-	if (mode == ARGS_GET)
-		return ac;
-	else if (mode == ARGS_SET){
-		ac = new_ac;
-		return ac;
-	}
-	return 0;
-}
 
-/*
-	* da_create(pos_args, StringList, sizeof(char *), GC_SUBSHELL);
-	* da_push(string)
-	* da_pop();
-	*
-	*
-	*
-	*
-*/
-
-char *open_read_file(char *path){
+char *read_input_file(char *path){
     int fd = open(path, O_RDWR | O_CREAT, 0644);
     if (fd == -1) {
         perror("Can't open file");
@@ -146,16 +122,11 @@ char *open_read_file(char *path){
 
 ShellInfos *shell(int mode) {
 	static ShellInfos *self = NULL;
-	int ac = manage_ac(ARGS_GET, 0);
 
 	if (mode == SHELL_INIT) {
 		self = gc(GC_CALLOC, 1, sizeof(ShellInfos), GC_ENV);
 		self->shell_terminal = STDIN_FILENO;
 		self->interactive = isatty(self->shell_terminal);
-		if (ac > 1){
-			self->interactive = 2;
-		}
-
 		if (self->interactive) {
 			while (tcgetpgrp(self->shell_terminal) != (self->shell_pgid = getpgrp()))
 				kill(- self->shell_pgid, SIGTTIN);
@@ -217,29 +188,29 @@ void exec_config_file(Vars *shell_vars) {
 
 //TODO:string_list args
 
-/*
-	* da_create(pos_args, StringList, sizeof(char *), GC_SUBSHELL);
-	* da_push(string)
-	* da_pop();
-	*
-	*
-	*
-	*
-*/
+void update_last_executed_command(Vars *shell_vars, char *input) {
+	char *last_executed = ft_strjoin("_=", input);
+	string_list_add_or_update(shell_vars->env, last_executed);
+	string_list_add_or_update(shell_vars->set, last_executed);
+	FREE_POINTERS(last_executed);
+}
+
+#define SHELL_IS_RUNNING true
 
 int main(const int ac, char *av[], const char *env[]) {
 	(void) av; (void) ac; (void) env;
 	
-	manage_ac(ARGS_SET, ac);
 	shell(SHELL_INIT);
 	g_signal = 0;
 	job_list = job_list_init();
+
 	da_create(jobListTmp, JobListe, sizeof(AndOrP *), GC_SUBSHELL);
 	jobList = jobListTmp;
 
 	Vars *shell_vars = vars_init(env);
 	int history_fd = -1;
 	ShellInfos *self = shell(SHELL_GET);
+	if (ac != 1) self->interactive = false;
 
 	if (self->interactive){
 		history_fd = get_history();
@@ -249,15 +220,17 @@ int main(const int ac, char *av[], const char *env[]) {
 
 	char *input = NULL;
 	//display the prompt, init signals if shell in interactive and reads input
-	while (true) {
-		if (self->interactive < 2) {
-			input = init_prompt_and_signals(input, self->interactive, shell_vars);
+	while (SHELL_IS_RUNNING) {
+		if (self->interactive)
+			signal_manager(SIG_PROMPT);
+		if (ac == 1) {
+			input = read_input_prompt(input, shell_vars);
 		} else {
-			input = open_read_file(av[1]);
+			input = read_input_file(av[1]);
 			if (ac > 2) {
-				da_create(pos_args, StringList, sizeof(char *), GC_SUBSHELL);//definition of pos_args
+				da_create(positional_args, StringList, sizeof(char *), GC_SUBSHELL);
 				for (int i = 2; i < ac; i++){
-					da_push(pos_args, av[i]);
+					da_push(positional_args, av[i]);
 				}
 			}
 		}
@@ -265,42 +238,33 @@ int main(const int ac, char *av[], const char *env[]) {
 			do_job_notification();
 		if (input) {
 			if (self->interactive) {
-				if (history_expansion(&input, history_fd) == false) {
+				if (history_expansion(&input, history_fd) == false)
 					continue;
-				}
-				if (input[0])
+				if (*input)
 					add_input_to_history(input, &history_fd);
 			}
 			parse_input(input, av[1], shell_vars);
 			gc(GC_CLEANUP, GC_ALL);
-			exit(1);
+			exit(EXIT_FAILURE);
+			//----------------------------------------------//
 			TokenList *tokens = lexer_lex_all(input);
-			// tokenListToString(tokens);
 			if (lexer_syntax_error(tokens))
 				continue; 
 			heredoc_detector(tokens, shell_vars);
 			Node *AST = ast_build(tokens);
 			ast_execute(AST, shell_vars, true);
-			//update env '_' variable
-			char *last_executed = ft_strjoin("_=", input);
-			string_list_add_or_update(shell_vars->env, last_executed);
-			string_list_add_or_update(shell_vars->set, last_executed);
-			FREE_POINTERS(last_executed);
-			//reset memory collection for the next input
+			//---------OLD EXECUTION CHAIN------------------//
+			update_last_executed_command(shell_vars, input);
 			gc(GC_RESET, GC_SUBSHELL);
 		} else {
 			if (job_list->size) {
-				printf("There are running jobs\n");
+				dprintf(2, "There are running jobs. Killing them.\n");
 				job_killall();
 				continue;
 			}
 			break;
 		}
-		if (self->interactive == 2)
-			break;
 	}
-	// if (self->interactive)
-	// 	gc(GC_CLEANUP)
 	gc(GC_CLEANUP, GC_ALL);
 	close_all_fds();
 	return (EXIT_SUCCESS);
