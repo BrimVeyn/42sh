@@ -1,16 +1,16 @@
-# if false | false; then
-# 	ls;
-# elif false | false; then
-# 	printf yeahhhhhh\n | cat
-# else
-# 	printf hackatahon\n | cat
-# fi | cat
+# { printf yeah\n; printf hoho\n; }
 
-(printf subshell\n | cat)
+if true; then
+	printf salut\n;
+fi
 
 #
-# printf salut\n; #Comment test
-#
+# ((( printf yeah\n )))
 
-# ((( printf yeah
+# while false; do
+# 	printf yeah
+# done
+#
+#
+#
 #

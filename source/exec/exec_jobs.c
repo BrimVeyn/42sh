@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/08 11:37:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/14 17:17:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,9 @@ void wait_for_job (Job *j) {
 	do {
 		pid = waitpid(-j->pgid, &status, WUNTRACED);
 		if (pid != -1) {
-			// dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", j->pgid, pid, getpid());
+			dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", j->pgid, pid, getpid());
 		} else {
-			// dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", j->pgid, pid,  getpid());
+			dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", j->pgid, pid,  getpid());
 		}
 	} while (!mark_process_status(list, pid, status)
 	&& !job_is_stopped(j)

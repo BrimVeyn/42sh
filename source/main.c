@@ -109,6 +109,7 @@ char *read_input_file(char *path){
     char *buffer = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (buffer == MAP_FAILED) {
 		close(fd);
+		//FIX: should not happen when file is empty
 		printf("mmap failed\n");
 		return NULL;
     }
@@ -169,6 +170,7 @@ void exec_config_file(Vars *shell_vars) {
 
     char *file_content = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (file_content == MAP_FAILED) {
+		//FIX: empty fails produce mmap failed
         perror("mmap failed");
         close(fd);
         return;
