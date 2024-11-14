@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:43:08 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/08 10:17:50 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/09 17:42:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 #include <stdio.h>
 
 void pretty_error(char *raw_token) {
-	Lex *lexer = lex_interface(LEX_OWN, NULL, NULL);
+	Lex *lexer = lex_interface(LEX_OWN, NULL, NULL, NULL);
 	char buffer[MAX_WORD_LEN] = {0};
 	int message_len = ft_sprintf(buffer, "%s:%ld:%ld: "C_BOLD C_BRIGHT_RED"error"C_RESET": unexpected token near: "C_BOLD C_WHITE"\'%s\'"C_RESET"\n", lexer->filename, lexer->line, lexer->column, raw_token);
 	int lineno_len = ft_sprintf(buffer, "  %ld", lexer->line) - message_len;

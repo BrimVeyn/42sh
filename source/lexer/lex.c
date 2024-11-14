@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/08 17:08:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/09 17:44:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void da_transfer(StringStream *in, StringStream *out, int number) {
 	}
 }
 
-void get_next_token(StringStream *input, StringStream *cache, size_t *line, size_t *column) {
+bool get_next_token(StringStream *input, StringStream *cache, size_t *line, size_t *column) {
 
 	if (*input->data == '#') {
 		while (input->size && *input->data != '\n') {
@@ -123,29 +123,34 @@ void get_next_token(StringStream *input, StringStream *cache, size_t *line, size
 	}
 
 	if (!*cache->data) {
-		if (!ft_strncmp(input->data, "<<-", 3)) { da_transfer(cache, input, 3); (*column) += 3; return ; }
-		if (!ft_strncmp(input->data, "<&", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
-		if (!ft_strncmp(input->data, ">&", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
-		if (!ft_strncmp(input->data, "<<", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
-		if (!ft_strncmp(input->data, "<>", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
-		if (!ft_strncmp(input->data, ">>", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
-		if (!ft_strncmp(input->data, ">|", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
-		if (!ft_strncmp(input->data, ";;", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
-		if (!ft_strncmp(input->data, "&&", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
-		if (!ft_strncmp(input->data, "||", 2)) { da_transfer(cache, input, 2); (*column) += 2; return ; }
+		if (!ft_strncmp(input->data, "<<-", 3)) { da_transfer(cache, input, 3); (*column) += 3; return true; }
+		if (!ft_strncmp(input->data, "<&", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
+		if (!ft_strncmp(input->data, ">&", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
+		if (!ft_strncmp(input->data, "<<", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
+		if (!ft_strncmp(input->data, "<>", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
+		if (!ft_strncmp(input->data, ">>", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
+		if (!ft_strncmp(input->data, ">|", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
+		if (!ft_strncmp(input->data, ";;", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
+		if (!ft_strncmp(input->data, "&&", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
+		if (!ft_strncmp(input->data, "||", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
 		switch (input->data[0]) {
-			case ';' : da_push(cache, da_pop_front(input)); (*column)++; return;
-			case '&' : da_push(cache, da_pop_front(input)); (*column)++; return;
-			case '<' : da_push(cache, da_pop_front(input)); (*column)++; return;
-			case '>' : da_push(cache, da_pop_front(input)); (*column)++; return;
-			case '|' : da_push(cache, da_pop_front(input)); (*column)++; return;
-			case '(' : da_push(cache, da_pop_front(input)); (*column)++; return;
-			case ')' : da_push(cache, da_pop_front(input)); (*column)++; return;
-			case '\n': da_push(cache, da_pop_front(input)); (*line)++; (*column) = 0; return;
+			case ';' : da_push(cache, da_pop_front(input)); (*column)++; return true;
+			case '&' : da_push(cache, da_pop_front(input)); (*column)++; return true;
+			case '<' : da_push(cache, da_pop_front(input)); (*column)++; return true;
+			case '>' : da_push(cache, da_pop_front(input)); (*column)++; return true;
+			case '|' : da_push(cache, da_pop_front(input)); (*column)++; return true;
+			case '(' : da_push(cache, da_pop_front(input)); (*column)++; return true;
+			case ')' : da_push(cache, da_pop_front(input)); (*column)++; return true;
+			case '\n': da_push(cache, da_pop_front(input)); (*line)++; (*column) = 0; return true;
 		}
 	}
 
-	if (context_stack->size != 0 && da_peak_back(context_stack) != WORD_WORD) {
-		dprintf(2, "SYNTAX ERROR UNCLOSED SHIT\n");
+	if (context_stack->size != 0) {
+		WordContext context = da_peak_back(context_stack);	
+		if (context != WORD_WORD) {
+			dprintf(2, "Syntax error, unclosed %d (add contextToStr function)\n", context);
+			return false;
+		}
 	}
+	return true;
 }

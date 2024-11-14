@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/07 15:02:22 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/14 16:33:56 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/14 16:35:41 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/14 17:33:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "libft.h"
 
 #include <fcntl.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -183,21 +184,29 @@ char *boolStr(bool bobo) {
 
 void execute_list(ListP *list, bool background, Vars *shell_vars);
 
-CompleteCommandP *wrapcc(ListP *list) {
-	CompleteCommandP *wrapper = gc_unique(CompleteCommandP, GC_SUBSHELL);
-	wrapper->separator = END;
-	wrapper->list = list;
-	return wrapper;
-}
-
 void execute_subshell(CommandP *command, Vars *shell_vars) {
 	ListP *subshell = command->subshell;
 	if (!redirect_ios(command->redir_list)) {
-		exit(g_exitno);
+		return ;
 	}
 	//FIX: add background trigger
-	CompleteCommandP *wrapper = wrapcc(subshell);
-	execute_complete_command(wrapper, shell_vars);
+	while (subshell) {
+		execute_list(subshell, false, shell_vars);
+		subshell = subshell->next;
+	}
+}
+
+void execute_brace_group(CommandP *command, Vars *shell_vars) {
+	ListP *command_group = command->brace_group;
+	if (!redirect_ios(command->redir_list)) {
+		return ;
+	}
+	//FIX: add background trigger, is it really there or inside execute_list that i'll be resolved ?
+	while (command_group) {
+		execute_list(command_group, false, shell_vars);
+		command_group = command_group->next;
+	}
+
 }
 
 void execute_if_clause(CommandP *command, Vars *shell_vars) {
@@ -206,29 +215,23 @@ void execute_if_clause(CommandP *command, Vars *shell_vars) {
 	size_t i = 0;
 	for (; i < if_clause->conditions->size; i++) {
 		ListP *condition = if_clause->conditions->data[i];
-		CompleteCommandP *wrapped_condition = wrapcc(condition);
-		execute_complete_command(wrapped_condition, shell_vars);
+		execute_list(condition, false, shell_vars);
 		if (g_exitno == 0) {
 			ListP *body = if_clause->bodies->data[i];
-			CompleteCommandP *wrapped_body = wrapcc(body);
-			execute_complete_command(wrapped_body, shell_vars);
+			execute_list(body, false, shell_vars);
+			return ;
 		}
 	}
 	if (i < if_clause->bodies->size) {
 		ListP *else_body = if_clause->bodies->data[i];
-		CompleteCommandP *wrapped_else = wrapcc(else_body);
-		execute_complete_command(wrapped_else, shell_vars);
+		execute_list(else_body, false, shell_vars);
 	}
 }
 
 void execute_while_clause(CommandP *command, Vars *shell_vars) {
 	WhileClauseP *while_clause = command->while_clause;
-	CompleteCommandP *wrapped_condition = wrapcc(while_clause->condition);
-
-	CompleteCommandP *wrapped_body = wrapcc(while_clause->body);
-
-	while (execute_complete_command(wrapped_condition, shell_vars), g_exitno == 0) {
-		execute_complete_command(wrapped_body, shell_vars);
+	while (execute_list(while_clause->condition, false, shell_vars), g_exitno == 0) {
+		execute_list(while_clause->body, false, shell_vars);
 	}
 }
 
@@ -248,11 +251,13 @@ void execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 
 	bool hadPipe = false;
 	int pipefd[2] = {-1, -1};
+	const bool piped = (process->next != NULL);
+	(void)piped;
 
-	if (!process->next) {
-		execute_single_command(process);
-		return ;
-	}
+	// if (!piped) {
+	// 	execute_single_command(process);
+	// 	return ;
+	// }
 
 	while (process) {
 		const bool hasPipe = (process->next != NULL);
@@ -268,23 +273,12 @@ void execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 			close_all_fds();
 
 			switch (process->command->type) {
-				case Subshell: { 
-					// pid_t subPid = fork();
-					// if (IS_CHILD(subPid)) {
-						execute_subshell(process->command, shell_vars);
-						// exit(g_exitno);
-					// } else {
-					// 	if (!job->pgid)
-					// 		job->pgid = subPid;
-					// 	setpgid (subPid, job->pgid);
-					// }
-					break;
-				}
+				case Subshell: { execute_subshell(process->command, shell_vars); exit(g_exitno); break; }
 				case Simple_Command: { execute_simple_command(process->command, pipefd, shell_vars); break; }
-				case Brace_Group: break;
-				case If_Clause: { execute_if_clause(process->command, shell_vars); return ; }
-				case While_Clause: { execute_while_clause(process->command, shell_vars); return ; }
-				case Case_Clause: break;
+				case Brace_Group: { execute_brace_group(process->command, shell_vars); exit(g_exitno); break; }
+				case If_Clause: { execute_if_clause(process->command, shell_vars); exit(g_exitno); return ; }
+				case While_Clause: { execute_while_clause(process->command, shell_vars); exit(g_exitno); return ; }
+				case Case_Clause: { break; }
 				case For_Clause: { break; }
 				default: break;
 			}
@@ -307,13 +301,14 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 	AndOrP *andor_head = list->and_or;
 
 	while (andor_head) {
-		const TokenType separator = andor_head->separator;
-		(void)separator; (void)shell_vars; (void)background;
+		const TokenType separator = andor_head->separator; (void)separator;
 		execute_pipeline(andor_head, background, shell_vars);
 		andor_head = andor_head->next;
 	}
 
 	ShellInfos *shell_infos = shell(SHELL_GET);
+
+	dprintf(2, "BEFORE WAITING\n");
 	if (!shell_infos->interactive)
 		job_wait(list->and_or);
 	else if (background)
@@ -334,5 +329,6 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 		execute_list(list_head, background, shell_vars);
 		list_head = list_head->next;
 	}
+	dprintf(2, "END OF EXECUTION\n");
 	return ;
 }
