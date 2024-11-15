@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/06 10:10:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/07 10:48:41 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@
 //TODO:Limiter history -> HIST_SIZE
 //HistFileSize HistFile
 //ctrl + v multiline
+//ctrl R highlight
+//multiline 
 
 //FIX: FIX ^C one line up 
 
