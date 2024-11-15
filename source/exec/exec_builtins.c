@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/15 16:11:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/15 17:03:38 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 typedef void (*builtin_func_t)(const SimpleCommandP *, Vars *);
 
 bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars) {
-	if (!command->bin) 
+	if (!command->word_list->data[0]) 
 		return false;
 
 	static const struct {
@@ -28,14 +28,14 @@ bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars) {
 		{"echo",  &builtin_echo}, {"exit",  &builtin_exit},
 		{"export",  &builtin_export}, {"hash",  &builtin_hash},
 		{"type",  &builtin_type}, {"jobs",  &builtin_jobs},
-		/*{"pwd", &builtin_pwd},*/ {"unset", &builtin_unset},
+		{"pwd", &builtin_pwd}, {"unset", &builtin_unset},
 		{"fg", &builtin_fg},  {"bg", &builtin_bg},
 		{"cd", &builtin_cd},
 	};
 
 	int result_index = -1;
 	for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); i++) {
-		if (!ft_strcmp(command->bin, map[i].bin)) {
+		if (!ft_strcmp(command->word_list->data[0], map[i].bin)) {
 			result_index = i;
 			break;
 		}

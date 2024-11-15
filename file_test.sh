@@ -1,10 +1,10 @@
 # salut nathan
-(echo salut)
+# { printf hey\n; echo salut; }
 # { printf yeah\n; printf hoho\n; }
 #
-# if true; then
-# 	printf salut\n;
-# fi
+
+false && printf salut\n;
+# printf hey\n && printf salut\n;
 #
 #
 # ((( printf yeah\n )))
