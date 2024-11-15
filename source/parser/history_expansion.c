@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:17:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/05 13:45:21 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/15 14:31:32 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 
-//TODO:! tout seul ne doit pas trigger hist
 int get_history(void) {
 	char *home = getenv("HOME");
 	char history_filename[1024] = {0};
@@ -157,7 +156,7 @@ char *get_value_nb(char *parameter, char *buffer, size_t file_size){
 
 bool history_expansion (char **pstring, int history_fd){
 
-	regex_match_t result = regex_match("[^\\\\]?\\![\\-!a-zA-Z0-9]*", *pstring);
+	regex_match_t result = regex_match("[^\\\\]?\\![\\-!a-zA-Z0-9]+", *pstring);
 	size_t file_size = 0;
 	char *buffer = NULL;
 
@@ -178,7 +177,7 @@ bool history_expansion (char **pstring, int history_fd){
 		}
 
 		do {
-			result = regex_match("[^\\\\]?\\![\\-!a-zA-Z0-9]*", *pstring);
+			result = regex_match("[^\\\\]?\\![\\-!a-zA-Z0-9]+", *pstring);
 			if (!result.is_found){
 				break;
 			}

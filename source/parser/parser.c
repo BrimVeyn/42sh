@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:07:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/06 10:08:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/08 14:49:43 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,7 @@ void string_list_consume(StrList *str_list, Vars *shell_vars) {
 		// printf("trimmed: %s\n", curr->str);
 		result = parser_tilde_expansion(curr->str, shell_vars);
 		
-		printf("result: %s\n", result);
+		// printf("result: %s\n", result);
 		if (result) {
 			gc(GC_FREE, str_list->data[i]->str, GC_SUBSHELL);
 			str_list->data[i]->str = gc(GC_ADD, result, GC_SUBSHELL);

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 16:26:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/04 15:10:39 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/08 14:48:38 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 	int pos = rl_state->cursor.y * get_col() - rl_state->prompt.size;
 	pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->prompt.size : 0);
 
-	if ((c == '\n' && rl_state->interactive) || (c == '\0' && !rl_state->interactive)){
+	if (c == '\n' || c == '\0'){
 		return handle_enter_key(rl_state, line);
 	}
 
@@ -76,11 +76,14 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 		return 0;
 	}
 	
-	str_insert(line, c, pos);
+	if (!rl_state->interactive){
+		str_push_back(line, c);
+	}
+	else
+		str_insert(line, c, pos);
 
 	if (rl_state->interactive)
 		update_cursor_x(rl_state, line, 1);
-
     return 0;
 }
 

@@ -18,6 +18,29 @@ BITTERSWEET="\033[0;38;2;255;81;84m"
 SGBUS="\033[0;38;2;124;223;100m"
 SELECTIVE_YELLOW="\033[0;38;2;255;188;31m"
 
+setup_cd_test_environment() {
+    mkdir -p test_cd
+    cd test_cd || exit
+
+    mkdir -p dir1 dir2 dir3/subdir
+
+    mkdir -p protected
+    touch protected/file
+    chmod -rwx protected
+
+    ln -s dir1 link_to_dir1
+    ln -s dir2 link_to_dir2
+    ln -s dir3/subdir link_to_subdir
+    ln -s ../dir2 dir3/link_to_parent_dir2
+
+    mkdir -p symlink_chain
+    ln -s ../dir1 symlink_chain/step1
+    ln -s ../dir2 symlink_chain/step2
+    ln -s ../dir3 symlink_chain/step3
+
+    cd ..
+}
+
 start_tests ()
 {
 	mkdir -p ./outfiles
@@ -25,6 +48,7 @@ start_tests ()
 	mkdir -p ./42sh_error
 	mkdir -p ./bash_outfiles
 	mkdir -p ./bash_error
+	setup_cd_test_environment
 
 	chmod 000 infiles/no_perms
 
@@ -129,11 +153,12 @@ test_lists=(
 	"src/command_group"
 	"src/arithmetic_expansion"
 	"src/builtin_export"
+	"src/builtin_cd"
 	"src/mixed"
 )
 
-PS3="Enter a number to run associated tests, * for all "
-select option in redirections syntax expand subshell command_sub command_group arithmetic_expansion builtin_export mixed
+PS3="Enter a number to run associated tests, * for all: "
+select option in redirections syntax expand subshell command_sub command_group arithmetic_expansion builtin_export builtin_cd mixed
 do
     case $option in
         redirections)
@@ -167,6 +192,12 @@ do
         builtin_export)
 			test_lists=("src/builtin_export");
 			start_tests;
+            ;;
+		builtin_cd)
+			test_lists=("src/builtin_cd");
+			start_tests;
+			chmod 777 test_cd/protected
+			rm -rf test_cd;
             ;;
         mixed)
 			test_lists=("src/mixed");

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 17:11:38 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/17 12:51:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/08 11:26:01 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,13 +93,13 @@ void builtin_jobs(const SimpleCommand *command, __attribute__((unused)) Vars *sh
 	size_t i = 1;
 	while (is_options) {
 		is_options = false;
-		for (; command->args[i] && regex_match("^-l*$", command->args[i]).is_found ; i++) {
+		for (; command->args[i] && regex_match("^-l+$", command->args[i]).is_found ; i++) {
 			opts |= 1; is_options = true;
 		}
-		for (; command->args[i] && regex_match("^-p*$", command->args[i]).is_found ; i++) {
+		for (; command->args[i] && regex_match("^-p+$", command->args[i]).is_found ; i++) {
 			opts |= 2; is_options = true;
 		}
-		for (; command->args[i] && regex_match("^-[pl]*$", command->args[i]).is_found ; i++) {
+		for (; command->args[i] && regex_match("^-[pl]+$", command->args[i]).is_found ; i++) {
 			opts |= 3; is_options = true;
 		}
 	}

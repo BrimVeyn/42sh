@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:16:37 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/03 17:32:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/08 11:33:09 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,11 +187,11 @@ void builtin_hash(const SimpleCommand *command, Vars *shell_vars) {
 		return ;
 	}
 
-	if (command->args[i] && regex_match("^-r*$", command->args[i]).is_found) {
+	if (command->args[i] && regex_match("^-r+$", command->args[i]).is_found) {
 		hash_interface(HASH_CLEAR, NULL, shell_vars);
 		i += 1;
 	}
-	for (; command->args[i] && regex_match("^-d*$", command->args[i]).is_found; i++) {
+	for (; command->args[i] && regex_match("^-d+$", command->args[i]).is_found; i++) {
 		delete_mode = true;
 	}
 

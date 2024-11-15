@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/16 10:16:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/07 17:03:30 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/15 14:44:10 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/15 14:44:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,7 +264,7 @@ void			token_list_insert_list(TokenList *dest, TokenList *src, const int index);
 
 //----------------StringList----------------//
 void			string_list_add_or_update(StringList *sl, char *var);
-bool			string_list_update(StringList *sl, char *var);
+bool			string_list_update(StringList *sl, const char *var);
 void			string_list_append(StringList *sl, char *var);
 void			string_list_clear(StringList *list);
 bool			string_list_remove(StringList *sl, char *id);
