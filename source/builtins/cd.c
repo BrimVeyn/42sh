@@ -6,11 +6,10 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 15:10:45 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/15 13:52:01 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/15 15:22:20 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//TODO: CD :)
 #include "ft_regex.h"
 #include "lexer.h"
 #include "parser.h"
@@ -211,12 +210,6 @@ void canonical_convertion(char **pcurpath){
 	}
 	*pcurpath = curpath;
 }
-
-////usr/.////././///home/
-//TODO:get home dabord local etc
-//Error a gerer, error print operand et pas curpath
-//
-//
 
 int last_elem_is(const char *str, char c){
 	return (str[ft_strlen(str) - 1] == c);
