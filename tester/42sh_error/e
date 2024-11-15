@@ -1,1 +1,1 @@
-42sh: cd: /nonexistent_path/..//./nonexistent2: such file or directory
+ln: failed to create symbolic link 'chain/step1/dir1': File exists

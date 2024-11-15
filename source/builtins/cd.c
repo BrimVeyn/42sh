@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 15:10:45 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/08 16:55:33 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/15 13:52:01 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -248,11 +248,6 @@ int get_flags_and_operand(char **args, int *options, char **operand){
 	return 0;
 }
 
-//local
-//env
-//set
-//
-
 static char *get_variable_in_bi(Vars *shell_vars, char *name){
 	char *result = string_list_get_value(shell_vars->local, name);
 	if (result) return result;
@@ -335,6 +330,16 @@ void builtin_cd(const SimpleCommand *command, Vars *shell_vars) {
     }
 
 	canonical_convertion(&curpath);
+
+	if (options & CD_P) {
+		char resolved_path[PATH_MAX];
+		if (!realpath(curpath, resolved_path)) {
+			print_cd_error(ERROR_NO_SUCH_FILE, (void **)&curpath);
+			g_exitno = 1;
+			return;
+		}
+		curpath = gc(GC_ADD, ft_strdup(resolved_path), GC_SUBSHELL);
+	}
 
 	if (cd_status){
 		print_cd_error(cd_status, (void **)&operand);
