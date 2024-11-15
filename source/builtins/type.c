@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:02:12 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/16 13:44:59 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/15 15:54:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,29 +34,29 @@ static bool is_keyword(const char *arg) {
 	return false;
 }
 
-void builtin_type(const SimpleCommand *command, Vars *shell_vars) {
+void builtin_type(const SimpleCommandP *command, Vars *shell_vars) {
 	char buffer[MAX_WORD_LEN] = {0};
 	size_t i = 1;
 
-	for (; command->args[i]; i++) {
-		bool isbuiltin = is_builtin(command->args[i]);
+	for (; command->word_list->data[i]; i++) {
+		bool isbuiltin = is_builtin(command->word_list->data[i]);
 		if (isbuiltin) {
-			ft_sprintf(buffer, "%s is a shell builtin\n", command->args[i]);
+			ft_sprintf(buffer, "%s is a shell builtin\n", command->word_list->data[i]);
 			continue;
         }
 
-		bool iskeyword = is_keyword(command->args[i]);
+		bool iskeyword = is_keyword(command->word_list->data[i]);
 		if (iskeyword) {
-			ft_sprintf(buffer, "%s is a shell keyword\n", command->args[i]);
+			ft_sprintf(buffer, "%s is a shell keyword\n", command->word_list->data[i]);
 			continue;
         }
 
-		char *maybe_bin = hash_find_bin(command->args[i], shell_vars);
+		char *maybe_bin = hash_find_bin(command->word_list->data[i], shell_vars);
 		if (!maybe_bin && !isbuiltin) {
-			TYPE_BIN_NOT_FOUND(command->args[i]);
+			TYPE_BIN_NOT_FOUND(command->word_list->data[i]);
 			continue;
 		} else {
-			ft_sprintf(buffer, "%s is %s\n", command->args[i], maybe_bin);
+			ft_sprintf(buffer, "%s is %s\n", command->word_list->data[i], maybe_bin);
 		}
 	}
 

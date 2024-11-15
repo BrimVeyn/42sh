@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 16:46:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/09 17:37:26 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/15 15:50:59 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -364,4 +364,5 @@ void job_notification(void);
 #include "exec.h"
 
 void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars);
+bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars);
 #endif // !FINAL_PARSER

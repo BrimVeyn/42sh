@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 15:10:45 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/15 13:52:01 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/15 15:53:40 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,13 +257,13 @@ static char *get_variable_in_bi(Vars *shell_vars, char *name){
 	return result;
 }
 
-void builtin_cd(const SimpleCommand *command, Vars *shell_vars) {
+void builtin_cd(const SimpleCommandP *command, Vars *shell_vars) {
 	cd_status = VALID_DIRECTORY;
 	char *curpath = NULL;
 
 	int options = 0;
 	char *operand = NULL;
-	if (get_flags_and_operand(command->args, &options, &operand) == -1){
+	if (get_flags_and_operand(command->word_list->data, &options, &operand) == -1){
 		print_cd_error(cd_status, (void **)&options);
 		g_exitno = 1;
 		return;

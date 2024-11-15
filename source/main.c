@@ -232,8 +232,7 @@ int main(const int ac, char *av[], const char *env[]) {
 				}
 			}
 		}
-		if (self->interactive)
-			do_job_notification();
+		if (self->interactive) { do_job_notification(); }
 		if (input) {
 			if (self->interactive) {
 				if (history_expansion(&input, history_fd) == false)
@@ -241,9 +240,9 @@ int main(const int ac, char *av[], const char *env[]) {
 				if (*input)
 					add_input_to_history(input, &history_fd);
 			}
-			// parse_input(input, av[1], shell_vars);
-			// gc(GC_CLEANUP, GC_ALL);
-			// exit(EXIT_FAILURE);
+			parse_input(input, av[1], shell_vars);
+			gc(GC_CLEANUP, GC_ALL);
+			exit(EXIT_FAILURE);
 			//----------------------------------------------//
 			TokenList *tokens = lexer_lex_all(input);
 			if (lexer_syntax_error(tokens))

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 17:11:38 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/08 11:26:01 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/15 15:54:27 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ void print_job_entry(char *buffer, const size_t idx, int opts) {
 		ft_sprintf(buffer, "\n");
 }
 
-void builtin_jobs(const SimpleCommand *command, __attribute__((unused)) Vars *shell_vars) {
+void builtin_jobs(const SimpleCommandP *command, __attribute__((unused)) Vars *shell_vars) {
 	char buffer[MAX_WORD_LEN] = {0};
 	uint8_t opts = 0;
 	bool	is_options = true;
@@ -93,27 +93,27 @@ void builtin_jobs(const SimpleCommand *command, __attribute__((unused)) Vars *sh
 	size_t i = 1;
 	while (is_options) {
 		is_options = false;
-		for (; command->args[i] && regex_match("^-l+$", command->args[i]).is_found ; i++) {
+		for (; command->word_list->data[i] && regex_match("^-l+$", command->word_list->data[i]).is_found ; i++) {
 			opts |= 1; is_options = true;
 		}
-		for (; command->args[i] && regex_match("^-p+$", command->args[i]).is_found ; i++) {
+		for (; command->word_list->data[i] && regex_match("^-p+$", command->word_list->data[i]).is_found ; i++) {
 			opts |= 2; is_options = true;
 		}
-		for (; command->args[i] && regex_match("^-[pl]+$", command->args[i]).is_found ; i++) {
+		for (; command->word_list->data[i] && regex_match("^-[pl]+$", command->word_list->data[i]).is_found ; i++) {
 			opts |= 3; is_options = true;
 		}
 	}
 
-	if (!command->args[i]) {
+	if (!command->word_list->data[i]) {
 		for (size_t i = 0; i < job_list->size; i++) {
 			print_job_entry(buffer, i, opts);
 		}
 	} else {
-		for (; command->args[i]; i++) {
-			int maybe_num = ft_atoi(command->args[i]);
-			if (!is_number(command->args[i]) || maybe_num == 0 || maybe_num > (int) job_list->size) {
+		for (; command->word_list->data[i]; i++) {
+			int maybe_num = ft_atoi(command->word_list->data[i]);
+			if (!is_number(command->word_list->data[i]) || maybe_num == 0 || maybe_num > (int) job_list->size) {
 				g_exitno = 1;
-				ERROR_NO_SUCH_JOB("jobs", command->args[i]);
+				ERROR_NO_SUCH_JOB("jobs", command->word_list->data[i]);
 			} else {
 				print_job_entry(buffer, maybe_num - 1, opts);
 			}

@@ -6,17 +6,17 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/05 10:25:14 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/15 16:11:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "libft.h"
-#include <stdio.h>
+#include "../lexer/final_parser.h"
 
-typedef void (*builtin_func_t)(const SimpleCommand *, Vars *);
+typedef void (*builtin_func_t)(const SimpleCommandP *, Vars *);
 
-bool builtin_executer(const SimpleCommand *command, Vars *shell_vars) {
+bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars) {
 	if (!command->bin) 
 		return false;
 

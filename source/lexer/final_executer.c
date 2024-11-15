@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:35:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/14 17:33:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/15 16:38:28 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,25 +39,26 @@ void create_pipe(bool *hadPipe, int *pipefd) {
 #define IS_CHILD(pid) ((pid == 0) ? true : false)
 
 void resolve_bine(SimpleCommandP *command, Vars *shell_vars) {
-	if (!command || !command->bin) {
+	char *command_bin = command->word_list->data[0];
+	if (!command || !command_bin) {
 		return ;
 	}
-	char *maybe_bin = hash_interface(HASH_FIND, command->bin, shell_vars);
-	if (is_builtin(command->bin)) {
+	char *maybe_bin = hash_interface(HASH_FIND, command_bin, shell_vars);
+	if (is_builtin(command_bin)) {
 		return ;
 	}
 	if (maybe_bin) {
-		hash_interface(HASH_ADD_USED, command->bin, shell_vars);
-		command->bin = maybe_bin;
+		hash_interface(HASH_ADD_USED, command_bin, shell_vars);
+		command_bin = maybe_bin;
 	} else {
 		bool absolute = false;
-		maybe_bin = find_bin_location(command->bin, shell_vars->env, &absolute);
+		maybe_bin = find_bin_location(command_bin, shell_vars->env, &absolute);
 		if (maybe_bin) {
 			if (absolute == false)
-				hash_interface(HASH_ADD_USED, command->bin, shell_vars);
-			command->bin = maybe_bin;
+				hash_interface(HASH_ADD_USED, command_bin, shell_vars);
+			command_bin = maybe_bin;
 		} else {
-			command->bin = NULL;
+			command_bin = NULL;
 		}
 	}
 }
@@ -162,20 +163,20 @@ bool redirect_ios(RedirectionL *redir_list) {
 
 void execute_simple_command(CommandP *command, int *pipefd, Vars *shell_vars) {
 	SimpleCommandP *simple_command = command->simple_command;
-	simple_command->bin = simple_command->word_list->data[0];
-
 	resolve_bine(simple_command, shell_vars);
 	if (!redirect_ios(simple_command->redir_list)) {
-		exit(g_exitno);
+		return ;
 	}
 
 	dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
 	print_simple_command(simple_command);
 	dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
 
-	execve(simple_command->bin, simple_command->word_list->data, shell_vars->env->data);
-	close(pipefd[0]);
-	close(pipefd[1]);
+	execve(simple_command->word_list->data[0], simple_command->word_list->data, shell_vars->env->data);
+	if (pipefd) {
+		close(pipefd[0]);
+		close(pipefd[1]);
+	}
 }
 
 char *boolStr(bool bobo) {
@@ -235,12 +236,66 @@ void execute_while_clause(CommandP *command, Vars *shell_vars) {
 	}
 }
 
-void execute_single_command(PipeLineP *process) {
-	(void) process;
-	return ;
+#define NO_WAIT 0
+#define WAIT 1
+
+int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
+	PipeLineP *process = job->pipeline;
+	CommandP *command = job->pipeline->command;
+	switch (command->type) {
+		case Simple_Command: {
+			command->simple_command->bin = command->simple_command->word_list->data[0];
+			resolve_bine(command->simple_command, shell_vars);
+			if (is_builtin(command->simple_command->bin)) {
+				if (background) {
+					dprintf(2, "should be forked\n");
+					return WAIT;
+				} else {
+					execute_builtin(command->simple_command, shell_vars);
+					return NO_WAIT;
+				}
+			} else {
+				pid_t pid = fork();
+
+				if (IS_CHILD(pid)) {
+					close_all_fds();
+					execute_simple_command(command, NULL, shell_vars);
+					exit(g_exitno);
+				} else {
+					process->pid = pid;
+					if (!job->pgid)
+						job->pgid = pid;
+					setpgid(pid, job->pgid);
+				}
+				return WAIT;
+			}
+		}
+		case Subshell: {
+			pid_t pid = fork();
+
+			if (IS_CHILD(pid)) {
+				close_all_fds();
+				execute_subshell(command, shell_vars);
+				exit(g_exitno);
+			} else {
+				process->pid = pid;
+				if (!job->pgid)
+					job->pgid = pid;
+				setpgid(pid, job->pgid);
+			}
+			return WAIT;
+		}
+		case Brace_Group: { execute_brace_group(process->command, shell_vars); return NO_WAIT; }
+		case If_Clause: { execute_if_clause(process->command, shell_vars); return NO_WAIT ; }
+		case While_Clause: { execute_while_clause(process->command, shell_vars);  return NO_WAIT; }
+		case Case_Clause: { break; }
+		case For_Clause: { break; }
+		default: {};
+	}
+	return ERROR;
 }
 
-void execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
+int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	(void)background;
 	PipeLineP *process = job->pipeline;
 	int saved_fds[] = {
@@ -252,12 +307,11 @@ void execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	bool hadPipe = false;
 	int pipefd[2] = {-1, -1};
 	const bool piped = (process->next != NULL);
-	(void)piped;
+	dprintf(2, "piped: %s\n", boolStr(piped));
 
-	// if (!piped) {
-	// 	execute_single_command(process);
-	// 	return ;
-	// }
+	if (!piped) {
+		return execute_single_command(job, background, shell_vars);
+	}
 
 	while (process) {
 		const bool hasPipe = (process->next != NULL);
@@ -273,11 +327,11 @@ void execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 			close_all_fds();
 
 			switch (process->command->type) {
+				case Simple_Command: { execute_simple_command(process->command, pipefd, shell_vars); exit(g_exitno); break; }
 				case Subshell: { execute_subshell(process->command, shell_vars); exit(g_exitno); break; }
-				case Simple_Command: { execute_simple_command(process->command, pipefd, shell_vars); break; }
 				case Brace_Group: { execute_brace_group(process->command, shell_vars); exit(g_exitno); break; }
-				case If_Clause: { execute_if_clause(process->command, shell_vars); exit(g_exitno); return ; }
-				case While_Clause: { execute_while_clause(process->command, shell_vars); exit(g_exitno); return ; }
+				case If_Clause: { execute_if_clause(process->command, shell_vars); exit(g_exitno); break ; }
+				case While_Clause: { execute_while_clause(process->command, shell_vars); exit(g_exitno); break ; }
 				case Case_Clause: { break; }
 				case For_Clause: { break; }
 				default: break;
@@ -295,26 +349,31 @@ void execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 		dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
 	}
 	close_saved_fds(saved_fds);
+	return WAIT;
 }
 
 void execute_list(ListP *list, bool background, Vars *shell_vars) {
 	AndOrP *andor_head = list->and_or;
+	int status = NO_WAIT;
 
 	while (andor_head) {
 		const TokenType separator = andor_head->separator; (void)separator;
-		execute_pipeline(andor_head, background, shell_vars);
+		if (execute_pipeline(andor_head, background, shell_vars) == WAIT) {
+			status = WAIT;
+		}
 		andor_head = andor_head->next;
 	}
 
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
-	dprintf(2, "BEFORE WAITING\n");
-	if (!shell_infos->interactive)
-		job_wait(list->and_or);
-	else if (background)
-		put_job_background(list->and_or);
-	else
-		put_job_foreground(list->and_or, false);
+	if (status == WAIT) {
+		if (!shell_infos->interactive)
+			job_wait(list->and_or);
+		else if (background)
+			put_job_background(list->and_or);
+		else
+			put_job_foreground(list->and_or, false);
+	}
 }
 
 

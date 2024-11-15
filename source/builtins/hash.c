@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:16:37 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/08 11:33:09 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/15 15:53:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,34 +178,34 @@ void *hash_interface(hash_mode mode, char *arg, Vars *shell_vars) {
 	return NULL;
 }
 
-void builtin_hash(const SimpleCommand *command, Vars *shell_vars) {
+void builtin_hash(const SimpleCommandP *command, Vars *shell_vars) {
 	size_t i = 1;
 	bool delete_mode = false;
 	
-	if (!command->args[1]) {
+	if (!command->word_list->data[1]) {
 		hash_interface(HASH_PRINT, NULL, shell_vars);
 		return ;
 	}
 
-	if (command->args[i] && regex_match("^-r+$", command->args[i]).is_found) {
+	if (command->word_list->data[i] && regex_match("^-r+$", command->word_list->data[i]).is_found) {
 		hash_interface(HASH_CLEAR, NULL, shell_vars);
 		i += 1;
 	}
-	for (; command->args[i] && regex_match("^-d+$", command->args[i]).is_found; i++) {
+	for (; command->word_list->data[i] && regex_match("^-d+$", command->word_list->data[i]).is_found; i++) {
 		delete_mode = true;
 	}
 
-	if (delete_mode && !command->args[i]) {
+	if (delete_mode && !command->word_list->data[i]) {
 		HASH_OPTION_REQUIRES_ARG;
 		g_exitno = 1;
 		return ;
 	}
 
-	for (; command->args[i]; i++) {
+	for (; command->word_list->data[i]; i++) {
 		if (delete_mode) {
-			hash_interface(HASH_REMOVE, command->args[i], shell_vars);
+			hash_interface(HASH_REMOVE, command->word_list->data[i], shell_vars);
         } else {
-			hash_interface(HASH_ADD_UNUSED, command->args[i], shell_vars);
+			hash_interface(HASH_ADD_UNUSED, command->word_list->data[i], shell_vars);
 		}
 	}
 }
