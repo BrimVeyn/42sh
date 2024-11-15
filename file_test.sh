@@ -1,4 +1,5 @@
 # salut nathan
+(echo salut)
 # { printf yeah\n; printf hoho\n; }
 #
 # if true; then

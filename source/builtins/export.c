@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:33:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/16 17:23:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/15 15:54:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,31 +47,31 @@ static void print_export_p(StringList *env) {
 	}
 }
 
-void builtin_export(const SimpleCommand *command, Vars *shell_vars) {
+void builtin_export(const SimpleCommandP *command, Vars *shell_vars) {
 	size_t i = 1;
 	size_t args_len = 0;
-	for (; command->args[args_len]; args_len++) {}
+	for (; command->word_list->data[args_len]; args_len++) {}
 
-	for (; command->args[i] && regex_match("^-p*$", command->args[i]).is_found ; i++) {
+	for (; command->word_list->data[i] && regex_match("^-p*$", command->word_list->data[i]).is_found ; i++) {
 		if (args_len == i + 1) {
 			print_export_p(shell_vars->env);
 			return ;
 		}
 	}
 	
-	for (; command->args[i]; i++) {
-		char *arg = command->args[i];
+	for (; command->word_list->data[i]; i++) {
+		char *arg = command->word_list->data[i];
 		char *equal_ptr = ft_strchr(arg, '=');
 		size_t equal_pos = equal_ptr - arg;
 		bool has_equal = (equal_ptr);
-		size_t arg_len = ft_strlen(command->args[i]);
-		regex_match_t match = regex_match("[_a-zA-Z][_a-zA-Z0-9]*", command->args[i]);
+		size_t arg_len = ft_strlen(command->word_list->data[i]);
+		regex_match_t match = regex_match("[_a-zA-Z][_a-zA-Z0-9]*", command->word_list->data[i]);
 		size_t match_len = (match.is_found) ? match.re_end - match.re_start : -1;
 
 		if ((has_equal && match_len == equal_pos) || (!has_equal && match_len == arg_len)) {
-			string_list_add_or_update(shell_vars->env, command->args[i]);
+			string_list_add_or_update(shell_vars->env, command->word_list->data[i]);
 		} else {
-			INVALID_IDENTIFIER(command->args[i]);
+			INVALID_IDENTIFIER(command->word_list->data[i]);
 			g_exitno = 1;
 		}
 	}

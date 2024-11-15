@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 14:44:54 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/15 14:44:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/15 15:50:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@ void	secure_pipe2(int pipefd[2], int flags);
 void	secure_execve(const char *pathname, char **const argv, char **const envp);
 
 bool	is_builtin(const char *bin);
-bool	builtin_executer(const SimpleCommand *command, Vars *shell_vars);
 
 int		exec_node(Node *node, Vars *shell_vars, bool foreground);
 void	add_vars_to_local(StringList *list, TokenList *vars);
@@ -107,19 +106,21 @@ typedef struct cdOpt {
 void *hash_interface(hash_mode mode, char *arg, Vars *shell_vars);
 char *hash_find_bin(char *bin, Vars *shell_vars);
 
-void builtin_hash(const SimpleCommand *command, Vars *shell_vars);
-void builtin_set(const SimpleCommand *command, Vars *shell_vars);
-void builtin_env(const SimpleCommand *command, Vars *shell_vars);
-void builtin_echo(const SimpleCommand *command, Vars *shell_vars);
-void builtin_exit(const SimpleCommand *command, Vars *shell_vars);
-void builtin_export(const SimpleCommand *command, Vars *shell_vars);
-void builtin_type(const SimpleCommand *command, Vars *shell_vars);
-void builtin_pwd(const SimpleCommand *command, Vars *shell_vars);
-void builtin_cd(const SimpleCommand *command, Vars *shell_vars);
-void builtin_unset(const SimpleCommand *command, Vars *shell_vars);
-void builtin_jobs(const SimpleCommand *command, Vars *shell_vars);
-void builtin_fg(const SimpleCommand *command, Vars *shell_vars);
-void builtin_bg(const SimpleCommand *command, Vars *shell_vars);
+#include "../source/lexer/final_parser.h"
+
+void builtin_hash(const SimpleCommandP *command, Vars *shell_vars);
+void builtin_set(const SimpleCommandP *command, Vars *shell_vars);
+void builtin_env(const SimpleCommandP *command, Vars *shell_vars);
+void builtin_echo(const SimpleCommandP *command, Vars *shell_vars);
+void builtin_exit(const SimpleCommandP *command, Vars *shell_vars);
+void builtin_export(const SimpleCommandP *command, Vars *shell_vars);
+void builtin_type(const SimpleCommandP *command, Vars *shell_vars);
+void builtin_pwd(const SimpleCommandP *command, Vars *shell_vars);
+void builtin_cd(const SimpleCommandP *command, Vars *shell_vars);
+void builtin_unset(const SimpleCommandP *command, Vars *shell_vars);
+void builtin_jobs(const SimpleCommandP *command, Vars *shell_vars);
+void builtin_fg(const SimpleCommandP *command, Vars *shell_vars);
+void builtin_bg(const SimpleCommandP *command, Vars *shell_vars);
 //-------------------------------------------------------------//
 
 #endif

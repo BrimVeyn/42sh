@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/08 15:03:20 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/15 15:51:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,8 +129,8 @@ bool exec_simple_command(const SimpleCommand *command, Vars *shell_vars) {
 		if (!command->bin) {
 			return false;
 		}
-		if (builtin_executer(command, shell_vars))
-			return false;
+		// if (builtin_executer(command, shell_vars))
+		// 	return false;
 		secure_execve(command->bin, command->args, shell_vars->env->data);
 	} else return false;
 	return true;
@@ -270,12 +270,12 @@ int launch_job(Job *job, Vars *shell_vars, bool foreground) {
 			
 			//TODO: Better error managment for non-piped builtins
 
-			if (pipefd[0] == -1 && apply_all_redirect(proc->command->redir_list) && builtin_executer(proc->command, shell_vars)) {
-				dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
-				dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
-				dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
-				break;
-            }
+			// if (pipefd[0] == -1 && apply_all_redirect(proc->command->redir_list) && builtin_executer(proc->command, shell_vars)) {
+				// dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
+				// dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
+				// dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
+				// break;
+    //         }
 
 			pids[i] = secure_fork();
 			if (pids[i] == 0) {
