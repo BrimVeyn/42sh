@@ -48,7 +48,6 @@ start_tests ()
 	mkdir -p ./42sh_error
 	mkdir -p ./bash_outfiles
 	mkdir -p ./bash_error
-	setup_cd_test_environment
 
 	chmod 000 infiles/no_perms
 
@@ -154,11 +153,12 @@ test_lists=(
 	"src/arithmetic_expansion"
 	"src/builtin_export"
 	"src/builtin_cd"
+	"src/builtin_exit"
 	"src/mixed"
 )
 
 PS3="Enter a number to run associated tests, * for all: "
-select option in redirections syntax expand subshell command_sub command_group arithmetic_expansion builtin_export builtin_cd mixed
+select option in redirections syntax expand subshell command_sub command_group arithmetic_expansion builtin_export builtin_cd builtin_exit mixed
 do
     case $option in
         redirections)
@@ -195,9 +195,14 @@ do
             ;;
 		builtin_cd)
 			test_lists=("src/builtin_cd");
+			setup_cd_test_environment
 			start_tests;
 			chmod 777 test_cd/protected
 			rm -rf test_cd;
+            ;;
+        builtin_exit)
+			test_lists=("src/builtin_exit");
+			start_tests;
             ;;
         mixed)
 			test_lists=("src/mixed");
