@@ -1,9 +1,10 @@
+# salut nathan
 # { printf yeah\n; printf hoho\n; }
-
-if true; then
-	printf salut\n;
-fi
-
+#
+# if true; then
+# 	printf salut\n;
+# fi
+#
 #
 # ((( printf yeah\n )))
 

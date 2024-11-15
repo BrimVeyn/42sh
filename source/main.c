@@ -187,9 +187,6 @@ void exec_config_file(Vars *shell_vars) {
     close(fd);
 }
 
-
-//TODO:string_list args
-
 void update_last_executed_command(Vars *shell_vars, char *input) {
 	char *last_executed = ft_strjoin("_=", input);
 	string_list_add_or_update(shell_vars->env, last_executed);
@@ -223,8 +220,7 @@ int main(const int ac, char *av[], const char *env[]) {
 	char *input = NULL;
 	//display the prompt, init signals if shell in interactive and reads input
 	while (SHELL_IS_RUNNING) {
-		if (self->interactive)
-			signal_manager(SIG_PROMPT);
+		if (self->interactive) { signal_manager(SIG_PROMPT); }
 		if (ac == 1) {
 			input = read_input_prompt(input, shell_vars);
 		} else {
@@ -245,9 +241,9 @@ int main(const int ac, char *av[], const char *env[]) {
 				if (*input)
 					add_input_to_history(input, &history_fd);
 			}
-			parse_input(input, av[1], shell_vars);
-			gc(GC_CLEANUP, GC_ALL);
-			exit(EXIT_FAILURE);
+			// parse_input(input, av[1], shell_vars);
+			// gc(GC_CLEANUP, GC_ALL);
+			// exit(EXIT_FAILURE);
 			//----------------------------------------------//
 			TokenList *tokens = lexer_lex_all(input);
 			if (lexer_syntax_error(tokens))
