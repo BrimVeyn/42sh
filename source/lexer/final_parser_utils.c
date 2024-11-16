@@ -32,7 +32,7 @@ PipeLineP *pipelineNew(CommandP *command) {
 	return self;
 }
 
-void	andOrAddBack(AndOrP **lst, AndOrP *new_value) {
+void	andOrAddBack(AndOrP **lst, AndOrP *new_value, TokenType separator) {
 	AndOrP	*temp;
 
 	if (*lst == NULL)
@@ -41,6 +41,7 @@ void	andOrAddBack(AndOrP **lst, AndOrP *new_value) {
 		temp = *lst;
 		while (temp->next)
 			temp = temp->next;
+    temp->separator = separator;
 		temp->next = new_value;
 	}
 }

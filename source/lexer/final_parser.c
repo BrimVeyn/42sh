@@ -74,7 +74,7 @@ TokenType identify_token(const char *raw_value, const int table_row, bool *error
 			return ASSIGNMENT_WORD;
 	}
 
-	dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
+	/*dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);*/
 	if (regex_match("^[a-zA-Z_][a-zA-Z0-9_]*$", (char *)raw_value).is_found) {
 		if (table_row == 30 || 
 			(table_row == 48 && !ft_strcmp("(", lex_interface(LEX_PEAK, NULL, NULL, error))))
@@ -214,8 +214,7 @@ StackEntry *parse(Vars *shell_vars) {
 						da_pop(stack);
 						TokenType separator = da_pop(stack)->token.type;
 						AndOrP *and_or = da_pop(stack)->token.and_or;
-						and_or->separator = separator;
-						andOrAddBack(&and_or, andOrNew(pipeline, END));
+						andOrAddBack(&and_or, andOrNew(pipeline, END), separator);
 						reduced_entry->token.type = And_Or;
 						reduced_entry->token.and_or = and_or;
 						state = da_peak_back(stack)->state;
