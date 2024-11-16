@@ -312,7 +312,6 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	bool hadPipe = false;
 	int pipefd[2] = {-1, -1};
 	const bool piped = (process->next != NULL);
-	dprintf(2, "piped: %s\n", boolStr(piped));
 
 	if (!piped) {
 		return execute_single_command(job, background, shell_vars);
@@ -375,21 +374,28 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 				put_job_foreground(list->and_or, false);
 		}
 
-		bool skip = (
+		const bool skip = (
 			(separator == AND_IF && g_exitno != 0) 
 			||
 			(separator == OR_IF && g_exitno == 0)
 		);
-		dprintf(2, "SKIP: %s\n", boolStr(skip));
-		if (g_exitno == 0) {
-			dprintf(2, C_EMERALD"SUCCESS %d"C_RESET"\n", wait_status);
-		} else {
-			dprintf(2, C_VIOLET"FAILED %d"C_RESET"\n", wait_status);
-		}
+
+		/*dprintf(2, "SKIP: %s\n", boolStr(skip));*/
+		/*if (g_exitno == 0) {*/
+		/*	dprintf(2, C_EMERALD"SUCCESS %d"C_RESET"\n", wait_status);*/
+		/*} else {*/
+		/*	dprintf(2, C_VIOLET"FAILED %d"C_RESET"\n", wait_status);*/
+		/*}*/
+
 		andor_head = andor_head->next;
+    const bool to_find = (separator == AND_IF) ? OR_IF : AND_IF; 
+    bool found = false;
+    while (!found && skip && andor_head) {
+      if (andor_head->separator == to_find || andor_head->separator == END)
+        found = true;
+      andor_head = andor_head->next;
+    }
 	}
-
-
 }
 
 

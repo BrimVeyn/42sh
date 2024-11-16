@@ -307,7 +307,7 @@ void *lex_interface(LexMode mode, void *input, void *filename, bool *error);
 void		pipelineAddBack(PipeLineP **lst, PipeLineP *new_value);
 PipeLineP	*pipelineNew(CommandP *command);
 
-void		andOrAddBack(AndOrP **lst, AndOrP *new_value);
+void		andOrAddBack(AndOrP **lst, AndOrP *new_value, TokenType separator);
 AndOrP		*andOrNew(PipeLineP *pipeline, TokenType separator);
 
 void		listAddBack(ListP **lst, ListP *new_value);
