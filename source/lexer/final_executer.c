@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:35:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/15 17:40:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/17 17:10:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,21 +70,21 @@ bool check_filepath(char *file_path, TokenType mode) {
 	if (stat(file_path, &file_stat) != -1) {
 
 		if (S_ISDIR(file_stat.st_mode)) {
-			dprintf(2, "42sh: %s: Is a directory\n", file_path);
+			error("42sh: %s: Is a directory", 1);
 			return (false);
 		}
 		if (file_stat.st_mode & S_IXUSR) {
 			return file_path;
 		}
 		else {
-			dprintf(2, "42sh: %s: Permission Denied\n", file_path);
+			error("42sh: %s: Permission Denied", 1);
 			return (false);
 		}
 	} else {
 		if (mode == LESS) {
-			dprintf(2, "42sh: %s: No such file or directory\n", file_path);
+			error("42sh: %s: No such file or directory", 1);
 			return false;
-        }
+		}
 		if (mode == GREAT)
 			return true;
 	}
@@ -102,8 +102,7 @@ bool redirect_ios(RedirectionL *redir_list) {
 		const bool has_io_number = (redir->io_number != NULL);
 		int io_number = (has_io_number) ? ft_atoi(redir->io_number) : -1;
 		if (io_number >= MAX_FD) {
-			dprintf(2, "42sh: %d: Bad file descriptor\n", io_number); 
-			g_exitno = 1;
+			error("42sh: %d: Bad file descriptor", 1);
 			return false;
 		}
 		//TODO: error managment when open fails
@@ -238,29 +237,15 @@ void execute_while_clause(CommandP *command, Vars *shell_vars) {
 #define WAIT 1
 
 int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
+	(void)background;
 	PipeLineP *process = job->pipeline;
 	CommandP *command = job->pipeline->command;
 	switch (command->type) {
 		case Simple_Command: {
 			resolve_bine(command->simple_command, shell_vars);
 			if (is_builtin(command->simple_command->word_list->data[0])) {
-				if (background) {
-					pid_t pid = fork();
-					if (IS_CHILD(pid)) {
-						close_all_fds();
-						execute_builtin(command->simple_command, shell_vars);
-						exit(g_exitno);
-					} else {
-						process->pid = pid;
-						if (!job->pgid)
-							job->pgid = pid;
-						setpgid(pid, job->pgid);
-					}
-				return WAIT;
-				} else {
-					execute_builtin(command->simple_command, shell_vars);
-					return NO_WAIT;
-				}
+				execute_builtin(command->simple_command, shell_vars);
+				return NO_WAIT;
 			} else {
 				pid_t pid = fork();
 				if (IS_CHILD(pid)) {
@@ -320,7 +305,7 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	while (process) {
 		const bool hasPipe = (process->next != NULL);
 
-		dprintf(2, "hasPipe: %s | hadPipe: %s\n", boolStr(hasPipe), boolStr(hadPipe));
+		// dprintf(2, "hasPipe: %s | hadPipe: %s\n", boolStr(hasPipe), boolStr(hadPipe));
 
 		if (hadPipe) dup_input_and_close(pipefd[0]);
 		if (hasPipe) create_pipe(&hadPipe, pipefd);
@@ -388,13 +373,14 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 		/*}*/
 
 		andor_head = andor_head->next;
-    const bool to_find = (separator == AND_IF) ? OR_IF : AND_IF; 
-    bool found = false;
-    while (!found && skip && andor_head) {
-      if (andor_head->separator == to_find || andor_head->separator == END)
-        found = true;
-      andor_head = andor_head->next;
-    }
+		const bool to_find = (separator == AND_IF) ? OR_IF : AND_IF; 
+		bool found = false;
+
+		while (!found && skip && andor_head) {
+			if (andor_head->separator == to_find || andor_head->separator == END)
+				found = true;
+			andor_head = andor_head->next;
+		}
 	}
 }
 
