@@ -25,6 +25,8 @@
 int g_debug = 0;
 JobList *job_list = NULL;
 
+//TODO: 42shrc
+
 void	*read_input_prompt(char *input, Vars *shell_vars) {
 	char *prompt = string_list_get_value(shell_vars->set, "PS1");
 	if (prompt)
@@ -105,11 +107,14 @@ char *read_input_file(char *path){
         exit(EXIT_FAILURE);
 	}
     size_t file_size = st.st_size;
+	if (file_size == 0) {
+		close(fd);
+		return NULL;
+	}
 
     char *buffer = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (buffer == MAP_FAILED) {
 		close(fd);
-		//FIX: should not happen when file is empty
 		printf("mmap failed\n");
 		return NULL;
     }
@@ -140,53 +145,6 @@ ShellInfos *shell(int mode) {
 	return NULL;
 }
 
-//TODO:Default file propre, syntax errors for 42shrc
-void exec_config_file(Vars *shell_vars) {
-    char *home = string_list_get_value(shell_vars->env, "HOME");
-    char config_filename[1024] = {0};
-    ft_sprintf(config_filename, "%s/.42shrc", home);
-
-    int fd = open(config_filename, O_RDWR | O_CREAT, 0644);
-    if (fd == -1) {
-        perror("Can't open config file");
-        return;
-    }
-
-    struct stat st;
-    if (fstat(fd, &st) == -1) {
-        perror("Can't get config's file stats");
-        close(fd);
-        return;
-    }
-
-    size_t file_size = st.st_size;
-
-    if (file_size == 0) {
-		// write(fd, "PS1=42sh", 9); //tmp
-		// execute_command_sub("PS1=42sh", shell_vars);
-		close(fd);
-		return;
-    }
-
-    char *file_content = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (file_content == MAP_FAILED) {
-		//FIX: empty fails produce mmap failed
-        perror("mmap failed");
-        close(fd);
-        return;
-    }
-	
-	TokenList *tokens = lexer_lex_all(file_content);
-	// if (lexer_syntax_error(tokens))
-	// 	clean_sub();
-	// heredoc_detector(tokens);
-	Node *AST = ast_build(tokens);
-	ast_execute(AST, shell_vars, true);
-
-    munmap(file_content, file_size);
-    close(fd);
-}
-
 void update_last_executed_command(Vars *shell_vars, char *input) {
 	char *last_executed = ft_strjoin("_=", input);
 	string_list_add_or_update(shell_vars->env, last_executed);
@@ -214,7 +172,17 @@ int main(const int ac, char *av[], const char *env[]) {
 	if (self->interactive){
 		history_fd = get_history();
 		signal_manager(SIG_PROMPT);
-		exec_config_file(shell_vars);
+
+		char *home = string_list_get_value(shell_vars->env, "HOME");
+		char config_filename[1024] = {0};
+		ft_sprintf(config_filename, "%s/.42shrc", home);
+
+		char *file_content = read_input_file(config_filename);
+		if (file_content){
+			TokenList *tokens = lexer_lex_all(file_content);
+			Node *AST = ast_build(tokens);
+			ast_execute(AST, shell_vars, true);
+		}
 	}
 
 	char *input = NULL;

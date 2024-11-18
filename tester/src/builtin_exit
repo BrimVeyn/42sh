@@ -1,0 +1,7 @@
+(exit); echo ${?}
+(exit 12); echo ${?}
+(exit 32108931209); echo ${?}
+(exit dasdsaada); echo ${?}
+(exit dsadsadas 321321312); echo ${?}
+(exit 43213221 dsadasda); echo ${?}
+(exit 32132131 43123); echo ${?}

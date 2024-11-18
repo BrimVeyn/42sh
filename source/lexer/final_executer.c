@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/14 16:35:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 11:37:05 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/18 11:53:01 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/18 11:54:01 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,6 +258,7 @@ void execute_for_clause(CommandP *command, Vars *shell_vars) {
 
 void register_function(CommandP *command, Vars *shell_vars) {
 	FunctionP *func = command->function_definition;
+	(void)func;(void)shell_vars;
 }
 
 #define NO_WAIT 0
