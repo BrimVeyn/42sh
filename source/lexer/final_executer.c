@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:53:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 11:54:01 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/18 11:57:41 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -393,13 +393,6 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 			(separator == OR_IF && g_exitno == 0)
 		);
 
-		/*dprintf(2, "SKIP: %s\n", boolStr(skip));*/
-		/*if (g_exitno == 0) {*/
-		/*	dprintf(2, C_EMERALD"SUCCESS %d"C_RESET"\n", wait_status);*/
-		/*} else {*/
-		/*	dprintf(2, C_VIOLET"FAILED %d"C_RESET"\n", wait_status);*/
-		/*}*/
-
 		andor_head = andor_head->next;
 		const bool to_find = (separator == AND_IF) ? OR_IF : AND_IF; 
 		bool found = false;
@@ -424,6 +417,6 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 		execute_list(list_head, background, shell_vars);
 		list_head = list_head->next;
 	}
-	dprintf(2, "END OF EXECUTION\n");
+	dprintf(2, C_LIGHT_PINK"COMPLETE COMMAND EXECUTED"C_RESET"\n");
 	return ;
 }

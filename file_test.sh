@@ -15,6 +15,8 @@ case 3 in
 	;;
 esac | cat
 
+printf salut\n;
+
 #
 # { sleep 2; false; } && printf one\n && printf two\n && printf three\n || printf salope\n && printf yeah\n
 # printf hey\n && printf salut\n;
