@@ -24,6 +24,7 @@
 
 int g_debug = 0;
 JobList *job_list = NULL;
+FunctionList *FuncList = NULL;
 
 //TODO: 42shrc
 
@@ -152,6 +153,7 @@ void update_last_executed_command(Vars *shell_vars, char *input) {
 	FREE_POINTERS(last_executed);
 }
 
+
 #define SHELL_IS_RUNNING true
 
 int main(const int ac, char *av[], const char *env[]) {
@@ -161,8 +163,11 @@ int main(const int ac, char *av[], const char *env[]) {
 	g_signal = 0;
 	job_list = job_list_init();
 
-	da_create(jobListTmp, JobListe, sizeof(AndOrP *), GC_SUBSHELL);
+	da_create(jobListTmp, JobListe, sizeof(AndOrP *), GC_ENV);
 	jobList = jobListTmp;
+
+	da_create(funcListTmp, FunctionList, sizeof(FunctionP *), GC_ENV);
+	FuncList = funcListTmp;
 
 	Vars *shell_vars = vars_init(env);
 	int history_fd = -1;
@@ -211,6 +216,7 @@ int main(const int ac, char *av[], const char *env[]) {
 			parse_input(input, av[1], shell_vars);
 			update_last_executed_command(shell_vars, input);
 			gc(GC_RESET, GC_SUBSHELL);
+			if (ac != 1) break;
 		} else {
 			if (job_list->size) {
 				dprintf(2, "There are running jobs. Killing them.\n");

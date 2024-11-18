@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 14:44:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 11:57:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/18 17:20:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,10 +75,10 @@ TokenType identify_token(const char *raw_value, const int table_row, bool *error
 			return ASSIGNMENT_WORD;
 	}
 
-	/*dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);*/
+	// dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
 	if (regex_match("^[a-zA-Z_][a-zA-Z0-9_]*$", (char *)raw_value).is_found) {
 		if (table_row == 30 || 
-			(table_row == 48 && !ft_strcmp("(", lex_interface(LEX_PEAK, NULL, NULL, error))))
+			((table_row == 48 || table_row == 0) && !ft_strcmp("(", lex_interface(LEX_PEAK, NULL, NULL, error))))
 			return NAME;
 	}
 
