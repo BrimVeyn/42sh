@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:07:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 11:49:37 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/18 15:25:17 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars){
 	}
 
 	signal_manager(SIG_HERE_DOC);
-	while(++line_number && (input = ft_readline(prompt)) && ft_strcmp(eof, input) && rl_done != 2){
+	while(++line_number && (input = ft_readline(prompt, shell_vars)) && ft_strcmp(eof, input) && rl_done != 2){
 		if (mode == HD_EXPAND){
 			ft_dprintf(file_fd, "%s\n", input);
 		} else if (mode == HD_NO_EXPAND){

@@ -30,9 +30,9 @@ JobList *job_list = NULL;
 void	*read_input_prompt(char *input, Vars *shell_vars) {
 	char *prompt = string_list_get_value(shell_vars->set, "PS1");
 	if (prompt)
-		input = ft_readline(prompt);
+		input = ft_readline(prompt, shell_vars);
 	else
-		input = ft_readline("42sh> ");
+		input = ft_readline("42sh> ", shell_vars);
 	if (!input) {
 		return NULL;
 	}
@@ -170,7 +170,7 @@ int main(const int ac, char *av[], const char *env[]) {
 	if (ac != 1) self->interactive = false;
 
 	if (self->interactive){
-		history_fd = get_history();
+		history_fd = get_history(shell_vars);
 		signal_manager(SIG_PROMPT);
 
 		char *home = string_list_get_value(shell_vars->env, "HOME");

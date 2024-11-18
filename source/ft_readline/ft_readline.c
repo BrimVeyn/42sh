@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/18 10:44:01 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/18 16:01:34 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,7 +234,7 @@ void update_line(readline_state_t *rl_state, string *line) {
 	}
 }
 
-void init_readline(readline_state_t *rl_state, const char *prompt){
+void init_readline(readline_state_t *rl_state, const char *prompt, Vars *shell_vars){
     char buffer[2048] = {0};
 
     set_prompt(rl_state, prompt);
@@ -242,11 +242,11 @@ void init_readline(readline_state_t *rl_state, const char *prompt){
 
 	//TODO:definir history autrement
 	if (!history_defined) {
-		init_history();
+		init_history(shell_vars);
 		history_defined = true;
 	}
 	history->offset = history->length;
-	add_history("");
+	add_history("", shell_vars);
 
 	enable_raw_mode();
 
@@ -301,7 +301,7 @@ int should_process_enter() {
     return 0;
 }
 
-char *ft_readline(const char *prompt) {
+char *ft_readline(const char *prompt, Vars *shell_vars) {
 	readline_state_t *rl_state = NULL;
 	
 	if (manage_rl_state(RL_GET, NULL)){
@@ -325,10 +325,12 @@ char *ft_readline(const char *prompt) {
     rl_state->interactive = self->interactive;
 
     if (rl_state->interactive)
-		init_readline(rl_state, prompt);
+		init_readline(rl_state, prompt, shell_vars);
 
 	string *line = gc(GC_ALLOC, 1, sizeof(string), GC_READLINE);
     if (rl_state->interactive) {
+		printf("length: %d\n", history->length);
+		exit(0);
         *line = str_strdup(&history->entries[history->length - 1]->line);
 		gc(GC_ADD, line->data, GC_READLINE);
     } else {
