@@ -178,10 +178,11 @@ int main(const int ac, char *av[], const char *env[]) {
 		ft_sprintf(config_filename, "%s/.42shrc", home);
 
 		char *file_content = read_input_file(config_filename);
-
-		TokenList *tokens = lexer_lex_all(file_content);
-		Node *AST = ast_build(tokens);
-		ast_execute(AST, shell_vars, true);
+		if (file_content){
+			TokenList *tokens = lexer_lex_all(file_content);
+			Node *AST = ast_build(tokens);
+			ast_execute(AST, shell_vars, true);
+		}
 	}
 
 	char *input = NULL;
@@ -208,9 +209,9 @@ int main(const int ac, char *av[], const char *env[]) {
 				if (*input)
 					add_input_to_history(input, &history_fd);
 			}
-			// parse_input(input, av[1], shell_vars);
-			// gc(GC_CLEANUP, GC_ALL);
-			// exit(EXIT_FAILURE);
+			parse_input(input, av[1], shell_vars);
+			gc(GC_CLEANUP, GC_ALL);
+			exit(EXIT_FAILURE);
 			//----------------------------------------------//
 			TokenList *tokens = lexer_lex_all(input);
 			if (lexer_syntax_error(tokens))

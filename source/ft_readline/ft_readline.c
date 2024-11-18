@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/15 15:22:58 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/18 10:44:01 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -346,11 +346,16 @@ char *ft_readline(const char *prompt) {
 			continue;
 		}
 
-		if (rl_done){
+		if (rl_done == 1){
 			ft_rl_newline();
 			rl_done = 0;
 			str_clear(line);
 			continue; }
+
+		if (rl_done == 2){
+			str_clear(line);
+			break;
+		}
 
 		int result = 0;
         if (bytes_read == 0 || c == VEOF) {
