@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/04 15:07:58 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/18 15:33:08 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,9 +60,7 @@ extern int rl_done;
 extern HISTORY_STATE *history;
 extern bool history_defined;
 
-void init_history();
 void destroy_history();
-void add_history(const char *str);
 void pop_history();
 void str_info(const string *str);
 void set_prompt(readline_state_t *rl_state, const char *new_prompt);
@@ -74,7 +72,6 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line);
 int can_go_right(readline_state_t *rl_state, string *line);
 int can_go_left(readline_state_t *rl_state);
 
-char *ft_readline(const char *prompt);
 void ft_readline_clean();
 void ft_rl_newline();
 
@@ -88,5 +85,10 @@ void rl_print_prompt(int fd, readline_state_t *rl_state);
 void move_cursor(int x, int y);
 
 void set_cursor_position(readline_state_t *rl_state);
+
+#include "lexer.h"
+char *ft_readline(const char *prompt, Vars *shell_vars);
+void init_history(Vars *shell_vars);
+void add_history(const char *str, Vars *shell_vars);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:17:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/15 14:31:32 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/18 13:21:16 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 
-int get_history(void) {
+int get_history(Vars *shell_vars) {
 	char *home = getenv("HOME");
 	char history_filename[1024] = {0};
 	ft_sprintf(history_filename, "%s/.42sh_history", home);
@@ -56,7 +56,7 @@ int get_history(void) {
 			char *tmp = (char *)malloc(end - start + 1);
 			memcpy(tmp, start, end - start);
 			tmp[end - start] = '\0';
-			add_history(tmp);
+			add_history(tmp, shell_vars);
 			free(tmp);
 			start = end + 1;
 		}
@@ -68,8 +68,8 @@ int get_history(void) {
 	return fd;
 }
 
-void add_input_to_history(char *input, int *history_fd){
-	add_history(input);
+void add_input_to_history(char *input, int *history_fd, Vars *shell_vars){
+	add_history(input, shell_vars);
 	char *home = getenv("HOME");
 	char history_filename[1024] = {0};
 	ft_sprintf(history_filename, "%s/.42sh_history", home);
