@@ -6,26 +6,30 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:07:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/08 14:49:43 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/18 11:49:37 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "parser.h"
 #include "ft_regex.h"
 #include "libft.h"
+#include "signals.h"
 #include "utils.h"
 #include "lexer.h"
 #include "exec.h"
 #include "debug.h"
 #include "ft_readline.h"
 #include "c_string.h"
+#include "../lexer/final_parser.h"
 
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 
-char *here_doc(char *eof, Vars *shell_vars){
+//FIX: unlink heredoc
+
+char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars){
 	char *input = NULL;
 	char *prompt = string_list_get_value(shell_vars->set, "PS2");
 	if (!prompt){
@@ -34,16 +38,33 @@ char *here_doc(char *eof, Vars *shell_vars){
 	}
 
 	static int heredoc_number = 0;
+	static int line_number = 0;
 	char filename[50]; 
 	sprintf(filename, "/tmp/here_doc_%d", heredoc_number++);
 	int file_fd = open(filename, O_CREAT | O_WRONLY | O_TRUNC, 0664);
 	if (file_fd == -1) {
 		return NULL;
 	}
-	while((input = ft_readline(prompt)) && ft_strcmp(eof, input)){
-		dprintf(file_fd, "%s\n", input);
+
+	signal_manager(SIG_HERE_DOC);
+	while(++line_number && (input = ft_readline(prompt)) && ft_strcmp(eof, input) && rl_done != 2){
+		if (mode == HD_EXPAND){
+			ft_dprintf(file_fd, "%s\n", input);
+		} else if (mode == HD_NO_EXPAND){
+			ft_dprintf(file_fd, "%s\n", input);
+		}
 		free(input);
 	}
+
+	signal_manager(SIG_PROMPT);
+	if (!input){
+		ft_dprintf(2, "42sh: warning: here-document at line %d delimited by end-of-file (wanted `%s')", line_number, eof);
+	}
+	else if (rl_done == 2){
+		rl_done = 0;
+		return NULL;
+	}
+
 	free(input);
 	close(file_fd);
 	return gc(GC_ADD, ft_strdup(filename), GC_GENERAL);
@@ -56,7 +77,7 @@ bool heredoc_detector(TokenList *data, Vars *shell_vars) {
 		if (el->tag == T_REDIRECTION && el->r_type == R_HERE_DOC) {
 			Token *filename = el->r_postfix;
 			el->r_type = R_INPUT;
-			filename->w_infix = here_doc(filename->w_infix, shell_vars);
+			filename->w_infix = here_doc(filename->w_infix, HD_EXPAND, shell_vars);
 			if (!filename->w_infix) return false;
 		}
 	}
