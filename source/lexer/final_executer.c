@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:35:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/17 17:10:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/18 11:37:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,6 +233,33 @@ void execute_while_clause(CommandP *command, Vars *shell_vars) {
 	}
 }
 
+void execute_case_clause(CommandP *command, Vars *shell_vars) {
+	CaseClauseP *case_clause = command->case_clause;
+	int default_index = -1;
+	for (size_t i = 0; i < case_clause->patterns->size; i++) {
+		const StringListL *condition = case_clause->patterns->data[i];
+		for (size_t inner_i = 0; inner_i < condition->size; inner_i++) {
+			if (!ft_strcmp("*", condition->data[inner_i]))
+				default_index = i;
+			if (!ft_strcmp(condition->data[inner_i], case_clause->expression))
+				return execute_list(case_clause->bodies->data[i], false, shell_vars);
+		}
+	}
+	if (default_index != -1)
+		return execute_list(case_clause->bodies->data[default_index], false, shell_vars);
+	return ;
+}
+
+void execute_for_clause(CommandP *command, Vars *shell_vars) {
+	ForClauseP *for_clause = command->for_clause;
+	(void) for_clause; (void)shell_vars;
+	return ;
+}
+
+void register_function(CommandP *command, Vars *shell_vars) {
+	FunctionP *func = command->function_definition;
+}
+
 #define NO_WAIT 0
 #define WAIT 1
 
@@ -278,8 +305,8 @@ int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 		case Brace_Group: { execute_brace_group(process->command, shell_vars); return NO_WAIT; }
 		case If_Clause: { execute_if_clause(process->command, shell_vars); return NO_WAIT; }
 		case While_Clause: { execute_while_clause(process->command, shell_vars);  return NO_WAIT; }
-		case Case_Clause: { break; }
-		case For_Clause: { break; }
+		case Case_Clause: { execute_case_clause(process->command, shell_vars); return NO_WAIT; }
+		case For_Clause: { execute_for_clause(process->command, shell_vars); return NO_WAIT; }
 		default: {};
 	}
 	return ERROR;
@@ -319,10 +346,11 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 				case Simple_Command: { execute_simple_command(process->command, pipefd, shell_vars); exit(g_exitno); break; }
 				case Subshell: { execute_subshell(process->command, shell_vars); exit(g_exitno); break; }
 				case Brace_Group: { execute_brace_group(process->command, shell_vars); exit(g_exitno); break; }
-				case If_Clause: { execute_if_clause(process->command, shell_vars); exit(g_exitno); break ; }
-				case While_Clause: { execute_while_clause(process->command, shell_vars); exit(g_exitno); break ; }
-				case Case_Clause: { break; }
-				case For_Clause: { break; }
+				case If_Clause: { execute_if_clause(process->command, shell_vars); exit(g_exitno); break; }
+				case While_Clause: { execute_while_clause(process->command, shell_vars); exit(g_exitno); break; }
+				case Case_Clause: { execute_case_clause(process->command, shell_vars); exit(g_exitno); break; }
+				case For_Clause: { execute_for_clause(process->command, shell_vars); exit(g_exitno); break; }
+				case Function_Definition: {}
 				default: break;
 			}
 		} else {
@@ -346,9 +374,8 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
 	while (andor_head) {
-		int wait_status;
 		const TokenType separator = andor_head->separator; (void)separator;
-		wait_status = execute_pipeline(andor_head, background, shell_vars);
+		const int wait_status = execute_pipeline(andor_head, background, shell_vars);
 
 		if (wait_status == WAIT) {
 			if (!shell_infos->interactive)
