@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 14:44:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/15 14:44:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/18 11:44:32 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "ft_regex.h"
 #include "utils.h"
 #include "libft.h"
+#include "parser.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -1074,16 +1075,37 @@ StackEntry *parse(Vars *shell_vars) {
 						reduced_entry->state = parsingTable[state][Io_File].value;
 						break;
 					}
-					case 99: /* io_here -> DLESS here_end */ /*      TODO: start here_doc */
+					case 99: /* io_here -> DLESS here_end *//*      TODO: start here_doc */
 					case 100: { /* io_here -> DLESSDASH here_end */ //  TODO: start here_doc no expansions */
 						Tokenn here_end = da_pop(stack)->token;
-						Tokenn type = da_pop(stack)->token;
-						reduced_entry->token.type = Io_File;
+						TokenType type = da_pop(stack)->token.type;
+
+						char *heredoc_filename = NULL;
+						switch (type) {
+							case DLESS: //<<
+								{
+									// start_here_doc expansion on
+									heredoc_filename = here_doc(here_end.raw_value, HD_EXPAND, shell_vars);
+									break;
+								}
+							case DLESSDASH:
+								{
+									// start_here_doc expansions off
+									heredoc_filename = here_doc(here_end.raw_value, HD_NO_EXPAND, shell_vars);
+									break;
+								}
+							default: {};
+						}
+						if (!heredoc_filename){
+							return NULL;
+						}
+						//start here doc probleme reutrn NULL
+						reduced_entry->token.type = Io_Redirect;
 						reduced_entry->token.redir = gc_unique(RedirectionP, GC_SUBSHELL);
-						reduced_entry->token.redir->filename = here_end.raw_value;
-						reduced_entry->token.redir->type = type.type;
+						reduced_entry->token.redir->filename = heredoc_filename;
+						reduced_entry->token.redir->type = LESS; // <
 						state = da_peak_back(stack)->state;
-						reduced_entry->state = parsingTable[state][Io_Here].value;
+						reduced_entry->state = parsingTable[state][Io_Redirect].value;
 						break;
 					}
 					case 98: { /* filename -> WORD */

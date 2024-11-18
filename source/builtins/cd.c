@@ -3,14 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   cd.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/04 15:10:45 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/15 15:53:40 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/18 11:53:41 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/18 11:53:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//TODO: CD :)
 #include "ft_regex.h"
 #include "lexer.h"
 #include "parser.h"
@@ -211,12 +210,6 @@ void canonical_convertion(char **pcurpath){
 	}
 	*pcurpath = curpath;
 }
-
-////usr/.////././///home/
-//TODO:get home dabord local etc
-//Error a gerer, error print operand et pas curpath
-//
-//
 
 int last_elem_is(const char *str, char c){
 	return (str[ft_strlen(str) - 1] == c);

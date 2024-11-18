@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/30 16:46:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/15 17:20:04 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/18 11:52:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -362,6 +362,13 @@ void update_job_status(void);
 void job_notification(void);
 
 #include "exec.h"
+
+typedef enum {
+	HD_EXPAND,
+	HD_NO_EXPAND
+} heredoc_mode;
+
+char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars);
 
 void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars);
 bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars);
