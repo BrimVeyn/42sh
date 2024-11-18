@@ -209,16 +209,6 @@ int main(const int ac, char *av[], const char *env[]) {
 					add_input_to_history(input, &history_fd);
 			}
 			parse_input(input, av[1], shell_vars);
-			gc(GC_CLEANUP, GC_ALL);
-			exit(EXIT_FAILURE);
-			//----------------------------------------------//
-			TokenList *tokens = lexer_lex_all(input);
-			if (lexer_syntax_error(tokens))
-				continue; 
-			heredoc_detector(tokens, shell_vars);
-			Node *AST = ast_build(tokens);
-			ast_execute(AST, shell_vars, true);
-			//---------OLD EXECUTION CHAIN------------------//
 			update_last_executed_command(shell_vars, input);
 			gc(GC_RESET, GC_SUBSHELL);
 		} else {

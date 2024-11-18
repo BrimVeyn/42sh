@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 14:44:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 11:44:32 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/18 11:57:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,17 +141,17 @@ StackEntry *parse(Vars *shell_vars) {
 						break;
 					}
 					case 2: { /* complete_commands -> complete_commands newline_list complete_command */
-						da_pop(stack);
-						da_pop(stack);
-						da_pop(stack);
+						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
+						da_pop(stack); //newline_list
+						da_pop(stack); //complete_commands
+						print_complete_command(complete_command);
+						execute_complete_command(complete_command, shell_vars);
 						reduced_entry->token.type = Complete_Commands;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Complete_Commands].value;
 						break;
 					}
 					case 3: { /* complete_commands -> complete_command */
-						// (void)shell_vars;
-						// da_pop(stack);
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
 						print_complete_command(complete_command);
 						execute_complete_command(complete_command, shell_vars);
