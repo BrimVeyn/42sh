@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/08 12:51:41 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/19 16:35:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ void job_notification(void) {
 
 	for (size_t i = 0; i < jobList->size; i++) {
 		AndOrP *el = jobList->data[i];
-		if (job_completed(el)) {
+		if (el->completed) {
 			if (el->bg)
 				dprintf(2, "[%zu]\tDone\t%s\n", el->id, "yeahhhh");
 			remove_job(el);

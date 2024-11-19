@@ -205,7 +205,7 @@ int main(const int ac, char *av[], const char *env[]) {
 				}
 			}
 		}
-		if (self->interactive) { do_job_notification(); }
+		if (self->interactive) { job_notification(); }
 		if (input) {
 			if (self->interactive) {
 				if (history_expansion(&input, history_fd) == false)
@@ -216,9 +216,17 @@ int main(const int ac, char *av[], const char *env[]) {
 			parse_input(input, av[1], shell_vars);
 			update_last_executed_command(shell_vars, input);
 			gc(GC_RESET, GC_SUBSHELL);
+            //----------------------------------------------//
+            // TokenList *tokens = lexer_lex_all(input);
+            // if (lexer_syntax_error(tokens))
+            //     continue; 
+            // heredoc_detector(tokens, shell_vars);
+            // Node *AST = ast_build(tokens);
+            // ast_execute(AST, shell_vars, true);
+            //---------OLD EXECUTION CHAIN------------------//
 			if (ac != 1) break;
 		} else {
-			if (job_list->size) {
+			if (jobList->size) {
 				dprintf(2, "There are running jobs. Killing them.\n");
 				job_killall();
 				continue;

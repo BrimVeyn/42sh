@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:53:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 17:35:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/19 17:36:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
+
+pid_t master_pgid;
 
 void dup_input_and_close(int fd) {
 	secure_dup2(fd, STDIN_FILENO);
@@ -100,7 +102,7 @@ bool redirect_ios(RedirectionL *redir_list) {
 	if (!redir_list) {
 		return true;
 	}
-	print_redir_list(redir_list);
+	// print_redir_list(redir_list);
 
 	for (size_t i = 0; i < redir_list->size; i++) {
 		const RedirectionP *redir = redir_list->data[i];
@@ -174,10 +176,10 @@ void execute_simple_command(CommandP *command, int *pipefd, Vars *shell_vars) {
 		return ;
 	}
 
-	dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
-	dprintf(2, "  Bin: %s\n", path);
-	print_simple_command(simple_command);
-	dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
+	// dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
+	// dprintf(2, "  Bin: %s\n", path);
+	// print_simple_command(simple_command);
+	// dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
 
 	execve(path, simple_command->word_list->data, shell_vars->env->data);
 	if (pipefd) {
@@ -315,10 +317,12 @@ int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 					gc(GC_CLEANUP, GC_ALL);
 					exit(g_exitno);
 				} else {
+					// process->pid = pid;
 					process->pid = pid;
 					if (!job->pgid)
 						job->pgid = pid;
-					setpgid(pid, job->pgid);
+					// job->pgid = master_pgid;
+					setpgid(pid, master_pgid);
 				}
 				return WAIT;
 			}
@@ -414,10 +418,8 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 		const int wait_status = execute_pipeline(andor_head, background, shell_vars);
 
 		if (wait_status == WAIT) {
-			if (!shell_infos->interactive)
+			if (!shell_infos->interactive || !background)
 				job_wait(andor_head);
-			else if (background)
-				put_job_background(list->and_or);
 			else
 				put_job_foreground(list->and_or, false);
 		}
@@ -440,31 +442,40 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 	}
 }
 
-
 void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars) {
 	ListP *list_head = complete_command->list;
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
 	const bool background = (shell_infos->interactive && complete_command->separator == AMPER);
-	dprintf(2, "BACKGROUND : %s\n", boolStr(background));
+
 
 	if (background) {
 		pid_t pid = fork();
 		if (IS_CHILD(pid)) {
+			close_all_fds();
+			master_pgid = getpid();
 			while (list_head) {
 				execute_list(list_head, false, shell_vars);
 				list_head = list_head->next;
 			}
+			close_all_fds();
+			gc(GC_CLEANUP, GC_ALL);
+			exit(g_exitno);
 		} else {
+			setpgid(pid, pid);
+			AndOrP *master = gc_unique(AndOrP, GC_ENV);
+			master->pgid = pid;
+			dprintf(2, C_BRIGHT_CYAN"ANNOUNCE"C_RESET": pid: "C_MAGENTA" %d"C_RESET"\n", master->pgid);
+			put_job_background(master, true);
 			return ;
+		}
+	} else {
+		while (list_head) {
+			execute_list(list_head, false, shell_vars);
+			list_head = list_head->next;
 		}
 	}
 
-	while (list_head) {
-		execute_list(list_head, false, shell_vars);
-		list_head = list_head->next;
-	}
-
-	dprintf(2, C_LIGHT_PINK"COMPLETE COMMAND EXECUTED"C_RESET"\n");
+	// dprintf(2, C_LIGHT_PINK"COMPLETE COMMAND EXECUTED"C_RESET"\n");
 	return ;
 }
