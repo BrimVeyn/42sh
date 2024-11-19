@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 17:34:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/19 17:36:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,23 +43,30 @@ void job_wait (AndOrP *job) {
 
 }
 
-void put_job_background (AndOrP *job) {
+void put_job_background (AndOrP *job, bool add) {
 	job->bg = true;
-	andor_move(job);
-	da_push(jobList, job);
-	dprintf(2, "[%zu]\t%d\n", job->id, job->pgid);
+	if (add) {
+		andor_move(job);
+		da_push(jobList, job);
+		dprintf(2, "[%zu]\t%d\n", job->id, job->pgid);
+		job->notified = true;
+    }
 }
 
 void put_job_foreground (AndOrP *job, int cont) {
 	ShellInfos *self = shell(SHELL_GET);
 	/* Put the job into the foreground.  */
 	tcsetpgrp(self->shell_terminal, job->pgid);
+	dprintf(2, "JOB->PGID: %d\n", job->pgid);
 	/* Send the job a continue signal, if necessary.  */
 	if (cont) {
-		job->notified = false;
+		// job->notified = false;
 		tcsetattr(self->shell_terminal, TCSADRAIN, &job->tmodes);
 		if (kill(-job->pgid, SIGCONT) < 0)
+        {
+			perror("SIGCONT");
 			fatal("SIGCONT failed\n", 255);
+        }
 	}
 	/* Wait for it to report.  */
 	job_wait(job);
@@ -74,10 +81,10 @@ void update_job_status(void) {
 	int status;
 	pid_t pid;
 
-	if (!job_list || !job_list->size) return ;
+	if (!jobList || !jobList->size) return ;
 	do {
 		pid = waitpid (WAIT_ANY, &status, WUNTRACED|WNOHANG);
-	} while (!mark_process_status(job_list, pid, status));
+	} while (!mark_process(jobList, pid, status));
 }
 
 int mark_process (JobListe *list, pid_t pid, int status) {
@@ -88,6 +95,9 @@ int mark_process (JobListe *list, pid_t pid, int status) {
 
 	for (size_t i = 0; i < list->size; i++) {
 		AndOrP *job = list->data[i];
+		if (job->pgid == pid) {
+			job->completed = true;
+		}
 		/* Update the record for the process.  */
 		for (p = job->pipeline; p; p = p->next) {
 			if (p->pid == pid) {
@@ -111,6 +121,6 @@ int mark_process (JobListe *list, pid_t pid, int status) {
 			}
 		}
 	}
-	fprintf (stderr, C_RED"FATAL: No child process %d."C_RESET"\n", pid);
+	// fprintf (stderr, C_RED"FATAL: No child process %d."C_RESET"\n", pid);
 	return -1;
 }
