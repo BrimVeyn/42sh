@@ -1,0 +1,5 @@
+cat $HISTFILE
+echo $HISTFILE
+salut
+hello
+HISTFILE=dadwadwq

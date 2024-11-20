@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:53:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 11:53:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/20 13:11:11 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,7 +241,7 @@ int get_flags_and_operand(char **args, int *options, char **operand){
 	return 0;
 }
 
-static char *get_variable_in_bi(Vars *shell_vars, char *name){
+char *get_variable_in_bi(Vars *shell_vars, char *name){
 	char *result = string_list_get_value(shell_vars->local, name);
 	if (result) return result;
 	result = string_list_get_value(shell_vars->env, name);

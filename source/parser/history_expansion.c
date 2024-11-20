@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:17:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 13:21:16 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/20 16:17:45 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 
-int get_history(Vars *shell_vars) {
+void get_history(Vars *shell_vars) {
 	char *home = getenv("HOME");
 	char history_filename[1024] = {0};
 	ft_sprintf(history_filename, "%s/.42sh_history", home);
@@ -44,8 +44,7 @@ int get_history(Vars *shell_vars) {
     char *buffer = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (buffer == MAP_FAILED) {
 		close(fd);
-		fd = open(history_filename, O_APPEND | O_RDWR | O_CREAT, 0644);
-		return fd;
+		return;
     }
 
 	char *start = buffer;
@@ -64,23 +63,14 @@ int get_history(Vars *shell_vars) {
 	}
 	munmap(buffer, file_size);
 	close(fd);
-	fd = open(history_filename, O_APPEND | O_RDWR | O_CREAT, 0644);
-	return fd;
 }
 
-void add_input_to_history(char *input, int *history_fd, Vars *shell_vars){
+void add_input_to_history(char *input, Vars *shell_vars){
 	add_history(input, shell_vars);
-	char *home = getenv("HOME");
-	char history_filename[1024] = {0};
-	ft_sprintf(history_filename, "%s/.42sh_history", home);
-	// if (*history_fd == -1){
-	// 	*history_fd = open(history_filename, O_APPEND | O_WRONLY | O_CREAT, 0644);
-	// 	if (*history_fd == -1) {
-	// 		perror("Can't open history file");
-	// 		exit(EXIT_FAILURE);
-	// 	}
-	// }
-	dprintf(*history_fd, "%s\n", input);
+	// char *home = getenv("HOME");
+	// char history_filename[1024] = {0};
+	// ft_sprintf(history_filename, "%s/.42sh_history", home);
+	// dprintf(*history_fd, "%s\n", input);
 }
 
 char *get_value_wd(char *parameter, char *buffer, size_t file_size){
@@ -154,27 +144,73 @@ char *get_value_nb(char *parameter, char *buffer, size_t file_size){
     return value;
 }
 
-bool history_expansion (char **pstring, int history_fd){
+char *stringify_history(HISTORY_STATE *history, int start, int end) {
+    size_t capacity = 10;
+    size_t size = 0;
+
+    char *buffer = gc(GC_CALLOC, capacity, sizeof(char), GC_SUBSHELL);
+    if (!buffer)
+        return NULL;
+
+    for (int i = start; i < end; i++) {
+        char *current = history->entries[i]->line.data;
+        size_t current_len = ft_strlen(current);
+
+        if (size + current_len >= capacity) {
+            size_t new_capacity = (size + current_len) * 2;
+            buffer = gc(GC_REALLOC, buffer, capacity, new_capacity, sizeof(char), GC_SUBSHELL);
+            if (!buffer)
+                return NULL;
+			capacity = new_capacity;
+        }
+		ft_strlcat(buffer, "\n", capacity);
+        ft_strlcat(buffer, current, capacity);
+        size += current_len;
+    }
+
+    return buffer;
+}
+
+bool history_expansion (char **pstring){
 
 	regex_match_t result = regex_match("[^\\\\]?\\![\\-!a-zA-Z0-9]+", *pstring);
 	size_t file_size = 0;
 	char *buffer = NULL;
 
 	if (result.is_found){
-		struct stat st;
-		if (fstat(history_fd, &st) == -1){
-			perror("Can't get history's file stats");
-			return false;
-		}
-		file_size = st.st_size;
-
-		buffer = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, history_fd, 0);
-		if (buffer == MAP_FAILED) {
+		//BLOC 0
+		buffer = stringify_history(history, 0, history->length - 1);
+		printf("%s\n\n\n", buffer);
+		if (!buffer){
 			char *parameter = ft_substr(*pstring, result.re_start + 1, result.re_end);
 			dprintf(2, "event not found: !%s\n", parameter);
 			free(parameter);
 			return false;
 		}
+
+		//BLOC 0 FIN
+		// // BLOC 1
+		// char *home = getenv("HOME");
+		// char history_filename[1024] = {0};
+		// ft_sprintf(history_filename, "%s/.42sh_history", home);
+		// int history_fd = open(history_filename, O_RDWR | O_CREAT, 0644);
+		//
+		// struct stat st;
+		// if (fstat(history_fd, &st) == -1){
+		// 	perror("Can't get history's file stats");
+		// 	return false;
+		// }
+		// file_size = st.st_size;
+		//
+		// buffer = mmap(NULL, file_size, PROT_READ | PROT_WRITE, MAP_SHARED, history_fd, 0);
+		// if (buffer == MAP_FAILED) {
+		// 	char *parameter = ft_substr(*pstring, result.re_start + 1, result.re_end);
+		// 	dprintf(2, "event not found: !%s\n", parameter);
+		// 	free(parameter);
+		// 	return false;
+		// }
+		// // BLOC 1 FIN
+		// printf("%s\n\n\n", buffer);
 
 		do {
 			result = regex_match("[^\\\\]?\\![\\-!a-zA-Z0-9]+", *pstring);
@@ -208,6 +244,8 @@ bool history_expansion (char **pstring, int history_fd){
 			}
 			free(parameter);
 		} while(true);
+
+		gc(GC_FREE, buffer, GC_SUBSHELL);
 	}
 	return true;
 }
