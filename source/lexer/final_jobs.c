@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/19 17:36:26 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/20 17:31:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,28 @@ void job_wait (AndOrP *job) {
 	da_create(list, JobListe, sizeof(AndOrP *), GC_ENV);
 	list->data[list->size++] = job;
 
-	// dprintf(2, "is it stopped : %s\n", job->first_process->stopped ? "true" : "false");
+	// dprintf(2, "is it stopped : %s\n", job->first_process->stopped ? "true" : "false");	
 	do {
 		pid = waitpid(-job->pgid, &status, WUNTRACED);
+		if (pid != -1) {
+			dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
+		} else {
+			dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
+		}
+	} while (!mark_process(list, pid, status)
+	&& !job_stopped(job)
+	&& !job_completed(job));
+
+}
+void job_wait_2 (AndOrP *job) {
+	int status;
+	pid_t pid;
+	da_create(list, JobListe, sizeof(AndOrP *), GC_ENV);
+	list->data[list->size++] = job;
+
+	// dprintf(2, "is it stopped : %s\n", job->first_process->stopped ? "true" : "false");
+	do {
+		pid = waitpid(-1, &status, WUNTRACED);
 		if (pid != -1) {
 			dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
 		} else {
