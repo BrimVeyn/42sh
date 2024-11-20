@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:53:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 11:57:41 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/19 15:48:31 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ bool redirect_ios(RedirectionL *redir_list) {
 	if (!redir_list) {
 		return true;
 	}
-	print_redir_list(redir_list);
+	// print_redir_list(redir_list);
 
 	for (size_t i = 0; i < redir_list->size; i++) {
 		const RedirectionP *redir = redir_list->data[i];
@@ -166,9 +166,9 @@ void execute_simple_command(CommandP *command, int *pipefd, Vars *shell_vars) {
 		return ;
 	}
 
-	dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
-	print_simple_command(simple_command);
-	dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
+	// dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
+	// print_simple_command(simple_command);
+	// dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
 
 	execve(simple_command->word_list->data[0], simple_command->word_list->data, shell_vars->env->data);
 	if (pipefd) {
@@ -417,6 +417,6 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 		execute_list(list_head, background, shell_vars);
 		list_head = list_head->next;
 	}
-	dprintf(2, C_LIGHT_PINK"COMPLETE COMMAND EXECUTED"C_RESET"\n");
+	// dprintf(2, C_LIGHT_PINK"COMPLETE COMMAND EXECUTED"C_RESET"\n");
 	return ;
 }

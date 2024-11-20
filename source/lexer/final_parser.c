@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 14:44:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 11:57:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/19 15:47:13 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,7 @@ StackEntry *parse(Vars *shell_vars) {
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
 						da_pop(stack); //newline_list
 						da_pop(stack); //complete_commands
-						print_complete_command(complete_command);
+						// print_complete_command(complete_command);
 						execute_complete_command(complete_command, shell_vars);
 						reduced_entry->token.type = Complete_Commands;
 						state = da_peak_back(stack)->state;
@@ -153,7 +153,7 @@ StackEntry *parse(Vars *shell_vars) {
 					}
 					case 3: { /* complete_commands -> complete_command */
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
-						print_complete_command(complete_command);
+						// print_complete_command(complete_command);
 						execute_complete_command(complete_command, shell_vars);
 						reduced_entry->token.type = Complete_Commands;
 						state = da_peak_back(stack)->state;

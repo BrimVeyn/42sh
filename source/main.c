@@ -1,3 +1,4 @@
+#include "ft_regex.h"
 #include "lexer/final_parser.h"
 #include "parser.h"
 #include "utils.h"
@@ -152,6 +153,33 @@ void update_last_executed_command(Vars *shell_vars, char *input) {
 	FREE_POINTERS(last_executed);
 }
 
+void update_history_file(HISTORY_STATE *history, Vars *shell_vars){
+	(void)shell_vars;
+	// char *histfile = get_variable_in_bi(shell_vars, "HISTFILE");
+	// char *c_histfilesize = get_variable_in_bi(shell_vars, "HISTFILESIZE");
+	
+	// int histfilesize = -1;
+	// if (c_histfilesize && regex_match("[^0-9]", c_histfilesize).is_found == false){
+	// 	histfilesize = ft_atoi(c_histfilesize);
+	// }
+
+	// int history_fd = open(histfile, O_CREAT | O_TRUNC | O_WRONLY);
+	char *home = getenv("HOME");
+	char history_filename[1024] = {0};
+	ft_sprintf(history_filename, "%s/.42sh_history", home);
+	int history_fd = open(history_filename, O_TRUNC | O_RDWR | O_CREAT, 0644);
+	printf("history_fd: %d\n", history_fd);
+
+	if (history_fd != -1){
+		for (//int i = (history->length > histfilesize && histfilesize >= 0) ? history->length - histfilesize : 0; 
+		int i = 0;
+		i < history->length; i++){
+			ft_dprintf(history_fd, "%s\n", history->entries[i]->line.data);
+		}
+		close(history_fd);
+	}
+}
+
 #define SHELL_IS_RUNNING true
 
 int main(const int ac, char *av[], const char *env[]) {
@@ -165,12 +193,11 @@ int main(const int ac, char *av[], const char *env[]) {
 	jobList = jobListTmp;
 
 	Vars *shell_vars = vars_init(env);
-	int history_fd = -1;
 	ShellInfos *self = shell(SHELL_GET);
 	if (ac != 1) self->interactive = false;
 
 	if (self->interactive){
-		history_fd = get_history(shell_vars);
+		get_history(shell_vars);
 		signal_manager(SIG_PROMPT);
 
 		char *home = string_list_get_value(shell_vars->env, "HOME");
@@ -203,14 +230,24 @@ int main(const int ac, char *av[], const char *env[]) {
 		if (self->interactive) { do_job_notification(); }
 		if (input) {
 			if (self->interactive) {
-				if (history_expansion(&input, history_fd) == false)
+				if (history_expansion(&input) == false)
 					continue;
 				if (*input)
-					add_input_to_history(input, &history_fd);
+					add_history(input, shell_vars);
+					// add_input_to_history(input, &history_fd, shell_vars);
 			}
 			parse_input(input, av[1], shell_vars);
 			update_last_executed_command(shell_vars, input);
 			gc(GC_RESET, GC_SUBSHELL);
+			// connard
+            //----------------------------------------------//
+            // TokenList *tokens = lexer_lex_all(input);
+            // if (lexer_syntax_error(tokens))
+            //     continue; 
+            // heredoc_detector(tokens, shell_vars);
+            // Node *AST = ast_build(tokens);
+            // ast_execute(AST, shell_vars, true);
+            //---------OLD EXECUTION CHAIN------------------//
 		} else {
 			if (job_list->size) {
 				dprintf(2, "There are running jobs. Killing them.\n");
@@ -220,6 +257,7 @@ int main(const int ac, char *av[], const char *env[]) {
 			break;
 		}
 	}
+	update_history_file(history, shell_vars);
 	gc(GC_CLEANUP, GC_ALL);
 	close_all_fds();
 	return (EXIT_SUCCESS);
