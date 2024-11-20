@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:53:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/19 17:36:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/20 17:32:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "final_parser.h"
 #include "parser.h"
+#include "signals.h"
 #include "utils.h"
 #include "colors.h"
 #include "libft.h"
@@ -293,6 +294,8 @@ void register_function(CommandP *command) {
 	da_push(FuncList, func);
 }
 
+void job_wait_2 (AndOrP *job);
+
 int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 	(void)background;
 	PipeLineP *process = job->pipeline;
@@ -312,16 +315,17 @@ int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 			} else {
 				pid_t pid = fork();
 				if (IS_CHILD(pid)) {
+					signal_manager(SIG_EXEC);
+					setpgid(pid, master_pgid);
+			dprintf(2, C_DARK_CYAN"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
 					close_all_fds();
 					execute_simple_command(command, NULL, shell_vars);
 					gc(GC_CLEANUP, GC_ALL);
 					exit(g_exitno);
 				} else {
-					// process->pid = pid;
 					process->pid = pid;
 					if (!job->pgid)
 						job->pgid = pid;
-					// job->pgid = master_pgid;
 					setpgid(pid, master_pgid);
 				}
 				return WAIT;
@@ -418,8 +422,8 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 		const int wait_status = execute_pipeline(andor_head, background, shell_vars);
 
 		if (wait_status == WAIT) {
-			if (!shell_infos->interactive || !background)
-				job_wait(andor_head);
+			if (!shell_infos->interactive || background)
+				job_wait_2(andor_head);
 			else
 				put_job_foreground(list->and_or, false);
 		}
@@ -454,18 +458,21 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 		if (IS_CHILD(pid)) {
 			close_all_fds();
 			master_pgid = getpid();
+			dprintf(2, C_BRIGHT_CYAN"[MASTER] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
 			while (list_head) {
-				execute_list(list_head, false, shell_vars);
+				execute_list(list_head, true, shell_vars);
 				list_head = list_head->next;
 			}
 			close_all_fds();
 			gc(GC_CLEANUP, GC_ALL);
 			exit(g_exitno);
 		} else {
+			// Save shell terminal attributes for the job
+			tcgetattr(shell_infos->shell_terminal, &shell_infos->shell_tmodes);
 			setpgid(pid, pid);
 			AndOrP *master = gc_unique(AndOrP, GC_ENV);
+			master->tmodes = shell_infos->shell_tmodes;
 			master->pgid = pid;
-			dprintf(2, C_BRIGHT_CYAN"ANNOUNCE"C_RESET": pid: "C_MAGENTA" %d"C_RESET"\n", master->pgid);
 			put_job_background(master, true);
 			return ;
 		}
