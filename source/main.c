@@ -169,7 +169,6 @@ void update_history_file(HISTORY_STATE *history, Vars *shell_vars){
 	// char history_filename[1024] = {0};
 	// ft_sprintf(history_filename, "%s/.42sh_history", home);
 	// int history_fd = open(history_filename, O_TRUNC | O_RDWR | O_CREAT, 0644);
-	printf("history_fd: %d\n", history_fd);
 
 	if (history_fd != -1){
 		for (int i = (history->length > histfilesize && histfilesize >= 0) ? history->length - histfilesize : 0; 

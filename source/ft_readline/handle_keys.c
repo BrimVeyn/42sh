@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 16:26:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/19 11:30:15 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/21 16:24:01 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,12 +128,15 @@ rl_event handle_down_arrow(readline_state_t *rl_state, string *line) {
 	return RL_NO_OP;
 }
 
+void print_history_values(HISTORY_STATE *history);
 rl_event handle_up_arrow(readline_state_t *rl_state, string *line, Vars *shell_vars) {
 	char *chistsize = string_list_get_value(shell_vars->set, "HISTSIZE");
 	int histsize = -1;
 	if (chistsize && regex_match("[^0-9]", chistsize).is_found == false)
 		histsize = ft_atoi(chistsize);
 
+	// printf("navigation offset: %d\n", history->navigation_offset);
+	print_history_values(history);
 	if ((histsize < 0 || history->navigation_offset < histsize) && history->navigation_offset < history->length - 1){
 		history->navigation_offset++;
 		rl_state->cursor.x = history->entries[history->length - history->navigation_offset - 1]->line.size;
