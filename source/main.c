@@ -157,7 +157,7 @@ void update_last_executed_command(Vars *shell_vars, char *input) {
 void update_history_file(HISTORY_STATE *history, Vars *shell_vars){
 	char *histfile = get_variable_in_bi(shell_vars, "HISTFILE");
 	char *c_histfilesize = get_variable_in_bi(shell_vars, "HISTFILESIZE");
-	printf("%s\n", c_histfilesize);
+	// printf("%s\n", c_histfilesize);
 	
 	int histfilesize = -1;
 	if (c_histfilesize && regex_match("[^0-9]", c_histfilesize).is_found == false){
@@ -169,7 +169,7 @@ void update_history_file(HISTORY_STATE *history, Vars *shell_vars){
 	// char history_filename[1024] = {0};
 	// ft_sprintf(history_filename, "%s/.42sh_history", home);
 	// int history_fd = open(history_filename, O_TRUNC | O_RDWR | O_CREAT, 0644);
-	printf("history_fd: %d\n", history_fd);
+	// printf("history_fd: %d\n", history_fd);
 
 	if (history_fd != -1){
 		for (int i = (history->length > histfilesize && histfilesize >= 0) ? history->length - histfilesize : 0; 
@@ -179,6 +179,8 @@ void update_history_file(HISTORY_STATE *history, Vars *shell_vars){
 		close(history_fd);
 	}
 }
+
+int g_jobfd;
 
 #define SHELL_IS_RUNNING true
 
@@ -194,6 +196,11 @@ int main(const int ac, char *av[], const char *env[]) {
 
 	da_create(funcListTmp, FunctionList, sizeof(FunctionP *), GC_ENV);
 	FuncList = funcListTmp;
+
+	char *home = getenv("HOME");
+	char job_filename[1024] = {0};
+	ft_sprintf(job_filename, "%s/.job_ipc", home);
+    g_jobfd = open(job_filename, O_RDWR | O_CREAT, 0644);
 
 	Vars *shell_vars = vars_init(env);
 	ShellInfos *self = shell(SHELL_GET);

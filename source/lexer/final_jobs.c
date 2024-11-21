@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/21 10:35:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/21 17:37:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "colors.h"
 #include "final_parser.h"
+#include "signals.h"
 #include "utils.h"
 
 #include <stdio.h>
@@ -33,31 +34,41 @@ void job_wait (AndOrP *job) {
 	do {
 		pid = waitpid(-job->pgid, &status, WUNTRACED);
 		if (pid != -1) {
-		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
+			// dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
 		// } else {
 		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
 		}
-	} while (!mark_process(list, pid, status)
+	} while (!mark_process(list, pid, status, true)
 	&& !job_stopped(job)
 	&& !job_completed(job));
-
 }
+
+#include "signal.h"
+
 void job_wait_2 (AndOrP *job) {
 	int status;
 	pid_t pid;
 	da_create(list, JobListe, sizeof(AndOrP *), GC_ENV);
 	list->data[list->size++] = job;
 
-	// dprintf(2, "is it stopped : %s\n", job->first_process->stopped ? "true" : "false");
 	do {
 		pid = waitpid(-1, &status, WUNTRACED);
 		if (pid != -1) {
-		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
+			dprintf(2, C_BRIGHT_CYAN"WAIT2"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
 		// } else {
-		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
+		// 	dprintf(2, C_BRIGHT_CYAN"WAIT2"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
 		// 	perror("WAIT");
+			if (WIFSTOPPED(status)) {
+				dprintf(2, "pid = %d\n", getpid());
+				signal_manager(SIG_EXEC);
+				mark_process(list, pid, status, true);
+				if (kill(getpid(), SIGTSTP) < 0)
+					perror("KILL");
+				continue;
+			}
 		}
-	} while (!mark_process(list, pid, status)
+            
+	} while (!mark_process(list, pid, status, false)
 	// && !job_stopped(job)
 	&& !job_completed(job));
 
@@ -104,10 +115,11 @@ void update_job_status(void) {
 	if (!jobList || !jobList->size) return ;
 	do {
 		pid = waitpid (WAIT_ANY, &status, WUNTRACED|WNOHANG);
-	} while (!mark_process(jobList, pid, status));
+		// dprintf(2, "CAUGHT: %d | %d\n", pid, status);
+	} while (!mark_process(jobList, pid, status, false));
 }
 
-int mark_process (JobListe *list, pid_t pid, int status) {
+int mark_process (JobListe *list, pid_t pid, int status, bool print) {
 	PipeLineP *p;
 
 	if (pid <= 0)
@@ -115,7 +127,7 @@ int mark_process (JobListe *list, pid_t pid, int status) {
 
 	for (size_t i = 0; i < list->size; i++) {
 		AndOrP *job = list->data[i];
-		if (job->pgid == pid) {
+		if (job->pgid == pid && !WIFSTOPPED(status)) {
 			job->completed = true;
 		}
 		/* Update the record for the process.  */
@@ -131,7 +143,8 @@ int mark_process (JobListe *list, pid_t pid, int status) {
 					andor_move(job);
 					da_push(jobList, job);
 					job->sig = WSTOPSIG(status);
-					dprintf(STDERR_FILENO, "[%zu]\tStopped(%s)\t%s\n", job->id, sigStr(job->sig), "waouh");
+					if (print)
+						dprintf(STDERR_FILENO, "[%zu]\tStopped(%s)\t%s\n", job->id, sigStr(job->sig), "waouh");
 					job->notified = true;
 				} else if (WIFSIGNALED (status)) {
 					p->completed = 1;
