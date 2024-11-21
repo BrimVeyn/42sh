@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/18 11:53:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/21 10:32:48 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/21 10:35:13 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/21 10:35:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -480,7 +480,6 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 			list_head = list_head->next;
 		}
 	}
-
 	// dprintf(2, C_LIGHT_PINK"COMPLETE COMMAND EXECUTED"C_RESET"\n");
 	return ;
 }

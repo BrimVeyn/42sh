@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 16:26:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/08 14:48:38 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/19 11:30:15 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "42sh.h"
 #include "ft_regex.h"
 #include "c_string.h"
+#include "lexer.h"
 #include "libft.h"
 #include "utils.h"
 #include <linux/limits.h>
@@ -27,6 +28,8 @@
 
 
 //TODO: Clean handle_enter_function
+
+//FIX:ne pas get histsize uniquement du set
 int handle_enter_key(readline_state_t *rl_state, string *line) {
 	if (rl_state->interactive){
 		if (rl_state->search_mode.active){
@@ -51,7 +54,7 @@ int handle_enter_key(readline_state_t *rl_state, string *line) {
 		rl_state->cursor.x = 0;
 		move_cursor(0, rl_state->cursor_offset.y + rl_state->cursor.y);
 	}
-	return 1;
+	return RL_REFRESH;
 }
 
 void handle_backspace_key(readline_state_t *rl_state, string *line, size_t pos){
@@ -73,7 +76,7 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 
 	if (c == 127 && rl_state->interactive){
 		handle_backspace_key(rl_state, line, pos);
-		return 0;
+		return RL_NO_OP;
 	}
 	
 	if (!rl_state->interactive){
@@ -84,7 +87,7 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 
 	if (rl_state->interactive)
 		update_cursor_x(rl_state, line, 1);
-    return 0;
+    return RL_NO_OP;
 }
 
 void handle_delete_key(readline_state_t *rl_state, string *line) {
@@ -114,37 +117,45 @@ void handle_right_arrow(readline_state_t *rl_state, string *line){
 	}
 }
 
-int handle_down_arrow(readline_state_t *rl_state, string *line) {
-	history->offset++;
-	rl_state->cursor.x = history->entries[history->offset]->line.size;
-	gc(GC_FREE, line->data, GC_READLINE);
-	*line = str_strdup(&history->entries[history->offset]->line);
-	gc(GC_ADD, line->data, GC_READLINE);
-	return 2;
+rl_event handle_down_arrow(readline_state_t *rl_state, string *line) {
+	if (history->navigation_offset > 0){
+		history->navigation_offset--;
+		rl_state->cursor.x = history->entries[history->length - history->navigation_offset - 1]->line.size;
+		gc(GC_FREE, line->data, GC_READLINE);
+		*line = str_strdup(&history->entries[history->length - history->navigation_offset - 1]->line);
+		gc(GC_ADD, line->data, GC_READLINE);
+	}
+	return RL_NO_OP;
 }
 
-int handle_up_arrow(readline_state_t *rl_state, string *line) {
+rl_event handle_up_arrow(readline_state_t *rl_state, string *line, Vars *shell_vars) {
+	char *chistsize = string_list_get_value(shell_vars->set, "HISTSIZE");
+	int histsize = -1;
+	if (chistsize && regex_match("[^0-9]", chistsize).is_found == false)
+		histsize = ft_atoi(chistsize);
 
-	history->offset--;
-	rl_state->cursor.x = history->entries[history->offset]->line.size;
-	gc(GC_FREE, line->data, GC_READLINE);
-	*line = str_strdup(&history->entries[history->offset]->line);
-	gc(GC_ADD, line->data, GC_READLINE);
-	return 2;
+	if ((histsize < 0 || history->navigation_offset < histsize) && history->navigation_offset < history->length - 1){
+		history->navigation_offset++;
+		rl_state->cursor.x = history->entries[history->length - history->navigation_offset - 1]->line.size;
+		gc(GC_FREE, line->data, GC_READLINE);
+		*line = str_strdup(&history->entries[history->length - history->navigation_offset - 1]->line);
+		gc(GC_ADD, line->data, GC_READLINE);
+	}
+	return RL_NO_OP;
 }
 
-int handle_special_keys(readline_state_t *rl_state, string *line) {
+rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *shell_vars) {
     char seq[3];
-    if (read(STDIN_FILENO, &seq[0], 1) == 0) return 1;
+    if (read(STDIN_FILENO, &seq[0], 1) == 0) return RL_REFRESH;
     
     if (seq[0] == '[') {
-        if (read(STDIN_FILENO, &seq[1], 1) == 0) return 1;
+        if (read(STDIN_FILENO, &seq[1], 1) == 0) return RL_REFRESH;
 
         if (seq[1] == '3') {
-            if (read(STDIN_FILENO, &seq[2], 1) == 0) return 1;
+            if (read(STDIN_FILENO, &seq[2], 1) == 0) return RL_REFRESH;
             if (seq[2] == '~') {
                 handle_delete_key(rl_state, line);
-                return 2;
+                return RL_NO_OP;
             }
         }
 
@@ -154,9 +165,9 @@ int handle_special_keys(readline_state_t *rl_state, string *line) {
             rl_state->prompt.size = ft_strlen(rl_state->prompt.data);
         }
         
-        if (seq[1] == 'A' && history->offset > 0) {
-            return handle_up_arrow(rl_state, line);
-        } else if (seq[1] == 'B' && history->offset < history->length - 1) {
+        if (seq[1] == 'A') {
+            return handle_up_arrow(rl_state, line, shell_vars);
+        } else if (seq[1] == 'B') {
             return handle_down_arrow(rl_state, line);
         } else if (seq[1] == 'D') {
 			handle_left_arrow(rl_state, line);
@@ -164,7 +175,7 @@ int handle_special_keys(readline_state_t *rl_state, string *line) {
 			handle_right_arrow(rl_state, line);
         }
     }
-    return 0;
+    return RL_NO_OP;
 }
 
 void handle_control_keys(readline_state_t *rl_state, char char_c){

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/18 10:44:01 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/19 15:14:37 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "42sh.h"
 #include "ft_regex.h"
 #include "c_string.h"
+#include "lexer.h"
 #include "libft.h"
 #include "utils.h"
 #include <linux/limits.h>
@@ -27,7 +28,7 @@
 
 
 //TODO:Limiter history -> HIST_SIZE
-//HistFileSize HistFile
+//HistFileSize
 //ctrl + v multiline
 //ctrl R highlight
 //multiline 
@@ -230,11 +231,14 @@ void update_line(readline_state_t *rl_state, string *line) {
 		}
 		write(STDOUT_FILENO, line->data, str_length(line));
 		write(STDOUT_FILENO, "':", 2);
-		write(STDOUT_FILENO, rl_state->search_mode.word_found, ft_strlen(rl_state->search_mode.word_found));
+		write(STDOUT_FILENO, "\033[7m", 4);
+		write(STDOUT_FILENO, rl_state->search_mode.word_found, line->size);
+		write(STDOUT_FILENO, "\033[0m", 4);
+		write(STDOUT_FILENO, rl_state->search_mode.word_found + line->size, ft_strlen(rl_state->search_mode.word_found) - line->size);
 	}
 }
 
-void init_readline(readline_state_t *rl_state, const char *prompt){
+void init_readline(readline_state_t *rl_state, const char *prompt, Vars *shell_vars){
     char buffer[2048] = {0};
 
     set_prompt(rl_state, prompt);
@@ -242,11 +246,12 @@ void init_readline(readline_state_t *rl_state, const char *prompt){
 
 	//TODO:definir history autrement
 	if (!history_defined) {
-		init_history();
+		init_history(shell_vars);
 		history_defined = true;
 	}
-	history->offset = history->length;
-	add_history("");
+	history->offset = 0;
+	handle_history_config(history, shell_vars);
+	add_history("", shell_vars);
 
 	enable_raw_mode();
 
@@ -256,6 +261,7 @@ void init_readline(readline_state_t *rl_state, const char *prompt){
 	move_cursor(rl_state->cursor_offset.x, rl_state->cursor_offset.y);
 	rl_print_prompt(STDOUT_FILENO, rl_state);
 	manage_rl_state(RL_SET, rl_state);
+
 }
 
 int can_go_left(readline_state_t *rl_state){
@@ -301,7 +307,7 @@ int should_process_enter() {
     return 0;
 }
 
-char *ft_readline(const char *prompt) {
+char *ft_readline(const char *prompt, Vars *shell_vars) {
 	readline_state_t *rl_state = NULL;
 	
 	if (manage_rl_state(RL_GET, NULL)){
@@ -325,7 +331,7 @@ char *ft_readline(const char *prompt) {
     rl_state->interactive = self->interactive;
 
     if (rl_state->interactive)
-		init_readline(rl_state, prompt);
+		init_readline(rl_state, prompt, shell_vars);
 
 	string *line = gc(GC_ALLOC, 1, sizeof(string), GC_READLINE);
     if (rl_state->interactive) {
@@ -357,7 +363,7 @@ char *ft_readline(const char *prompt) {
 			break;
 		}
 
-		int result = 0;
+		rl_event result = RL_NO_OP;
         if (bytes_read == 0 || c == VEOF) {
             if (line->data[0] == '\0') {
                 if (rl_state->interactive) {
@@ -371,12 +377,12 @@ char *ft_readline(const char *prompt) {
 		} else if (c == CTRL_L || c == CTRL_R) {
 			handle_control_keys(rl_state, c);
         } else if (c == '\033') {
-            result = handle_special_keys(rl_state, line);
+            result = handle_special_keys(rl_state, line, shell_vars);
         } else {
 			result = handle_printable_keys(rl_state, c, line);
         }
 		
-		if (result == 1) {
+		if (result == RL_REFRESH) {
 			break;
 		}
 		
