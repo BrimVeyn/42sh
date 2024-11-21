@@ -25,6 +25,7 @@
 
 int g_debug = 0;
 JobList *job_list = NULL;
+FunctionList *FuncList = NULL;
 
 //TODO: 42shrc
 
@@ -188,8 +189,11 @@ int main(const int ac, char *av[], const char *env[]) {
 	g_signal = 0;
 	job_list = job_list_init();
 
-	da_create(jobListTmp, JobListe, sizeof(AndOrP *), GC_SUBSHELL);
+	da_create(jobListTmp, JobListe, sizeof(AndOrP *), GC_ENV);
 	jobList = jobListTmp;
+
+	da_create(funcListTmp, FunctionList, sizeof(FunctionP *), GC_ENV);
+	FuncList = funcListTmp;
 
 	Vars *shell_vars = vars_init(env);
 	ShellInfos *self = shell(SHELL_GET);
@@ -226,7 +230,7 @@ int main(const int ac, char *av[], const char *env[]) {
 				}
 			}
 		}
-		if (self->interactive) { do_job_notification(); }
+		if (self->interactive) { job_notification(); }
 		if (input) {
 			if (self->interactive) {
 				if (history_expansion(&input) == false)
@@ -247,8 +251,9 @@ int main(const int ac, char *av[], const char *env[]) {
             // Node *AST = ast_build(tokens);
             // ast_execute(AST, shell_vars, true);
             //---------OLD EXECUTION CHAIN------------------//
+			if (ac != 1) break;
 		} else {
-			if (job_list->size) {
+			if (jobList->size) {
 				dprintf(2, "There are running jobs. Killing them.\n");
 				job_killall();
 				continue;

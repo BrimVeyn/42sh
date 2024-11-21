@@ -3,15 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   final_executer.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/18 11:53:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/19 15:48:31 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/11/21 11:04:41 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/11/21 11:04:55 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "final_parser.h"
+#include "parser.h"
+#include "signals.h"
 #include "utils.h"
 #include "colors.h"
 #include "libft.h"
@@ -23,6 +25,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
+
+pid_t master_pgid;
 
 void dup_input_and_close(int fd) {
 	secure_dup2(fd, STDIN_FILENO);
@@ -38,26 +42,30 @@ void create_pipe(bool *hadPipe, int *pipefd) {
 
 #define IS_CHILD(pid) ((pid == 0) ? true : false)
 
-void resolve_bine(SimpleCommandP *command, Vars *shell_vars) {
+int is_function(char *func_name);
+
+char  *resolve_bine(SimpleCommandP *command, Vars *shell_vars) {
 	if (!command || !command->word_list->data[0]) {
-		return ;
+		return NULL;
 	}
+	if (is_function(command->word_list->data[0]) != -1)
+		return command->word_list->data[0];
 	char *maybe_bin = hash_interface(HASH_FIND, command->word_list->data[0], shell_vars);
 	if (is_builtin(command->word_list->data[0])) {
-		return ;
+		return command->word_list->data[0];
 	}
 	if (maybe_bin) {
 		hash_interface(HASH_ADD_USED, command->word_list->data[0], shell_vars);
-		command->word_list->data[0] = maybe_bin;
+		return maybe_bin;
 	} else {
 		bool absolute = false;
 		maybe_bin = find_bin_location(command->word_list->data[0], shell_vars->env, &absolute);
 		if (maybe_bin) {
 			if (absolute == false)
 				hash_interface(HASH_ADD_USED, command->word_list->data[0], shell_vars);
-			command->word_list->data[0] = maybe_bin;
+			return maybe_bin;
 		} else {
-			command->word_list->data[0] = NULL;
+			return NULL;
 		}
 	}
 }
@@ -161,16 +169,20 @@ bool redirect_ios(RedirectionL *redir_list) {
 
 void execute_simple_command(CommandP *command, int *pipefd, Vars *shell_vars) {
 	SimpleCommandP *simple_command = command->simple_command;
-	resolve_bine(simple_command, shell_vars);
 	if (!redirect_ios(simple_command->redir_list)) {
+		return ;
+	}
+	char *path = resolve_bine(simple_command, shell_vars);
+	if (!path) {
 		return ;
 	}
 
 	// dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
+	// dprintf(2, "  Bin: %s\n", path);
 	// print_simple_command(simple_command);
 	// dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
 
-	execve(simple_command->word_list->data[0], simple_command->word_list->data, shell_vars->env->data);
+	execve(path, simple_command->word_list->data, shell_vars->env->data);
 	if (pipefd) {
 		close(pipefd[0]);
 		close(pipefd[1]);
@@ -256,13 +268,33 @@ void execute_for_clause(CommandP *command, Vars *shell_vars) {
 	return ;
 }
 
-void register_function(CommandP *command, Vars *shell_vars) {
-	FunctionP *func = command->function_definition;
-	(void)func;(void)shell_vars;
-}
-
 #define NO_WAIT 0
 #define WAIT 1
+
+int is_function(char *func_name) {
+	for (size_t i = 0; i < FuncList->size; i++) {
+		if (!ft_strcmp(FuncList->data[i]->function_name, func_name)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+void gc_move_function(FunctionP *func);
+
+void register_function(CommandP *command) {
+	FunctionP *func = command->function_definition;
+	for (size_t i = 0; i < FuncList->size; i++) {
+		if (!ft_strcmp(func->function_name, FuncList->data[i]->function_name)) {
+			da_erase_index(FuncList, i);
+		}
+	}
+	gc_move_function(func);
+	dprintf(2, "FUNCTION: %s\n", func->function_name);
+	da_push(FuncList, func);
+}
+
+void job_wait_2 (AndOrP *job);
 
 int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 	(void)background;
@@ -270,21 +302,31 @@ int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 	CommandP *command = job->pipeline->command;
 	switch (command->type) {
 		case Simple_Command: {
-			resolve_bine(command->simple_command, shell_vars);
-			if (is_builtin(command->simple_command->word_list->data[0])) {
+			char *path = resolve_bine(command->simple_command, shell_vars);
+			int funcNo = is_function(path);
+			if (funcNo != -1) {
+				//FIX: reset pids
+				execute_brace_group(FuncList->data[funcNo]->function_body, shell_vars);
+				return NO_WAIT;
+            }
+			if (is_builtin(path)) {
 				execute_builtin(command->simple_command, shell_vars);
 				return NO_WAIT;
 			} else {
 				pid_t pid = fork();
 				if (IS_CHILD(pid)) {
+					signal_manager(SIG_EXEC);
+					setpgid(pid, master_pgid);
+			// dprintf(2, C_DARK_CYAN"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
 					close_all_fds();
 					execute_simple_command(command, NULL, shell_vars);
+					gc(GC_CLEANUP, GC_ALL);
 					exit(g_exitno);
 				} else {
 					process->pid = pid;
 					if (!job->pgid)
 						job->pgid = pid;
-					setpgid(pid, job->pgid);
+					setpgid(pid, master_pgid);
 				}
 				return WAIT;
 			}
@@ -308,7 +350,8 @@ int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 		case While_Clause: { execute_while_clause(process->command, shell_vars);  return NO_WAIT; }
 		case Case_Clause: { execute_case_clause(process->command, shell_vars); return NO_WAIT; }
 		case For_Clause: { execute_for_clause(process->command, shell_vars); return NO_WAIT; }
-		default: {};
+		case Function_Definition: { register_function(process->command); return NO_WAIT; }
+		default: { break; };
 	}
 	return ERROR;
 }
@@ -351,8 +394,8 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 				case While_Clause: { execute_while_clause(process->command, shell_vars); exit(g_exitno); break; }
 				case Case_Clause: { execute_case_clause(process->command, shell_vars); exit(g_exitno); break; }
 				case For_Clause: { execute_for_clause(process->command, shell_vars); exit(g_exitno); break; }
-				case Function_Definition: {}
-				default: break;
+				case Function_Definition: { register_function(process->command); exit(g_exitno); break; }
+				default: { break; }
 			}
 		} else {
 			process->pid = pid;
@@ -379,10 +422,8 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 		const int wait_status = execute_pipeline(andor_head, background, shell_vars);
 
 		if (wait_status == WAIT) {
-			if (!shell_infos->interactive)
-				job_wait(andor_head);
-			else if (background)
-				put_job_background(list->and_or);
+			if (!shell_infos->interactive || background)
+				job_wait_2(andor_head);
 			else
 				put_job_foreground(list->and_or, false);
 		}
@@ -405,17 +446,39 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 	}
 }
 
-
 void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars) {
 	ListP *list_head = complete_command->list;
 	ShellInfos *shell_infos = shell(SHELL_GET);
-	// dprintf(2, "INTERFACTIVE: %d | %s\n", shell_infos->interactive, boolStr(shell_infos->interactive));
 
 	const bool background = (shell_infos->interactive && complete_command->separator == AMPER);
 
-	while (list_head) {
-		execute_list(list_head, background, shell_vars);
-		list_head = list_head->next;
+
+	if (background) {
+		pid_t pid = fork();
+		if (IS_CHILD(pid)) {
+			// close_all_fds();
+			master_pgid = getpid();
+			// dprintf(2, C_BRIGHT_CYAN"[MASTER] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
+			while (list_head) {
+				execute_list(list_head, true, shell_vars);
+				list_head = list_head->next;
+			}
+			close_all_fds();
+			gc(GC_CLEANUP, GC_ALL);
+			exit(g_exitno);
+		} else {
+			setpgid(pid, pid);
+			AndOrP *master = gc_unique(AndOrP, GC_ENV);
+			master->tmodes = shell_infos->shell_tmodes;
+			master->pgid = pid;
+			put_job_background(master, true);
+			return ;
+		}
+	} else {
+		while (list_head) {
+			execute_list(list_head, false, shell_vars);
+			list_head = list_head->next;
+		}
 	}
 	// dprintf(2, C_LIGHT_PINK"COMPLETE COMMAND EXECUTED"C_RESET"\n");
 	return ;

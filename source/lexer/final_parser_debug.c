@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:43:08 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/15 15:39:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/18 17:21:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void pretty_error(char *raw_token) {
 		ft_sprintf(buffer, " ");
 	}
 	ft_sprintf(buffer, "  |  ");
-	for (size_t i = 0; i < lexer->column; i++) {
+	for (size_t i = 0; i < lexer->column - 1; i++) {
 		if (tab_count) {
 			ft_sprintf(buffer, "\t");
 			tab_count -= 1;
@@ -83,7 +83,6 @@ close_print:
 }
 
 void print_simple_command(const SimpleCommandP *self) {
-	dprintf(2, "  Bin: %s\n", self->word_list->data[0]);
 	print_word_list("Vars", self->assign_list);
 	print_word_list("Words", self->word_list);
 	print_redir_list(self->redir_list);
