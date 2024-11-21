@@ -154,25 +154,24 @@ void update_last_executed_command(Vars *shell_vars, char *input) {
 }
 
 void update_history_file(HISTORY_STATE *history, Vars *shell_vars){
-	(void)shell_vars;
-	// char *histfile = get_variable_in_bi(shell_vars, "HISTFILE");
-	// char *c_histfilesize = get_variable_in_bi(shell_vars, "HISTFILESIZE");
+	char *histfile = get_variable_in_bi(shell_vars, "HISTFILE");
+	char *c_histfilesize = get_variable_in_bi(shell_vars, "HISTFILESIZE");
+	printf("%s\n", c_histfilesize);
 	
-	// int histfilesize = -1;
-	// if (c_histfilesize && regex_match("[^0-9]", c_histfilesize).is_found == false){
-	// 	histfilesize = ft_atoi(c_histfilesize);
-	// }
+	int histfilesize = -1;
+	if (c_histfilesize && regex_match("[^0-9]", c_histfilesize).is_found == false){
+		histfilesize = ft_atoi(c_histfilesize);
+	}
 
-	// int history_fd = open(histfile, O_CREAT | O_TRUNC | O_WRONLY);
-	char *home = getenv("HOME");
-	char history_filename[1024] = {0};
-	ft_sprintf(history_filename, "%s/.42sh_history", home);
-	int history_fd = open(history_filename, O_TRUNC | O_RDWR | O_CREAT, 0644);
+	int history_fd = open(histfile, O_CREAT | O_TRUNC | O_WRONLY);
+	// char *home = getenv("HOME");
+	// char history_filename[1024] = {0};
+	// ft_sprintf(history_filename, "%s/.42sh_history", home);
+	// int history_fd = open(history_filename, O_TRUNC | O_RDWR | O_CREAT, 0644);
 	printf("history_fd: %d\n", history_fd);
 
 	if (history_fd != -1){
-		for (//int i = (history->length > histfilesize && histfilesize >= 0) ? history->length - histfilesize : 0; 
-		int i = 0;
+		for (int i = (history->length > histfilesize && histfilesize >= 0) ? history->length - histfilesize : 0; 
 		i < history->length; i++){
 			ft_dprintf(history_fd, "%s\n", history->entries[i]->line.data);
 		}

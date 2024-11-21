@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/19 15:53:10 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/21 10:20:02 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,11 @@ void init_history(Vars *shell_vars) {
 	history->config = config;
 	string_list_add_or_update(shell_vars->set, "HISTSIZE=500");
 	string_list_add_or_update(shell_vars->set, "HISTFILESIZE=500");
+
+	char *home = getenv("HOME");
+	char history_filename[1024] = {0};
+	ft_sprintf(history_filename, "HISTFILE=%s/.42sh_history", home);
+	string_list_add_or_update(shell_vars->set, history_filename);
 }
 
 void print_history_values(HISTORY_STATE *history) {
