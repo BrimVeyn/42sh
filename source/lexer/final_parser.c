@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/15 14:44:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/19 14:16:41 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/21 10:35:33 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/21 10:35:41 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ TokenType identify_token(const char *raw_value, const int table_row, bool *error
 		[NEWLINE] = "\n", [AMPER] = "&", [SEMI] = ";",
 	};
 
+	// dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
 			(table_row != 27 || !is_keyword(i))) {
@@ -71,7 +72,7 @@ TokenType identify_token(const char *raw_value, const int table_row, bool *error
 	}
 
 	if (regex_match("^[a-zA-Z_][a-zA-Z0-9_]*=", (char *)raw_value).is_found) {
-		if (table_row != 66)
+		if (table_row != 66 && table_row != 27)
 			return ASSIGNMENT_WORD;
 	}
 

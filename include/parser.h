@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:05:45 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/06 11:14:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/20 13:58:55 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,9 +124,9 @@ char				*parser_command_substitution(char *str, Vars *shell_vars);
 char				*parser_arithmetic_expansion(char *str, Vars *shell_vars);
 
 //-------------------history modules------------//
-bool				history_expansion (char **pstring, int history_fd);
-void				add_input_to_history(char *input, int *history_fd);
-int					get_history(void);
+bool				history_expansion (char **pstring);
+void				add_input_to_history(char *input, int *history_fd, Vars *shell_vars);
+void				get_history(Vars *shell_vars);
 
 //-------------------Parameter Expansion-------------//
 void				parser_skip_subshell(TokenList *list, size_t *it);
