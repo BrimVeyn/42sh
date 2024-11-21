@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/21 10:35:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/21 10:35:26 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/21 16:21:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -384,6 +384,7 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 		pid_t pid = fork();
 
 		if (IS_CHILD(pid)) {
+			signal_manager(SIG_EXEC);
 			close_all_fds();
 
 			switch (process->command->type) {
@@ -423,7 +424,7 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 
 		if (wait_status == WAIT) {
 			if (!shell_infos->interactive || background)
-				job_wait_2(andor_head);
+				job_wait_2(andor_head); //wait -1 (all childs)
 			else
 				put_job_foreground(list->and_or, false);
 		}
@@ -457,6 +458,7 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 		pid_t pid = fork();
 		if (IS_CHILD(pid)) {
 			// close_all_fds();
+			// signal_manager(SIG_EXEC);
 			master_pgid = getpid();
 			// dprintf(2, C_BRIGHT_CYAN"[MASTER] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
 			while (list_head) {
@@ -471,6 +473,7 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 			AndOrP *master = gc_unique(AndOrP, GC_ENV);
 			master->tmodes = shell_infos->shell_tmodes;
 			master->pgid = pid;
+			master->pid = pid;
 			put_job_background(master, true);
 			return ;
 		}

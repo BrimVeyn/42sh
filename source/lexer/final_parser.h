@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/19 15:33:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/21 16:43:34 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,6 +208,7 @@ struct AndOrP {
 	//-----------Job_control-------//
 	size_t id; //job control id
 	pid_t pgid; //process group id
+	pid_t pid; //master pid
 	bool notified;
 	bool bg; //bg/fg
 	int sig; //stopped by signo
@@ -348,6 +349,8 @@ typedef struct {
 	int	gc_level;
 } JobListe;
 
+extern int g_jobfd;
+
 typedef struct {
 	FunctionP **data;
 	size_t size;
@@ -360,7 +363,7 @@ typedef struct {
 extern JobListe *jobList;
 extern FunctionList *FuncList;
 
-int mark_process (JobListe *list, pid_t pid, int status);
+int mark_process (JobListe *list, pid_t pid, int status, bool print);
 void put_job_background (AndOrP *job, bool add);
 void put_job_foreground (AndOrP *job, int cont);
 void job_wait (AndOrP *job);
