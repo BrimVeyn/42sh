@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:33:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/15 15:54:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/21 10:37:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ void builtin_export(const SimpleCommandP *command, Vars *shell_vars) {
 
 		if ((has_equal && match_len == equal_pos) || (!has_equal && match_len == arg_len)) {
 			string_list_add_or_update(shell_vars->env, command->word_list->data[i]);
+			string_list_add_or_update(shell_vars->set, command->word_list->data[i]);
 		} else {
 			INVALID_IDENTIFIER(command->word_list->data[i]);
 			g_exitno = 1;

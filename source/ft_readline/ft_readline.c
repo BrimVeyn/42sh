@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/19 15:14:37 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/21 13:38:24 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,6 +250,7 @@ void init_readline(readline_state_t *rl_state, const char *prompt, Vars *shell_v
 		history_defined = true;
 	}
 	history->offset = 0;
+	history->navigation_offset = 0;
 	handle_history_config(history, shell_vars);
 	add_history("", shell_vars);
 
