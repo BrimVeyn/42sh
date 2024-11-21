@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/20 17:31:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/21 10:33:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,9 @@ void job_wait (AndOrP *job) {
 	do {
 		pid = waitpid(-job->pgid, &status, WUNTRACED);
 		if (pid != -1) {
-			dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
-		} else {
-			dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
+		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
+		// } else {
+		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
 		}
 	} while (!mark_process(list, pid, status)
 	&& !job_stopped(job)
@@ -52,12 +52,13 @@ void job_wait_2 (AndOrP *job) {
 	do {
 		pid = waitpid(-1, &status, WUNTRACED);
 		if (pid != -1) {
-			dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
-		} else {
-			dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
+		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
+		// } else {
+		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
+		// 	perror("WAIT");
 		}
 	} while (!mark_process(list, pid, status)
-	&& !job_stopped(job)
+	// && !job_stopped(job)
 	&& !job_completed(job));
 
 }
@@ -76,7 +77,7 @@ void put_job_foreground (AndOrP *job, int cont) {
 	ShellInfos *self = shell(SHELL_GET);
 	/* Put the job into the foreground.  */
 	tcsetpgrp(self->shell_terminal, job->pgid);
-	dprintf(2, "JOB->PGID: %d\n", job->pgid);
+	// dprintf(2, "JOB->PGID: %d\n", job->pgid);
 	/* Send the job a continue signal, if necessary.  */
 	if (cont) {
 		// job->notified = false;
