@@ -6,16 +6,24 @@
 # { printf yeah\n; printf hoho\n; }
 #
 #
-case 3 in
-	1) printf 1\n
-	;;
-	2|3) printf 2or3\n
-	;;
-	*) printf default\n
-	;;
-esac | cat
+# case 3 in
+# 	1) printf 1\n
+# 	;;
+# 	2|3) printf 2or3\n
+# 	;;
+# 	*) printf default\n
+# 	;;
+# esac | cat
 
-printf salut\n;
+# printf salut\n;
+
+func_one () { 
+	printf salut; 
+	printf hey;
+}
+#
+func_one
+# func_two
 
 #
 # { sleep 2; false; } && printf one\n && printf two\n && printf three\n || printf salope\n && printf yeah\n

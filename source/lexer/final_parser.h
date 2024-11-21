@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 11:52:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/19 15:33:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,6 @@ typedef struct {
 } StringListVect;
 
 typedef struct {
-	char *bin;
 	RedirectionL *redir_list;
 	StringListL	*word_list;
 	StringListL *assign_list;
@@ -163,7 +162,6 @@ typedef struct WhileClauseP WhileClauseP;
 typedef struct CaseClauseP CaseClauseP;
 typedef struct PipeLineP PipeLineP;
 typedef struct FunctionP FunctionP;
-typedef struct BraceGroupP BraceGroupP;
 typedef struct AndOrP AndOrP;
 typedef struct ListP ListP;
 
@@ -213,6 +211,7 @@ struct AndOrP {
 	bool notified;
 	bool bg; //bg/fg
 	int sig; //stopped by signo
+	bool completed;
 	struct termios tmodes; //saved tmodes
 	//-----------------------------//
 	PipeLineP *pipeline; //first_process
@@ -349,10 +348,20 @@ typedef struct {
 	int	gc_level;
 } JobListe;
 
+typedef struct {
+	FunctionP **data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int gc_level;
+} FunctionList;
+
+
 extern JobListe *jobList;
+extern FunctionList *FuncList;
 
 int mark_process (JobListe *list, pid_t pid, int status);
-void put_job_background (AndOrP *job);
+void put_job_background (AndOrP *job, bool add);
 void put_job_foreground (AndOrP *job, int cont);
 void job_wait (AndOrP *job);
 int job_stopped(AndOrP *j);

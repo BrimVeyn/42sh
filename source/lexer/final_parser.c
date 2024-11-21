@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   final_parser.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/15 14:44:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/21 10:32:37 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/11/21 11:05:21 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/11/21 11:05:42 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,9 +76,10 @@ TokenType identify_token(const char *raw_value, const int table_row, bool *error
 			return ASSIGNMENT_WORD;
 	}
 
+	// dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
 	if (regex_match("^[a-zA-Z_][a-zA-Z0-9_]*$", (char *)raw_value).is_found) {
 		if (table_row == 30 || 
-			(table_row == 48 && !ft_strcmp("(", lex_interface(LEX_PEAK, NULL, NULL, error))))
+			((table_row == 48 || table_row == 0) && !ft_strcmp("(", lex_interface(LEX_PEAK, NULL, NULL, error))))
 			return NAME;
 	}
 
