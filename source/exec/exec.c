@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/19 15:10:40 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/21 10:04:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,7 +160,7 @@ void launch_process(SimpleCommand *command, Vars *shell_vars,  pid_t pgid, bool 
 		setpgid (pid, pgid);
 
 		if (foreground)
-			tcsetpgrp (shell_infos->shell_terminal, pgid);
+			tcsetpgrp(shell_infos->shell_terminal, pgid);
 
 		signal_manager(SIG_EXEC);
 	}
