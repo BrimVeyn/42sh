@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/21 16:03:01 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/22 17:32:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,14 @@ void remove_job(AndOrP *job) {
 	da_erase_index(jobList, index);
 }
 
+static int get_completed_job_index() {
+	for (size_t i = 0; i < jobList->size; i++) {
+		AndOrP *el = jobList->data[i];
+		if (el->completed) return i;
+	}
+	return -1;
+}
+
 void job_notification(void) {
 	update_job_status();
 
@@ -67,10 +75,13 @@ void job_notification(void) {
 		if (el->completed) {
 			if (el->bg)
 				dprintf(2, "[%zu]\tDone\t%s\n", el->id, "yeahhhh");
-			remove_job(el);
 		} else if (job_stopped(el) && !el->notified) {
 			dprintf(2, "[%zu]\t%d\n", el->id, el->pgid);
 			el->notified = true;
 		}
+	}
+
+	for (int idx; (idx = get_completed_job_index()) != -1;) {
+		da_erase_index(jobList, (size_t)idx);
 	}
 }

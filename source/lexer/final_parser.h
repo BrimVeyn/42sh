@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/21 16:43:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/22 13:00:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -341,6 +341,8 @@ void print_while_clause(const WhileClauseP *while_clause);
 void print_token_stack(const TokenStack *stack);
 /*----------------------------------------------------------*/
 
+// #define HIGH_FD_MAX 256
+
 typedef struct {
 	AndOrP **data;
 	size_t size;
@@ -348,8 +350,6 @@ typedef struct {
 	size_t size_of_element;
 	int	gc_level;
 } JobListe;
-
-extern int g_jobfd;
 
 typedef struct {
 	FunctionP **data;
