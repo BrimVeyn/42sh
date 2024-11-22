@@ -10,6 +10,7 @@
 #include "libft.h"
 #include "ft_readline.h"
 
+#include <linux/limits.h>
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -197,11 +198,6 @@ int main(const int ac, char *av[], const char *env[]) {
 	da_create(funcListTmp, FunctionList, sizeof(FunctionP *), GC_ENV);
 	FuncList = funcListTmp;
 
-	char *home = getenv("HOME");
-	char job_filename[1024] = {0};
-	ft_sprintf(job_filename, "%s/.job_ipc", home);
-    g_jobfd = open(job_filename, O_RDWR | O_CREAT, 0644);
-
 	Vars *shell_vars = vars_init(env);
 	ShellInfos *self = shell(SHELL_GET);
 	if (ac != 1) self->interactive = false;
@@ -244,12 +240,10 @@ int main(const int ac, char *av[], const char *env[]) {
 					continue;
 				if (*input)
 					add_history(input, shell_vars);
-					// add_input_to_history(input, &history_fd, shell_vars);
 			}
 			parse_input(input, av[1], shell_vars);
 			update_last_executed_command(shell_vars, input);
 			gc(GC_RESET, GC_SUBSHELL);
-			// connard
             //----------------------------------------------//
             // TokenList *tokens = lexer_lex_all(input);
             // if (lexer_syntax_error(tokens))

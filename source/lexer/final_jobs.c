@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/21 17:37:50 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/22 17:26:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void job_wait (AndOrP *job) {
 	do {
 		pid = waitpid(-job->pgid, &status, WUNTRACED);
 		if (pid != -1) {
-			// dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
+		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
 		// } else {
 		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
 		}
@@ -54,16 +54,19 @@ void job_wait_2 (AndOrP *job) {
 	do {
 		pid = waitpid(-1, &status, WUNTRACED);
 		if (pid != -1) {
-			dprintf(2, C_BRIGHT_CYAN"WAIT2"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
-		// } else {
+		// 	dprintf(2, C_BRIGHT_CYAN"WAIT2"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
+		// // } else {
 		// 	dprintf(2, C_BRIGHT_CYAN"WAIT2"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
 		// 	perror("WAIT");
 			if (WIFSTOPPED(status)) {
-				dprintf(2, "pid = %d\n", getpid());
+				// dprintf(2, "pid = %d\n", getpid());
 				signal_manager(SIG_EXEC);
 				mark_process(list, pid, status, true);
-				if (kill(getpid(), SIGTSTP) < 0)
+				if (kill(getpid(), SIGTSTP) < 0) {
 					perror("KILL");
+					fatal("Jobs: kill failed", 255);
+                }
+				signal_manager(SIG_PROMPT);
 				continue;
 			}
 		}
@@ -129,6 +132,7 @@ int mark_process (JobListe *list, pid_t pid, int status, bool print) {
 		AndOrP *job = list->data[i];
 		if (job->pgid == pid && !WIFSTOPPED(status)) {
 			job->completed = true;
+			return 0;
 		}
 		/* Update the record for the process.  */
 		for (p = job->pipeline; p; p = p->next) {

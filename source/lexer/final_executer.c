@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/21 10:35:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/21 16:21:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/22 17:33:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
 
@@ -167,22 +168,21 @@ bool redirect_ios(RedirectionL *redir_list) {
 	return true;
 }
 
-void execute_simple_command(CommandP *command, int *pipefd, Vars *shell_vars) {
+void execute_simple_command(CommandP *command, char *bin, int *pipefd, Vars *shell_vars) {
 	SimpleCommandP *simple_command = command->simple_command;
 	if (!redirect_ios(simple_command->redir_list)) {
 		return ;
 	}
-	char *path = resolve_bine(simple_command, shell_vars);
-	if (!path) {
+	if (!bin) {
 		return ;
 	}
 
 	// dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
-	// dprintf(2, "  Bin: %s\n", path);
+	// dprintf(2, "  Bin: %s\n", bin);
 	// print_simple_command(simple_command);
 	// dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
 
-	execve(path, simple_command->word_list->data, shell_vars->env->data);
+	execve(bin, simple_command->word_list->data, shell_vars->env->data);
 	if (pipefd) {
 		close(pipefd[0]);
 		close(pipefd[1]);
@@ -195,26 +195,24 @@ char *boolStr(bool bobo) {
 
 void execute_list(ListP *list, bool background, Vars *shell_vars);
 
-void execute_subshell(CommandP *command, Vars *shell_vars) {
+void execute_subshell(CommandP *command, bool background, Vars *shell_vars) {
 	ListP *subshell = command->subshell;
 	if (!redirect_ios(command->redir_list)) {
 		return ;
 	}
-	//FIX: add background trigger
 	while (subshell) {
-		execute_list(subshell, false, shell_vars);
+		execute_list(subshell, background, shell_vars);
 		subshell = subshell->next;
 	}
 }
 
-void execute_brace_group(CommandP *command, Vars *shell_vars) {
+void execute_brace_group(CommandP *command, bool background, Vars *shell_vars) {
 	ListP *command_group = command->brace_group;
 	if (!redirect_ios(command->redir_list)) {
 		return ;
 	}
-	//FIX: add background trigger, is it really there or inside execute_list that i'll be resolved ?
 	while (command_group) {
-		execute_list(command_group, false, shell_vars);
+		execute_list(command_group, background, shell_vars);
 		command_group = command_group->next;
 	}
 }
@@ -296,20 +294,26 @@ void register_function(CommandP *command) {
 
 void job_wait_2 (AndOrP *job);
 
+void set_group(AndOrP *job, PipeLineP *process, pid_t pid) {
+	process->pid = pid;
+	if (!job->pgid)
+		job->pgid = pid;
+	setpgid(pid, job->pgid);
+}
+
 int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
-	(void)background;
 	PipeLineP *process = job->pipeline;
 	CommandP *command = job->pipeline->command;
 	switch (command->type) {
 		case Simple_Command: {
-			char *path = resolve_bine(command->simple_command, shell_vars);
-			int funcNo = is_function(path);
+			char *bin = resolve_bine(command->simple_command, shell_vars);
+			int funcNo = is_function(bin);
 			if (funcNo != -1) {
 				//FIX: reset pids
-				execute_brace_group(FuncList->data[funcNo]->function_body, shell_vars);
+				execute_brace_group(FuncList->data[funcNo]->function_body, background, shell_vars);
 				return NO_WAIT;
             }
-			if (is_builtin(path)) {
+			if (is_builtin(bin)) {
 				execute_builtin(command->simple_command, shell_vars);
 				return NO_WAIT;
 			} else {
@@ -319,33 +323,28 @@ int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 					setpgid(pid, master_pgid);
 			// dprintf(2, C_DARK_CYAN"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
 					close_all_fds();
-					execute_simple_command(command, NULL, shell_vars);
+					execute_simple_command(command, bin, NULL, shell_vars);
 					gc(GC_CLEANUP, GC_ALL);
 					exit(g_exitno);
-				} else {
-					process->pid = pid;
-					if (!job->pgid)
-						job->pgid = pid;
-					setpgid(pid, master_pgid);
-				}
+				} else { set_group(job, process, pid); }
 				return WAIT;
 			}
 		}
 		case Subshell: {
+			if (background) {
+				execute_subshell(command, background, shell_vars);
+				return NO_WAIT;
+			}
 			pid_t pid = fork();
 			if (IS_CHILD(pid)) {
 				close_all_fds();
-				execute_subshell(command, shell_vars);
+				execute_subshell(command, background, shell_vars);
+				gc(GC_CLEANUP, GC_ALL);
 				exit(g_exitno);
-			} else {
-				process->pid = pid;
-				if (!job->pgid)
-					job->pgid = pid;
-				setpgid(pid, job->pgid);
-			}
+			} else { set_group(job, process, pid); }
 			return WAIT;
 		}
-		case Brace_Group: { execute_brace_group(process->command, shell_vars); return NO_WAIT; }
+		case Brace_Group: { execute_brace_group(process->command, background, shell_vars); return NO_WAIT; }
 		case If_Clause: { execute_if_clause(process->command, shell_vars); return NO_WAIT; }
 		case While_Clause: { execute_while_clause(process->command, shell_vars);  return NO_WAIT; }
 		case Case_Clause: { execute_case_clause(process->command, shell_vars); return NO_WAIT; }
@@ -388,9 +387,14 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 			close_all_fds();
 
 			switch (process->command->type) {
-				case Simple_Command: { execute_simple_command(process->command, pipefd, shell_vars); exit(g_exitno); break; }
-				case Subshell: { execute_subshell(process->command, shell_vars); exit(g_exitno); break; }
-				case Brace_Group: { execute_brace_group(process->command, shell_vars); exit(g_exitno); break; }
+				case Simple_Command: { 
+					char *bin = resolve_bine(process->command->simple_command, shell_vars);
+					execute_simple_command(process->command, bin, pipefd, shell_vars);
+					exit(g_exitno);
+					break;
+				}
+				case Subshell: { execute_subshell(process->command, background, shell_vars); exit(g_exitno); break; }
+				case Brace_Group: { execute_brace_group(process->command, background, shell_vars); exit(g_exitno); break; }
 				case If_Clause: { execute_if_clause(process->command, shell_vars); exit(g_exitno); break; }
 				case While_Clause: { execute_while_clause(process->command, shell_vars); exit(g_exitno); break; }
 				case Case_Clause: { execute_case_clause(process->command, shell_vars); exit(g_exitno); break; }
@@ -398,12 +402,7 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 				case Function_Definition: { register_function(process->command); exit(g_exitno); break; }
 				default: { break; }
 			}
-		} else {
-			process->pid = pid;
-			if (!job->pgid)
-				job->pgid = pid;
-			setpgid(pid, job->pgid);
-		}
+		} else { set_group(job, process, pid); }
 		process = process->next;
 
 		dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
@@ -430,8 +429,7 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 		}
 
 		const bool skip = (
-			(separator == AND_IF && g_exitno != 0) 
-			||
+			(separator == AND_IF && g_exitno != 0) ||
 			(separator == OR_IF && g_exitno == 0)
 		);
 
@@ -451,38 +449,35 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 	ListP *list_head = complete_command->list;
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
-	const bool background = (shell_infos->interactive && complete_command->separator == AMPER);
+	while (list_head) {
+		const bool background = (
+			shell_infos->interactive == true && 
+			( (list_head->separator == END && complete_command->separator == AMPER) ||
+			(list_head->separator == AMPER) )
+		);
+		// dprintf(2, "Background ? %s\n", boolStr(background));
 
-
-	if (background) {
-		pid_t pid = fork();
-		if (IS_CHILD(pid)) {
-			// close_all_fds();
-			// signal_manager(SIG_EXEC);
-			master_pgid = getpid();
-			// dprintf(2, C_BRIGHT_CYAN"[MASTER] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
-			while (list_head) {
-				execute_list(list_head, true, shell_vars);
-				list_head = list_head->next;
+		if (background == true) {
+			pid_t pid = fork();
+			if (IS_CHILD(pid)) {
+				master_pgid = getpid();
+				// dprintf(2, C_BRIGHT_CYAN"[MASTER] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
+				execute_list(list_head, background, shell_vars);
+				close_all_fds();
+				gc(GC_CLEANUP, GC_ALL);
+				exit(g_exitno);
+			} else {
+				setpgid(pid, pid);
+				AndOrP *master = list_head->and_or;
+				master->tmodes = shell_infos->shell_tmodes;
+				master->pid = pid;
+				master->pgid = pid;
+				put_job_background(master, true);
 			}
-			close_all_fds();
-			gc(GC_CLEANUP, GC_ALL);
-			exit(g_exitno);
 		} else {
-			setpgid(pid, pid);
-			AndOrP *master = gc_unique(AndOrP, GC_ENV);
-			master->tmodes = shell_infos->shell_tmodes;
-			master->pgid = pid;
-			master->pid = pid;
-			put_job_background(master, true);
-			return ;
+			execute_list(list_head, background, shell_vars);
 		}
-	} else {
-		while (list_head) {
-			execute_list(list_head, false, shell_vars);
-			list_head = list_head->next;
-		}
+		list_head = list_head->next;
 	}
-	// dprintf(2, C_LIGHT_PINK"COMPLETE COMMAND EXECUTED"C_RESET"\n");
 	return ;
 }
