@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:07:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 15:25:17 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/23 22:45:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,61 +70,19 @@ char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars){
 	return gc(GC_ADD, ft_strdup(filename), GC_GENERAL);
 }
 
-bool heredoc_detector(TokenList *data, Vars *shell_vars) {
-	for (uint16_t it = 0; it < data->size; it++) {
-		const Token *curr = data->data[it];
-		Token *const el = (curr->tag == T_WORD && curr->w_postfix->tag == T_REDIRECTION) ? curr->w_postfix : (Token *) curr;
-		if (el->tag == T_REDIRECTION && el->r_type == R_HERE_DOC) {
-			Token *filename = el->r_postfix;
-			el->r_type = R_INPUT;
-			filename->w_infix = here_doc(filename->w_infix, HD_EXPAND, shell_vars);
-			if (!filename->w_infix) return false;
-		}
-	}
-	return true;
-}
-
-void add_redirection_from_token(RedirectionList *redir_list, const Token *el) {
-	Redirection *redir = gc_unique(Redirection, GC_SUBSHELL); 
-	// tokenToString((Token *)el, 0);
-
-	if (el->tag == T_WORD) {
-		redir->prefix_fd = ft_atoi(el->w_infix);
-		redir->r_type = el->w_postfix->r_type;
-		if (is_number(el->w_postfix->r_postfix->w_infix)) {
-			redir->su_type = R_FD;
-			redir->fd = ft_atol(el->w_postfix->r_postfix->w_infix);
-		} else {
-			redir->su_type = R_FILENAME;
-			redir->filename = el->w_postfix->r_postfix->w_infix;
-		}
-	} else if (el->tag == T_REDIRECTION) {
-		redir->prefix_fd = -1;
-		redir->r_type = el->r_type;
-		if (is_number(el->r_postfix->w_infix)) {
-			redir->su_type = R_FD;
-			redir->fd = ft_atol(el->r_postfix->w_infix);
-		} else {
-			redir->su_type = R_FILENAME;
-			redir->filename = el->r_postfix->w_infix;
-		}
-	}
-	da_push(redir_list, redir);
-}
-
-Token *get_candidate(TokenList *tl, const size_t idx) {
-	if (is_redirection(tl, &idx)) {
-		if (tl->data[idx]->tag == T_WORD) {
-			return tl->data[idx]->w_postfix->r_postfix;
-		} else {
-			return tl->data[idx]->r_postfix;
-		}
-	} else if (is_word(tl, &idx)) {
-		return tl->data[idx];
-	} else {
-		return NULL;
-	}
-}
+// Token *get_candidate(TokenList *tl, const size_t idx) {
+// 	if (is_redirection(tl, &idx)) {
+// 		if (tl->data[idx]->tag == T_WORD) {
+// 			return tl->data[idx]->w_postfix->r_postfix;
+// 		} else {
+// 			return tl->data[idx]->r_postfix;
+// 		}
+// 	} else if (is_word(tl, &idx)) {
+// 		return tl->data[idx];
+// 	} else {
+// 		return NULL;
+// 	}
+// }
 
 void remove_boundaries(Str *exp) {
 	static const size_t boundaries[][2] = {
@@ -257,95 +215,95 @@ bool is_var_expand_context(ExpKindList *exp_stack) {
 	return var_expand;
 }
 
-StrList *get_range_list(Token *candidate, Vars *shell_vars, bool *error) {
-	
-	static const ContextMap map[] = {
-		[EXP_ARITHMETIC] = { .begin = "$((", .end = "))" },
-		[EXP_CMDSUB] = { .begin = "$(", .end = ")"},
-		[EXP_VARIABLE] = { .begin = "${", .end = "}" },
-		[EXP_SUB] = { .begin = "(", .end = ")" },
-	};
-
-	da_create(self, StrList, sizeof(Str *), GC_SUBSHELL);
-	da_create(exp_stack, ExpKindList, sizeof(ExpKind), GC_SUBSHELL);
-	da_create(word, StringStream, sizeof(char), GC_SUBSHELL);
-	da_create(cache_stack, StringStream, sizeof(char), GC_SUBSHELL);
-	ss_push_string(word, candidate->w_infix);
-	bool can_push = false;
-
-	while (word->size) {
-		ExpKind maybe_begin = 0;
-		ExpKind maybe_end = 0;
-		ExpKind top_context = da_peak_back(exp_stack);
-		ExpKind bottom_context = da_peak_front(exp_stack);
-		bool	var_expand = is_var_expand_context(exp_stack);
-
-		if ((maybe_begin = identify_exp_begin(word->data)) != EXP_WORD) {
-			if (!exp_stack->size && can_push) {
-				Str *res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
-				da_push(self, res);
-			}
-			da_push(exp_stack, maybe_begin);
-			for (size_t i = 0; i < ft_strlen(map[maybe_begin].begin); i++) {
-				da_push(cache_stack, da_pop_front(word));
-			}
-			continue;
-		}
-		if (exp_stack->size && (maybe_end = identify_exp_end(word->data, map, top_context)) != EXP_WORD) {
-			if (maybe_end == top_context) {
-				da_pop(exp_stack);
-				for (size_t i = 0; i < ft_strlen(map[maybe_end].end); i++) {
-					da_push(cache_stack, da_pop_front(word));
-				}
-				if (bottom_context == EXP_ARITHMETIC && top_context == EXP_CMDSUB) {
-					da_push(cache_stack, 0);
-					size_t idx = ft_strrstr(cache_stack->data, map[top_context].begin);
-					char *tmp = ft_substr(&cache_stack->data[idx], 2, ft_strlen(&cache_stack->data[idx]) - 2 - 1);
-					char *result = parser_command_substitution(tmp, shell_vars);
-					free(tmp);
-					// dprintf(2, "result: %s\n", result);
-					ss_cut(cache_stack, idx);
-					ss_push_string(cache_stack, result);
-					free(result);
-					// dprintf(2, "cache: %s\n", cache_stack->data);
-				}
-				if (var_expand && top_context == EXP_VARIABLE) {
-					da_push(cache_stack, 0);
-					size_t idx = ft_strrstr(cache_stack->data, map[top_context].begin);
-					char *result = parser_parameter_expansion(&cache_stack->data[idx], shell_vars);
-					if (result) {
-						ss_cut(cache_stack, idx);
-						ss_push_string(cache_stack, result);
-						free(result);
-					} else {
-						ss_cut(cache_stack, idx);
-						ss_push_string(cache_stack, "");
-					}
-				}
-				if (!exp_stack->size) {
-					Str *res = str_init(maybe_end, ss_get_owned_slice(cache_stack), false);
-					da_push(self, res);
-				}
-			} 
-			can_push = false;
-		} else {
-			da_push(cache_stack, da_pop_front(word));
-			can_push = true;
-		}
-	}
-	if (can_push) {
-		Str *res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
-		da_push(self, res);
-	}
-	if (exp_stack->size) {
-		UNEXPECTED_EOF(')');
-		g_exitno = 2;
-		*error = true;
-	}
-	gc(GC_FREE, cache_stack->data, GC_SUBSHELL);
-	gc(GC_FREE, word->data, GC_SUBSHELL);
-	return self;
-}
+// StrList *get_range_list(Token *candidate, Vars *shell_vars, bool *error) {
+// 	
+// 	static const ContextMap map[] = {
+// 		[EXP_ARITHMETIC] = { .begin = "$((", .end = "))" },
+// 		[EXP_CMDSUB] = { .begin = "$(", .end = ")"},
+// 		[EXP_VARIABLE] = { .begin = "${", .end = "}" },
+// 		[EXP_SUB] = { .begin = "(", .end = ")" },
+// 	};
+//
+// 	da_create(self, StrList, sizeof(Str *), GC_SUBSHELL);
+// 	da_create(exp_stack, ExpKindList, sizeof(ExpKind), GC_SUBSHELL);
+// 	da_create(word, StringStream, sizeof(char), GC_SUBSHELL);
+// 	da_create(cache_stack, StringStream, sizeof(char), GC_SUBSHELL);
+// 	ss_push_string(word, candidate->w_infix);
+// 	bool can_push = false;
+//
+// 	while (word->size) {
+// 		ExpKind maybe_begin = 0;
+// 		ExpKind maybe_end = 0;
+// 		ExpKind top_context = da_peak_back(exp_stack);
+// 		ExpKind bottom_context = da_peak_front(exp_stack);
+// 		bool	var_expand = is_var_expand_context(exp_stack);
+//
+// 		if ((maybe_begin = identify_exp_begin(word->data)) != EXP_WORD) {
+// 			if (!exp_stack->size && can_push) {
+// 				Str *res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
+// 				da_push(self, res);
+// 			}
+// 			da_push(exp_stack, maybe_begin);
+// 			for (size_t i = 0; i < ft_strlen(map[maybe_begin].begin); i++) {
+// 				da_push(cache_stack, da_pop_front(word));
+// 			}
+// 			continue;
+// 		}
+// 		if (exp_stack->size && (maybe_end = identify_exp_end(word->data, map, top_context)) != EXP_WORD) {
+// 			if (maybe_end == top_context) {
+// 				da_pop(exp_stack);
+// 				for (size_t i = 0; i < ft_strlen(map[maybe_end].end); i++) {
+// 					da_push(cache_stack, da_pop_front(word));
+// 				}
+// 				if (bottom_context == EXP_ARITHMETIC && top_context == EXP_CMDSUB) {
+// 					da_push(cache_stack, 0);
+// 					size_t idx = ft_strrstr(cache_stack->data, map[top_context].begin);
+// 					char *tmp = ft_substr(&cache_stack->data[idx], 2, ft_strlen(&cache_stack->data[idx]) - 2 - 1);
+// 					char *result = parser_command_substitution(tmp, shell_vars);
+// 					free(tmp);
+// 					// dprintf(2, "result: %s\n", result);
+// 					ss_cut(cache_stack, idx);
+// 					ss_push_string(cache_stack, result);
+// 					free(result);
+// 					// dprintf(2, "cache: %s\n", cache_stack->data);
+// 				}
+// 				if (var_expand && top_context == EXP_VARIABLE) {
+// 					da_push(cache_stack, 0);
+// 					size_t idx = ft_strrstr(cache_stack->data, map[top_context].begin);
+// 					char *result = parser_parameter_expansion(&cache_stack->data[idx], shell_vars);
+// 					if (result) {
+// 						ss_cut(cache_stack, idx);
+// 						ss_push_string(cache_stack, result);
+// 						free(result);
+// 					} else {
+// 						ss_cut(cache_stack, idx);
+// 						ss_push_string(cache_stack, "");
+// 					}
+// 				}
+// 				if (!exp_stack->size) {
+// 					Str *res = str_init(maybe_end, ss_get_owned_slice(cache_stack), false);
+// 					da_push(self, res);
+// 				}
+// 			} 
+// 			can_push = false;
+// 		} else {
+// 			da_push(cache_stack, da_pop_front(word));
+// 			can_push = true;
+// 		}
+// 	}
+// 	if (can_push) {
+// 		Str *res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
+// 		da_push(self, res);
+// 	}
+// 	if (exp_stack->size) {
+// 		UNEXPECTED_EOF(')');
+// 		g_exitno = 2;
+// 		*error = true;
+// 	}
+// 	gc(GC_FREE, cache_stack->data, GC_SUBSHELL);
+// 	gc(GC_FREE, word->data, GC_SUBSHELL);
+// 	return self;
+// }
 
 
 void print_node(Str *node) {
@@ -456,77 +414,77 @@ void string_erase_nulls(StrList *list) {
 	}
 }
 
-bool is_variable_declaration(Token *token, bool *can_be_variable) {
-	if (*can_be_variable && token->tag == T_WORD && regex_match("^[_a-zA-Z][a-zA-Z1-9_]*=", token->w_infix).is_found) {
-		return true;
-	} else {
-		*can_be_variable = false;
-		return false;
-	}
-}
+// bool is_variable_declaration(Token *token, bool *can_be_variable) {
+// 	if (*can_be_variable && token->tag == T_WORD && regex_match("^[_a-zA-Z][a-zA-Z1-9_]*=", token->w_infix).is_found) {
+// 		return true;
+// 	} else {
+// 		*can_be_variable = false;
+// 		return false;
+// 	}
+// }
 
-bool is_here_doc(const TokenList *list, const size_t *it) {
-	return (list->data[*it]->r_type == R_HERE_DOC || list->data[*it]->w_postfix->r_type == R_HERE_DOC);
-}
+// bool is_here_doc(const TokenList *list, const size_t *it) {
+// 	return (list->data[*it]->r_type == R_HERE_DOC || list->data[*it]->w_postfix->r_type == R_HERE_DOC);
+// }
 
-SimpleCommand *parser_parse_current(TokenList *list, Vars *shell_vars) {
-
-	bool error = false;
-	bool can_be_variable = true;
-	SimpleCommand *command = gc_unique(SimpleCommand, GC_SUBSHELL);
-	da_create(redir_list, RedirectionList, sizeof(Redirection *), GC_SUBSHELL);
-	da_create(var_list, TokenList, sizeof(Token *), GC_SUBSHELL);
-	da_create(arg_list, StringList, sizeof(Str), GC_SUBSHELL);
-	
-	enum { WORD, VARIABLE, REDIRECTION, HERE_DOC };
-
-	for (size_t it = 0; it < list->size; it++) {
-		// tokenToString(list->data[it], 0);
-		int type = WORD;
-		if (is_variable_declaration(list->data[it], &can_be_variable)) {
-			type = VARIABLE;
-		}
-		if (is_redirection(list, &it)) {
-			type = REDIRECTION;
-		}
-		Token *candidate = get_candidate(list, it);
-		if (!candidate)
-			continue;
-		StrList *string_list = get_range_list(candidate, shell_vars, &error);
-		// da_print(string_list);
-		if (error) 
-			return NULL;
-		string_list_consume(string_list, shell_vars);
-		if (type == WORD) {
-			string_list_split(string_list, shell_vars);
-		}
-		string_erase_nulls(string_list);
-		StringList *result = string_list_merge(string_list);
-		if (type == WORD) {
-			string_list_push_list(arg_list, result);
-		} else if (type == VARIABLE) {
-			list->data[it]->w_infix = result->data[0];
-			da_push(var_list, list->data[it]);
-		} else if (type == REDIRECTION) {
-			if (list->data[it]->tag == T_WORD) {
-				list->data[it]->w_postfix->r_postfix->w_infix = result->data[0];
-			} else {
-				list->data[it]->r_postfix->w_infix = result->data[0];
-			}
-			add_redirection_from_token(redir_list, list->data[it]);
-		}
-	}
-
-	command->bin = arg_list->data[0];
-	command->args = arg_list->data;
-	command->redir_list = redir_list;
-
-	// printCommand(command);
-
-	if (command->bin == NULL && var_list->size != 0)
-		add_vars_to_set(shell_vars, var_list);
-	else
-		add_vars_to_local(shell_vars->local, var_list);
-
-	return command;
-}
+// SimpleCommand *parser_parse_current(TokenList *list, Vars *shell_vars) {
+//
+// 	bool error = false;
+// 	bool can_be_variable = true;
+// 	SimpleCommand *command = gc_unique(SimpleCommand, GC_SUBSHELL);
+// 	da_create(redir_list, RedirectionList, sizeof(Redirection *), GC_SUBSHELL);
+// 	da_create(var_list, TokenList, sizeof(Token *), GC_SUBSHELL);
+// 	da_create(arg_list, StringList, sizeof(Str), GC_SUBSHELL);
+// 	
+// 	enum { WORD, VARIABLE, REDIRECTION, HERE_DOC };
+//
+// 	for (size_t it = 0; it < list->size; it++) {
+// 		// tokenToString(list->data[it], 0);
+// 		int type = WORD;
+// 		if (is_variable_declaration(list->data[it], &can_be_variable)) {
+// 			type = VARIABLE;
+// 		}
+// 		if (is_redirection(list, &it)) {
+// 			type = REDIRECTION;
+// 		}
+// 		Token *candidate = get_candidate(list, it);
+// 		if (!candidate)
+// 			continue;
+// 		StrList *string_list = get_range_list(candidate, shell_vars, &error);
+// 		// da_print(string_list);
+// 		if (error) 
+// 			return NULL;
+// 		string_list_consume(string_list, shell_vars);
+// 		if (type == WORD) {
+// 			string_list_split(string_list, shell_vars);
+// 		}
+// 		string_erase_nulls(string_list);
+// 		StringList *result = string_list_merge(string_list);
+// 		if (type == WORD) {
+// 			string_list_push_list(arg_list, result);
+// 		} else if (type == VARIABLE) {
+// 			list->data[it]->w_infix = result->data[0];
+// 			da_push(var_list, list->data[it]);
+// 		} else if (type == REDIRECTION) {
+// 			if (list->data[it]->tag == T_WORD) {
+// 				list->data[it]->w_postfix->r_postfix->w_infix = result->data[0];
+// 			} else {
+// 				list->data[it]->r_postfix->w_infix = result->data[0];
+// 			}
+// 			add_redirection_from_token(redir_list, list->data[it]);
+// 		}
+// 	}
+//
+// 	command->bin = arg_list->data[0];
+// 	command->args = arg_list->data;
+// 	command->redir_list = redir_list;
+//
+// 	// printCommand(command);
+//
+// 	if (command->bin == NULL && var_list->size != 0)
+// 		add_vars_to_set(shell_vars, var_list);
+// 	else
+// 		add_vars_to_local(shell_vars->local, var_list);
+//
+// 	return command;
+// }

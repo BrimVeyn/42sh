@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/17 14:31:41 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 22:56:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,23 @@ static void replace_nested_greedy(const char *ref, char *buffer) {
 }
 
 #include "colors.h"
+
+static Lexer_p lexer_init(char *input) {
+	Lexer_p lexer = gc(GC_ADD, ft_calloc(1, sizeof(Lexer)), GC_SUBSHELL);
+
+	Lexer self = {
+		.input = input,
+		.input_len = ft_strlen(input),
+		.position = 0,
+		.read_position = 0,
+		.ch = 0,
+	};
+
+	*lexer = self;
+	lexer_read_char(lexer);
+
+	return lexer;
+}
 
 char *parser_arithmetic_expansion(char *str, Vars *shell_vars) {
 

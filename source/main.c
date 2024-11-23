@@ -5,7 +5,6 @@
 #include "signals.h"
 #include "debug.h"
 #include "lexer.h"
-#include "ast.h"
 #include "exec.h"
 #include "libft.h"
 #include "ft_readline.h"
@@ -25,10 +24,11 @@
 #include <signals.h>
 
 int g_debug = 0;
-JobList *job_list = NULL;
-FunctionList *FuncList = NULL;
+int g_exitno = 0;
+int g_signal = 0;
 
-//TODO: 42shrc
+FunctionList *g_funcList = NULL;
+JobListe *g_jobList = NULL;
 
 void	*read_input_prompt(char *input, Vars *shell_vars) {
 	char *prompt = string_list_get_value(shell_vars->set, "PS1");
@@ -48,7 +48,7 @@ void env_to_string_list(StringList *env_list, const char **env){
 		string_list_add_or_update(env_list, gc(GC_ADD, ft_strdup(env[i]), GC_ENV));
 }
 
-Vars *vars_init(const char **env) {
+Vars *shell_vars_init(const char **env) {
 	Vars *self = gc(GC_ADD, ft_calloc(1, sizeof(Vars)), GC_ENV);
 
 	da_create(env_list, StringList, sizeof(char *), GC_ENV);
@@ -181,48 +181,41 @@ void update_history_file(HISTORY_STATE *history, Vars *shell_vars){
 	}
 }
 
-int g_jobfd;
-
 #define SHELL_IS_RUNNING true
+#define SCRIPT_MODE ((ac == 1) ? false : true)
+
+void load_42shrc(Vars *shell_vars) {
+	get_history(shell_vars);
+	signal_manager(SIG_PROMPT);
+
+	char *home = string_list_get_value(shell_vars->env, "HOME");
+	char config_filename[1024] = {0};
+	ft_sprintf(config_filename, "%s/.42shrc", home);
+
+	char *file_content = read_input_file(config_filename);
+	//FIX: uncomment this line
+	(void)file_content;
+	// parse_input(file_content, config_filename, shell_vars);
+}
 
 int main(const int ac, char *av[], const char *env[]) {
-	(void) av; (void) ac; (void) env;
 	
 	shell(SHELL_INIT);
-	g_signal = 0;
-	job_list = job_list_init();
-
 	da_create(jobListTmp, JobListe, sizeof(AndOrP *), GC_ENV);
-	jobList = jobListTmp;
-
 	da_create(funcListTmp, FunctionList, sizeof(FunctionP *), GC_ENV);
-	FuncList = funcListTmp;
+	g_jobList = jobListTmp;
+	g_funcList = funcListTmp;
 
-	Vars *shell_vars = vars_init(env);
+	Vars *shell_vars = shell_vars_init(env);
 	ShellInfos *self = shell(SHELL_GET);
-	if (ac != 1) self->interactive = false;
+	if (SCRIPT_MODE) self->interactive = false;
 
-	if (self->interactive){
-		get_history(shell_vars);
-		signal_manager(SIG_PROMPT);
-
-		char *home = string_list_get_value(shell_vars->env, "HOME");
-		char config_filename[1024] = {0};
-		ft_sprintf(config_filename, "%s/.42shrc", home);
-
-		char *file_content = read_input_file(config_filename);
-		if (file_content){
-			TokenList *tokens = lexer_lex_all(file_content);
-			Node *AST = ast_build(tokens);
-			ast_execute(AST, shell_vars, true);
-		}
-	}
+	if (self->interactive) load_42shrc(shell_vars);
 
 	char *input = NULL;
-	//display the prompt, init signals if shell in interactive and reads input
 	while (SHELL_IS_RUNNING) {
 		if (self->interactive) { signal_manager(SIG_PROMPT); }
-		if (ac == 1) {
+		if (!SCRIPT_MODE) {
 			input = read_input_prompt(input, shell_vars);
 		} else {
 			input = read_input_file(av[1]);
@@ -244,18 +237,11 @@ int main(const int ac, char *av[], const char *env[]) {
 			parse_input(input, av[1], shell_vars);
 			update_last_executed_command(shell_vars, input);
 			gc(GC_RESET, GC_SUBSHELL);
-            //----------------------------------------------//
-            // TokenList *tokens = lexer_lex_all(input);
-            // if (lexer_syntax_error(tokens))
-            //     continue; 
-            // heredoc_detector(tokens, shell_vars);
-            // Node *AST = ast_build(tokens);
-            // ast_execute(AST, shell_vars, true);
-            //---------OLD EXECUTION CHAIN------------------//
-			if (ac != 1) break;
+			if (SCRIPT_MODE) break;
 		} else {
-			if (jobList->size) {
+			if (g_jobList->size) {
 				dprintf(2, "There are running jobs. Killing them.\n");
+				//TODO: newjobkillall for AndOrP
 				job_killall();
 				continue;
 			}

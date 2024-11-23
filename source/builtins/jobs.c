@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 17:11:38 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/15 15:54:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 22:59:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,14 +71,15 @@ char *sigStr(const int sig) {
 
 void print_job_entry(char *buffer, const size_t idx, int opts) {
 	if (opts <= 1)
-		ft_sprintf(buffer, "[%ld]\t", job_list->data[idx]->id);
+		ft_sprintf(buffer, "[%ld]\t", g_jobList->data[idx]->id);
 	if (opts >= 1)
-		ft_sprintf(buffer, "%d\t", job_list->data[idx]->pgid);
+		ft_sprintf(buffer, "%d\t", g_jobList->data[idx]->pgid);
 	if (opts <= 1) {
-		if (job_is_stopped(job_list->data[idx]))
-			ft_sprintf(buffer, "Stopped(%s)\t%s\n", sigStr(job_list->data[idx]->sig), get_pipeline(job_list->data[idx]));
-		else
-			ft_sprintf(buffer, "Running\t%s\n", get_pipeline(job_list->data[idx]));
+		//FIX: update these functions
+		// if (job_is_stopped(g_jobList->data[idx]))
+			// ft_sprintf(buffer, "Stopped(%s)\t%s\n", sigStr(g_jobList->data[idx]->sig), get_pipeline(g_jobList->data[idx]));
+		// else
+			// ft_sprintf(buffer, "Running\t%s\n", get_pipeline(g_jobList->data[idx]));
 	}
 	if (opts >= 2)
 		ft_sprintf(buffer, "\n");
@@ -105,13 +106,13 @@ void builtin_jobs(const SimpleCommandP *command, __attribute__((unused)) Vars *s
 	}
 
 	if (!command->word_list->data[i]) {
-		for (size_t i = 0; i < job_list->size; i++) {
+		for (size_t i = 0; i < g_jobList->size; i++) {
 			print_job_entry(buffer, i, opts);
 		}
 	} else {
 		for (; command->word_list->data[i]; i++) {
 			int maybe_num = ft_atoi(command->word_list->data[i]);
-			if (!is_number(command->word_list->data[i]) || maybe_num == 0 || maybe_num > (int) job_list->size) {
+			if (!is_number(command->word_list->data[i]) || maybe_num == 0 || maybe_num > (int) g_jobList->size) {
 				g_exitno = 1;
 				ERROR_NO_SUCH_JOB("jobs", command->word_list->data[i]);
 			} else {

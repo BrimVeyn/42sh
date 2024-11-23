@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/22 17:32:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 22:59:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,17 +51,17 @@ void andor_move(AndOrP *job) {
 
 void remove_job(AndOrP *job) {
 	size_t index = 0;
-	for (;index < jobList->size; index++) {
-		if (job == jobList->data[index]) {
+	for (;index < g_jobList->size; index++) {
+		if (job == g_jobList->data[index]) {
 			break;
 		}
 	}
-	da_erase_index(jobList, index);
+	da_erase_index(g_jobList, index);
 }
 
 static int get_completed_job_index() {
-	for (size_t i = 0; i < jobList->size; i++) {
-		AndOrP *el = jobList->data[i];
+	for (size_t i = 0; i < g_jobList->size; i++) {
+		AndOrP *el = g_jobList->data[i];
 		if (el->completed) return i;
 	}
 	return -1;
@@ -70,8 +70,8 @@ static int get_completed_job_index() {
 void job_notification(void) {
 	update_job_status();
 
-	for (size_t i = 0; i < jobList->size; i++) {
-		AndOrP *el = jobList->data[i];
+	for (size_t i = 0; i < g_jobList->size; i++) {
+		AndOrP *el = g_jobList->data[i];
 		if (el->completed) {
 			if (el->bg)
 				dprintf(2, "[%zu]\tDone\t%s\n", el->id, "yeahhhh");
@@ -82,6 +82,6 @@ void job_notification(void) {
 	}
 
 	for (int idx; (idx = get_completed_job_index()) != -1;) {
-		da_erase_index(jobList, (size_t)idx);
+		da_erase_index(g_jobList, (size_t)idx);
 	}
 }

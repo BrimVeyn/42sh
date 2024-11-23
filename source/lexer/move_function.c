@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 17:20:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 23:17:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,10 @@ void gc_move_pipeline(PipeLineP *pipeline) {
 	PipeLineP *head = pipeline;
 	while (head) {
 		gc(GC_MOVE, head, GC_SUBSHELL, GC_ENV);
+		head->pid = 0;
+		head->completed = 0;
+		head->status = 0;
+		head->stopped = 0;
 		gc_move_command(head->command);
 		head = head->next;
 	}
@@ -109,6 +113,13 @@ void gc_move_andor(AndOrP *andor) {
 	AndOrP *head = andor;
 	while (head) {
 		gc(GC_MOVE, head, GC_SUBSHELL, GC_ENV);
+		head->bg = 0;
+		head->id = 0;
+		head->pid = 0;
+		head->pgid = 0;
+		head->notified = 0;
+		head->completed = 0;
+		head->sig = 0;
 		gc_move_pipeline(head->pipeline);
 		head = head->next;
 	}

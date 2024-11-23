@@ -6,17 +6,17 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/19 15:14:37 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/23 22:50:27 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_readline.h"
-#include "42sh.h"
-#include "ft_regex.h"
 #include "c_string.h"
 #include "lexer.h"
 #include "libft.h"
 #include "utils.h"
+#include "exec.h"
+
 #include <linux/limits.h>
 #include <stdio.h>
 #include <termios.h>
