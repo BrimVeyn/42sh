@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/22 13:00:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 22:03:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,9 @@
 #include <sys/types.h>
 #include <termios.h>
 
+#define NO_WAIT 0x0
+#define WAIT 0x1
+#define IS_CHILD(pid) ((pid == 0) ? true : false)
 
 typedef enum TokenType {
 	AND_IF,

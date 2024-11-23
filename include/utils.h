@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/17 17:08:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 22:02:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,7 +181,7 @@ void ss_push_string(StringStream *ss, char *str);
 char *ss_get_owned_slice(StringStream *ss);
 void ss_cut(StringStream *ss, size_t new_size);
 
-void			fatal(char *msg, int exit_code);
-void			error(char *msg, int exit_code);
+void error(const char * const msg, const int exit_code);
+void fatal(const char * const msg, const int exit_code);
 
 #endif // !UTILS_H

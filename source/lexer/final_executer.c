@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/21 10:35:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/22 17:33:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 22:05:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "final_parser.h"
+#include "lexer.h"
 #include "parser.h"
 #include "signals.h"
 #include "utils.h"
@@ -27,7 +28,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-pid_t master_pgid;
+pid_t g_masterPgid;
 
 void dup_input_and_close(int fd) {
 	secure_dup2(fd, STDIN_FILENO);
@@ -41,9 +42,7 @@ void create_pipe(bool *hadPipe, int *pipefd) {
 	close(pipefd[1]);
 }
 
-#define IS_CHILD(pid) ((pid == 0) ? true : false)
-
-int is_function(char *func_name);
+int is_function(const char * const func_name);
 
 char  *resolve_bine(SimpleCommandP *command, Vars *shell_vars) {
 	if (!command || !command->word_list->data[0]) {
@@ -266,14 +265,29 @@ void execute_for_clause(CommandP *command, Vars *shell_vars) {
 	return ;
 }
 
-#define NO_WAIT 0
-#define WAIT 1
+void declare_positional(StringListL *positional_parameters, Vars *shell_vars) {
+	for (size_t i = 0; i < positional_parameters->size; i++) {
+		char buffer[MAX_WORD_LEN] = {0};
+		int ret = ft_snprintf(buffer, MAX_WORD_LEN, "%ld=%s", i, positional_parameters->data[i]);
+		if (ret == -1)
+			fatal("snprintf: exceeded buffer capacity", 255);
+		string_list_add_or_update(shell_vars->local, buffer);
+	}
+}
 
-int is_function(char *func_name) {
+void execute_function(CommandP *command, int funcNo, bool background, Vars *shell_vars) {
+	SimpleCommandP *simple_command = command->simple_command;
+	StringListL *positional_parameters = simple_command->word_list;
+	declare_positional(positional_parameters, shell_vars);
+	execute_brace_group(FuncList->data[funcNo]->function_body, background, shell_vars);
+	string_list_clear(shell_vars->local);
+}
+
+
+int is_function(const char * const func_name) {
 	for (size_t i = 0; i < FuncList->size; i++) {
-		if (!ft_strcmp(FuncList->data[i]->function_name, func_name)) {
+		if (!ft_strcmp(FuncList->data[i]->function_name, func_name))
 			return i;
-		}
 	}
 	return -1;
 }
@@ -310,7 +324,7 @@ int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 			int funcNo = is_function(bin);
 			if (funcNo != -1) {
 				//FIX: reset pids
-				execute_brace_group(FuncList->data[funcNo]->function_body, background, shell_vars);
+				execute_function(command, funcNo, background, shell_vars);
 				return NO_WAIT;
             }
 			if (is_builtin(bin)) {
@@ -320,7 +334,7 @@ int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 				pid_t pid = fork();
 				if (IS_CHILD(pid)) {
 					signal_manager(SIG_EXEC);
-					setpgid(pid, master_pgid);
+					setpgid(pid, g_masterPgid);
 			// dprintf(2, C_DARK_CYAN"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
 					close_all_fds();
 					execute_simple_command(command, bin, NULL, shell_vars);
@@ -460,7 +474,7 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 		if (background == true) {
 			pid_t pid = fork();
 			if (IS_CHILD(pid)) {
-				master_pgid = getpid();
+				g_masterPgid = getpid();
 				// dprintf(2, C_BRIGHT_CYAN"[MASTER] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
 				execute_list(list_head, background, shell_vars);
 				close_all_fds();
