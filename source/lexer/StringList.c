@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/08 10:54:34 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/23 22:00:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,9 @@
 
 #include <stdio.h>
 
-void add_vars_to_set(Vars *shell_vars, TokenList *vars) {
-	StringList *set = shell_vars->set;
-	StringList *env = shell_vars->env;
+void add_vars_to_set(const Vars * const shell_vars, TokenList *vars) {
+	StringList * const set = shell_vars->set;
+	StringList * const env = shell_vars->env;
 	for (size_t i = 0; i < vars->size; i++) {
 		string_list_update(env, vars->data[i]->w_infix);
 		string_list_add_or_update(set, vars->data[i]->w_infix);
@@ -47,9 +47,9 @@ void string_list_delete(StringList *list) {
 
 bool string_list_remove(StringList *sl, char *id) {
 	for (size_t i = 0; i < sl->size; i++) {
-		char *curr_equal_ptr = ft_strchr(sl->data[i], '=');
-		size_t curr_equal_pos = curr_equal_ptr - sl->data[i];
-		char *curr_id = ft_substr(sl->data[i], 0, curr_equal_pos);
+		const char * const curr_equal_ptr = ft_strchr(sl->data[i], '=');
+		const size_t curr_equal_pos = curr_equal_ptr - sl->data[i];
+		char * const curr_id = ft_substr(sl->data[i], 0, curr_equal_pos);
 
 		if  (!ft_strcmp(curr_id, id)) {
 			gc(GC_FREE, sl->data[i], GC_ENV);
@@ -64,15 +64,15 @@ bool string_list_remove(StringList *sl, char *id) {
 }
 
 bool string_list_update(StringList *sl, const char *var) {
-	char *equal_ptr = ft_strchr(var, '=');
-	bool add_only = (!equal_ptr);
-	size_t equal_pos = equal_ptr - var;
-	char *id = ft_substr(var, 0, equal_pos);
+	const char * const equal_ptr = ft_strchr(var, '=');
+	const bool add_only = (!equal_ptr);
+	const size_t equal_pos = equal_ptr - var;
+	char * const id = ft_substr(var, 0, equal_pos);
 
 	for (size_t i = 0; i < sl->size; i++) {
-		char *curr_equal_ptr = ft_strchr(sl->data[i], '=');
-		size_t curr_equal_pos = curr_equal_ptr - sl->data[i];
-		char *curr_id = ft_substr(sl->data[i], 0, curr_equal_pos);
+		const char *curr_equal_ptr = ft_strchr(sl->data[i], '=');
+		const  size_t curr_equal_pos = curr_equal_ptr - sl->data[i];
+		char * const curr_id = ft_substr(sl->data[i], 0, curr_equal_pos);
 
 		if  (!ft_strcmp(curr_id, id)) {
 			if (!add_only) {
@@ -94,18 +94,18 @@ void string_list_add_or_update(StringList *sl, char *var) {
 }
 
 void string_list_append(StringList *sl, char *var) {
-	size_t plus_pos = ft_strstr(var, "+");
-	char *var_id = ft_substr(var, 0, plus_pos);
-	char *var_tail = &var[plus_pos + 2];
+	const size_t plus_pos = ft_strstr(var, "+");
+	char * const var_id = ft_substr(var, 0, plus_pos);
+	const char *var_tail = &var[plus_pos + 2];
 	if (!var_tail)
 		return ;
 	for (size_t i = 0; i < sl->size; i++) {
-		size_t equal_pos = ft_strstr(sl->data[i], "=");
-		char *curr_id = ft_substr(sl->data[i], 0, equal_pos);
+		const size_t equal_pos = ft_strstr(sl->data[i], "=");
+		char * const curr_id = ft_substr(sl->data[i], 0, equal_pos);
 		if (!ft_strcmp(curr_id, var_id)) {
 			free(curr_id);
 			free(var_id);
-			char *hold = sl->data[i];
+			char * const hold = sl->data[i];
 			sl->data[i] = gc(GC_ADD, ft_strjoin(sl->data[i], var_tail), GC_ENV);
 			gc(GC_FREE, hold, GC_ENV);
 			return ;
@@ -116,9 +116,9 @@ void string_list_append(StringList *sl, char *var) {
 
 char *string_list_get_value(StringList *sl, char *id) {
 	for (size_t i = 0; i < sl->size; i++) {
-		char *curr_equal_ptr = ft_strchr(sl->data[i], '=');
-		size_t curr_equal_pos = curr_equal_ptr - sl->data[i];
-		char *curr_id = ft_substr(sl->data[i], 0, curr_equal_pos);
+		const char *curr_equal_ptr = ft_strchr(sl->data[i], '=');
+		const size_t curr_equal_pos = curr_equal_ptr - sl->data[i];
+		char * const curr_id = ft_substr(sl->data[i], 0, curr_equal_pos);
 
 		if  (!ft_strcmp(curr_id, id)) {
 			free(curr_id);
@@ -130,10 +130,9 @@ char *string_list_get_value(StringList *sl, char *id) {
 }
 
 char *shell_vars_get_value(Vars *shell_vars, char *id) {
-	char *return_value = string_list_get_value(shell_vars->env, id);
-	if (!return_value) {
+	char * return_value = string_list_get_value(shell_vars->env, id);
+	if (!return_value)
 		return_value = string_list_get_value(shell_vars->set, id);
-	}
 	return return_value;
 }
 

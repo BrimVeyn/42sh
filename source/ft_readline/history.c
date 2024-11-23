@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/21 10:20:02 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/23 21:50:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ HISTORY_STATE *history;
 
 void init_history(Vars *shell_vars) {
 
-	history = gc(GC_ALLOC, 1, sizeof(HISTORY_STATE), GC_READLINE);
+	history = gc_unique(HISTORY_STATE, GC_READLINE);
 	history->offset = 0;
 	history->navigation_offset = 0;
 	history->length = 0;
@@ -32,10 +32,9 @@ void init_history(Vars *shell_vars) {
 	history->entries = gc(GC_CALLOC, 10, sizeof(HIST_ENTRY*), GC_READLINE);
 
 	//config
-	HISTORY_CONFIG *config = gc(GC_CALLOC, sizeof(HISTORY_CONFIG), GC_READLINE);
-	config->histsize = 500;
-	config->histfilesize = 500;
-	history->config = config;
+	history->config = gc_unique(HISTORY_CONFIG, GC_READLINE);
+	history->config->histsize = 500;
+	history->config->histfilesize = 500;
 	string_list_add_or_update(shell_vars->set, "HISTSIZE=500");
 	string_list_add_or_update(shell_vars->set, "HISTFILESIZE=500");
 

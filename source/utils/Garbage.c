@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 17:22:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 21:44:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ static void gc_init(Garbage *gc) {
 		gc[n].capacity = 10;
 		gc[n].garbage = ft_calloc(10, sizeof(void *));
 		if (!gc[n].garbage)
-			exit(EXIT_FAILURE);
+			fatal("alloc error", 255);
 	}
 }
 
@@ -35,7 +35,7 @@ static void *gc_add(Garbage *gc, void *ptr, const gc_level n) {
 		gc[n].garbage = (void **) ft_realloc(gc[n].garbage, gc[n].size, gc[n].capacity, sizeof(void *));
 		free(tmp);
 		if (!gc[n].garbage)
-			exit(EXIT_FAILURE);
+			fatal("alloc error", 255);
 	}
 	gc[n].garbage[gc[n].size] = ptr;
 	gc[n].size += 1;
