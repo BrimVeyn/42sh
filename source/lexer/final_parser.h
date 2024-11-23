@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 22:03:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 23:07:41 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -363,8 +363,10 @@ typedef struct {
 } FunctionList;
 
 
-extern JobListe *jobList;
-extern FunctionList *FuncList;
+extern JobListe *g_jobList;
+extern FunctionList *g_funcList;
+
+void gc_move_function(FunctionP *func);
 
 int mark_process (JobListe *list, pid_t pid, int status, bool print);
 void put_job_background (AndOrP *job, bool add);
@@ -375,6 +377,7 @@ int job_completed(AndOrP *j);
 void andor_move(AndOrP *job);
 void update_job_status(void);
 void job_notification(void);
+void job_killall(void);
 
 #include "exec.h"
 

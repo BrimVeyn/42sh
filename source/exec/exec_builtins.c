@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/15 17:03:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 22:34:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars) {
 
 bool is_builtin(const char *bin) {
 	static const char *builtins[] = {
-		"echo", "cd", /*"pwd",*/ "export", "type",
+		"echo", "cd", "pwd", "export", "type",
 		"unset", "env", "exit", "set", 
 		"hash", "jobs", "fg", "bg",
 	};

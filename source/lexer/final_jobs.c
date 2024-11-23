@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/22 17:26:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 23:07:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,13 @@
 #include <sys/wait.h>
 #include <termios.h>
 
-JobListe *jobList;
+
+void job_killall(void) {
+	for (size_t i = 0; i < g_jobList->size; i++) {
+		kill(g_jobList->data[i]->pgid, SIGTERM);
+	}
+	g_jobList->size = 0;
+}
 
 void job_wait (AndOrP *job) {
 	int status;
@@ -81,7 +87,7 @@ void put_job_background (AndOrP *job, bool add) {
 	job->bg = true;
 	if (add) {
 		andor_move(job);
-		da_push(jobList, job);
+		da_push(g_jobList, job);
 		dprintf(2, "[%zu]\t%d\n", job->id, job->pgid);
 		job->notified = true;
     }
@@ -115,11 +121,11 @@ void update_job_status(void) {
 	int status;
 	pid_t pid;
 
-	if (!jobList || !jobList->size) return ;
+	if (!g_jobList || !g_jobList->size) return ;
 	do {
 		pid = waitpid (WAIT_ANY, &status, WUNTRACED|WNOHANG);
 		// dprintf(2, "CAUGHT: %d | %d\n", pid, status);
-	} while (!mark_process(jobList, pid, status, false));
+	} while (!mark_process(g_jobList, pid, status, false));
 }
 
 int mark_process (JobListe *list, pid_t pid, int status, bool print) {
@@ -145,7 +151,7 @@ int mark_process (JobListe *list, pid_t pid, int status, bool print) {
 				} else if (WIFSTOPPED (status)) {
 					p->stopped = 1;
 					andor_move(job);
-					da_push(jobList, job);
+					da_push(g_jobList, job);
 					job->sig = WSTOPSIG(status);
 					if (print)
 						dprintf(STDERR_FILENO, "[%zu]\tStopped(%s)\t%s\n", job->id, sigStr(job->sig), "waouh");

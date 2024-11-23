@@ -6,14 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:11 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/06 10:08:11 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 22:46:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "exec.h"
 #include "lexer.h"
 #include "parser.h"
 #include "utils.h" 
-#include "ast.h" 
 #include "ft_regex.h"
 
 #include <stdio.h>
@@ -33,13 +33,17 @@ static void clean_sub(void) {
 bool execute_command_sub(char *input, Vars *shell_vars) {
 	pid_t pid = fork();
 	if (!pid) {
-		TokenList *tokens = lexer_lex_all(input);
-		if (lexer_syntax_error(tokens))
-			clean_sub();
-		heredoc_detector(tokens, shell_vars);
-		Node *AST = ast_build(tokens);
-		ast_execute(AST, shell_vars, true);
+		//FIX: uncomment next line
+		// parse_input(input, "command_sub", shell_vars);
+		(void)input;(void)shell_vars;
 		clean_sub();
+		// TokenList *tokens = lexer_lex_all(input);
+		// if (lexer_syntax_error(tokens))
+		// 	clean_sub();
+		// heredoc_detector(tokens, shell_vars);
+		// Node *AST = ast_build(tokens);
+		// ast_execute(AST, shell_vars, true);
+		// clean_sub();
 	} else {
 		//TODO: must be backgrounable
 		//parsed in the children ?

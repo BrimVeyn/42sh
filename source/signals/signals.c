@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:29:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 11:17:57 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/23 23:02:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,13 @@
 #include <stdio.h>
 #include <signal.h>
 
-int g_signal;
-
-void signal_sigint_prompt(__attribute__((unused)) int code) {
+void signal_sigint_prompt(int code) {
 	rl_done = 1;
 	g_signal = code;
 
 }
 
-void signal_sigint_heredoc(__attribute__((unused)) int code) {
+void signal_sigint_heredoc(int code) {
 	rl_done = 2;
 	g_signal = code;
 }

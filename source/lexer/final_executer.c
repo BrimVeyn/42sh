@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/21 10:35:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 22:05:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 23:19:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,6 +236,7 @@ void execute_if_clause(CommandP *command, Vars *shell_vars) {
 }
 
 void execute_while_clause(CommandP *command, Vars *shell_vars) {
+	//TODO: handle until_clause maybe in a separate func maybe not
 	WhileClauseP *while_clause = command->while_clause;
 	while (execute_list(while_clause->condition, false, shell_vars), g_exitno == 0) {
 		execute_list(while_clause->body, false, shell_vars);
@@ -261,6 +262,7 @@ void execute_case_clause(CommandP *command, Vars *shell_vars) {
 
 void execute_for_clause(CommandP *command, Vars *shell_vars) {
 	ForClauseP *for_clause = command->for_clause;
+	//TOOD: fill this
 	(void) for_clause; (void)shell_vars;
 	return ;
 }
@@ -278,32 +280,31 @@ void declare_positional(StringListL *positional_parameters, Vars *shell_vars) {
 void execute_function(CommandP *command, int funcNo, bool background, Vars *shell_vars) {
 	SimpleCommandP *simple_command = command->simple_command;
 	StringListL *positional_parameters = simple_command->word_list;
+	gc_move_function(g_funcList->data[funcNo]); //hasn't the move effect but resets PID and PGID
 	declare_positional(positional_parameters, shell_vars);
-	execute_brace_group(FuncList->data[funcNo]->function_body, background, shell_vars);
+	execute_brace_group(g_funcList->data[funcNo]->function_body, background, shell_vars);
 	string_list_clear(shell_vars->local);
 }
 
 
 int is_function(const char * const func_name) {
-	for (size_t i = 0; i < FuncList->size; i++) {
-		if (!ft_strcmp(FuncList->data[i]->function_name, func_name))
+	for (size_t i = 0; i < g_funcList->size; i++) {
+		if (!ft_strcmp(g_funcList->data[i]->function_name, func_name))
 			return i;
 	}
 	return -1;
 }
 
-void gc_move_function(FunctionP *func);
-
 void register_function(CommandP *command) {
 	FunctionP *func = command->function_definition;
-	for (size_t i = 0; i < FuncList->size; i++) {
-		if (!ft_strcmp(func->function_name, FuncList->data[i]->function_name)) {
-			da_erase_index(FuncList, i);
+	for (size_t i = 0; i < g_funcList->size; i++) {
+		if (!ft_strcmp(func->function_name, g_funcList->data[i]->function_name)) {
+			da_erase_index(g_funcList, i);
 		}
 	}
 	gc_move_function(func);
 	dprintf(2, "FUNCTION: %s\n", func->function_name);
-	da_push(FuncList, func);
+	da_push(g_funcList, func);
 }
 
 void job_wait_2 (AndOrP *job);
@@ -370,7 +371,6 @@ int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 }
 
 int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
-	(void)background;
 	PipeLineP *process = job->pipeline;
 	int saved_fds[] = {
 		[STDIN_FILENO] = dup(STDIN_FILENO),

@@ -6,16 +6,16 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/23 21:50:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/23 22:51:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "c_string.h"
 #include "ft_readline.h"
-#include "42sh.h"
 #include "lexer.h"
 #include "libft.h"
 #include "utils.h"
+#include "ft_regex.h"
 
 bool history_defined = false;
 HISTORY_STATE *history;
