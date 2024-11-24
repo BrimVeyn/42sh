@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:11 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 22:46:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/24 10:15:41 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,32 +33,15 @@ static void clean_sub(void) {
 bool execute_command_sub(char *input, Vars *shell_vars) {
 	pid_t pid = fork();
 	if (!pid) {
-		//FIX: uncomment next line
-		// parse_input(input, "command_sub", shell_vars);
-		(void)input;(void)shell_vars;
+		//TODO: connect job control
+		parse_input(input, "command_sub", shell_vars);
 		clean_sub();
-		// TokenList *tokens = lexer_lex_all(input);
-		// if (lexer_syntax_error(tokens))
-		// 	clean_sub();
-		// heredoc_detector(tokens, shell_vars);
-		// Node *AST = ast_build(tokens);
-		// ast_execute(AST, shell_vars, true);
-		// clean_sub();
 	} else {
-		//TODO: must be backgrounable
-		//parsed in the children ?
 		int status;
 		waitpid(pid, &status, 0);
 		g_exitno = WEXITSTATUS(status);
 	}
 	return true;
-}
-
-bool is_variable_assignment(char *str) {
-	if (regex_match("[_a-zA-Z][_a-zA-Z0-9]*=", str).is_found) {
-		return true;
-	}
-	return false;
 }
 
 char *parser_command_substitution(char *str, Vars *shell_vars) {
@@ -78,10 +61,8 @@ char *parser_command_substitution(char *str, Vars *shell_vars) {
 	dup2(STDOUT_SAVE, STDOUT_FILENO); close(STDOUT_SAVE);
 
 	output_fd = open(file_name, O_RDONLY, 0644);
-	if (output_fd == -1) {
-		printf("failed 2\n");
-		exit(EXIT_FAILURE);
-	}
+	if (output_fd == -1)
+		fatal("open: command_sub file not found", 255);
 
 	char *result = read_whole_file(output_fd);
 	close(output_fd); unlink(file_name);

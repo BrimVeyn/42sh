@@ -6,17 +6,18 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 13:04:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 22:55:11 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/24 16:22:04 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "final_parser.h"
+#include "utils.h"
 
 #include <stdio.h>
 
 bool get_next_token(StringStream *input, StringStream *cache, size_t *line, size_t *column);
 
-void *lex_interface(LexMode mode, void *input, void *filename, bool *error) {
+void *lex_interface(const LexMode mode, void *input, void *filename, bool *error) {
 	static Lex *lexer = NULL;
 
 	switch (mode) {
@@ -24,7 +25,7 @@ void *lex_interface(LexMode mode, void *input, void *filename, bool *error) {
 		case (LEX_SET): {
 			lexer = gc_unique(Lex, GC_SUBSHELL);
 			lexer->raw_input = input;
-			lexer->filename = (filename == NULL) ? "cmd_line" : filename;
+			lexer->filename = (filename == NULL) ? "terminal" : filename;
 			da_create(tmp, StringStream, sizeof(char), GC_SUBSHELL);
 			lexer->input = tmp;
 			da_create(tmp2, StringStream, sizeof(char), GC_SUBSHELL);
@@ -40,7 +41,7 @@ void *lex_interface(LexMode mode, void *input, void *filename, bool *error) {
 				da_create(tmp, StringStream, sizeof(char), GC_SUBSHELL);
 				if (!get_next_token(lexer->input, tmp, &lexer->line, &lexer->column))
 					*error = true;
-				return tmp->data;
+				return ss_get_owned_slice(tmp);
 			}
 			break;
 		}
@@ -55,7 +56,7 @@ void *lex_interface(LexMode mode, void *input, void *filename, bool *error) {
 			break;
 		} 
 		case (LEX_PEAK_CHAR): return lexer->input->data[0] != '\0' ? &lexer->input->data[0] : NULL;
-		case (LEX_DEBUG): dprintf(2, "input: %s\n", lexer->input->data); dprintf(2, "peak: %s\n", lexer->peak->data); break;
+		case (LEX_DEBUG): ft_dprintf(2, "input: %s\n", lexer->input->data); ft_dprintf(2, "peak: %s\n", lexer->peak->data); break;
 	}
 	return NULL;
 }

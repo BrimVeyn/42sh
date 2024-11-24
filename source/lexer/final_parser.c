@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/21 10:35:33 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/22 11:45:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/24 16:25:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,10 @@
 
 extern TableEntry parsingTable[182][86];
 
-bool is_keyword(TokenType type) {
+bool is_keyword(const TokenType type) {
 	return (type == IF || type == FI || type == CASE || type == ESAC ||
 		 type == FOR || type == IN || type == WHILE || type == UNTIL ||
-		 type == DONE || type == DO || type == LBRACE || type == RBRACE);
+		 type == DONE || type == DO || type == LBRACE || type == RBRACE || type == THEN);
 }
 
 TokenType identify_token(const char *raw_value, const int table_row, bool *error) {
@@ -43,12 +43,10 @@ TokenType identify_token(const char *raw_value, const int table_row, bool *error
 		[BANG] = "!", [PIPE] = "|",
 		[LPAREN] = "(", [RPAREN] = ")",
 		[LBRACE] = "{", [RBRACE] = "}",
-		[FOR] = "for",
-		[IN] = "in",
+		[FOR] = "for", [IN] = "in",
 		[CASE] = "case", [ESAC] = "esac", [DSEMI] = ";;",
 		[IF] = "if", [THEN] = "then", [FI] = "fi", [ELIF] = "elif", [ELSE] = "else",
-		[WHILE] =  "while",
-		[UNTIL] = "until",
+		[WHILE] =  "while", [UNTIL] = "until",
 		[DO] = "do", [DONE] = "done",
 		[DLESS] = "<<", [DLESSDASH] = "<<-", [LESS] = "<", [LESSAND] = "<&",
 		[DGREAT] = ">>", [GREAT] = ">", [GREATAND] = ">&",
@@ -59,13 +57,12 @@ TokenType identify_token(const char *raw_value, const int table_row, bool *error
 	// dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
-			(table_row != 27 || !is_keyword(i))) {
+			((table_row != 27 && table_row != 66) || !is_keyword(i))) {
 			return i;
 		}
 	}
 
-
-	if (regex_match("^[0-9]+", (char *)raw_value).is_found) {
+	if (regex_match("^[0-9]+$", (char *)raw_value).is_found) {
 		char *peak = lex_interface(LEX_PEAK_CHAR, NULL, NULL, error);
 		if (peak && (*peak == '<' || *peak == '>'))
 			return IO_NUMBER;
@@ -145,6 +142,7 @@ StackEntry *parse(Vars *shell_vars) {
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
 						da_pop(stack); //newline_list
 						da_pop(stack); //complete_commands
+						// dprintf(2, "ONE COMMAND !\n");
 						// print_complete_command(complete_command);
 						execute_complete_command(complete_command, shell_vars);
 						reduced_entry->token.type = Complete_Commands;
@@ -154,6 +152,7 @@ StackEntry *parse(Vars *shell_vars) {
 					}
 					case 3: { /* complete_commands -> complete_command */
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
+						// dprintf(2, "ONE COMMAND !\n");
 						// print_complete_command(complete_command);
 						execute_complete_command(complete_command, shell_vars);
 						reduced_entry->token.type = Complete_Commands;

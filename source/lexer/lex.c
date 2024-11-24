@@ -6,10 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/09 17:44:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/24 16:19:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "final_parser.h"
 #include "lexer.h"
 #include "utils.h"
 #include "libft.h"
@@ -148,7 +149,7 @@ bool get_next_token(StringStream *input, StringStream *cache, size_t *line, size
 	if (context_stack->size != 0) {
 		WordContext context = da_peak_back(context_stack);	
 		if (context != WORD_WORD) {
-			dprintf(2, "Syntax error, unclosed %d (add contextToStr function)\n", context);
+			pretty_error("eof");
 			return false;
 		}
 	}

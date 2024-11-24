@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 23:07:41 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/24 16:34:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -296,7 +296,7 @@ char *tokenTypeStr(TokenType type);
 char *actionStr(const Action action);
 
 typedef struct {
-	char *filename; //either script name or cmd_line
+	char *filename; //either script name or terminal
 	char *raw_input;
 	StringStream *input;
 	StringStream *peak;
@@ -305,7 +305,7 @@ typedef struct {
 } Lex;
 
 typedef enum {LEX_SET, LEX_GET, LEX_OWN, LEX_PEAK, LEX_PEAK_CHAR, LEX_DEBUG} LexMode;
-void *lex_interface(LexMode mode, void *input, void *filename, bool *error);
+void *lex_interface(const LexMode mode, void *input, void *filename, bool *error);
 
 void		pipelineAddBack(PipeLineP **lst, PipeLineP *new_value);
 PipeLineP	*pipelineNew(CommandP *command);
@@ -387,6 +387,8 @@ typedef enum {
 } heredoc_mode;
 
 char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars);
+
+StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const bool split);
 
 void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars);
 bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars);

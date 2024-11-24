@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 22:54:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/24 10:31:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,8 +166,8 @@ void close_saved_fds(int *saved_fds) {
 // 		if (pgid == 0) pgid = pid;
 // 		setpgid (pid, pgid);
 //
-// 		if (foreground)
-// 			tcsetpgrp(shell_infos->shell_terminal, pgid);
+		// if (foreground)
+		// 	tcsetpgrp(shell_infos->shell_terminal, pgid);
 //
 // 		signal_manager(SIG_EXEC);
 // 	}

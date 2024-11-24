@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 12:20:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/15 15:48:55 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/24 16:23:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ void builtin_echo(const SimpleCommandP *command, __attribute__((unused)) Vars *s
 		newline = false;
 	}
 
-	for (; command->word_list->data[i]; i++) {
+	for (; i < command->word_list->size; i++) {
 		ft_sprintf(buffer, "%s", command->word_list->data[i]);
 		if (command->word_list->data[i + 1]) {
 			ft_sprintf(buffer, " ");
