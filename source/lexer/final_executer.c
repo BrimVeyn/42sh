@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/21 10:35:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 23:19:39 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/24 16:36:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -316,26 +316,36 @@ void set_group(AndOrP *job, PipeLineP *process, pid_t pid) {
 	setpgid(pid, job->pgid);
 }
 
+void process_simple_command(SimpleCommandP *simple_command, Vars *shell_vars) {
+	StringListL *args = do_expansions(simple_command->word_list, shell_vars, true);
+	StringListL *vars = do_expansions(simple_command->assign_list, shell_vars, false);
+	simple_command->word_list = args;
+	simple_command->assign_list = vars;
+	if (!args->data[0])
+		add_vars_to_set(shell_vars, vars);
+	else
+		add_vars_to_local(shell_vars->local, vars);
+}
+
 int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 	PipeLineP *process = job->pipeline;
 	CommandP *command = job->pipeline->command;
 	switch (command->type) {
 		case Simple_Command: {
+			process_simple_command(command->simple_command, shell_vars);
 			char *bin = resolve_bine(command->simple_command, shell_vars);
 			int funcNo = is_function(bin);
 			if (funcNo != -1) {
-				//FIX: reset pids
 				execute_function(command, funcNo, background, shell_vars);
 				return NO_WAIT;
-            }
-			if (is_builtin(bin)) {
+            } else if (is_builtin(bin)) {
 				execute_builtin(command->simple_command, shell_vars);
 				return NO_WAIT;
 			} else {
 				pid_t pid = fork();
 				if (IS_CHILD(pid)) {
-					signal_manager(SIG_EXEC);
 					setpgid(pid, g_masterPgid);
+					signal_manager(SIG_EXEC);
 			// dprintf(2, C_DARK_CYAN"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
 					close_all_fds();
 					execute_simple_command(command, bin, NULL, shell_vars);
@@ -402,18 +412,27 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 
 			switch (process->command->type) {
 				case Simple_Command: { 
+					process_simple_command(process->command->simple_command, shell_vars);
 					char *bin = resolve_bine(process->command->simple_command, shell_vars);
-					execute_simple_command(process->command, bin, pipefd, shell_vars);
+					int funcNo = is_function(bin);
+					if (funcNo != -1) {
+						execute_function(process->command, funcNo, background, shell_vars);
+					} else if (is_builtin(bin)) {
+						execute_builtin(process->command->simple_command, shell_vars);
+					} else {
+						execute_simple_command(process->command, bin, pipefd, shell_vars);
+					}
+					gc(GC_CLEANUP, GC_ALL);
 					exit(g_exitno);
 					break;
 				}
-				case Subshell: { execute_subshell(process->command, background, shell_vars); exit(g_exitno); break; }
-				case Brace_Group: { execute_brace_group(process->command, background, shell_vars); exit(g_exitno); break; }
-				case If_Clause: { execute_if_clause(process->command, shell_vars); exit(g_exitno); break; }
-				case While_Clause: { execute_while_clause(process->command, shell_vars); exit(g_exitno); break; }
-				case Case_Clause: { execute_case_clause(process->command, shell_vars); exit(g_exitno); break; }
-				case For_Clause: { execute_for_clause(process->command, shell_vars); exit(g_exitno); break; }
-				case Function_Definition: { register_function(process->command); exit(g_exitno); break; }
+				case Subshell: { execute_subshell(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case Brace_Group: { execute_brace_group(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case If_Clause: { execute_if_clause(process->command, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case While_Clause: { execute_while_clause(process->command, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case Case_Clause: { execute_case_clause(process->command, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case For_Clause: { execute_for_clause(process->command, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case Function_Definition: { register_function(process->command); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
 				default: { break; }
 			}
 		} else { set_group(job, process, pid); }
@@ -432,28 +451,28 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
 	while (andor_head) {
-		const TokenType separator = andor_head->separator; (void)separator;
+		TokenType separator = andor_head->separator; (void)separator;
 		const int wait_status = execute_pipeline(andor_head, background, shell_vars);
 
 		if (wait_status == WAIT) {
 			if (!shell_infos->interactive || background)
-				job_wait_2(andor_head); //wait -1 (all childs)
-			else
-				put_job_foreground(list->and_or, false);
+				job_wait_2(andor_head); //WAIT_ANY
+			else { //interactive
+				job_wait_2(andor_head);
+			}
 		}
 
-		const bool skip = (
+		bool skip = (
 			(separator == AND_IF && g_exitno != 0) ||
 			(separator == OR_IF && g_exitno == 0)
 		);
-
-		andor_head = andor_head->next;
-		const bool to_find = (separator == AND_IF) ? OR_IF : AND_IF; 
-		bool found = false;
-
-		while (!found && skip && andor_head) {
-			if (andor_head->separator == to_find || andor_head->separator == END)
-				found = true;
+		if (skip) {
+			do {
+				separator = andor_head->separator;
+				skip = ((separator == AND_IF && g_exitno) || (separator == OR_IF && !g_exitno));
+			} while (skip && (andor_head = andor_head->next));
+			andor_head = andor_head->next;
+		} else {
 			andor_head = andor_head->next;
 		}
 	}

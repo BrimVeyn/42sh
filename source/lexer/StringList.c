@@ -6,31 +6,31 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/23 22:36:39 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/24 16:32:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "final_parser.h"
 #include "lexer.h"
 #include "utils.h"
 #include "libft.h"
 
 #include <stdio.h>
 
-//TODO: make new version of these two
-// void add_vars_to_set(const Vars * const shell_vars, TokenList *vars) {
-// 	StringList * const set = shell_vars->set;
-// 	StringList * const env = shell_vars->env;
-// 	for (size_t i = 0; i < vars->size; i++) {
-// 		string_list_update(env, vars->data[i]->w_infix);
-// 		string_list_add_or_update(set, vars->data[i]->w_infix);
-// 	}
-// }
-//
-// void add_vars_to_local(StringList *list, TokenList *vars) {
-// 	for (size_t i = 0; i < vars->size; i++) {
-// 		string_list_add_or_update(list, vars->data[i]->w_infix);
-// 	}
-// }
+void add_vars_to_set(const Vars * const shell_vars, const StringListL * const vars) {
+	StringList * const set = shell_vars->set;
+	StringList * const env = shell_vars->env;
+	for (size_t i = 0; i < vars->size; i++) {
+		string_list_update(env, vars->data[i]);
+		string_list_add_or_update(set, vars->data[i]);
+	}
+}
+
+void add_vars_to_local(StringList * const list, const StringListL * const vars) {
+	for (size_t i = 0; i < vars->size; i++) {
+		string_list_add_or_update(list, vars->data[i]);
+	}
+}
 
 void string_list_clear(StringList *list) {
 	for (size_t i = 0; i < list->size; i++) {
@@ -142,6 +142,6 @@ void string_list_print(const StringList *list) {
 		char *eql = ft_strchr(list->data[i], '=');
 		if (!eql)
 			continue;
-		printf("[%03zu]: %s\n", i, list->data[i]);
+		printf("%s\n", list->data[i]);
 	}
 }

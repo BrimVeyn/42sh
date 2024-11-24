@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 14:44:54 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 22:36:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/24 09:58:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,6 @@ void	secure_execve(const char *pathname, char **const argv, char **const envp);
 bool	is_builtin(const char *bin);
 //
 // int		exec_node(Node *node, Vars *shell_vars, bool foreground);
-// void	add_vars_to_local(StringList *list, TokenList *vars);
-// void	add_vars_to_set(Vars *shell_vars, TokenList *vars);
 char *find_bin_location(char *bin, StringList *env, bool *absolute);
 //
 // //------------------------Jobs---------------------------------//
@@ -109,6 +107,9 @@ void *hash_interface(hash_mode mode, char *arg, Vars *shell_vars);
 char *hash_find_bin(char *bin, Vars *shell_vars);
 
 #include "../source/lexer/final_parser.h"
+
+void add_vars_to_local(StringList * const list, const StringListL * const vars);
+void add_vars_to_set(const Vars * const shell_vars, const StringListL * const vars);
 
 void builtin_hash(const SimpleCommandP *command, Vars *shell_vars);
 void builtin_set(const SimpleCommandP *command, Vars *shell_vars);

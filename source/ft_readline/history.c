@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/23 22:51:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/24 10:30:27 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@ bool history_defined = false;
 HISTORY_STATE *history;
 
 //TODO:builtin fc
+//
+//FIX: reset history cursor when leaving readline
 
 void init_history(Vars *shell_vars) {
 

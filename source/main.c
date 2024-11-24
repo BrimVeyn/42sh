@@ -30,6 +30,8 @@ int g_signal = 0;
 FunctionList *g_funcList = NULL;
 JobListe *g_jobList = NULL;
 
+//FIX: tilde expansion
+
 void	*read_input_prompt(char *input, Vars *shell_vars) {
 	char *prompt = string_list_get_value(shell_vars->set, "PS1");
 	if (prompt)
@@ -208,9 +210,9 @@ int main(const int ac, char *av[], const char *env[]) {
 
 	Vars *shell_vars = shell_vars_init(env);
 	ShellInfos *self = shell(SHELL_GET);
-	if (SCRIPT_MODE) self->interactive = false;
 
-	if (self->interactive) load_42shrc(shell_vars);
+	if (SCRIPT_MODE) { self->interactive = false; }
+	if (self->interactive) { load_42shrc(shell_vars); }
 
 	char *input = NULL;
 	while (SHELL_IS_RUNNING) {
@@ -237,11 +239,10 @@ int main(const int ac, char *av[], const char *env[]) {
 			parse_input(input, av[1], shell_vars);
 			update_last_executed_command(shell_vars, input);
 			gc(GC_RESET, GC_SUBSHELL);
-			if (SCRIPT_MODE) break;
+			if (SCRIPT_MODE) { break; }
 		} else {
 			if (g_jobList->size) {
 				dprintf(2, "There are running jobs. Killing them.\n");
-				//TODO: newjobkillall for AndOrP
 				job_killall();
 				continue;
 			}

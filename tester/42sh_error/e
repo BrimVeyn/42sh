@@ -1,5 +1,0 @@
-[96mWAIT[0m: waiting for | waited | in process: [31m0 | -1 | 1981221[0m
-[96mWAIT[0m: waiting for | waited | in process: [35m1981222 | 1981222 | 1981221[0m
-ln: failed to create symbolic link 'chain/step1/dir1': File exists
-[96mWAIT[0m: waiting for | waited | in process: [35m1981223 | 1981223 | 1981221[0m
-[96mWAIT[0m: waiting for | waited | in process: [35m1981221 | 1981221 | 1981220[0m
