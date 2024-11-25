@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_readline.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/21 16:15:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/23 22:50:27 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/25 11:37:58 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/25 11:37:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,6 +250,7 @@ void init_readline(readline_state_t *rl_state, const char *prompt, Vars *shell_v
 		history_defined = true;
 	}
 	history->offset = 0;
+	history->navigation_offset = 0;
 	handle_history_config(history, shell_vars);
 	add_history("", shell_vars);
 
