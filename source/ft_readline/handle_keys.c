@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   handle_keys.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/01 16:26:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/23 22:50:36 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/25 11:37:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,18 +129,17 @@ rl_event handle_down_arrow(readline_state_t *rl_state, string *line) {
 }
 
 rl_event handle_up_arrow(readline_state_t *rl_state, string *line, Vars *shell_vars) {
-	char *chistsize = string_list_get_value(shell_vars->set, "HISTSIZE");
-	int histsize = -1;
-	if (chistsize && regex_match("[^0-9]", chistsize).is_found == false)
-		histsize = ft_atoi(chistsize);
-
-	if ((histsize < 0 || history->navigation_offset < histsize) && history->navigation_offset < history->length - 1){
+	(void)shell_vars;
+	if (history->navigation_offset < history->length - CURRENT_LINE){ //-1
 		history->navigation_offset++;
 		rl_state->cursor.x = history->entries[history->length - history->navigation_offset - 1]->line.size;
 		gc(GC_FREE, line->data, GC_READLINE);
 		*line = str_strdup(&history->entries[history->length - history->navigation_offset - 1]->line);
 		gc(GC_ADD, line->data, GC_READLINE);
 	}
+	// move_cursor(0, 0);
+	// print_history_values(history);
+	// set_cursor_position(rl_state);
 	return RL_NO_OP;
 }
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   history.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/09 13:20:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/24 10:30:27 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/25 11:37:44 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/25 11:37:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,10 +157,12 @@ char *search_in_history(char *str){
 
 void adapt_histsize(int new_histsize, HISTORY_STATE *history){
 	if ((new_histsize < history->length && new_histsize != -1) || (history->config->histsize == -1 && new_histsize != -1)){
-		history->entries += history->length - new_histsize;
-		history->length = new_histsize;
+		history->entries += (history->length - new_histsize - 1);
+		history->length = new_histsize + CURRENT_LINE; //+1
 	}
 	history->config->histsize = new_histsize;
+	// printf("after adapt_histsize");
+	// print_history_values(history);
 }
 
 void handle_history_config(HISTORY_STATE *history, Vars *shell_vars){
