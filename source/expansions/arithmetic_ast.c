@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 11:11:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/18 12:49:36 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:30:28 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "arithmetic.h"
 #include "assert.h"
 #include "utils.h"
+#include "libft.h"
 
 
 static long get_value(ANode *self, Vars *shell_vars) {

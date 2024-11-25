@@ -1,9 +1,8 @@
 #include "ft_regex.h"
-#include "lexer/final_parser.h"
+#include "final_parser.h"
 #include "parser.h"
 #include "utils.h"
 #include "signals.h"
-#include "debug.h"
 #include "lexer.h"
 #include "exec.h"
 #include "libft.h"
@@ -62,6 +61,8 @@ Vars *shell_vars_init(const char **env) {
 	self->set = set_list;
 	da_create(local_list, StringList, sizeof(char *), GC_ENV);
 	self->local = local_list;
+	da_create(positional_list, StringList, sizeof(char *), GC_ENV);
+	self->positional = positional_list;
 	env_to_string_list(self->env, env);
 	env_to_string_list(self->set, env);
 	return self;
@@ -102,7 +103,7 @@ char *get_history_index(char *string, int index){
 }
 
 
-char *read_input_file(char *path){
+char *read_input_file(const char *path){
     int fd = open(path, O_RDWR | O_CREAT, 0644);
     if (fd == -1) {
         perror("Can't open file");
@@ -162,16 +163,18 @@ void update_last_executed_command(Vars *shell_vars, char *input) {
 }
 
 void update_history_file(HISTORY_STATE *history, Vars *shell_vars){
-	char *histfile = get_variable_in_bi(shell_vars, "HISTFILE");
-	char *c_histfilesize = get_variable_in_bi(shell_vars, "HISTFILESIZE");
+	char *histfile = get_variable_value(shell_vars, "HISTFILE");
+	char *c_histfilesize = get_variable_value(shell_vars, "HISTFILESIZE");
 	// printf("%s\n", c_histfilesize);
 	
 	int histfilesize = -1;
 	if (c_histfilesize && regex_match("[^0-9]", c_histfilesize).is_found == false){
 		histfilesize = ft_atoi(c_histfilesize);
 	}
-
-	int history_fd = open(histfile, O_CREAT | O_TRUNC | O_WRONLY);
+	
+	if (!histfile) 
+		return;
+	int history_fd = open(histfile, O_CREAT | O_TRUNC | O_WRONLY, 0644);
 	// char *home = getenv("HOME");
 	// char history_filename[1024] = {0};
 	// ft_sprintf(history_filename, "%s/.42sh_history", home);
@@ -189,6 +192,7 @@ void update_history_file(HISTORY_STATE *history, Vars *shell_vars){
 
 #define SHELL_IS_RUNNING true
 #define SCRIPT_MODE ((ac == 1) ? false : true)
+#define HAS_POSITIONAL (ac > 2)
 
 void load_42shrc(Vars *shell_vars) {
 	get_history(shell_vars);
@@ -202,6 +206,17 @@ void load_42shrc(Vars *shell_vars) {
 	//FIX: uncomment this line
 	(void)file_content;
 	// parse_input(file_content, config_filename, shell_vars);
+}
+
+void save_positional_parameters(const int ac, char **av, Vars * const shell_vars) {
+	for (int i = 1; i < ac; i++){
+		char buffer[MAX_WORD_LEN] = {0};
+		char *positional_number = ft_itoa(i - 1);
+		if (ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s", positional_number, av[i]) == -1)
+			fatal("snprintf: MAX_WORD_LEN exceeded", 255);
+		free(positional_number);
+		string_list_add_or_update(shell_vars->positional, buffer);
+	}
 }
 
 int main(const int ac, char *av[], const char *env[]) {
@@ -225,12 +240,7 @@ int main(const int ac, char *av[], const char *env[]) {
 			input = read_input_prompt(input, shell_vars);
 		} else {
 			input = read_input_file(av[1]);
-			if (ac > 2) {
-				da_create(positional_args, StringList, sizeof(char *), GC_SUBSHELL);
-				for (int i = 2; i < ac; i++){
-					da_push(positional_args, av[i]);
-				}
-			}
+			if (HAS_POSITIONAL) { save_positional_parameters(ac, av, shell_vars); }
 		}
 		if (self->interactive) { job_notification(); }
 		if (input) {
@@ -253,7 +263,7 @@ int main(const int ac, char *av[], const char *env[]) {
 			break;
 		}
 	}
-	update_history_file(history, shell_vars);
+	if (self->interactive) { update_history_file(history, shell_vars); }
 	gc(GC_CLEANUP, GC_ALL);
 	close_all_fds();
 	return (EXIT_SUCCESS);

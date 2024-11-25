@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser_command_substitution.c                      :+:      :+:    :+:   */
+/*   command_substitution.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:11 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/24 10:15:41 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:26:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "utils.h" 
 #include "ft_regex.h"
 
+#include <linux/limits.h>
 #include <stdio.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -47,7 +48,7 @@ bool execute_command_sub(char *input, Vars *shell_vars) {
 char *parser_command_substitution(char *str, Vars *shell_vars) {
 	static int COMMAND_SUB_NO = 0;
 
-	char file_name[MAX_FILENAME_LEN] = {0};
+	char file_name[PATH_MAX] = {0};
 	ft_sprintf(file_name, "/tmp/command_sub_%d", COMMAND_SUB_NO++);
 
 	int output_fd = open(file_name, O_CREAT | O_TRUNC | O_WRONLY | O_CLOEXEC, 0644);

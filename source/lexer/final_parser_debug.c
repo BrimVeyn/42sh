@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:43:08 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 17:21:26 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:01:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,36 +17,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void pretty_error(char *raw_token) {
-	Lex *lexer = lex_interface(LEX_OWN, NULL, NULL, NULL);
-	char buffer[MAX_WORD_LEN] = {0};
-	int message_len = ft_sprintf(buffer, "%s:%ld:%ld: "C_BOLD C_BRIGHT_RED"error"C_RESET": unexpected token near: "C_BOLD C_WHITE"\'%s\'"C_RESET"\n", lexer->filename, lexer->line, lexer->column, raw_token);
-	int lineno_len = ft_sprintf(buffer, "  %ld", lexer->line) - message_len;
-	ft_sprintf(buffer, "  |  ");
-	char *line = get_line_x(lexer->raw_input, lexer->line);
-	int tab_count = 0;
-	for (size_t i = 0; line[i]; i++) {
-		if (line[i] == '\t') {
-			tab_count += 1;
-		}
-	}
-	ft_sprintf(buffer, "%s\n", line);
-	for(int i = 0; i < lineno_len; i++) {
-		ft_sprintf(buffer, " ");
-	}
-	ft_sprintf(buffer, "  |  ");
-	for (size_t i = 0; i < lexer->column - 1; i++) {
-		if (tab_count) {
-			ft_sprintf(buffer, "\t");
-			tab_count -= 1;
-		} else {
-			ft_sprintf(buffer, " ");
-		}
-	}
-	ft_sprintf(buffer, C_BOLD C_BRIGHT_RED"^"C_RESET"\n");
-	ft_dprintf(2, buffer);
-	FREE_POINTERS(line);
-}
+
 
 void print_redir_list(const RedirectionL *redir_list) {
 	dprintf(2, C_DARK_CYAN"  Redirs: "C_RESET C_SEA_GREEN"{"C_RESET);

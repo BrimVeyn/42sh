@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/24 16:19:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:21:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,31 +14,38 @@
 #include "lexer.h"
 #include "utils.h"
 #include "libft.h"
-#include "debug.h"
-#include <stdio.h>
 
-#define BITMAP8_SIZE 8
 #define IS_ON(ptr, context) ((*ptr) & (1 << (int) context)) > 0
 
 WordContext get_context(const StringStream *input, WordContextBounds *map, const WordContext context) {
-	const unsigned char *byteptr = (unsigned char *)&map[context].bitmap;
+    const unsigned char * const byteptr = (unsigned char *)&map[context].bitmap;
 
-	if (IS_ON(byteptr, WORD_ARITHMETIC) && !ft_strncmp(input->data, map[WORD_ARITHMETIC].start, 3)) 
-		return WORD_ARITHMETIC;
-	if (IS_ON(byteptr, WORD_CMD_SUB) && !ft_strncmp(input->data, map[WORD_CMD_SUB].start, 2)) 
-		return WORD_CMD_SUB;
-	if (IS_ON(byteptr, WORD_PARAM) && !ft_strncmp(input->data, map[WORD_PARAM].start, 2)) 
-		return WORD_PARAM;
-	if (IS_ON(byteptr, WORD_SUBSHELL) && !ft_strncmp(input->data, map[WORD_SUBSHELL].start, 1)) 
-		return WORD_SUBSHELL;
-	if (IS_ON(byteptr, WORD_ARITHMETIC_PAREN) && !ft_strncmp(input->data, map[WORD_ARITHMETIC_PAREN].start, 1)) 
-		return WORD_ARITHMETIC_PAREN;
-	if (IS_ON(byteptr, WORD_SINGLE_QUOTE) && !ft_strncmp(input->data, map[WORD_SINGLE_QUOTE].start, 1)) 
-		return WORD_SINGLE_QUOTE;
-	if (IS_ON(byteptr, WORD_DOUBLE_QUOTE) && !ft_strncmp(input->data, map[WORD_DOUBLE_QUOTE].start, 1)) 
-		return WORD_DOUBLE_QUOTE;
-	return NONE;
+    static const struct {
+        WordContext type;
+        int check_length;
+    } contexts[] = {
+        {WORD_ARITHMETIC, 3},
+        {WORD_CMD_SUB, 2},
+        {WORD_PARAM, 2},
+        {WORD_SUBSHELL, 1},
+        {WORD_ARITHMETIC_PAREN, 1},
+        {WORD_SINGLE_QUOTE, 1},
+        {WORD_DOUBLE_QUOTE, 1}
+    };
+
+    for (size_t i = 0; i < sizeof(contexts) / sizeof(contexts[0]); i++) {
+        const WordContext current_context = contexts[i].type;
+        const int length = contexts[i].check_length;
+
+        if (IS_ON(byteptr, current_context) && 
+            !ft_strncmp(input->data, map[current_context].start, length)) {
+            return current_context;
+        }
+    }
+
+    return NONE;
 }
+
 
 WordContext get_end_of_context(const StringStream *input, WordContextBounds *map, const WordContext context) {
 	if (context == WORD_WORD && ft_strchr(map[context].end, input->data[0])) {

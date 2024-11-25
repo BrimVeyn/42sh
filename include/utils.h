@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 22:02:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:26:32 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ extern int g_exitno;
 
 #define BUFFER_SIZE 1024
 #define MAX_WORD_LEN 65536
-#define MAX_FILENAME_LEN 1024
 #define POSIX_MAX_ID_LEN 255
 
 #define FREE_POINTERS(...) \
@@ -32,7 +31,6 @@ extern int g_exitno;
     } \
 
 //----------------Garbage-------------------//
-
 typedef enum {
 	GC_GENERAL,
 	GC_READLINE,
@@ -62,12 +60,10 @@ typedef struct {
 } Garbage;
 
 void *gc(gc_mode mode, ...);
-
 //------------------------------------------//
 
 
 //----------------Dynamic arrays--------------------//
-
 typedef struct {
 	char	*data;
 	size_t	size;
@@ -148,7 +144,6 @@ typedef struct {
 
 //------------------------------------------//
 
-
 //----------------Utils--------------------//
 void			*ft_realloc(void *ptr, size_t old_size, size_t new_size, size_t element_size);
 void			free_charchar(char **array);
@@ -177,11 +172,9 @@ char			*read_whole_file(int fd);
 char			*get_line_x(char *in, const size_t n);
 //------------------------------------------//
 
-void ss_push_string(StringStream *ss, char *str);
-char *ss_get_owned_slice(StringStream *ss);
-void ss_cut(StringStream *ss, size_t new_size);
-
+//------------------Error-----------------------//
 void error(const char * const msg, const int exit_code);
 void fatal(const char * const msg, const int exit_code);
+//----------------------------------------------//
 
 #endif // !UTILS_H

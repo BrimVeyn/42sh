@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/03 16:45:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 11:43:59 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/25 16:00:59 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "libft.h"
 #include "utils.h"
 
-void builtin_pwd(__attribute__((unused)) const SimpleCommandP *command, __attribute__((unused)) Vars *shell_vars) {
+void builtin_pwd(__attribute__((unused)) const SimpleCommandP *command, __attribute__((unused)) Vars * const shell_vars) {
 	//TODO: shall we handle -L and -P ?
 	char *cwd = getcwd(NULL, PATH_MAX);
 	if (!cwd) {

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:53:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/20 13:11:11 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/25 16:04:14 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,16 +241,7 @@ int get_flags_and_operand(char **args, int *options, char **operand){
 	return 0;
 }
 
-char *get_variable_in_bi(Vars *shell_vars, char *name){
-	char *result = string_list_get_value(shell_vars->local, name);
-	if (result) return result;
-	result = string_list_get_value(shell_vars->env, name);
-	if (result) return result;
-	result = string_list_get_value(shell_vars->set, name);
-	return result;
-}
-
-void builtin_cd(const SimpleCommandP *command, Vars *shell_vars) {
+void builtin_cd(const SimpleCommandP *command, Vars * const shell_vars) {
 	cd_status = VALID_DIRECTORY;
 	char *curpath = NULL;
 
@@ -269,7 +260,7 @@ void builtin_cd(const SimpleCommandP *command, Vars *shell_vars) {
 	}
 	
 	if (!operand){
-		const char *home = get_variable_in_bi(shell_vars, "HOME");
+		const char *home = get_variable_value(shell_vars, "HOME");
 		if (!home){
 			g_exitno = 1;
 			cd_status = ERROR_OLDPWD_NOT_SET;
@@ -280,7 +271,7 @@ void builtin_cd(const SimpleCommandP *command, Vars *shell_vars) {
 	}
 
 	if (!ft_strcmp(operand, "-")){
-		const char *oldpwd = get_variable_in_bi(shell_vars, "OLDPWD");
+		const char *oldpwd = get_variable_value(shell_vars, "OLDPWD");
 		if (!oldpwd){
 			g_exitno = 1;
 			cd_status = ERROR_OLDPWD_NOT_SET;
@@ -305,7 +296,7 @@ void builtin_cd(const SimpleCommandP *command, Vars *shell_vars) {
 	}
 	
 	// if option -P -> 10
-	char *pwd = get_variable_in_bi(shell_vars, "PWD");
+	char *pwd = get_variable_value(shell_vars, "PWD");
 	if (!pwd)
 		pwd = getcwd(NULL, PATH_MAX);
     if (curpath[0] != '/') {

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 13:50:05 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/25 16:03:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "utils.h"
 #include "exec.h"
 #include "ft_regex.h"
+#include <stdio.h>
 
 char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 	// printf("id: %s\nword: %s\nmetachar: %s\n", id, word, metachar);
@@ -162,8 +163,11 @@ char *parser_parameter_expansion(char *str, Vars *shell_vars){
 		}
 		result = regex_match("\\$\\{[0-9]+\\}", str);
 		if (result.is_found){
-			char *tmp = ft_substr(str, result.re_start + 2, result.re_end - result.re_start - 1); //+2 -> skip ${ |  -1 -> skip }
-			value = get_variable_in_bi(shell_vars, tmp);
+			const size_t start = result.re_start + 2;
+			const size_t end = result.re_end - 1;
+			char * const tmp = ft_substr(str, start, end - start); //+2 -> skip ${ |  -1 -> skip }
+			value = get_variable_value(shell_vars, tmp);
+			free(tmp);
 			if (!value){
 				value = ft_strdup("");
 				gc(GC_ADD, value, GC_SUBSHELL);
@@ -188,7 +192,7 @@ char *parser_parameter_expansion(char *str, Vars *shell_vars){
 		char *tmp = ft_strjoin(re_start, value);
 
 		str = gc(GC_ADD, ft_strjoin(tmp, re_end), GC_GENERAL);
-		free(tmp); free(re_start); free(re_end);
+		FREE_POINTERS(tmp, re_start, re_end);
 		// printf("string: %s\n\n", str);
 
 	} while(true);

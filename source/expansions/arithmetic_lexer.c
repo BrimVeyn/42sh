@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 11:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/17 14:46:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:22:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-arithemtic_token_tag get_atoken_tag(Lexer_p l) {
+arithemtic_token_tag get_atoken_tag(Lexer * l) {
 	if (regex_match("^[_0-9a-zA-Z]", &l->input[l->position]).re_start != -1) {
 		return A_OPERAND;
 	} else {
@@ -27,7 +27,7 @@ arithemtic_token_tag get_atoken_tag(Lexer_p l) {
 	}
 }
 
-arithmetic_operators get_operator_tag(Lexer_p l) {
+arithmetic_operators get_operator_tag(Lexer * l) {
 	const char *input_ptr = &l->input[l->position];
 	static const struct {
 		const char *op_str;
@@ -64,7 +64,7 @@ bool is_operator_char(char c) {
 	return (ft_strchr("+-*/%<>=!|&()", c));
 }
 
-bool fill_operand(AToken *self, Lexer_p l) {
+bool fill_operand(AToken *self, Lexer * l) {
 	const int start = l->position;
 	while (ft_isalnum(l->ch) || l->ch == '_') {
 		lexer_read_char(l);
@@ -90,7 +90,7 @@ bool fill_operand(AToken *self, Lexer_p l) {
 	return true;
 }
 
-AToken *lexer_get_next_atoken(Lexer_p l) {
+AToken *lexer_get_next_atoken(Lexer * l) {
 	AToken *self = gc(GC_ADD, ft_calloc(1, sizeof(AToken)), GC_SUBSHELL);
 
 	eat_whitespace(l);
@@ -130,7 +130,7 @@ void free_atoken_stack(ATokenStack *list) {
 	gc(GC_FREE, list, GC_SUBSHELL);
 }
 
-ATokenStack *lexer_arithmetic_exp_lex_all(Lexer_p lexer) {
+ATokenStack *lexer_arithmetic_exp_lex_all(Lexer * lexer) {
 	da_create(self, ATokenStack, sizeof(AToken *), GC_SUBSHELL);
 
 	while (lexer->ch) {

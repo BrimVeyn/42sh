@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 23:17:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 14:28:49 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,17 +66,20 @@ void gc_move_command(CommandP *command) {
 		case Brace_Group : { gc_move_list(command->brace_group); break;}
 		case Subshell: { gc_move_list(command->subshell); break;}
 		case If_Clause: { 
+			gc(GC_MOVE, command->if_clause, GC_SUBSHELL, GC_ENV);
 			gc_move_listvect(command->if_clause->bodies); 
 			gc_move_listvect(command->if_clause->conditions); 
 			break;
 		}
 		case For_Clause: {
+			gc(GC_MOVE, command->for_clause, GC_SUBSHELL, GC_ENV);
 			gc(GC_MOVE, command->for_clause->iterator, GC_SUBSHELL, GC_ENV);
 			gc_move_list(command->for_clause->body);
 			gc_move_stringlist(command->for_clause->word_list);
 			break;
 		}
 		case Case_Clause: {
+			gc(GC_MOVE, command->case_clause, GC_SUBSHELL, GC_ENV);
 			gc(GC_MOVE, command->case_clause->expression, GC_SUBSHELL, GC_ENV);
 			gc_move_stringlistvect(command->case_clause->patterns);
 			gc_move_listvect(command->case_clause->bodies);
@@ -84,6 +87,7 @@ void gc_move_command(CommandP *command) {
 		}
 		case Until_Clause:
 		case While_Clause: {
+			gc(GC_MOVE, command->while_clause, GC_SUBSHELL, GC_ENV);
 			gc_move_list(command->while_clause->body);
 			gc_move_list(command->while_clause->condition);
 			break;
@@ -100,10 +104,6 @@ void gc_move_pipeline(PipeLineP *pipeline) {
 	PipeLineP *head = pipeline;
 	while (head) {
 		gc(GC_MOVE, head, GC_SUBSHELL, GC_ENV);
-		head->pid = 0;
-		head->completed = 0;
-		head->status = 0;
-		head->stopped = 0;
 		gc_move_command(head->command);
 		head = head->next;
 	}
@@ -113,13 +113,6 @@ void gc_move_andor(AndOrP *andor) {
 	AndOrP *head = andor;
 	while (head) {
 		gc(GC_MOVE, head, GC_SUBSHELL, GC_ENV);
-		head->bg = 0;
-		head->id = 0;
-		head->pid = 0;
-		head->pgid = 0;
-		head->notified = 0;
-		head->completed = 0;
-		head->sig = 0;
 		gc_move_pipeline(head->pipeline);
 		head = head->next;
 	}

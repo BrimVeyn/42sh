@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 17:14:34 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 11:44:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 16:00:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "utils.h"
 #include <unistd.h>
 
-void builtin_fg(const SimpleCommandP *command, __attribute__((unused)) Vars *shell_vars) {
+void builtin_fg(const SimpleCommandP *command, __attribute__((unused)) Vars * const shell_vars) {
 	bool has_arg = command->word_list->data[1] != NULL;
 	size_t job_number = 0;
 	if (has_arg)
