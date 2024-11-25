@@ -31,6 +31,8 @@ FunctionList *g_funcList = NULL;
 JobListe *g_jobList = NULL;
 
 //FIX: tilde expansion
+//
+#include "readline/readline.h"
 
 void	*read_input_prompt(char *input, Vars *shell_vars) {
 	char *prompt = string_list_get_value(shell_vars->set, "PS1");
@@ -38,6 +40,7 @@ void	*read_input_prompt(char *input, Vars *shell_vars) {
 		input = ft_readline(prompt, shell_vars);
 	else
 		input = ft_readline("42sh> ", shell_vars);
+		// input = readline("42sh> ");
 	if (!input) {
 		return NULL;
 	}
@@ -139,6 +142,7 @@ ShellInfos *shell(int mode) {
 		self->shell_terminal = STDIN_FILENO;
 		self->interactive = isatty(self->shell_terminal);
 		if (self->interactive) {
+			self->shell_terminal = open("/dev/tty", O_RDWR);
 			while (tcgetpgrp(self->shell_terminal) != (self->shell_pgid = getpgrp()))
 				kill(- self->shell_pgid, SIGTTIN);
 			tcsetpgrp(self->shell_terminal, self->shell_pgid);
