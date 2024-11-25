@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 14:44:54 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/24 09:58:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 13:21:48 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,11 +119,12 @@ void builtin_exit(const SimpleCommandP *command, Vars *shell_vars);
 void builtin_export(const SimpleCommandP *command, Vars *shell_vars);
 void builtin_type(const SimpleCommandP *command, Vars *shell_vars);
 void builtin_pwd(const SimpleCommandP *command, Vars *shell_vars);
-void builtin_cd(const SimpleCommandP *command, Vars *shell_vars);
-void builtin_unset(const SimpleCommandP *command, Vars *shell_vars);
-void builtin_jobs(const SimpleCommandP *command, Vars *shell_vars);
-void builtin_fg(const SimpleCommandP *command, Vars *shell_vars);
-void builtin_bg(const SimpleCommandP *command, Vars *shell_vars);
+void builtin_cd (const SimpleCommandP *command, Vars *shell_vars);
+void builtin_unset (const SimpleCommandP *command, Vars *shell_vars);
+void builtin_jobs (const SimpleCommandP *command, Vars *shell_vars);
+void builtin_fg (const SimpleCommandP *command, Vars *shell_vars);
+void builtin_bg (const SimpleCommandP *command, Vars *shell_vars);
+void builtin_fc (const SimpleCommandP *command, Vars *shell_vars);
 
 char *get_variable_in_bi(Vars *shell_vars, char *name);
 //-------------------------------------------------------------//

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/31 12:55:25 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/25 13:50:05 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,8 @@ static bool is_bad_substitution(char *str, int pos){
 	if (regex_match("\\$\\{\\}", before_format).re_start == pos ||
 		regex_match("\\$\\{.*:\\}", str).re_start == pos ||
 		regex_match("\\$\\{[^\\}]*$", str).re_start == pos ||
-		(regex_match("\\$\\{[A-Za-z_][A-Za-z0-9_]*[#%:].*\\}", str).re_start != pos &&
+		(regex_match("\\$\\{[0-9]+\\}", str).re_start != pos &&
+		regex_match("\\$\\{[A-Za-z_][A-Za-z0-9_]*[#%:].*\\}", str).re_start != pos &&
 		regex_match("\\$\\{[\\?#]\\}", str).re_start != pos &&
 		(regex_match("\\$\\{#?[A-Za-z_][A-Za-z0-9_]*\\}", str).re_start != pos &&
 		is_parameter_balanced(str))))
@@ -159,10 +160,19 @@ char *parser_parameter_expansion(char *str, Vars *shell_vars){
 		if (is_bad_substitution(str, result.re_start) == true){
 			return NULL;
 		}
-
-		result = regex_match("\\$\\{\\?\\}", str);
-		if (result.re_start != -1)
+		result = regex_match("\\$\\{[0-9]+\\}", str);
+		if (result.is_found){
+			char *tmp = ft_substr(str, result.re_start + 2, result.re_end - result.re_start - 1); //+2 -> skip ${ |  -1 -> skip }
+			value = get_variable_in_bi(shell_vars, tmp);
+			if (!value){
+				value = ft_strdup("");
+				gc(GC_ADD, value, GC_SUBSHELL);
+			}
+		}
+		else if (regex_match("\\$\\{\\?\\}", str).is_found == true){
+			result = regex_match("\\$\\{\\?\\}", str);
 			value = ft_itoa(g_exitno);
+		}
 		else {
 			result = regex_match ("\\$\\{[^\\$]*\\}", str);
 			if (result.re_start != -1){
