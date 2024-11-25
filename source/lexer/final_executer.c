@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/21 10:35:13 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/24 16:36:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 11:37:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-pid_t g_masterPgid;
+pid_t g_masterPgid = 0;
 
 void dup_input_and_close(int fd) {
 	secure_dup2(fd, STDIN_FILENO);
@@ -343,7 +343,23 @@ int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 				return NO_WAIT;
 			} else {
 				pid_t pid = fork();
+				ShellInfos *shell_infos = shell(SHELL_GET);
 				if (IS_CHILD(pid)) {
+
+					if (shell_infos->interactive)
+					{
+						pid_t pid = getpid();
+						if (job->pgid == 0) 
+							job->pgid = pid;
+						pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
+						setpgid(pid, pgid);
+
+						if (!background)
+							if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
+								perror("setpgrp");
+
+						signal_manager(SIG_EXEC);
+					}
 					setpgid(pid, g_masterPgid);
 					signal_manager(SIG_EXEC);
 			// dprintf(2, C_DARK_CYAN"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
@@ -405,10 +421,24 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 		if (hasPipe) create_pipe(&hadPipe, pipefd);
 
 		pid_t pid = fork();
+		ShellInfos *shell_infos = shell(SHELL_GET);
 
 		if (IS_CHILD(pid)) {
-			signal_manager(SIG_EXEC);
-			close_all_fds();
+			if (shell_infos->interactive)
+			{
+				pid_t pid = getpid();
+				if (job->pgid == 0) 
+					job->pgid = pid;
+				pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
+				setpgid(pid, pgid);
+
+				if (!background)
+					if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
+						perror("setpgrp");
+
+				signal_manager(SIG_EXEC);
+			}
+			// close_all_fds();
 
 			switch (process->command->type) {
 				case Simple_Command: { 
@@ -458,7 +488,7 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 			if (!shell_infos->interactive || background)
 				job_wait_2(andor_head); //WAIT_ANY
 			else { //interactive
-				job_wait_2(andor_head);
+				put_job_foreground(andor_head, false);
 			}
 		}
 
@@ -489,6 +519,7 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 			(list_head->separator == AMPER) )
 		);
 		// dprintf(2, "Background ? %s\n", boolStr(background));
+		g_masterPgid = 0;
 
 		if (background == true) {
 			pid_t pid = fork();
@@ -508,6 +539,7 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 				put_job_background(master, true);
 			}
 		} else {
+			// signal_manager(SIG_EXEC);
 			execute_list(list_head, background, shell_vars);
 		}
 		list_head = list_head->next;

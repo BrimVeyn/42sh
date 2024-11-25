@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/24 15:51:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 11:30:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,10 +59,10 @@ void job_wait_2 (AndOrP *job) {
 
 	do {
 		pid = waitpid(-1, &status, WUNTRACED);
+			// dprintf(2, C_BRIGHT_CYAN"WAIT2"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
 		if (pid != -1) {
-		// 	dprintf(2, C_BRIGHT_CYAN"WAIT2"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
 		// } else {
-			// dprintf(2, C_BRIGHT_CYAN"WAIT2"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
+		// 	dprintf(2, C_BRIGHT_CYAN"WAIT2"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
 		// 	perror("WAIT");
 			if (WIFSTOPPED(status)) {
 				// dprintf(2, "pid = %d\n", getpid());
