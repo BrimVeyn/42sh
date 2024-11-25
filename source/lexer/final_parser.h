@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/24 16:34:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 12:10:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,6 +213,7 @@ struct AndOrP {
 	pid_t pgid; //process group id
 	pid_t pid; //master pid
 	bool notified;
+	bool subshell; //remove notification
 	bool bg; //bg/fg
 	int sig; //stopped by signo
 	bool completed;
@@ -390,6 +391,6 @@ char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars);
 
 StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const bool split);
 
-void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars);
+void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars, bool subshell, bool background);
 bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars);
 #endif // !FINAL_PARSER

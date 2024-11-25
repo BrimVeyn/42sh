@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 11:38:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 12:10:37 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,7 @@ StackEntry *parse(Vars *shell_vars) {
 						da_pop(stack); //complete_commands
 						// dprintf(2, "ONE COMMAND !\n");
 						// print_complete_command(complete_command);
-						execute_complete_command(complete_command, shell_vars);
+						execute_complete_command(complete_command, shell_vars, false, false);
 						reduced_entry->token.type = Complete_Commands;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Complete_Commands].value;
@@ -154,7 +154,7 @@ StackEntry *parse(Vars *shell_vars) {
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
 						// dprintf(2, "ONE COMMAND !\n");
 						// print_complete_command(complete_command);
-						execute_complete_command(complete_command, shell_vars);
+						execute_complete_command(complete_command, shell_vars, false, false);
 						reduced_entry->token.type = Complete_Commands;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Complete_Commands].value;
