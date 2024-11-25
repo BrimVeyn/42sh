@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/23 21:45:40 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:03:32 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 void *ft_realloc(void *ptr, size_t oldSize, size_t nbEl, size_t elSize) {
 	void *new_ptr = ft_calloc(nbEl, elSize);
@@ -36,6 +37,17 @@ void free_charchar(char **s){
 		free(s[i]);
 	}
 	free(s);
+}
+
+bool is_whitespace(const char c) {
+	return (c == ' ' || c == '\t');
+}
+
+bool is_number(const char * const str) {
+	for (uint16_t i = 0; str[i]; i++) {
+		if (!ft_isdigit(str[i])) return false;
+	}
+	return true;
 }
 
 // char **ft_strdupdup(const StringList *env){

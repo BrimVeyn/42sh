@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 12:20:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/24 16:23:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 16:00:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@
 // 	g_exitno = 0;
 // }
 
-void builtin_echo(const SimpleCommandP *command, __attribute__((unused)) Vars *shell_vars) {
+void builtin_echo(const SimpleCommandP *command, __attribute__((unused)) Vars * const shell_vars) {
 	char buffer[MAX_WORD_LEN * 10] = {0};
 	memset(buffer, '\0', MAX_WORD_LEN);
 	bool newline = true;

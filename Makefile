@@ -6,7 +6,7 @@
 #    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/06 10:05:24 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/11/15 15:52:19 by bvan-pae         ###   ########.fr        #
+#    Updated: 2024/11/25 17:32:57 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,17 +28,16 @@ LEXER_SRC 		:= $(wildcard source/lexer/*.c)
 FT_READLINE_SRC := $(wildcard source/ft_readline/*.c)
 EXEC_SRC 		:= $(wildcard source/exec/*.c)
 AST_SRC			:= $(wildcard source/ast/*.c)
-DEBUG_SRC		:= $(wildcard source/debug/*.c)
 REGEX_SRC		:= $(wildcard source/regex/*.c)
-PARSER_SRC		:= $(wildcard source/parser/*.c)
 UTILS_SRC		:= $(wildcard source/utils/*.c)
 SIGNALS_SRC		:= $(wildcard source/signals/*.c)
 BUILTINS_SRC	:= $(wildcard source/builtins/*.c)
+EXPANSIONS_SRC	:= $(wildcard source/expansions/*.c)
 
 INC       := -I./include -I./libftprintf/header -I./libstring/include
 
-SRC 			:= source/main.c $(LEXER_SRC) $(DEBUG_SRC) $(UTILS_SRC) \
-				   $(PARSER_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC) \
+SRC 			:= source/main.c $(LEXER_SRC) $(UTILS_SRC) \
+				   $(EXPANSIONS_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC) \
 				   $(REGEX_SRC) $(BUILTINS_SRC) $(FT_READLINE_SRC) \
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)

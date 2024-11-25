@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser.c                                           :+:      :+:    :+:   */
+/*   expansions.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:07:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/24 16:26:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:32:08 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include "lexer.h"
 #include "ft_readline.h"
 #include "c_string.h"
-#include "../lexer/final_parser.h"
+#include "final_parser.h"
 
 #include <fcntl.h>
 #include <stdint.h>
@@ -25,6 +25,7 @@
 #include <unistd.h>
 
 //FIX: unlink heredoc
+void exp_kind_list_print(ExpKindList *list);
 
 char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars){
 	char *input = NULL;
@@ -167,26 +168,6 @@ ExpKind identify_exp_end(const char *str, const ContextMap *context_map, const E
 		return EXP_WORD;
 	}
 }
-
-char *ss_get_owned_slice(StringStream *ss) {
-	da_push(ss, '\0');
-	char *str = ss->data;
-	ss->data = gc(GC_CALLOC, ss->capacity, sizeof(char), GC_SUBSHELL);
-	ss->size = 0;
-	return str;
-}
-
-void ss_push_string(StringStream *ss, char *str) {
-	for (size_t i = 0; str[i]; i++) {
-		da_push(ss, str[i]);
-	}
-}
-
-void ss_cut(StringStream *ss, size_t new_size) {
-	ft_memset(&ss->data[new_size], 0, ss->size - new_size);
-	ss->size = new_size;
-}
-
 
 bool is_var_expand_context(ExpKindList *exp_stack) {
 	bool	var_expand = (exp_stack->size != 0);
@@ -403,9 +384,7 @@ StringListL *do_expansions(const StringListL * const word_list, Vars * const she
 	da_create(arg_list, StringListL, sizeof(char *), GC_SUBSHELL);
 	
 	for (size_t it = 0; it < word_list->size; it++) {
-		// tokenToString(list->data[it], 0);
 		StrList *string_list = get_range_list(word_list->data[it], shell_vars, &error);
-		// da_print(string_list);
 		if (error) 
 			return NULL;
 		string_list_consume(string_list, shell_vars);

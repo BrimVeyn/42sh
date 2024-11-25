@@ -6,13 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 13:20:06 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/25 16:53:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "libft.h"
-#include "../lexer/final_parser.h"
+#include "final_parser.h"
 
 typedef void (*builtin_func_t)(const SimpleCommandP *, Vars *);
 

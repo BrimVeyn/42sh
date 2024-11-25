@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 12:10:11 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 14:19:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -368,6 +368,7 @@ extern JobListe *g_jobList;
 extern FunctionList *g_funcList;
 
 void gc_move_function(FunctionP *func);
+FunctionP *gc_duplicate_function(FunctionP *func);
 
 int mark_process (JobListe *list, pid_t pid, int status, bool print);
 void put_job_background (AndOrP *job, bool add);

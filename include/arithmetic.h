@@ -6,17 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 10:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/14 16:57:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:27:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef ARITHMETIC_H
 # define ARITHMETIC_H
 
-#include "../../include/lexer.h"
-#include "../../include/parser.h"
-#include "../../libftprintf/header/libft.h"
-#include "utils.h"
+#include "lexer.h"
 
 typedef enum {
 	PP, // - ()
@@ -96,8 +93,8 @@ typedef struct {
 } ANodeStack;
 
 //----------------Token List Stack------------------//
-ATokenStack		*lexer_arithmetic_exp_lex_all(Lexer_p lexer);
-AToken			*lexer_get_next_atoken(Lexer_p l);
+ATokenStack		*lexer_arithmetic_exp_lex_all(Lexer * lexer);
+AToken			*lexer_get_next_atoken(Lexer * l);
 
 //----------------Arithmetic AST------------------//
 ANode			*generate_atree(ATokenStack *list);

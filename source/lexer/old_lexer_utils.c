@@ -6,14 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:57 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 22:52:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:22:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/lexer.h"
 #include "../../libftprintf/header/libft.h"
 
-void lexer_read_char(Lexer_p l) {
+void lexer_read_char(Lexer * l) {
 	if (l->read_position >= l->input_len) {
 		l->ch = 0;
 	} else {
@@ -23,25 +23,25 @@ void lexer_read_char(Lexer_p l) {
 	l->read_position += 1;
 }
 
-void lexer_reverse_read_char(Lexer_p l) {
+void lexer_reverse_read_char(Lexer * l) {
 	l->read_position -= 1;
 	l->position = l->read_position;
 	l->ch = l->input[l->read_position];
 }
 
-void lexer_read_x_char(Lexer_p l, uint16_t n) {
+void lexer_read_x_char(Lexer * l, uint16_t n) {
 	for (uint16_t i = 0; i < n; i++) {
 		lexer_read_char(l);
 	}
 }
 
-void eat_whitespace(Lexer_p l) {
+void eat_whitespace(Lexer * l) {
 	while (is_whitespace(l->ch)) {
 		lexer_read_char(l);
 	}
 }
 
-bool is_fdable_redirection(Lexer_p l) {
+bool is_fdable_redirection(Lexer * l) {
 	if (l->ch == '\0') return false;
 	const char *input_ptr = &l->input[l->position];
 	const size_t input_len = ft_strlen(input_ptr);

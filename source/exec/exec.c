@@ -5,327 +5,558 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 10:35:45 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/11/25 11:38:04 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/25 16:57:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// #include "exec.h"
-// #include "ast.h"
-// #include "debug.h"
-// #include "lexer.h"
-// #include "parser.h"
-// #include "signals.h"
-// #include "utils.h"
-// #include "libft.h"
-//
-// #include <stdint.h>
-// #include <stdio.h>
-// #include <termios.h>
-// #include <unistd.h>
-// #include <fcntl.h>
-// #include <stdlib.h>
-// #include <sys/wait.h>
-// #include <sys/types.h>
-// #include <sys/stat.h>
-//
-// int g_exitno;
-//
-// bool apply_redirect(const Redirection redirect) {
-// 	int fd = redirect.fd;
-// 	const int open_flag = (redirect.r_type == R_INPUT) * (O_RDONLY)
-// 		+ (redirect.r_type == R_OUTPUT || redirect.r_type == R_DUP_BOTH) * (O_WRONLY | O_TRUNC | O_CREAT)
-// 		+ (redirect.r_type == R_APPEND || redirect.r_type == R_DUP_BOTH_APPEND) * (O_WRONLY | O_CREAT | O_APPEND);
-//
-// 	int dup_on = (redirect.r_type == R_INPUT || redirect.r_type == R_DUP_IN) * STDIN_FILENO
-// 		+ (redirect.r_type == R_OUTPUT || redirect.r_type == R_APPEND || redirect.r_type == R_DUP_OUT) * STDOUT_FILENO;
-//
-// 	if (redirect.prefix_fd != -1){
-// 		dup_on = redirect.prefix_fd;
-// 	}
-//
-// 	if (redirect.su_type == R_FILENAME && (fd = open(redirect.filename, open_flag, 0664)) == -1){
-// 		return false;
-// 	}
-//
-// 	if (dup_on >= 1024){
-// 		dprintf(2, "42sh: %d: Bad file descriptor\n", dup_on);
-// 		return false;
-// 	}
-// 	if (fd >= 1024){
-// 		dprintf(2, "42sh: %d: Bad file descriptor\n", fd);
-// 		return false;
-// 	}
-//
-// 	if (redirect.r_type == R_DUP_BOTH || redirect.r_type == R_DUP_BOTH_APPEND) {
-// 		if (!secure_dup2(fd, STDOUT_FILENO)) return false;
-// 		if (!secure_dup2(fd, STDERR_FILENO)) return false;
-// 	}
-// 	else {
-// 		if (!secure_dup2(fd, dup_on)) return false;
-// 	}
-// 	if (redirect.su_type == R_FILENAME){
-// 		close(fd);
-// 	}
-// 	return true;
-// }
-//
-// bool apply_all_redirect(RedirectionList *redirections) {
-// 	for (int i = 0; redirections->data[i]; i++) {
-// 		if (!apply_redirect(*redirections->data[i])) {
-// 			return false;
-// 		}
-// 	}
-// 	return true;
-// }
-//
-
 #include "exec.h"
+#include "final_parser.h"
+#include "lexer.h"
+#include "parser.h"
+#include "signals.h"
+#include "utils.h"
+#include "colors.h"
 #include "libft.h"
 
-#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
+#include <stdlib.h>
 
-char *find_bin_location(char *bin, StringList *env, bool *absolute){
+pid_t g_masterPgid = 0;
+
+void dup_input_and_close(int fd) {
+	secure_dup2(fd, STDIN_FILENO);
+	close(fd);
+}
+
+void create_pipe(bool *hadPipe, int *pipefd) {
+	(*hadPipe) = true;
+	secure_pipe2(pipefd, O_CLOEXEC);
+	secure_dup2(pipefd[1], STDOUT_FILENO);
+	close(pipefd[1]);
+}
+
+int is_function(const char * const func_name);
+
+char  *resolve_bine(SimpleCommandP * const command, Vars * const shell_vars) {
+	if (!command || !command->word_list->data[0]) {
+		return NULL;
+	}
+	if (is_function(command->word_list->data[0]) != -1)
+		return command->word_list->data[0];
+	char *maybe_bin = hash_interface(HASH_FIND, command->word_list->data[0], shell_vars);
+	if (is_builtin(command->word_list->data[0])) {
+		return command->word_list->data[0];
+	}
+	if (maybe_bin) {
+		hash_interface(HASH_ADD_USED, command->word_list->data[0], shell_vars);
+		return maybe_bin;
+	} else {
+		bool absolute = false;
+		maybe_bin = find_bin_location(command->word_list->data[0], shell_vars->env, &absolute);
+		if (maybe_bin) {
+			if (absolute == false)
+				hash_interface(HASH_ADD_USED, command->word_list->data[0], shell_vars);
+			return maybe_bin;
+		} else {
+			return NULL;
+		}
+	}
+}
+
+#define MAX_FD 1024
+#include <sys/stat.h>
+
+bool check_filepath(char *file_path, TokenType mode) {
 	struct stat file_stat;
-	if (stat(bin, &file_stat) != -1 && ft_strchr(bin, '/')) {
+	if (stat(file_path, &file_stat) != -1) {
 
 		if (S_ISDIR(file_stat.st_mode)) {
-			dprintf(2, "%s: Is a directory\n", bin);
-			g_exitno = 126;
-			return (NULL);
+			error("42sh: %s: Is a directory", 1);
+			return (false);
 		}
 		if (file_stat.st_mode & S_IXUSR) {
-			*absolute = true;
-			return bin;
+			return file_path;
 		}
 		else {
-			dprintf(2, "%s: Permission Denied\n", bin);
-			g_exitno = 126;
-			return (NULL);
+			error("42sh: %s: Permission Denied", 1);
+			return (false);
+		}
+	} else {
+		if (mode == LESS) {
+			error("42sh: %s: No such file or directory", 1);
+			return false;
+		}
+		if (mode == GREAT)
+			return true;
+	}
+	return true;
+}
+
+bool redirect_ios(RedirectionL *redir_list) {
+	if (!redir_list) {
+		return true;
+	}
+	// print_redir_list(redir_list);
+
+	for (size_t i = 0; i < redir_list->size; i++) {
+		const RedirectionP *redir = redir_list->data[i];
+		const bool has_io_number = (redir->io_number != NULL);
+		int io_number = (has_io_number) ? ft_atoi(redir->io_number) : -1;
+		if (io_number >= MAX_FD) {
+			error("42sh: %d: Bad file descriptor", 1);
+			return false;
+		}
+		//TODO: error managment when open fails
+		if (!check_filepath(redir->filename, redir->type)) {
+			g_exitno = 1;
+			return false;
+		}
+		switch (redir->type) {
+			case (GREAT): { //>
+				const int open_flags = (O_CREAT | O_TRUNC | O_WRONLY);
+				const int fd = open(redir->filename, open_flags, 0664);
+				int dup_to = STDOUT_FILENO;
+				if (io_number != -1)
+					dup_to = io_number;
+				if (!secure_dup2(fd, dup_to))
+					return false;
+				close(fd);
+				break;
+			}
+			case (DGREAT): { //>>
+				const int open_flags = (O_CREAT | O_APPEND);
+				const int fd = open(redir->filename, open_flags, 0664);
+				int dup_to = STDOUT_FILENO;
+				if (io_number != -1)
+					dup_to = io_number;
+				if (!secure_dup2(fd, dup_to))
+					return false;
+				close(fd);
+				break;
+			}
+			case (LESSGREAT): { //<>
+				const int open_flags = (O_CREAT | O_TRUNC | O_RDWR);
+				const int fd = open(redir->filename, open_flags, 0664);
+				if (!secure_dup2(fd, STDOUT_FILENO) || !secure_dup2(fd, STDIN_FILENO))
+					return false;
+				close(fd);
+				break;
+			}
+			case (LESS): { //<
+				const int open_flags = (O_RDONLY);
+				int dup_to = STDIN_FILENO;
+				const int fd = open(redir->filename, open_flags, 0664);
+				if (io_number != -1) {
+					dup_to = io_number;
+				}
+				if (!secure_dup2(fd, dup_to))
+					return false;
+				close(fd);
+				break;
+			}
+			default: break;
 		}
 	}
-	else if (stat(bin, &file_stat) == -1 && ft_strchr(bin, '/')) {
-		dprintf(2, "%s: No such file or directory\n", bin);
-		g_exitno = 127;
-		return (NULL);
+	return true;
+}
+
+void execute_simple_command(CommandP *command, char *bin, int *pipefd, Vars *shell_vars) {
+	SimpleCommandP *simple_command = command->simple_command;
+	if (!redirect_ios(simple_command->redir_list)) {
+		return ;
+	}
+	if (!bin) {
+		return ;
 	}
 
-	char **path = ft_split(string_list_get_value(env, "PATH"), ':');
-	for (int i = 0; path[i]; i++) {
-		char *bin_with_path = ft_strjoin(path[i], (char *)gc(GC_ADD, ft_strjoin("/",bin), GC_SUBSHELL));
+	// dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
+	// dprintf(2, "  Bin: %s\n", bin);
+	// print_simple_command(simple_command);
+	// dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
 
-		struct stat file_stat;
-		if (stat(bin_with_path, &file_stat) != -1){
-			if (file_stat.st_mode & S_IXUSR){
-				free_charchar(path);
-				return (char *)gc(GC_ADD, bin_with_path, GC_SUBSHELL);
+	execve(bin, simple_command->word_list->data, shell_vars->env->data);
+	if (pipefd) {
+		close(pipefd[0]);
+		close(pipefd[1]);
+	}
+}
+
+char *boolStr(bool bobo) {
+	return (bobo == true) ? "TRUE" : "FALSE";
+}
+
+void execute_list(ListP *list, const bool background, Vars * const shell_vars);
+
+CompleteCommandP *wrap_list(ListP * const list) {
+	CompleteCommandP *complete_command = gc_unique(CompleteCommandP, GC_SUBSHELL);
+	complete_command->list = list;
+	return complete_command;
+}
+
+void execute_subshell(CommandP *command, const bool background, Vars * const shell_vars) {
+	ListP *subshell = command->subshell;
+	if (!redirect_ios(command->redir_list)) {
+		return ;
+	}
+	execute_complete_command(wrap_list(subshell), shell_vars, true, background);
+}
+
+void execute_brace_group(CommandP *command, const bool background, Vars * const shell_vars) {
+	ListP *command_group = command->brace_group;
+	if (!redirect_ios(command->redir_list)) {
+		return ;
+	}
+	execute_complete_command(wrap_list(command_group), shell_vars, false, background);
+}
+
+void execute_if_clause(CommandP *command, const bool background, Vars * const shell_vars) {
+	IFClauseP *if_clause = command->if_clause;
+
+	size_t i = 0;
+	for (; i < if_clause->conditions->size; i++) {
+		ListP *condition = if_clause->conditions->data[i];
+		execute_complete_command(wrap_list(condition), shell_vars, false, background);
+		if (g_exitno == 0) {
+			ListP *body = if_clause->bodies->data[i];
+			execute_complete_command(wrap_list(body), shell_vars, false, background);
+			return ;
+		}
+	}
+	if (i < if_clause->bodies->size) {
+		ListP *else_body = if_clause->bodies->data[i];
+		execute_complete_command(wrap_list(else_body), shell_vars, false, background);
+	}
+}
+
+void execute_while_clause(CommandP *command, const bool background, Vars * const shell_vars) {
+	//TODO: handle until_clause maybe in a separate func maybe not
+	WhileClauseP *while_clause = command->while_clause;
+	while (execute_complete_command(wrap_list(while_clause->condition), shell_vars, false, background), g_exitno == 0) {
+		execute_complete_command(wrap_list(while_clause->body), shell_vars, false, background);
+	}
+}
+
+void execute_case_clause(CommandP *command, const bool background, Vars * const shell_vars) {
+	CaseClauseP *case_clause = command->case_clause;
+	int default_index = -1;
+	for (size_t i = 0; i < case_clause->patterns->size; i++) {
+		const StringListL *condition = case_clause->patterns->data[i];
+		for (size_t inner_i = 0; inner_i < condition->size; inner_i++) {
+			if (!ft_strcmp("*", condition->data[inner_i]))
+				default_index = i;
+			if (!ft_strcmp(condition->data[inner_i], case_clause->expression))
+				return execute_complete_command(wrap_list(case_clause->bodies->data[i]), shell_vars, false, background);
+		}
+	}
+	if (default_index != -1)
+		return execute_complete_command(wrap_list(case_clause->bodies->data[default_index]), shell_vars, false, background);
+	return ;
+}
+
+void execute_for_clause(CommandP *command, const bool background, Vars *const shell_vars) {
+	ForClauseP *for_clause = command->for_clause;
+	//TOOD: fill this
+	(void) for_clause; (void)shell_vars; (void)background;
+	return ;
+}
+
+void declare_positional(const StringListL * const positional_parameters, const Vars * const shell_vars) {
+	for (size_t i = 1; i < positional_parameters->size; i++) {
+		char buffer[MAX_WORD_LEN] = {0};
+		int ret = ft_snprintf(buffer, MAX_WORD_LEN, "%ld=%s", i, positional_parameters->data[i]);
+		if (ret == -1)
+			fatal("snprintf: exceeded buffer capacity", 255);
+		// dprintf(2, "BUFFER: %s\n", buffer);
+		string_list_add_or_update(shell_vars->positional, buffer);
+	}
+}
+
+StringList *save_positionals(const Vars * const shell_vars) {
+	da_create(saved_positionals, StringList, sizeof(char *), GC_ENV);
+	for (size_t i = 0; i < shell_vars->positional->size; i++) {
+		char * const copy = gc(GC_ADD, ft_strdup(shell_vars->positional->data[i]), GC_ENV);
+		da_push(saved_positionals, copy);
+	}
+	return saved_positionals;
+}
+
+void execute_function(const CommandP * const command, const int funcNo, const bool background, Vars * const shell_vars) {
+	SimpleCommandP *simple_command = command->simple_command;
+	StringListL *positional_parameters = simple_command->word_list;
+	StringList *saved_positionals = save_positionals(shell_vars);
+	FunctionP *function_copy = gc_duplicate_function(g_funcList->data[funcNo]);
+
+	declare_positional(positional_parameters, shell_vars);
+	execute_brace_group(function_copy->function_body, background, shell_vars);
+	string_list_clear(shell_vars->positional);
+
+	shell_vars->positional = saved_positionals;
+}
+
+
+int is_function(const char * const func_name) {
+	for (size_t i = 0; i < g_funcList->size; i++) {
+		if (!ft_strcmp(g_funcList->data[i]->function_name, func_name))
+			return i;
+	}
+	return -1;
+}
+
+void register_function(const CommandP * const command) {
+	FunctionP *func = command->function_definition;
+	for (size_t i = 0; i < g_funcList->size; i++) {
+		if (!ft_strcmp(func->function_name, g_funcList->data[i]->function_name)) {
+			da_erase_index(g_funcList, i);
+		}
+	}
+	gc_move_function(func);
+	da_push(g_funcList, func);
+}
+
+void job_wait_2 (AndOrP *job);
+
+void set_group(AndOrP * const job, PipeLineP * const process, const pid_t pid) {
+	process->pid = pid;
+	if (!job->pgid)
+		job->pgid = pid;
+	setpgid(pid, job->pgid);
+}
+
+void process_simple_command(SimpleCommandP *simple_command, Vars *shell_vars) {
+	StringListL *args = do_expansions(simple_command->word_list, shell_vars, true);
+	StringListL *vars = do_expansions(simple_command->assign_list, shell_vars, false);
+	simple_command->word_list = args;
+	simple_command->assign_list = vars;
+	if (!args->data[0])
+		add_vars_to_set(shell_vars, vars);
+	else
+		add_vars_to_local(shell_vars->local, vars);
+}
+
+int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars) {
+	PipeLineP *process = job->pipeline;
+	CommandP *command = job->pipeline->command;
+	switch (command->type) {
+		case Simple_Command: {
+			process_simple_command(command->simple_command, shell_vars);
+			char *bin = resolve_bine(command->simple_command, shell_vars);
+			int funcNo = is_function(bin);
+			if (funcNo != -1) {
+				execute_function(command, funcNo, background, shell_vars);
+				return NO_WAIT;
+            } else if (is_builtin(bin)) {
+				execute_builtin(command->simple_command, shell_vars);
+				return NO_WAIT;
+			} else {
+				pid_t pid = fork();
+				ShellInfos *shell_infos = shell(SHELL_GET);
+				if (IS_CHILD(pid)) {
+
+					if (shell_infos->interactive)
+					{
+						pid_t pid = getpid();
+						if (job->pgid == 0) 
+							job->pgid = pid;
+						pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
+						setpgid(pid, pgid);
+
+						if (!background)
+							if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
+								perror("setpgrp");
+
+						signal_manager(SIG_EXEC);
+					}
+					setpgid(pid, g_masterPgid);
+					signal_manager(SIG_EXEC);
+			// dprintf(2, C_DARK_CYAN"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
+					close_all_fds();
+					execute_simple_command(command, bin, NULL, shell_vars);
+					gc(GC_CLEANUP, GC_ALL);
+					exit(g_exitno);
+				} else { set_group(job, process, pid); }
+				return WAIT;
 			}
 		}
-		free(bin_with_path);
-		bin_with_path = NULL;
+		case Subshell: {
+			if (background) {
+				execute_subshell(command, background, shell_vars);
+				return NO_WAIT;
+			}
+			pid_t pid = fork();
+			if (IS_CHILD(pid)) {
+				close_all_fds();
+				execute_subshell(command, background, shell_vars);
+				gc(GC_CLEANUP, GC_ALL);
+				exit(g_exitno);
+			} else { set_group(job, process, pid); }
+			return WAIT;
+		}
+		case Brace_Group: { execute_brace_group(process->command, background, shell_vars); return NO_WAIT; }
+		case If_Clause: { execute_if_clause(process->command, background, shell_vars); return NO_WAIT; }
+		case While_Clause: { execute_while_clause(process->command, background, shell_vars);  return NO_WAIT; }
+		case Case_Clause: { execute_case_clause(process->command, background, shell_vars); return NO_WAIT; }
+		case For_Clause: { execute_for_clause(process->command, background, shell_vars); return NO_WAIT; }
+		case Function_Definition: { register_function(process->command); return NO_WAIT; }
+		default: { break; };
 	}
-	free_charchar(path);
-	dprintf(2, "%s: command not found\n", bin);
-	g_exitno = 127;
-	return NULL;
+	return ERROR;
 }
-//
-// bool exec_simple_command(const SimpleCommand *command, Vars *shell_vars) {
-// 	if (apply_all_redirect(command->redir_list)) {
-// 		if (!command->bin) {
-// 			return false;
-// 		}
-// 		// if (builtin_executer(command, shell_vars))
-// 		// 	return false;
-// 		secure_execve(command->bin, command->args, shell_vars->env->data);
-// 	} else return false;
-// 	return true;
-// }
-//
-void close_saved_fds(int *saved_fds) {
-	if (saved_fds[STDIN_FILENO] != -1) {
-		close(saved_fds[STDIN_FILENO]);
-		saved_fds[STDIN_FILENO] = -1;
-	}	
-	if (saved_fds[STDOUT_FILENO] != -1) {
-		close(saved_fds[STDOUT_FILENO]);
-		saved_fds[STDOUT_FILENO] = -1;
+
+int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
+	PipeLineP *process = job->pipeline;
+	int saved_fds[] = {
+		[STDIN_FILENO] = dup(STDIN_FILENO),
+		[STDOUT_FILENO] = dup(STDOUT_FILENO),
+		[STDERR_FILENO] = dup(STDERR_FILENO),
+	};
+
+	bool hadPipe = false;
+	int pipefd[2] = {-1, -1};
+	const bool piped = (process->next != NULL);
+
+	if (!piped) {
+		return execute_single_command(job, background, shell_vars);
 	}
-	if (saved_fds[STDERR_FILENO] != -1) {
-		close(saved_fds[STDERR_FILENO]);
-		saved_fds[STDERR_FILENO] = -1;
+
+	while (process) {
+		const bool hasPipe = (process->next != NULL);
+
+		// dprintf(2, "hasPipe: %s | hadPipe: %s\n", boolStr(hasPipe), boolStr(hadPipe));
+
+		if (hadPipe) dup_input_and_close(pipefd[0]);
+		if (hasPipe) create_pipe(&hadPipe, pipefd);
+
+		pid_t pid = fork();
+		ShellInfos *shell_infos = shell(SHELL_GET);
+
+		if (IS_CHILD(pid)) {
+			if (shell_infos->interactive)
+			{
+				pid_t pid = getpid();
+				if (job->pgid == 0) 
+					job->pgid = pid;
+				pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
+				setpgid(pid, pgid);
+
+				if (!background)
+					if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
+						perror("setpgrp");
+
+				signal_manager(SIG_EXEC);
+			}
+			close_all_fds();
+
+			switch (process->command->type) {
+				case Simple_Command: { 
+					process_simple_command(process->command->simple_command, shell_vars);
+					char *bin = resolve_bine(process->command->simple_command, shell_vars);
+					int funcNo = is_function(bin);
+					if (funcNo != -1) {
+						execute_function(process->command, funcNo, background, shell_vars);
+					} else if (is_builtin(bin)) {
+						execute_builtin(process->command->simple_command, shell_vars);
+					} else {
+						execute_simple_command(process->command, bin, pipefd, shell_vars);
+					}
+					gc(GC_CLEANUP, GC_ALL);
+					exit(g_exitno);
+					break;
+				}
+				case Subshell: { execute_subshell(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case Brace_Group: { execute_brace_group(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case If_Clause: { execute_if_clause(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case While_Clause: { execute_while_clause(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case Case_Clause: { execute_case_clause(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case For_Clause: { execute_for_clause(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case Function_Definition: { register_function(process->command); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				default: { break; }
+			}
+		} else { set_group(job, process, pid); }
+		process = process->next;
+
+		dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
+		dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
+		dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
+	}
+	close_saved_fds(saved_fds);
+	return WAIT;
+}
+
+void execute_list(ListP *list, bool background, Vars *shell_vars) {
+	AndOrP *andor_head = list->and_or;
+	ShellInfos *shell_infos = shell(SHELL_GET);
+
+	while (andor_head) {
+		TokenType separator = andor_head->separator; (void)separator;
+		const int wait_status = execute_pipeline(andor_head, background, shell_vars);
+
+		if (wait_status == WAIT) {
+			if (!shell_infos->interactive || background)
+				job_wait_2(andor_head); //WAIT_ANY
+			else { //interactive
+				put_job_foreground(andor_head, false);
+			}
+		}
+
+		bool skip = (
+			(separator == AND_IF && g_exitno != 0) ||
+			(separator == OR_IF && g_exitno == 0)
+		);
+		if (skip) {
+			do {
+				separator = andor_head->separator;
+				skip = ((separator == AND_IF && g_exitno) || (separator == OR_IF && !g_exitno));
+			} while (skip && (andor_head = andor_head->next));
+			andor_head = andor_head->next;
+		} else {
+			andor_head = andor_head->next;
+		}
 	}
 }
-//
-// void launch_process(SimpleCommand *command, Vars *shell_vars,  pid_t pgid, bool foreground) {
-// 	ShellInfos *shell_infos = shell(SHELL_GET);
-// 	if (shell_infos->interactive)
-// 	{
-// 		pid_t pid = getpid ();
-// 		if (pgid == 0) pgid = pid;
-// 		setpgid (pid, pgid);
-//
-// 		if (foreground)
-// 			tcsetpgrp(shell_infos->shell_terminal, pgid);
-//
-// 		signal_manager(SIG_EXEC);
-// 	}
-// 	close_all_fds();
-// 	if (!command || !exec_simple_command(command, shell_vars)) {
-// 		gc(GC_CLEANUP, GC_ALL);
-// 		exit(g_exitno);
-// 	}
-// }
-//
-// void resolve_bin(SimpleCommand *command, Vars *shell_vars) {
-// 	if (!command || !command->bin) {
-// 		return ;
-// 	}
-// 	char *maybe_bin = hash_interface(HASH_FIND, command->bin, shell_vars);
-// 	if (is_builtin(command->bin)) {
-// 		return ;
-// 	}
-// 	if (maybe_bin) {
-// 		hash_interface(HASH_ADD_USED, command->bin, shell_vars);
-// 		command->bin = maybe_bin;
-// 	} else {
-// 		bool absolute = false;
-// 		maybe_bin = find_bin_location(command->bin, shell_vars->env, &absolute);
-// 		if (maybe_bin) {
-// 			if (absolute == false)
-// 				hash_interface(HASH_ADD_USED, command->bin, shell_vars);
-// 			command->bin = maybe_bin;
-// 		} else {
-// 			command->bin = NULL;
-// 		}
-// 	}
-// }
-//
-// int launch_job(Job *job, Vars *shell_vars, bool foreground) {
-// 	ShellInfos *shell_infos = shell(SHELL_GET);
-// 	Process *proc = job->first_process;
-// 	int pipefd[2] = {-1 , -1};
-// 	int saved_fds[3] = {-1, -1, -1};
-// 	pid_t pids[1024] = {0};
-// 	int i = 0;
-//
-// 	saved_fds[STDIN_FILENO] = dup(STDIN_FILENO);
-// 	saved_fds[STDOUT_FILENO]= dup(STDOUT_FILENO);
-// 	saved_fds[STDERR_FILENO] = dup(STDERR_FILENO);
-//
-// 	bool prev_pipe = false;
-//
-// 	while (proc) {
-//
-// 		if (prev_pipe) {
-// 			secure_dup2(pipefd[0], STDIN_FILENO);
-//             close(pipefd[0]);
-// 		}
-// 		if (proc->next) {
-// 			prev_pipe = true;
-// 			secure_pipe2(pipefd, O_CLOEXEC);
-// 			secure_dup2(pipefd[1], STDOUT_FILENO);
-//             close(pipefd[1]);
-// 		}
-// 		
-// 		if (proc->data_tag == DATA_NODE) {
-// 			if (proc->n_data->tree_tag == TREE_COMMAND_GROUP) {
-// 				if (proc->n_data->redirs != NULL) {
-// 					if (apply_all_redirect(proc->n_data->redirs)) {
-// 						g_exitno = ast_execute(proc->n_data, shell_vars, foreground);
-// 					}
-// 				} else {
-// 					g_exitno = ast_execute(proc->n_data, shell_vars, foreground);
-// 				}
-// 			} else if (proc->n_data->tree_tag == TREE_SUBSHELL) {
-// 				pids[i] = secure_fork();
-// 				if (pids[i] == 0) {
-// 					// dprintf(2, C_BRIGHT_BLUE"INFO"C_RESET": Command: "C_DARK_YELLOW"%s"C_RESET" PID | GPID: "C_YELLOW "%d | %d"C_RESET"\n", "SUBSHELL", getpid(), getpgid(getpid()));
-// 					// close_all_fds();
-// 					if (proc->n_data->redirs != NULL) {
-// 						if (!apply_all_redirect(proc->n_data->redirs)) {
-// 							gc(GC_CLEANUP, GC_SUBSHELL);
-// 							gc(GC_CLEANUP, GC_READLINE);
-// 							exit(g_exitno);
-// 						}
-// 					}
-// 					g_exitno = ast_execute(proc->n_data, shell_vars, foreground);
-// 					gc(GC_CLEANUP, GC_ENV);
-// 					gc(GC_CLEANUP, GC_SUBSHELL);
-// 					gc(GC_CLEANUP, GC_READLINE);
-// 					free(((Garbage *)gc(GC_GET))[GC_GENERAL].garbage);
-// 					exit(g_exitno);
-// 				} else {
-// 					proc->pid = pids[i];
-// 					if (!job->pgid)
-// 						job->pgid = pids[i];
-// 					setpgid (pids[i], job->pgid);
-// 					string_list_clear(shell_vars->local);
-// 				}
-// 			}
-// 		}
-//
-// 		if (proc->data_tag == DATA_TOKENS) {
-// 			proc->command = parser_parse_current(proc->s_data, shell_vars);
-// 			// printCommand(command);
-// 			if (!proc->command && pipefd[0] == -1){
-// 				close_all_fds();
-// 				return false;
-// 			}
-// 			resolve_bin(proc->command, shell_vars);
-// 			
-// 			//TODO: Better error managment for non-piped builtins
-//
-// 			// if (pipefd[0] == -1 && apply_all_redirect(proc->command->redir_list) && builtin_executer(proc->command, shell_vars)) {
-// 				// dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
-// 				// dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
-// 				// dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
-// 				// break;
-//     //         }
-//
-// 			pids[i] = secure_fork();
-// 			if (pids[i] == 0) {
-// 				launch_process(proc->command, shell_vars, job->pgid, foreground);
-// 			} else {
-// 				// Parent process
-// 				proc->pid = pids[i];
-// 				if (!job->pgid)
-// 					job->pgid = pids[i];
-// 				setpgid (pids[i], job->pgid);
-// 				// dprintf(2, C_BRIGHT_BLUE"INFO"C_RESET": Command: "C_YELLOW"%s"C_RESET" PID | GPID: "C_YELLOW "%d | %d"C_RESET"\n", command->bin, pids[i], getpgid(pids[i]));
-// 				string_list_clear(shell_vars->local);
-// 			}
-// 		}
-//
-// 		dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
-// 		dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
-// 		dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
-// 		
-// 		//increment pid only if it isnt a command group
-// 		i += !(proc->data_tag == DATA_NODE && proc->n_data->tree_tag == TREE_COMMAND_GROUP);
-// 		proc = proc->next;
-// 	}
-//
-// 	if (!shell_infos->interactive) {
-// 		wait_for_job(job);
-// 	} else if (foreground) {
-// 		put_job_in_foreground(job, false);
-// 	} else {
-// 		put_job_in_background(job);
-// 	}
-//
-// 	close_saved_fds(saved_fds);
-// 	return true;
-// }
-//
-// int exec_node(Node *node, Vars *shell_vars, bool foreground) {
-// 	Process *proc = build_executer_list(node->value.operand);
-// 	Job *job = gc_unique(Job, GC_SUBSHELL);
-// 	job->first_process = proc;
-//
-// 	launch_job(job, shell_vars, foreground);
-//
-// 	
-// 	return g_exitno;
-// }
+
+void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars, bool subshell, bool bg) {
+	ListP *list_head = complete_command->list;
+	ShellInfos *shell_infos = shell(SHELL_GET);
+
+	while (list_head) {
+		const bool background = (
+			shell_infos->interactive == true && 
+			( (list_head->separator == END && complete_command->separator == AMPER) ||
+			(list_head->separator == AMPER) || bg)
+		);
+		// dprintf(2, "Background ? %s\n", boolStr(background));
+		g_masterPgid = 0;
+
+		if (background == true) {
+			pid_t pid = fork();
+			if (IS_CHILD(pid)) {
+				g_masterPgid = getpid();
+				// dprintf(2, C_BRIGHT_CYAN"[MASTER] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
+				execute_list(list_head, background, shell_vars);
+				close_all_fds();
+				gc(GC_CLEANUP, GC_ALL);
+				exit(g_exitno);
+			} else {
+				setpgid(pid, pid);
+				AndOrP *master = list_head->and_or;
+				master->tmodes = shell_infos->shell_tmodes;
+				master->subshell = subshell;
+				master->pid = pid;
+				master->pgid = pid;
+				put_job_background(master, true);
+			}
+		} else {
+			// signal_manager(SIG_EXEC);
+			execute_list(list_head, background, shell_vars);
+		}
+		list_head = list_head->next;
+	}
+	return ;
+}

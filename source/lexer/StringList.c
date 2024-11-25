@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/24 16:32:39 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 16:05:59 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,17 @@
 #include "libft.h"
 
 #include <stdio.h>
+
+char *get_variable_value(Vars * const shell_vars, char * const name){
+	char *result = string_list_get_value(shell_vars->positional, name);
+	if (result) return result;
+	result = string_list_get_value(shell_vars->local, name);
+	if (result) return result;
+	result = string_list_get_value(shell_vars->env, name);
+	if (result) return result;
+	result = string_list_get_value(shell_vars->set, name);
+	return result;
+}
 
 void add_vars_to_set(const Vars * const shell_vars, const StringListL * const vars) {
 	StringList * const set = shell_vars->set;
@@ -32,7 +43,7 @@ void add_vars_to_local(StringList * const list, const StringListL * const vars) 
 	}
 }
 
-void string_list_clear(StringList *list) {
+void string_list_clear(StringList * const list) {
 	for (size_t i = 0; i < list->size; i++) {
 		gc(GC_FREE, list->data[i], GC_ENV);
 		list->data[i] = NULL;
@@ -40,13 +51,13 @@ void string_list_clear(StringList *list) {
 	list->size = 0;
 }
 
-void string_list_delete(StringList *list) {
+void string_list_delete(StringList * const list) {
 	string_list_clear(list);
 	gc(GC_FREE, list->data, GC_ENV);
 	gc(GC_FREE, list, GC_ENV);
 }
 
-bool string_list_remove(StringList *sl, char *id) {
+bool string_list_remove(StringList * const sl, char * const id) {
 	for (size_t i = 0; i < sl->size; i++) {
 		const char * const curr_equal_ptr = ft_strchr(sl->data[i], '=');
 		const size_t curr_equal_pos = curr_equal_ptr - sl->data[i];
@@ -89,12 +100,12 @@ bool string_list_update(StringList *sl, const char *var) {
 	return false;
 }
 
-void string_list_add_or_update(StringList *sl, char *var) {
+void string_list_add_or_update(StringList * const sl, char * const var) {
 	if (!string_list_update(sl, var))
 		da_push(sl, gc(GC_ADD, ft_strdup(var), GC_ENV));
 }
 
-void string_list_append(StringList *sl, char *var) {
+void string_list_append(const StringList * const sl, char * const var) {
 	const size_t plus_pos = ft_strstr(var, "+");
 	char * const var_id = ft_substr(var, 0, plus_pos);
 	const char *var_tail = &var[plus_pos + 2];
@@ -115,7 +126,7 @@ void string_list_append(StringList *sl, char *var) {
 	}
 }
 
-char *string_list_get_value(StringList *sl, char *id) {
+char *string_list_get_value(const StringList * const sl, char * const id) {
 	for (size_t i = 0; i < sl->size; i++) {
 		const char *curr_equal_ptr = ft_strchr(sl->data[i], '=');
 		const size_t curr_equal_pos = curr_equal_ptr - sl->data[i];
@@ -130,8 +141,8 @@ char *string_list_get_value(StringList *sl, char *id) {
 	return NULL;
 }
 
-char *shell_vars_get_value(Vars *shell_vars, char *id) {
-	char * return_value = string_list_get_value(shell_vars->env, id);
+char *shell_vars_get_value(const Vars * const shell_vars, char * const id) {
+	char *return_value = string_list_get_value(shell_vars->env, id);
 	if (!return_value)
 		return_value = string_list_get_value(shell_vars->set, id);
 	return return_value;
@@ -139,7 +150,7 @@ char *shell_vars_get_value(Vars *shell_vars, char *id) {
 
 void string_list_print(const StringList *list) {
 	for (size_t i = 0; i < list->size; i++) {
-		char *eql = ft_strchr(list->data[i], '=');
+		const char *eql = ft_strchr(list->data[i], '=');
 		if (!eql)
 			continue;
 		printf("%s\n", list->data[i]);

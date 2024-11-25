@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   debug_parser.c                                     :+:      :+:    :+:   */
+/*   expansions_debug.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:50:32 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 22:38:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:32:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/debug.h"
-#include "../../include/colors.h"
+#include "arithmetic.h"
+#include "parser.h"
 
 #include <stdio.h>
 
@@ -35,7 +35,6 @@ void printCharChar(char **tab) {
 	}
 }
 
-#include "../parser/arithmetic.h"
 
 char *aOpToSTring(AToken *token) {
 	static const struct {

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser_arithmetic_expansion.c                      :+:      :+:    :+:   */
+/*   arithmetic_expansion.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 22:56:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:22:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,8 +116,8 @@ static void replace_nested_greedy(const char *ref, char *buffer) {
 
 #include "colors.h"
 
-static Lexer_p lexer_init(char *input) {
-	Lexer_p lexer = gc(GC_ADD, ft_calloc(1, sizeof(Lexer)), GC_SUBSHELL);
+static Lexer * lexer_init(char *input) {
+	Lexer * lexer = gc(GC_ADD, ft_calloc(1, sizeof(Lexer)), GC_SUBSHELL);
 
 	Lexer self = {
 		.input = input,
@@ -144,7 +144,7 @@ char *parser_arithmetic_expansion(char *str, Vars *shell_vars) {
 	// printf(C_RED"------"C_RESET"\n");
 
 	long result = 0;
-	Lexer_p lexer = lexer_init(str);
+	Lexer * lexer = lexer_init(str);
 	ATokenStack *token_stack = lexer_arithmetic_exp_lex_all(lexer);
 
 	if (!token_stack) { 
