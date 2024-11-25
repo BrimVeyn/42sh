@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 22:59:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 12:09:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ void job_notification(void) {
 	for (size_t i = 0; i < g_jobList->size; i++) {
 		AndOrP *el = g_jobList->data[i];
 		if (el->completed) {
-			if (el->bg)
+			if (el->bg && !el->subshell)
 				dprintf(2, "[%zu]\tDone\t%s\n", el->id, "yeahhhh");
 		} else if (job_stopped(el) && !el->notified) {
 			dprintf(2, "[%zu]\t%d\n", el->id, el->pgid);

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 11:30:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 12:08:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,8 @@ void job_wait (AndOrP *job) {
 	// dprintf(2, "is it stopped : %s\n", job->first_process->stopped ? "true" : "false");	
 	do {
 		pid = waitpid(-job->pgid, &status, WUNTRACED);
+		// dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
 		if (pid != -1) {
-		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
 		// } else {
 		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
 		}
@@ -88,7 +88,8 @@ void put_job_background (AndOrP *job, bool add) {
 	if (add) {
 		andor_move(job);
 		da_push(g_jobList, job);
-		dprintf(2, "[%zu]\t%d\n", job->id, job->pgid);
+		if (!job->subshell)
+			dprintf(2, "[%zu]\t%d\n", job->id, job->pgid);
 		job->notified = true;
     }
 }
@@ -155,7 +156,7 @@ int mark_process (JobListe *list, pid_t pid, int status, bool print) {
 					andor_move(job);
 					da_push(g_jobList, job);
 					job->sig = WSTOPSIG(status);
-					if (print)
+					if (print && !job->notified)
 						dprintf(STDERR_FILENO, "[%zu]\tStopped(%s)\t%s\n", job->id, sigStr(job->sig), "waouh");
 					job->notified = true;
 				} else if (WIFSIGNALED (status)) {

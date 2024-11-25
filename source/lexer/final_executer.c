@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 11:38:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/25 13:53:38 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void create_pipe(bool *hadPipe, int *pipefd) {
 
 int is_function(const char * const func_name);
 
-char  *resolve_bine(SimpleCommandP *command, Vars *shell_vars) {
+char  *resolve_bine(SimpleCommandP * const command, Vars * const shell_vars) {
 	if (!command || !command->word_list->data[0]) {
 		return NULL;
 	}
@@ -192,58 +192,58 @@ char *boolStr(bool bobo) {
 	return (bobo == true) ? "TRUE" : "FALSE";
 }
 
-void execute_list(ListP *list, bool background, Vars *shell_vars);
+void execute_list(ListP *list, const bool background, Vars * const shell_vars);
 
-void execute_subshell(CommandP *command, bool background, Vars *shell_vars) {
+CompleteCommandP *wrap_list(ListP * const list) {
+	CompleteCommandP *complete_command = gc_unique(CompleteCommandP, GC_SUBSHELL);
+	complete_command->list = list;
+	return complete_command;
+}
+
+void execute_subshell(CommandP *command, const bool background, Vars * const shell_vars) {
 	ListP *subshell = command->subshell;
 	if (!redirect_ios(command->redir_list)) {
 		return ;
 	}
-	while (subshell) {
-		execute_list(subshell, background, shell_vars);
-		subshell = subshell->next;
-	}
+	execute_complete_command(wrap_list(subshell), shell_vars, true, background);
 }
 
-void execute_brace_group(CommandP *command, bool background, Vars *shell_vars) {
+void execute_brace_group(CommandP *command, const bool background, Vars * const shell_vars) {
 	ListP *command_group = command->brace_group;
 	if (!redirect_ios(command->redir_list)) {
 		return ;
 	}
-	while (command_group) {
-		execute_list(command_group, background, shell_vars);
-		command_group = command_group->next;
-	}
+	execute_complete_command(wrap_list(command_group), shell_vars, false, background);
 }
 
-void execute_if_clause(CommandP *command, Vars *shell_vars) {
+void execute_if_clause(CommandP *command, const bool background, Vars * const shell_vars) {
 	IFClauseP *if_clause = command->if_clause;
 
 	size_t i = 0;
 	for (; i < if_clause->conditions->size; i++) {
 		ListP *condition = if_clause->conditions->data[i];
-		execute_list(condition, false, shell_vars);
+		execute_complete_command(wrap_list(condition), shell_vars, false, background);
 		if (g_exitno == 0) {
 			ListP *body = if_clause->bodies->data[i];
-			execute_list(body, false, shell_vars);
+			execute_complete_command(wrap_list(body), shell_vars, false, background);
 			return ;
 		}
 	}
 	if (i < if_clause->bodies->size) {
 		ListP *else_body = if_clause->bodies->data[i];
-		execute_list(else_body, false, shell_vars);
+		execute_complete_command(wrap_list(else_body), shell_vars, false, background);
 	}
 }
 
-void execute_while_clause(CommandP *command, Vars *shell_vars) {
+void execute_while_clause(CommandP *command, const bool background, Vars * const shell_vars) {
 	//TODO: handle until_clause maybe in a separate func maybe not
 	WhileClauseP *while_clause = command->while_clause;
-	while (execute_list(while_clause->condition, false, shell_vars), g_exitno == 0) {
-		execute_list(while_clause->body, false, shell_vars);
+	while (execute_complete_command(wrap_list(while_clause->condition), shell_vars, false, background), g_exitno == 0) {
+		execute_complete_command(wrap_list(while_clause->body), shell_vars, false, background);
 	}
 }
 
-void execute_case_clause(CommandP *command, Vars *shell_vars) {
+void execute_case_clause(CommandP *command, const bool background, Vars * const shell_vars) {
 	CaseClauseP *case_clause = command->case_clause;
 	int default_index = -1;
 	for (size_t i = 0; i < case_clause->patterns->size; i++) {
@@ -252,22 +252,22 @@ void execute_case_clause(CommandP *command, Vars *shell_vars) {
 			if (!ft_strcmp("*", condition->data[inner_i]))
 				default_index = i;
 			if (!ft_strcmp(condition->data[inner_i], case_clause->expression))
-				return execute_list(case_clause->bodies->data[i], false, shell_vars);
+				return execute_complete_command(wrap_list(case_clause->bodies->data[i]), shell_vars, false, background);
 		}
 	}
 	if (default_index != -1)
-		return execute_list(case_clause->bodies->data[default_index], false, shell_vars);
+		return execute_complete_command(wrap_list(case_clause->bodies->data[default_index]), shell_vars, false, background);
 	return ;
 }
 
-void execute_for_clause(CommandP *command, Vars *shell_vars) {
+void execute_for_clause(CommandP *command, const bool background, Vars *const shell_vars) {
 	ForClauseP *for_clause = command->for_clause;
 	//TOOD: fill this
-	(void) for_clause; (void)shell_vars;
+	(void) for_clause; (void)shell_vars; (void)background;
 	return ;
 }
 
-void declare_positional(StringListL *positional_parameters, Vars *shell_vars) {
+void declare_positional(const StringListL * const positional_parameters, const Vars * const shell_vars) {
 	for (size_t i = 0; i < positional_parameters->size; i++) {
 		char buffer[MAX_WORD_LEN] = {0};
 		int ret = ft_snprintf(buffer, MAX_WORD_LEN, "%ld=%s", i, positional_parameters->data[i]);
@@ -277,7 +277,7 @@ void declare_positional(StringListL *positional_parameters, Vars *shell_vars) {
 	}
 }
 
-void execute_function(CommandP *command, int funcNo, bool background, Vars *shell_vars) {
+void execute_function(CommandP *command, const int funcNo, const bool background, Vars * const shell_vars) {
 	SimpleCommandP *simple_command = command->simple_command;
 	StringListL *positional_parameters = simple_command->word_list;
 	gc_move_function(g_funcList->data[funcNo]); //hasn't the move effect but resets PID and PGID
@@ -327,7 +327,7 @@ void process_simple_command(SimpleCommandP *simple_command, Vars *shell_vars) {
 		add_vars_to_local(shell_vars->local, vars);
 }
 
-int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
+int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars) {
 	PipeLineP *process = job->pipeline;
 	CommandP *command = job->pipeline->command;
 	switch (command->type) {
@@ -386,10 +386,10 @@ int execute_single_command(AndOrP *job, bool background, Vars *shell_vars) {
 			return WAIT;
 		}
 		case Brace_Group: { execute_brace_group(process->command, background, shell_vars); return NO_WAIT; }
-		case If_Clause: { execute_if_clause(process->command, shell_vars); return NO_WAIT; }
-		case While_Clause: { execute_while_clause(process->command, shell_vars);  return NO_WAIT; }
-		case Case_Clause: { execute_case_clause(process->command, shell_vars); return NO_WAIT; }
-		case For_Clause: { execute_for_clause(process->command, shell_vars); return NO_WAIT; }
+		case If_Clause: { execute_if_clause(process->command, background, shell_vars); return NO_WAIT; }
+		case While_Clause: { execute_while_clause(process->command, background, shell_vars);  return NO_WAIT; }
+		case Case_Clause: { execute_case_clause(process->command, background, shell_vars); return NO_WAIT; }
+		case For_Clause: { execute_for_clause(process->command, background, shell_vars); return NO_WAIT; }
 		case Function_Definition: { register_function(process->command); return NO_WAIT; }
 		default: { break; };
 	}
@@ -458,10 +458,10 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 				}
 				case Subshell: { execute_subshell(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
 				case Brace_Group: { execute_brace_group(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
-				case If_Clause: { execute_if_clause(process->command, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
-				case While_Clause: { execute_while_clause(process->command, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
-				case Case_Clause: { execute_case_clause(process->command, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
-				case For_Clause: { execute_for_clause(process->command, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case If_Clause: { execute_if_clause(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case While_Clause: { execute_while_clause(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case Case_Clause: { execute_case_clause(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case For_Clause: { execute_for_clause(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
 				case Function_Definition: { register_function(process->command); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
 				default: { break; }
 			}
@@ -508,7 +508,7 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 	}
 }
 
-void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars) {
+void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars, bool subshell, bool bg) {
 	ListP *list_head = complete_command->list;
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
@@ -516,7 +516,7 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 		const bool background = (
 			shell_infos->interactive == true && 
 			( (list_head->separator == END && complete_command->separator == AMPER) ||
-			(list_head->separator == AMPER) )
+			(list_head->separator == AMPER) || bg)
 		);
 		// dprintf(2, "Background ? %s\n", boolStr(background));
 		g_masterPgid = 0;
@@ -534,6 +534,7 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 				setpgid(pid, pid);
 				AndOrP *master = list_head->and_or;
 				master->tmodes = shell_infos->shell_tmodes;
+				master->subshell = subshell;
 				master->pid = pid;
 				master->pgid = pid;
 				put_job_background(master, true);
