@@ -6,12 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:57 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 17:22:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 13:43:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/lexer.h"
-#include "../../libftprintf/header/libft.h"
+#include "lexer.h"
+#include "libft.h"
 
 void lexer_read_char(Lexer * l) {
 	if (l->read_position >= l->input_len) {

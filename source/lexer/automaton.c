@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 16:43:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/07 17:01:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 10:48:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,10 @@
 
 char *tokenTypeStr(TokenType type) {
 	switch(type) {
-		case AND_IF: return "AND_IF";
-		case OR_IF: return "OR_IF";
-		case BANG: return "BANG";
-		case PIPE: return "PIPE";
+		case AND_IF: return "&&";
+		case OR_IF: return "||";
+		case BANG: return "!";
+		case PIPE: return "|";
 		case LPAREN: return "LPAREN";
 		case RPAREN: return "RPAREN";
 		case FOR: return "FOR";
@@ -43,18 +43,18 @@ char *tokenTypeStr(TokenType type) {
 		case DONE: return "DONE";
 		case ASSIGNMENT_WORD: return "ASSIGNMENT_WORD";
 		case IO_NUMBER: return "IO_NUMBER";
-		case LESS: return "LESS";
-		case LESSAND: return "LESSAND";
-		case GREAT: return "GREAT";
-		case GREATAND: return "GREATAND";
-		case DGREAT: return "DGREAT";
-		case LESSGREAT: return "LESSGREAT";
-		case CLOBBER: return "CLOBBER";
-		case DLESS: return "DLESS";
-		case DLESSDASH: return "DLESSDASH";
+		case LESS: return "<";
+		case LESSAND: return "<&";
+		case GREAT: return ">";
+		case GREATAND: return ">&";
+		case DGREAT: return ">>";
+		case LESSGREAT: return "<>";
+		case CLOBBER: return ">|";
+		case DLESS: return "<<";
+		case DLESSDASH: return "<<-";
 		case NEWLINE: return "NEWLINE";
-		case AMPER: return "AMPER";
-		case SEMI: return "SEMI";
+		case AMPER: return "&";
+		case SEMI: return ";";
 		case END: return "END";
 		case Program: return "Program";
 		case Complete_Commands: return "Complete_Commands";

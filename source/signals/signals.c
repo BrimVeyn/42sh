@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:29:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 23:02:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 16:42:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,6 @@ void signal_sigint_prompt(int code) {
 
 void signal_sigint_heredoc(int code) {
 	rl_done = 2;
-	g_signal = code;
-}
-
-void signal_sigint_exec(int code) {
 	printf("\n");
 	g_signal = code;
 }
@@ -69,16 +65,9 @@ void signal_exec_mode(void) {
 
 void signal_manager(type_of_signals mode) {
 	switch(mode) {
-		case SIG_PROMPT:
-			signal_prompt_mode();
-			break;
-		case SIG_EXEC:
-			signal_exec_mode();
-			break;
-		case SIG_HERE_DOC:
-			signal_heredoc_mode();
-			break;
-		default:
-			return;
+		case SIG_PROMPT: signal_prompt_mode(); break;
+		case SIG_EXEC: signal_exec_mode(); break;
+		case SIG_HERE_DOC: signal_heredoc_mode(); break;
+		default: return;
 	}
 }

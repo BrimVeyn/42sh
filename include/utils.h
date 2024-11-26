@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 17:26:32 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 16:55:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 extern int g_exitno;
 
@@ -131,7 +132,7 @@ typedef struct {
 #define da_print(array) \
 	_Generic((array), \
 		StrList *: str_list_print, \
-		StringList *: string_list_print, \
+		StringListL *: string_list_print, \
 		TokenList *: tokenListToString, \
 		ExpKindList *: exp_kind_list_print, \
 		ExprArray *: expr_array_print \
@@ -158,6 +159,7 @@ void			ft_dprintf(int fd, const char *fmt, ...);
 long			ft_atol(const char *str);
 char			*ft_ltoa(long n);
 char			string_stream_pop_front(StringStream *ss);
+char			*boolStr(bool rhs);
 //------------------------------------------//
 
 //----------------StringStream------------------//

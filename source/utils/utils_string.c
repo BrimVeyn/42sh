@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/25 17:03:32 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 16:55:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,11 @@ bool is_number(const char * const str) {
 	return true;
 }
 
-// char **ft_strdupdup(const StringList *env){
+char *boolStr(bool bobo) {
+	return (bobo == true) ? "TRUE" : "FALSE";
+}
+
+// char **ft_strdupdup(const StringListL *env){
 // 	char **strstr = ft_calloc(ft_strlenlen(env) + 1, sizeof(char *));
 // 	if (!strstr){
 // 		return NULL;

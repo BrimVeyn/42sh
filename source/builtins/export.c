@@ -6,11 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:33:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 21:56:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 13:41:32 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/exec.h"
+#include "exec.h"
 #include "lexer.h"
 #include "libft.h"
 #include "parser.h"
@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-static char **sort_env(StringList *env) {
+static char **sort_env(StringListL *env) {
 	char **self = ft_calloc(env->size + 1, sizeof(char *));
 	ft_memcpy(self, env->data, env->size * sizeof(char *));
 
@@ -37,7 +37,7 @@ static char **sort_env(StringList *env) {
 	return self;
 }
 
-static void print_export_p(StringList *env) {
+static void print_export_p(StringListL *env) {
 	char **res = sort_env(env);
 	for (size_t i = 0; res[i]; i++) {
 		printf("export \"%s\"\n", res[i]);

@@ -6,24 +6,42 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 17:21:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 17:33:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "exec.h"
 #include "final_parser.h"
 #include "lexer.h"
 #include "utils.h"
 #include "libft.h"
+#include "ft_readline.h"
 
-#define IS_ON(ptr, context) ((*ptr) & (1 << (int) context)) > 0
+#include <stdio.h>
+#include <time.h>
+
+#define BIT_IS_ON(mask, bit) (((mask) & (1U << (bit))) != 0)
+
+void printBinary(int n) {
+    unsigned int mask = 1 << (sizeof(int) * 8 - 1); // Mask for the most significant bit
+    for (; mask > 0; mask >>= 1) {
+        if (n & mask) {
+            putchar('1');
+        } else {
+            putchar('0');
+        }
+    }
+    putchar('\n'); // Add a newline at the end
+}
 
 WordContext get_context(const StringStream *input, WordContextBounds *map, const WordContext context) {
-    const unsigned char * const byteptr = (unsigned char *)&map[context].bitmap;
+    const unsigned char byteptr = map[context].bitmap;
 
     static const struct {
         WordContext type;
         int check_length;
     } contexts[] = {
+		{WORD_WORD, 0},
         {WORD_ARITHMETIC, 3},
         {WORD_CMD_SUB, 2},
         {WORD_PARAM, 2},
@@ -37,8 +55,9 @@ WordContext get_context(const StringStream *input, WordContextBounds *map, const
         const WordContext current_context = contexts[i].type;
         const int length = contexts[i].check_length;
 
-        if (IS_ON(byteptr, current_context) && 
+        if (BIT_IS_ON(byteptr, current_context) && contexts[i].check_length &&
             !ft_strncmp(input->data, map[current_context].start, length)) {
+			// dprintf(2, "new context: %s\n", map[current_context].start);
             return current_context;
         }
     }
@@ -95,6 +114,19 @@ bool get_next_token(StringStream *input, StringStream *cache, size_t *line, size
 	}
 
 	while (input->size) {
+
+		char f1 = da_peak_front(input);
+		char f2 = input->data[1];
+		if (f1 == '\\' && (!f2 || f2 == '\n')) {
+			da_pop_front(input); da_pop_front(input);
+			if (shell(SHELL_GET)->interactive) {
+				Lex *lexer = lex_interface(LEX_OWN, NULL, NULL, NULL, NULL);
+				char *PS2 = string_list_get_value(lexer->shell_vars->set, "PS2");
+				char *input_continuation = ft_readline(PS2, lexer->shell_vars);
+				ss_push_string(input, input_continuation);
+			}
+		}
+
 		WordContext maybe_new_context = get_context(input, map, da_peak_back(context_stack));
 
 		if (maybe_new_context != NONE) {
@@ -122,8 +154,7 @@ bool get_next_token(StringStream *input, StringStream *cache, size_t *line, size
 
 		char c = da_pop_front(input);
 		if (c == '\n') {
-			(*line)++;
-			(*column) = 0;
+			(*line)++; (*column) = 0;
 		} else {
 			(*column)++;
 		}

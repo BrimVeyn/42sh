@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 16:57:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 17:38:37 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,12 +175,6 @@ void execute_simple_command(CommandP *command, char *bin, int *pipefd, Vars *she
 	if (!bin) {
 		return ;
 	}
-
-	// dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
-	// dprintf(2, "  Bin: %s\n", bin);
-	// print_simple_command(simple_command);
-	// dprintf(2, C_RED"-------------------------------------------"C_RESET"\n");
-
 	execve(bin, simple_command->word_list->data, shell_vars->env->data);
 	if (pipefd) {
 		close(pipefd[0]);
@@ -188,9 +182,6 @@ void execute_simple_command(CommandP *command, char *bin, int *pipefd, Vars *she
 	}
 }
 
-char *boolStr(bool bobo) {
-	return (bobo == true) ? "TRUE" : "FALSE";
-}
 
 void execute_list(ListP *list, const bool background, Vars * const shell_vars);
 
@@ -222,24 +213,24 @@ void execute_if_clause(CommandP *command, const bool background, Vars * const sh
 	size_t i = 0;
 	for (; i < if_clause->conditions->size; i++) {
 		ListP *condition = if_clause->conditions->data[i];
-		execute_complete_command(wrap_list(condition), shell_vars, false, background);
+		execute_complete_command(wrap_list(condition), shell_vars, background, background);
 		if (g_exitno == 0) {
 			ListP *body = if_clause->bodies->data[i];
-			execute_complete_command(wrap_list(body), shell_vars, false, background);
+			execute_complete_command(wrap_list(body), shell_vars, background, background);
 			return ;
 		}
 	}
 	if (i < if_clause->bodies->size) {
 		ListP *else_body = if_clause->bodies->data[i];
-		execute_complete_command(wrap_list(else_body), shell_vars, false, background);
+		execute_complete_command(wrap_list(else_body), shell_vars, background, background);
 	}
 }
 
 void execute_while_clause(CommandP *command, const bool background, Vars * const shell_vars) {
 	//TODO: handle until_clause maybe in a separate func maybe not
 	WhileClauseP *while_clause = command->while_clause;
-	while (execute_complete_command(wrap_list(while_clause->condition), shell_vars, false, background), g_exitno == 0) {
-		execute_complete_command(wrap_list(while_clause->body), shell_vars, false, background);
+	while (execute_complete_command(wrap_list(while_clause->condition), shell_vars, true, background), g_exitno == 0) {
+		execute_complete_command(wrap_list(while_clause->body), shell_vars, true, background);
 	}
 }
 
@@ -252,25 +243,35 @@ void execute_case_clause(CommandP *command, const bool background, Vars * const 
 			if (!ft_strcmp("*", condition->data[inner_i]))
 				default_index = i;
 			if (!ft_strcmp(condition->data[inner_i], case_clause->expression))
-				return execute_complete_command(wrap_list(case_clause->bodies->data[i]), shell_vars, false, background);
+				return execute_complete_command(wrap_list(case_clause->bodies->data[i]), shell_vars, true, background);
 		}
 	}
 	if (default_index != -1)
-		return execute_complete_command(wrap_list(case_clause->bodies->data[default_index]), shell_vars, false, background);
+		return execute_complete_command(wrap_list(case_clause->bodies->data[default_index]), shell_vars, true, background);
 	return ;
 }
 
-void execute_for_clause(CommandP *command, const bool background, Vars *const shell_vars) {
-	ForClauseP *for_clause = command->for_clause;
-	//TOOD: fill this
-	(void) for_clause; (void)shell_vars; (void)background;
+void execute_for_clause(CommandP * const command, const bool background, Vars *const shell_vars) {
+	const ForClauseP * const for_clause = command->for_clause;
+	const StringListL *expanded_words = do_expansions(for_clause->word_list, shell_vars, true);
+	const StringListL * const word_list = (for_clause->in == true) ? expanded_words : shell_vars->positional;
+	for (size_t i = (0 + !for_clause->in); word_list && i < word_list->size; i++) {
+		char buffer[MAX_WORD_LEN] = {0};
+		const char * const value = (for_clause->in == true) ? word_list->data[i] : get_positional_value(word_list, i); 
+		const int ret = ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s", for_clause->iterator, value);
+		if (ret == -1)
+			fatal("snprintf: buffer overflow", 255);
+		string_list_add_or_update(shell_vars->set, buffer);
+		ListP * const body_save = gc_duplicate_list(for_clause->body);
+		execute_complete_command(wrap_list(body_save), shell_vars, background, background);
+	}
 	return ;
 }
 
 void declare_positional(const StringListL * const positional_parameters, const Vars * const shell_vars) {
 	for (size_t i = 1; i < positional_parameters->size; i++) {
 		char buffer[MAX_WORD_LEN] = {0};
-		int ret = ft_snprintf(buffer, MAX_WORD_LEN, "%ld=%s", i, positional_parameters->data[i]);
+		const int ret = ft_snprintf(buffer, MAX_WORD_LEN, "%ld=%s", i, positional_parameters->data[i]);
 		if (ret == -1)
 			fatal("snprintf: exceeded buffer capacity", 255);
 		// dprintf(2, "BUFFER: %s\n", buffer);
@@ -278,8 +279,8 @@ void declare_positional(const StringListL * const positional_parameters, const V
 	}
 }
 
-StringList *save_positionals(const Vars * const shell_vars) {
-	da_create(saved_positionals, StringList, sizeof(char *), GC_ENV);
+StringListL *save_positionals(const Vars * const shell_vars) {
+	da_create(saved_positionals, StringListL, sizeof(char *), GC_ENV);
 	for (size_t i = 0; i < shell_vars->positional->size; i++) {
 		char * const copy = gc(GC_ADD, ft_strdup(shell_vars->positional->data[i]), GC_ENV);
 		da_push(saved_positionals, copy);
@@ -287,12 +288,20 @@ StringList *save_positionals(const Vars * const shell_vars) {
 	return saved_positionals;
 }
 
-void execute_function(const CommandP * const command, const int funcNo, const bool background, Vars * const shell_vars) {
-	SimpleCommandP *simple_command = command->simple_command;
-	StringListL *positional_parameters = simple_command->word_list;
-	StringList *saved_positionals = save_positionals(shell_vars);
-	FunctionP *function_copy = gc_duplicate_function(g_funcList->data[funcNo]);
+void clear_positional(StringListL * const positional) {
+	for (size_t i = 1; i < positional->size; i++) {
+		gc(GC_FREE, positional->data[i], GC_ENV);
+	}
+	positional->size = 1;
+}
 
+void execute_function(const CommandP * const command, const int funcNo, const bool background, Vars * const shell_vars) {
+	const SimpleCommandP * const simple_command = command->simple_command;
+	const StringListL * const positional_parameters = simple_command->word_list;
+	StringListL * const saved_positionals = save_positionals(shell_vars);
+	const FunctionP * const function_copy = gc_duplicate_function(g_funcList->data[funcNo]);
+
+	clear_positional(shell_vars->positional);
 	declare_positional(positional_parameters, shell_vars);
 	execute_brace_group(function_copy->function_body, background, shell_vars);
 	string_list_clear(shell_vars->positional);
@@ -310,7 +319,7 @@ int is_function(const char * const func_name) {
 }
 
 void register_function(const CommandP * const command) {
-	FunctionP *func = command->function_definition;
+	FunctionP * const func = command->function_definition;
 	for (size_t i = 0; i < g_funcList->size; i++) {
 		if (!ft_strcmp(func->function_name, g_funcList->data[i]->function_name)) {
 			da_erase_index(g_funcList, i);
@@ -320,7 +329,6 @@ void register_function(const CommandP * const command) {
 	da_push(g_funcList, func);
 }
 
-void job_wait_2 (AndOrP *job);
 
 void set_group(AndOrP * const job, PipeLineP * const process, const pid_t pid) {
 	process->pid = pid;
@@ -367,14 +375,13 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 						pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
 						setpgid(pid, pgid);
 
-						if (!background)
+						if (!background) {
 							if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
-								perror("setpgrp");
-
+								fatal("tcestgrp: failed", 255);
+                        }
 						signal_manager(SIG_EXEC);
 					}
-					setpgid(pid, g_masterPgid);
-					signal_manager(SIG_EXEC);
+					// setpgid(pid, g_masterPgid);
 			// dprintf(2, C_DARK_CYAN"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
 					close_all_fds();
 					execute_simple_command(command, bin, NULL, shell_vars);

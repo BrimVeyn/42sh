@@ -6,14 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 14:44:54 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 17:29:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 13:45:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef EXEC_H
 # define EXEC_H
 
-#include "lexer.h"
+#include "final_parser.h"
 
 #include <termios.h>
 #include <stdbool.h>
@@ -39,7 +39,7 @@ bool	secure_dup2(int from, int to);
 void	secure_pipe2(int pipefd[2], int flags);
 void	secure_execve(const char *pathname, char **const argv, char **const envp);
 bool	is_builtin(const char *bin);
-char	*find_bin_location(char *bin, StringList *env, bool *absolute);
+char	*find_bin_location(char *bin, StringListL *env, bool *absolute);
 
 char	*sigStr(const int sig);
 //-------------------------------------------------------------//
@@ -64,18 +64,14 @@ typedef enum {
 	HASH_GET,
 } hash_mode;
 
-typedef struct cdOpt {
-	int L;
-	int P;
-} cdOpt;
-
-
 void *hash_interface(hash_mode mode, char *arg, Vars *shell_vars);
 char *hash_find_bin(char *bin, Vars *shell_vars);
 
 #include "final_parser.h"
 
-void add_vars_to_local(StringList * const list, const StringListL * const vars);
+char *job_print(AndOrP * const andor, const bool newline);
+
+void add_vars_to_local(StringListL * const list, const StringListL * const vars);
 void add_vars_to_set(const Vars * const shell_vars, const StringListL * const vars);
 char *get_variable_value(Vars *shell_vars, char *name);
 

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 11:37:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 16:32:55 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,7 +241,8 @@ void update_line(readline_state_t *rl_state, string *line) {
 void init_readline(readline_state_t *rl_state, const char *prompt, Vars *shell_vars){
     char buffer[2048] = {0};
 
-    set_prompt(rl_state, prompt);
+	const char *final_prompt = (prompt != NULL) ? prompt : "";
+    set_prompt(rl_state, final_prompt);
 	tgetent(buffer, getenv("TERM"));
 
 	//TODO:definir history autrement

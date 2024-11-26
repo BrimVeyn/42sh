@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 16:42:55 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 15:44:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ TokenType identify_token(const char *raw_value, const int table_row, bool *error
 	}
 
 	if (regex_match("^[0-9]+$", (char *)raw_value).is_found) {
-		char *peak = lex_interface(LEX_PEAK_CHAR, NULL, NULL, error);
+		char *peak = lex_interface(LEX_PEAK_CHAR, NULL, NULL, error, NULL);
 		if (peak && (*peak == '<' || *peak == '>'))
 			return IO_NUMBER;
 	}
@@ -76,7 +76,7 @@ TokenType identify_token(const char *raw_value, const int table_row, bool *error
 	// dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
 	if (regex_match("^[a-zA-Z_][a-zA-Z0-9_]*$", (char *)raw_value).is_found) {
 		if (table_row == 30 || 
-			((table_row == 48 || table_row == 0) && !ft_strcmp("(", lex_interface(LEX_PEAK, NULL, NULL, error))))
+			((table_row == 48 || table_row == 0) && !ft_strcmp("(", lex_interface(LEX_PEAK, NULL, NULL, error, NULL))))
 			return NAME;
 	}
 
@@ -91,7 +91,7 @@ StackEntry *parse(Vars *shell_vars) {
 	da_create(stack, TokenStack, sizeof(StackEntry), GC_SUBSHELL);
 
 	Tokenn token;
-	token.raw_value = lex_interface(LEX_GET, NULL, NULL, &error);
+	token.raw_value = lex_interface(LEX_GET, NULL, NULL, &error, NULL);
 	if (error) return NULL;
 	token.type = identify_token(token.raw_value, 0, &error);
 	if (error) return NULL;
@@ -110,7 +110,7 @@ StackEntry *parse(Vars *shell_vars) {
 				new_entry->token = token;
 				new_entry->state = entry.value;
 				da_push(stack, new_entry);
-				token.raw_value = lex_interface(LEX_GET, NULL, NULL, &error);
+				token.raw_value = lex_interface(LEX_GET, NULL, NULL, &error, NULL);
 				if (error) return NULL;
 				token.type = identify_token(token.raw_value, entry.value, &error);
 				if (error) return NULL;
@@ -423,6 +423,7 @@ StackEntry *parse(Vars *shell_vars) {
 						reduced_entry->token.for_clause = gc_unique(ForClauseP, GC_SUBSHELL);
 						reduced_entry->token.for_clause->iterator = name;
 						reduced_entry->token.for_clause->body = do_group;
+						reduced_entry->token.for_clause->in = false;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][For_Clause].value;
 						break;
@@ -436,6 +437,7 @@ StackEntry *parse(Vars *shell_vars) {
 						reduced_entry->token.for_clause = gc_unique(ForClauseP, GC_SUBSHELL);
 						reduced_entry->token.for_clause->body = do_group;
 						reduced_entry->token.for_clause->iterator = name;
+						reduced_entry->token.for_clause->in = false;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][For_Clause].value;
 						break;
@@ -451,6 +453,7 @@ StackEntry *parse(Vars *shell_vars) {
 						reduced_entry->token.for_clause = gc_unique(ForClauseP, GC_SUBSHELL);
 						reduced_entry->token.for_clause->iterator = name;
 						reduced_entry->token.for_clause->body = do_group;
+						reduced_entry->token.for_clause->in = true;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][For_Clause].value;
 						break;
@@ -468,6 +471,7 @@ StackEntry *parse(Vars *shell_vars) {
 						reduced_entry->token.for_clause->iterator = iterator;
 						reduced_entry->token.for_clause->word_list = word_list;
 						reduced_entry->token.for_clause->body = do_group;
+						reduced_entry->token.for_clause->in = true;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][For_Clause].value;
 						break;
@@ -1230,7 +1234,7 @@ StackEntry *parse(Vars *shell_vars) {
 
 
 void parse_input(char *in, char *filename, Vars *shell_vars) {
-	lex_interface(LEX_SET, in, filename, NULL);
+	lex_interface(LEX_SET, in, filename, NULL, shell_vars);
 	// dprintf(2, "input:\n%s", in);
 	// for (size_t i = 0; i < 100; i++) {
 	// 	char *value = lex_interface(LEX_GET, NULL, error);	
