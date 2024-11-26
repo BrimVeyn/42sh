@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 14:44:54 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 13:21:48 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/26 13:10:52 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,12 +96,6 @@ typedef enum {
 	HASH_PRINT,
 	HASH_GET,
 } hash_mode;
-
-typedef struct cdOpt {
-	int L;
-	int P;
-} cdOpt;
-
 
 void *hash_interface(hash_mode mode, char *arg, Vars *shell_vars);
 char *hash_find_bin(char *bin, Vars *shell_vars);
