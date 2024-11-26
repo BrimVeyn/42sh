@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:17:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 10:57:13 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/25 14:25:15 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,6 @@ void get_history(Vars *shell_vars) {
 	}
 	munmap(buffer, file_size);
 	close(fd);
-	// print_history_values(history);
 }
 
 void add_input_to_history(char *input, Vars *shell_vars){
