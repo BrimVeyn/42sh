@@ -30,24 +30,24 @@ FunctionList *g_funcList = NULL;
 JobListe *g_jobList = NULL;
 
 //FIX: tilde expansion
-//
+
 #include "readline/readline.h"
 
 void	*read_input_prompt(char *input, Vars *shell_vars) {
-	char *prompt = string_list_get_value(shell_vars->set, "PS1");
-	if (prompt)
-		input = ft_readline(prompt, shell_vars);
+	char *PS1 = string_list_get_value(shell_vars->set, "PS1");
+	if (PS1)
+		input = ft_readline(PS1, shell_vars);
 	else
 		input = ft_readline("42sh> ", shell_vars);
 		// input = readline("42sh> ");
-	if (!input) {
+	if (!input)
 		return NULL;
-	}
+
 	gc(GC_ADD, input, GC_SUBSHELL);
 	return input;
 }
 
-void env_to_string_list(StringList *env_list, const char **env){
+void env_to_string_list(StringListL *env_list, const char **env){
 	for (size_t i = 0; env[i]; i++)
 		string_list_add_or_update(env_list, gc(GC_ADD, ft_strdup(env[i]), GC_ENV));
 }
@@ -55,13 +55,13 @@ void env_to_string_list(StringList *env_list, const char **env){
 Vars *shell_vars_init(const char **env) {
 	Vars *self = gc(GC_ADD, ft_calloc(1, sizeof(Vars)), GC_ENV);
 
-	da_create(env_list, StringList, sizeof(char *), GC_ENV);
+	da_create(env_list, StringListL, sizeof(char *), GC_ENV);
 	self->env = env_list;
-	da_create(set_list, StringList, sizeof(char *), GC_ENV);
+	da_create(set_list, StringListL, sizeof(char *), GC_ENV);
 	self->set = set_list;
-	da_create(local_list, StringList, sizeof(char *), GC_ENV);
+	da_create(local_list, StringListL, sizeof(char *), GC_ENV);
 	self->local = local_list;
-	da_create(positional_list, StringList, sizeof(char *), GC_ENV);
+	da_create(positional_list, StringListL, sizeof(char *), GC_ENV);
 	self->positional = positional_list;
 	env_to_string_list(self->env, env);
 	env_to_string_list(self->set, env);
@@ -203,9 +203,8 @@ void load_42shrc(Vars *shell_vars) {
 	ft_sprintf(config_filename, "%s/.42shrc", home);
 
 	char *file_content = read_input_file(config_filename);
-	//FIX: uncomment this line
-	(void)file_content;
-	// parse_input(file_content, config_filename, shell_vars);
+	if (file_content)
+		parse_input(file_content, config_filename, shell_vars);
 }
 
 void save_positional_parameters(const int ac, char **av, Vars * const shell_vars) {
@@ -256,9 +255,12 @@ int main(const int ac, char *av[], const char *env[]) {
 			if (SCRIPT_MODE) { break; }
 		} else {
 			if (g_jobList->size) {
-				dprintf(2, "There are running jobs. Killing them.\n");
+				//FIX: update for stopped and not running
+				dprintf(2, "There are stopped jobs. Killing them.\n");
 				job_killall();
 				continue;
+			} else {
+				dprintf(2, "exit\n");
 			}
 			break;
 		}

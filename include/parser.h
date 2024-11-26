@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:05:45 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 17:31:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 13:46:27 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,8 @@ typedef struct {
 	size_t capacity;
 	size_t size_of_element;
 } ExpKindList;
+
+#include "final_parser.h"
 
 Str					*str_init(const ExpKind kind, char *str, bool add_to_gc);
 void				str_list_print(const StrList *list);

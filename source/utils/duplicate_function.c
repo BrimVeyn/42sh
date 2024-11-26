@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 15:16:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 14:21:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,8 +96,10 @@ CommandP *gc_duplicate_command(CommandP *command) {
 		case For_Clause: {
 			self->for_clause = gc_unique(ForClauseP, GC_SUBSHELL);
 			self->for_clause->iterator = gc(GC_ADD, ft_strdup(command->for_clause->iterator), GC_SUBSHELL);
+			self->for_clause->in = command->for_clause->in;
+			if (self->for_clause->word_list)
+				self->for_clause->word_list = gc_duplicate_stringlist(command->for_clause->word_list);
 			self->for_clause->body = gc_duplicate_list(command->for_clause->body);
-			self->for_clause->word_list = gc_duplicate_stringlist(command->for_clause->word_list);
 			break;
 		}
 		case Case_Clause: {

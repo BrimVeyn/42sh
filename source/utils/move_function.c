@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 14:28:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 14:20:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,8 @@ void gc_move_command(CommandP *command) {
 			gc(GC_MOVE, command->for_clause, GC_SUBSHELL, GC_ENV);
 			gc(GC_MOVE, command->for_clause->iterator, GC_SUBSHELL, GC_ENV);
 			gc_move_list(command->for_clause->body);
-			gc_move_stringlist(command->for_clause->word_list);
+			if (command->for_clause->word_list)
+				gc_move_stringlist(command->for_clause->word_list);
 			break;
 		}
 		case Case_Clause: {

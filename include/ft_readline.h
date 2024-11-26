@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/25 10:56:01 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/26 13:46:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,8 @@ void move_cursor(int x, int y);
 void set_cursor_position(readline_state_t *rl_state);
 void print_history_values(HISTORY_STATE *history);
 
-#include "lexer.h"
+#include "final_parser.h"
+
 rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *shell_vars);
 char *ft_readline(const char *prompt, Vars *shell_vars);
 void init_history(Vars *shell_vars);

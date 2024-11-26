@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   final_jobs.c                                       :+:      :+:    :+:   */
+/*   jobs.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 12:08:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 14:18:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ void job_wait_2 (AndOrP *job) {
 void put_job_background (AndOrP *job, bool add) {
 	job->bg = true;
 	if (add) {
-		andor_move(job);
+		gc_move_andor(job);
 		da_push(g_jobList, job);
 		if (!job->subshell)
 			dprintf(2, "[%zu]\t%d\n", job->id, job->pgid);
@@ -153,11 +153,11 @@ int mark_process (JobListe *list, pid_t pid, int status, bool print) {
 					// dprintf (2, C_LIGHT_MAGENTA"EXIT"C_RESET": "C_GOLD"%d"C_RESET" status: "C_BRIGHT_BLUE"%d"C_RESET"\n", pid, WEXITSTATUS(status));
 				} else if (WIFSTOPPED (status)) {
 					p->stopped = 1;
-					andor_move(job);
+					gc_move_andor(job);
 					da_push(g_jobList, job);
 					job->sig = WSTOPSIG(status);
 					if (print && !job->notified)
-						dprintf(STDERR_FILENO, "[%zu]\tStopped(%s)\t%s\n", job->id, sigStr(job->sig), "waouh");
+						dprintf(STDERR_FILENO, "[%zu]\tStopped(%s)\t%s\n", job->id, sigStr(job->sig), job_print(job, false));
 					job->notified = true;
 				} else if (WIFSIGNALED (status)) {
 					p->completed = 1;

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 13:04:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/24 16:22:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 17:31:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 
 bool get_next_token(StringStream *input, StringStream *cache, size_t *line, size_t *column);
 
-void *lex_interface(const LexMode mode, void *input, void *filename, bool *error) {
+void *lex_interface(const LexMode mode, void *input, void *filename, bool *error, Vars * const shell_vars) {
 	static Lex *lexer = NULL;
 
 	switch (mode) {
@@ -30,6 +30,10 @@ void *lex_interface(const LexMode mode, void *input, void *filename, bool *error
 			lexer->input = tmp;
 			da_create(tmp2, StringStream, sizeof(char), GC_SUBSHELL);
 			lexer->peak = tmp2;
+			da_create(tmp3, StringStream, sizeof(char), GC_SUBSHELL);
+			lexer->raw_input_ss = tmp3;
+			ss_push_string(lexer->raw_input_ss, lexer->raw_input);
+			lexer->shell_vars = shell_vars;
 			lexer->line = 1;
 			ss_push_string(lexer->input, input);
 			break;

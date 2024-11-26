@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 14:19:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 17:33:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -248,8 +248,9 @@ struct WhileClauseP {
 
 struct ForClauseP {
 	char *iterator;
-	ListP *body;
+	bool in;
 	StringListL *word_list;
+	ListP *body;
 };
 
 struct CaseClauseP {
@@ -296,18 +297,6 @@ typedef struct {
 char *tokenTypeStr(TokenType type);
 char *actionStr(const Action action);
 
-typedef struct {
-	char *filename; //either script name or terminal
-	char *raw_input;
-	StringStream *input;
-	StringStream *peak;
-	size_t line; 
-	size_t column;
-} Lex;
-
-typedef enum {LEX_SET, LEX_GET, LEX_OWN, LEX_PEAK, LEX_PEAK_CHAR, LEX_DEBUG} LexMode;
-void *lex_interface(const LexMode mode, void *input, void *filename, bool *error);
-
 void		pipelineAddBack(PipeLineP **lst, PipeLineP *new_value);
 PipeLineP	*pipelineNew(CommandP *command);
 
@@ -345,6 +334,41 @@ void print_while_clause(const WhileClauseP *while_clause);
 void print_token_stack(const TokenStack *stack);
 /*----------------------------------------------------------*/
 
+typedef struct {
+	StringListL *env;
+	StringListL *set;
+	StringListL *local;
+	StringListL *positional;
+} Vars;
+
+void			parse_input(char *in, char *filename, Vars * const shell_vars);
+
+char			*get_positional_value(const StringListL * const sl, const size_t idx);
+char			*get_variable_value(Vars * const shell_vars, char * const name);
+void			string_list_add_or_update(StringListL * const sl, char * const var);
+bool			string_list_update(StringListL *sl, const char *var);
+void			string_list_append(const StringListL * const sl, char * const var);
+void			string_list_clear(StringListL *list);
+bool			string_list_remove(StringListL *sl, char *id);
+char			*string_list_get_value(const StringListL * const sl, char * const id);
+char			*shell_vars_get_value(const Vars * const shell_vars, char * const id);
+void			string_list_print(const StringListL *list);
+
+//FIX: update raw_input when line_continuation
+typedef struct {
+	char *filename; //either script name or terminal
+	char *raw_input; //update to StringStream
+	StringStream *raw_input_ss;
+	StringStream *input;
+	StringStream *peak;
+	Vars *shell_vars;
+	size_t line; 
+	size_t column;
+} Lex;
+
+typedef enum {LEX_SET, LEX_GET, LEX_OWN, LEX_PEAK, LEX_PEAK_CHAR, LEX_DEBUG} LexMode;
+void *lex_interface(const LexMode mode, void *input, void *filename, bool *error, Vars * const shell_vars);
+
 // #define HIGH_FD_MAX 256
 
 typedef struct {
@@ -367,21 +391,22 @@ typedef struct {
 extern JobListe *g_jobList;
 extern FunctionList *g_funcList;
 
-void gc_move_function(FunctionP *func);
-FunctionP *gc_duplicate_function(FunctionP *func);
+void		gc_move_function(FunctionP *func);
+void		gc_move_andor(AndOrP *andor);
+FunctionP	*gc_duplicate_function(FunctionP *func);
+ListP		*gc_duplicate_list(ListP *list);
 
-int mark_process (JobListe *list, pid_t pid, int status, bool print);
-void put_job_background (AndOrP *job, bool add);
-void put_job_foreground (AndOrP *job, int cont);
-void job_wait (AndOrP *job);
-int job_stopped(AndOrP *j);
-int job_completed(AndOrP *j);
-void andor_move(AndOrP *job);
-void update_job_status(void);
-void job_notification(void);
-void job_killall(void);
-
-#include "exec.h"
+void	put_job_background(AndOrP *job, bool add);
+void	put_job_foreground(AndOrP *job, int cont);
+void	andor_move(AndOrP *job);
+void	update_job_status(void);
+void	job_wait(AndOrP *job);
+void	job_wait_2 (AndOrP *job);
+void	job_notification(void);
+void	job_killall(void);
+int		job_stopped(AndOrP *j);
+int		job_completed(AndOrP *j);
+int		mark_process(JobListe *list, pid_t pid, int status, bool print);
 
 typedef enum {
 	HD_EXPAND,

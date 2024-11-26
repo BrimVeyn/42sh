@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   exec.c                                             :+:      :+:    :+:   */
+/*   old_exec.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:16 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 10:35:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 13:41:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-char *find_bin_location(char *bin, StringList *env, bool *absolute){
+char *find_bin_location(char *bin, StringListL *env, bool *absolute){
 	struct stat file_stat;
 	if (stat(bin, &file_stat) != -1 && ft_strchr(bin, '/')) {
 

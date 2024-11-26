@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:53:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 16:04:14 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 13:41:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ char *search_in_cdpath(char *operand, Vars *shell_vars) {
 	return ft_strdup(operand);
 }
 
-static char *build_path(StringList *stack){
+static char *build_path(StringListL *stack){
 	char *full_path = ft_strdup("");
 
 	for (size_t i = 0; i < stack->size; i++){
@@ -136,7 +136,7 @@ void canonical_convertion(char **pcurpath){
 
 	// regex_test("\\/?[^\\/]+", curpath);
 	
-	da_create(stack, StringList, sizeof(char *), GC_SUBSHELL);
+	da_create(stack, StringListL, sizeof(char *), GC_SUBSHELL);
 
 	while(1){
 		result = regex_match("\\/?[^\\/]+", curpath);

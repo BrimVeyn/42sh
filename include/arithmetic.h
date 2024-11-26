@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 10:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 17:27:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 13:45:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define ARITHMETIC_H
 
 #include "lexer.h"
+#include "final_parser.h"
 
 typedef enum {
 	PP, // - ()

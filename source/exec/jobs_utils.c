@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 17:04:24 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 10:53:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,13 +42,6 @@ int job_completed(AndOrP *j) {
 	return 1;
 }
 
-void andor_move(AndOrP *job) {
-	gc(GC_MOVE, job, GC_SUBSHELL, GC_ENV);
-	for (PipeLineP *p = job->pipeline; p; p = p->next) {
-		gc(GC_MOVE, p, GC_SUBSHELL, GC_ENV);
-	}
-}
-
 void remove_job(AndOrP *job) {
 	size_t index = 0;
 	for (;index < g_jobList->size; index++) {
@@ -74,7 +67,7 @@ void job_notification(void) {
 		AndOrP *el = g_jobList->data[i];
 		if (el->completed) {
 			if (el->bg && !el->subshell)
-				dprintf(2, "[%zu]\tDone\t%s\n", el->id, "yeahhhh");
+				dprintf(2, "[%zu]\tDone\t%s\n", el->id, job_print(el, false));
 		} else if (job_stopped(el) && !el->notified) {
 			dprintf(2, "[%zu]\t%d\n", el->id, el->pgid);
 			el->notified = true;

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 15:11:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/14 15:46:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/26 13:47:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #define SIGNAL_H
 
 #include <stdbool.h>
-#include "lexer.h"
+#include "final_parser.h"
 
 extern int g_signal;
 
