@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/26 17:33:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/27 10:49:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -355,6 +355,11 @@ char			*shell_vars_get_value(const Vars * const shell_vars, char * const id);
 void			string_list_print(const StringListL *list);
 
 //FIX: update raw_input when line_continuation
+
+typedef struct {
+	size_t line, column, absolute;
+} CursorPosition;
+
 typedef struct {
 	char *filename; //either script name or terminal
 	char *raw_input; //update to StringStream
@@ -362,8 +367,7 @@ typedef struct {
 	StringStream *input;
 	StringStream *peak;
 	Vars *shell_vars;
-	size_t line; 
-	size_t column;
+	CursorPosition pos;
 } Lex;
 
 typedef enum {LEX_SET, LEX_GET, LEX_OWN, LEX_PEAK, LEX_PEAK_CHAR, LEX_DEBUG} LexMode;

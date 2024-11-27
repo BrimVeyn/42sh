@@ -1,3 +1,4 @@
-for name in $(echo salut mec); do
-	echo ${name};
-done
+echo salut\
+ca va\
+oui et toi\
+ putain 
