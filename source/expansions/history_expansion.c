@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:17:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 10:57:13 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/27 10:36:51 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,6 @@ void get_history(Vars *shell_vars) {
 	}
 	munmap(buffer, file_size);
 	close(fd);
-	// print_history_values(history);
 }
 
 void add_input_to_history(char *input, Vars *shell_vars){
@@ -85,7 +84,7 @@ char *get_value_wd(char *parameter, char *buffer, size_t history_length){
             end = history_length;
             
             char *tmp_cmd = ft_substr(buffer, start, end - start);
-			printf("tmp_cmd: %s parameter: %s", tmp_cmd, parameter);
+			// printf("tmp_cmd: %s parameter: %s", tmp_cmd, parameter);
             if (!ft_strncmp(tmp_cmd, parameter, ft_strlen(parameter))) {
                 value = tmp_cmd;
 				printf("return\n");
