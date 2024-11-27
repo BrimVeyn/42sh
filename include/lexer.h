@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 14:44:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 22:56:41 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/27 13:43:02 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +56,8 @@ typedef struct {
 } WordContextList;
 
 #define WORD_MAP (BitMap8) {0, 1, 0, 1, 1, 0, 1, 1}
-#define PARAM_MAP (BitMap8) {0, 0, 0, 1, 0, 0, 0, 0}
 #define CMD_SUB_MAP (BitMap8) {0, 1, 1, 1, 1, 0, 1, 1}
+#define PARAM_MAP (BitMap8) {0, 0, 0, 1, 0, 0, 1, 0}
 #define SUBSHELL_MAP (BitMap8) {0, 1, 1, 1, 1, 0, 1, 1}
 #define ARITHMETIC_MAP (BitMap8) {0, 1, 0, 1, 1, 1, 0, 0}
 #define ARITHMETIC_PAREN_MAP (BitMap8) {0, 1, 0, 1, 1, 1, 0, 0}

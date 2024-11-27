@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:40:48 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/26 15:16:42 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/27 13:45:25 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,12 @@
 #include "libft.h"
 #include "ft_readline.h"
 #include "ft_regex.h"
+#include <sys/time.h>
+#include <linux/limits.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <time.h>
+#include <unistd.h>
 
 typedef enum {
 	FC_E = 0b00001,
@@ -53,6 +59,9 @@ void print_fc_error(const fcStatus n, const void ** const arg){
 	}
 }
 
+static int min(const int n1, const int n2){
+	return (n1 < n2) ? n1 : n2;
+}
 static int max(const int n1, const int n2){
 	return (n1 > n2) ? n1 : n2;
 }
@@ -62,8 +71,15 @@ static char *fc_default(void){
 }
 
 char *get_history_value_wd(char *word){
-	
-	return NULL;
+	int word_len = ft_strlen(word);
+	for (int i = history->length - 1; i >= 0; i--) {
+		char *current_cmd = history->entries[i]->line.data;
+		if (!ft_strncmp(current_cmd, word, min(word_len, ft_strlen(current_cmd)))) {
+			//do not free that
+			return current_cmd; 
+		}
+	}
+    return NULL;
 }
 
 char* get_history_value_nb(int first, int last) {
@@ -172,8 +188,49 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 		command_list = get_history_value_wd(*operands->data);
 	}
 	
-	printf("command_list: \n%s\n", command_list);
+	struct timeval	time;
+
+	if (gettimeofday(&time, NULL) == -1){
+		//print error
+		g_exitno = 1;
+		return ;
+	}
+	char filename[21] = {0}; //7 digit max for usec
+	ft_sprintf(filename, "/tmp/42sh-fn.%ld", time.tv_usec);
+	// printf("command_list: \n%s\n", command_list);
+	// printf("filname: %s\n", filename);
+
+	int fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, 0644);
+	if (fd == -1){
+		//print error
+		g_exitno = 1;
+		return;
+	}
+	write(fd, command_list, ft_strlen(command_list));
+
+	
+
+	char *editor = get_variable_in_bi(shell_vars, "EDITOR");
+	char *editor_tab[2] = {
+		[0] = editor,
+		[1] = NULL,
+	};
+	if (!editor){
+		//print error message
+		g_exitno = 1;
+		return;
+	}
+
+	pid_t id = fork();
+	if (id == 0){
+		execve(editor, editor_tab, shell_vars->env->data);
+		printf("connard\n");
+		exit (EXIT_FAILURE);
+	}
+	waitpid(-1, NULL, 0);
 
 	g_exitno = 0;
 	return ;
 }
+// ${FCEDIT:-${EDITOR:-$({ { hash editor; hash; } | grep editor | rev | cut -f1 | rev; } || echo ed)}}
+
