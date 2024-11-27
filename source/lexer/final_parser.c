@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/26 15:44:50 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/27 17:36:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 #include "ft_regex.h"
 #include "utils.h"
 #include "libft.h"
-#include "parser.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -34,7 +33,8 @@ bool is_keyword(const TokenType type) {
 		 type == DONE || type == DO || type == LBRACE || type == RBRACE || type == THEN);
 }
 
-TokenType identify_token(const char *raw_value, const int table_row, bool *error) {
+TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row, bool *error) {
+
 	if (!*raw_value)
 		return END;
 
@@ -57,7 +57,9 @@ TokenType identify_token(const char *raw_value, const int table_row, bool *error
 	// dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
-			((table_row != 27 && table_row != 66) || !is_keyword(i))) {
+			((table_row != 27 && table_row != 66) || !is_keyword(i)))
+		{
+			if (is_continuable(i)) { line_continuation(lexer); }
 			return i;
 		}
 	}
@@ -85,7 +87,7 @@ TokenType identify_token(const char *raw_value, const int table_row, bool *error
 
 #include "exec.h"
 
-StackEntry *parse(Vars *shell_vars) {
+StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 
 	bool error = false;
 	da_create(stack, TokenStack, sizeof(StackEntry), GC_SUBSHELL);
@@ -93,7 +95,8 @@ StackEntry *parse(Vars *shell_vars) {
 	Tokenn token;
 	token.raw_value = lex_interface(LEX_GET, NULL, NULL, &error, NULL);
 	if (error) return NULL;
-	token.type = identify_token(token.raw_value, 0, &error);
+	token.type = identify_token(lexer, token.raw_value, 0, &error);
+	da_push(lexer->produced_tokens, token.type);
 	if (error) return NULL;
 
 	size_t action_no = 0;
@@ -112,7 +115,8 @@ StackEntry *parse(Vars *shell_vars) {
 				da_push(stack, new_entry);
 				token.raw_value = lex_interface(LEX_GET, NULL, NULL, &error, NULL);
 				if (error) return NULL;
-				token.type = identify_token(token.raw_value, entry.value, &error);
+				token.type = identify_token(lexer, token.raw_value, entry.value, &error);
+				da_push(lexer->produced_tokens, token.type);
 				if (error) return NULL;
 				// dprintf(2, "Token produced: %s, type: %s\n", token.raw_value, tokenTypeStr(token.type));
 				break;
@@ -1222,8 +1226,10 @@ StackEntry *parse(Vars *shell_vars) {
 			}
 			case GOTO: 
 			case ERROR: {
-				if (ft_strcmp(token.raw_value, ""))
-					pretty_error(token.raw_value);
+				for (size_t i = 0; i < lexer->produced_tokens->size; i++) {
+					if (lexer->produced_tokens->data[i] != NEWLINE && lexer->produced_tokens->data[i] != END)
+						return (pretty_error(token.raw_value), NULL);
+				}
 				return NULL;
 				break;
 			}
@@ -1234,12 +1240,8 @@ StackEntry *parse(Vars *shell_vars) {
 
 
 void parse_input(char *in, char *filename, Vars *shell_vars) {
+	if (!*in) return ;
 	lex_interface(LEX_SET, in, filename, NULL, shell_vars);
-	// dprintf(2, "input:\n%s", in);
-	// for (size_t i = 0; i < 100; i++) {
-	// 	char *value = lex_interface(LEX_GET, NULL, error);	
-	// 	TokenType type = identify_token(value, 0);
-	// 	dprintf(2, "|%s| -> %s\n", value, tokenTypeStr(type));
-	// }
-	parse(shell_vars);
+	Lex *lexer = lex_interface(LEX_OWN, NULL, NULL, NULL, NULL);
+	parse(lexer, shell_vars);
 }

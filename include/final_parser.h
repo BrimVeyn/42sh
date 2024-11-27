@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/27 10:49:54 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/27 17:21:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -361,17 +361,29 @@ typedef struct {
 } CursorPosition;
 
 typedef struct {
+	TokenType *data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} TokenTypeVect;
+
+typedef struct {
 	char *filename; //either script name or terminal
-	char *raw_input; //update to StringStream
 	StringStream *raw_input_ss;
 	StringStream *input;
 	StringStream *peak;
 	Vars *shell_vars;
 	CursorPosition pos;
+	TokenTypeVect *produced_tokens;
 } Lex;
 
 typedef enum {LEX_SET, LEX_GET, LEX_OWN, LEX_PEAK, LEX_PEAK_CHAR, LEX_DEBUG} LexMode;
-void *lex_interface(const LexMode mode, void *input, void *filename, bool *error, Vars * const shell_vars);
+void	*lex_interface(const LexMode mode, void *input, void *filename, bool *error, Vars * const shell_vars);
+bool	is_continuable(const TokenType type);
+void	line_continuation(const Lex * const lexer);
+void 	line_continuation_backslash(StringStream * const input, CursorPosition * const pos);
+void 	pass_whitespace(StringStream * const input, CursorPosition * const pos);
 
 // #define HIGH_FD_MAX 256
 
