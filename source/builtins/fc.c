@@ -6,12 +6,11 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:40:48 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/27 13:47:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/27 14:55:45 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
-#include "final_parser.h"
 #include "lexer.h"
 #include "utils.h"
 #include "libft.h"
@@ -210,28 +209,12 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 	write(fd, command_list, ft_strlen(command_list));
 
 	
+	char *input = gc(GC_ADD, ft_strjoin("${EDITOR} ", filename), GC_SUBSHELL);
+	parse_input(input, NULL, shell_vars);
+	lseek(fd, 0, SEEK_SET);
+	char *buffer = read_whole_file(fd);
+	parse_input(buffer, NULL, shell_vars);
 
-	char *editor = get_variable_value(shell_vars, "EDITOR");
-	char *editor_tab[2] = {
-		[0] = editor,
-		[1] = NULL,
-	};
-	if (!editor){
-		//print error message
-		g_exitno = 1;
-		return;
-	}
-
-	pid_t id = fork();
-	if (id == 0){
-		execve(editor, editor_tab, shell_vars->env->data);
-		printf("connard\n");
-		exit (EXIT_FAILURE);
-	}
-	waitpid(-1, NULL, 0);
-
-	g_exitno = 0;
 	return ;
 }
-// ${FCEDIT:-${EDITOR:-$({ { hash editor; hash; } | grep editor | rev | cut -f1 | rev; } || echo ed)}}
 
