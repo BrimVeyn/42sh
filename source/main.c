@@ -260,7 +260,7 @@ int main(const int ac, char *av[], const char *env[]) {
 				dprintf(2, "There are stopped jobs. Killing them.\n");
 				job_killall();
 				continue;
-			} else {
+			} else if (self->interactive) {
 				dprintf(2, "exit\n");
 			}
 			break;

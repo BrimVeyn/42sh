@@ -1,4 +1,3 @@
-echo salut\
-ca va\
-oui et toi\
- putain 
+echo salut mec | \
+				 cat \
+				 Makefile
