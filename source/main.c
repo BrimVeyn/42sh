@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -198,11 +199,11 @@ void load_42shrc(Vars *shell_vars) {
 	get_history(shell_vars);
 	signal_manager(SIG_PROMPT);
 
-	char *home = string_list_get_value(shell_vars->env, "HOME");
+	const char * const home = string_list_get_value(shell_vars->env, "HOME");
 	char config_filename[1024] = {0};
 	ft_sprintf(config_filename, "%s/.42shrc", home);
 
-	char *file_content = read_input_file(config_filename);
+	char * const file_content = read_input_file(config_filename);
 	if (file_content)
 		parse_input(file_content, config_filename, shell_vars);
 }

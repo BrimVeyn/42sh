@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/26 16:55:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/27 12:54:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,15 @@ typedef struct {
 	int		gc_level;
 } StringStream;
 
+//----------------StringStream------------------//
+char	*ss_get_owned_slice(StringStream * const ss);
+char	*ss_to_string(StringStream * const ss);
+void	ss_push_string(StringStream * const ss, const char * const str);
+void	ss_cut(StringStream * const ss, const size_t new_size);
+char	ss_pop_front(StringStream * const ss);
+void	ss_insert_string(StringStream * const ss, const char * const str, const size_t pos);
+//------------------------------------------//
+
 #define gc_unique(datatype, garbage_collector_level) \
 	gc(GC_CALLOC, 1, sizeof(datatype), garbage_collector_level); \
 
@@ -107,7 +116,7 @@ typedef struct {
 	do { \
 		if (index < (array)->size)  { \
 			ft_memmove(&(array)->data[index], &(array)->data[index + 1], (array)->size_of_element * ((array)->size - index)); \
-			(array)->data[--(array)->size] = NULL; \
+			(array)->data[--(array)->size] = 0; \
 		} \
 	} while (0); \
 
@@ -140,7 +149,7 @@ typedef struct {
 
 #define da_pop_front(array) \
 	_Generic((array), \
-		StringStream *: string_stream_pop_front \
+		StringStream *: ss_pop_front \
 	)(array)
 
 //------------------------------------------//
@@ -158,14 +167,7 @@ int				ft_snprintf(char *buffer, const size_t size_of_buffer, const char *fmt, .
 void			ft_dprintf(int fd, const char *fmt, ...);
 long			ft_atol(const char *str);
 char			*ft_ltoa(long n);
-char			string_stream_pop_front(StringStream *ss);
 char			*boolStr(bool rhs);
-//------------------------------------------//
-
-//----------------StringStream------------------//
-char			*ss_get_owned_slice(StringStream *ss);
-void			ss_push_string(StringStream *ss, char *str);
-void			ss_cut(StringStream *ss, size_t new_size);
 //------------------------------------------//
 
 //----------------File Utils--------------------//

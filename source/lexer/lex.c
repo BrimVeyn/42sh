@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/26 17:33:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/27 13:44:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,11 @@ void da_transfer(StringStream *in, StringStream *out, int number) {
 	}
 }
 
-bool get_next_token(StringStream *input, StringStream *cache, size_t *line, size_t *column) {
+void line_continuation() {
+
+}
+
+bool get_next_token(StringStream *input, StringStream *cache, CursorPosition *pos) {
 
 	if (*input->data == '#') {
 		while (input->size && *input->data != '\n') {
@@ -110,20 +114,30 @@ bool get_next_token(StringStream *input, StringStream *cache, size_t *line, size
 
 	while (*input->data && (*input->data == '\t' || *input->data == ' ')) {
 		da_pop_front(input);
-		(*column)++;
+		(pos->column)++;
+		(pos->absolute)++;
 	}
 
 	while (input->size) {
 
-		char f1 = da_peak_front(input);
-		char f2 = input->data[1];
+		const char f1 = input->data[0];
+		const char f2 = input->data[1];
 		if (f1 == '\\' && (!f2 || f2 == '\n')) {
 			da_pop_front(input); da_pop_front(input);
+			const Lex * const lexer = lex_interface(LEX_OWN, NULL, NULL, NULL, NULL);
 			if (shell(SHELL_GET)->interactive) {
-				Lex *lexer = lex_interface(LEX_OWN, NULL, NULL, NULL, NULL);
-				char *PS2 = string_list_get_value(lexer->shell_vars->set, "PS2");
-				char *input_continuation = ft_readline(PS2, lexer->shell_vars);
+				const char * const PS2 = string_list_get_value(lexer->shell_vars->set, "PS2");
+				char * const input_continuation = ft_readline(PS2, lexer->shell_vars);
 				ss_push_string(input, input_continuation);
+				ss_insert_string(lexer->raw_input_ss, input_continuation, pos->absolute);
+				if (f2 == '\n') da_pop(lexer->raw_input_ss);
+				da_pop(lexer->raw_input_ss);
+				const char * const new_history_entry = ss_to_string(lexer->raw_input_ss);
+				pop_history();
+				add_history(new_history_entry, lexer->shell_vars);
+			} else {
+				da_erase_index(lexer->raw_input_ss, lexer->pos.absolute);
+				da_erase_index(lexer->raw_input_ss, lexer->pos.absolute);
 			}
 		}
 
@@ -133,7 +147,8 @@ bool get_next_token(StringStream *input, StringStream *cache, size_t *line, size
 			da_push(context_stack, maybe_new_context);
 			for (size_t i = 0; i < ft_strlen(map[maybe_new_context].start); i++) {
 				da_push(cache, da_pop_front(input));
-				(*column)++;
+				(pos->column)++;
+				(pos->absolute)++;
 			}
 			continue;
 		}
@@ -147,40 +162,43 @@ bool get_next_token(StringStream *input, StringStream *cache, size_t *line, size
 			}
 			for (size_t i = 0; i < ft_strlen(map[mayber_end_of_context].end); i++) {
 				da_push(cache, da_pop_front(input));
-				(*column)++;
+				(pos->column)++;
+				(pos->absolute)++;
 			}
 			continue;
 		}
 
 		char c = da_pop_front(input);
 		if (c == '\n') {
-			(*line)++; (*column) = 0;
+			(pos->line)++; (pos->column) = 0;
+			(pos->absolute)++;
 		} else {
-			(*column)++;
+			(pos->column)++;
+			(pos->absolute)++;
 		}
 		da_push(cache, c);
 	}
 
 	if (!*cache->data) {
-		if (!ft_strncmp(input->data, "<<-", 3)) { da_transfer(cache, input, 3); (*column) += 3; return true; }
-		if (!ft_strncmp(input->data, "<&", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
-		if (!ft_strncmp(input->data, ">&", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
-		if (!ft_strncmp(input->data, "<<", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
-		if (!ft_strncmp(input->data, "<>", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
-		if (!ft_strncmp(input->data, ">>", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
-		if (!ft_strncmp(input->data, ">|", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
-		if (!ft_strncmp(input->data, ";;", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
-		if (!ft_strncmp(input->data, "&&", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
-		if (!ft_strncmp(input->data, "||", 2)) { da_transfer(cache, input, 2); (*column) += 2; return true; }
+		if (!ft_strncmp(input->data, "<<-", 3)) { da_transfer(cache, input, 3); (pos->column) += 3; (pos->absolute) += 3; return true; }
+		if (!ft_strncmp(input->data, "<&", 2)) { da_transfer(cache, input, 2); (pos->column) += 2; (pos->absolute) += 2; return true; }
+		if (!ft_strncmp(input->data, ">&", 2)) { da_transfer(cache, input, 2); (pos->column) += 2; (pos->absolute) += 2; return true; }
+		if (!ft_strncmp(input->data, "<<", 2)) { da_transfer(cache, input, 2); (pos->column) += 2; (pos->absolute) += 2; return true; }
+		if (!ft_strncmp(input->data, "<>", 2)) { da_transfer(cache, input, 2); (pos->column) += 2; (pos->absolute) += 2; return true; }
+		if (!ft_strncmp(input->data, ">>", 2)) { da_transfer(cache, input, 2); (pos->column) += 2; (pos->absolute) += 2; return true; }
+		if (!ft_strncmp(input->data, ">|", 2)) { da_transfer(cache, input, 2); (pos->column) += 2; (pos->absolute) += 2; return true; }
+		if (!ft_strncmp(input->data, ";;", 2)) { da_transfer(cache, input, 2); (pos->column) += 2; (pos->absolute) += 2; return true; }
+		if (!ft_strncmp(input->data, "&&", 2)) { da_transfer(cache, input, 2); (pos->column) += 2; (pos->absolute) += 2; return true; }
+		if (!ft_strncmp(input->data, "||", 2)) { da_transfer(cache, input, 2); (pos->column) += 2; (pos->absolute) += 2; return true; }
 		switch (input->data[0]) {
-			case ';' : da_push(cache, da_pop_front(input)); (*column)++; return true;
-			case '&' : da_push(cache, da_pop_front(input)); (*column)++; return true;
-			case '<' : da_push(cache, da_pop_front(input)); (*column)++; return true;
-			case '>' : da_push(cache, da_pop_front(input)); (*column)++; return true;
-			case '|' : da_push(cache, da_pop_front(input)); (*column)++; return true;
-			case '(' : da_push(cache, da_pop_front(input)); (*column)++; return true;
-			case ')' : da_push(cache, da_pop_front(input)); (*column)++; return true;
-			case '\n': da_push(cache, da_pop_front(input)); (*line)++; (*column) = 0; return true;
+			case ';' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
+			case '&' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
+			case '<' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
+			case '>' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
+			case '|' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
+			case '(' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
+			case ')' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
+			case '\n': da_push(cache, da_pop_front(input)); (pos->line)++; (pos->column) = 0; (pos->absolute)++; return true;
 		}
 	}
 

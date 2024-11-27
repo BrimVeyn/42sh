@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 13:04:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/26 17:31:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/27 10:47:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 #include <stdio.h>
 
-bool get_next_token(StringStream *input, StringStream *cache, size_t *line, size_t *column);
+bool get_next_token(StringStream *input, StringStream *cache, CursorPosition *pos);
 
 void *lex_interface(const LexMode mode, void *input, void *filename, bool *error, Vars * const shell_vars) {
 	static Lex *lexer = NULL;
@@ -24,18 +24,18 @@ void *lex_interface(const LexMode mode, void *input, void *filename, bool *error
 		case (LEX_OWN): return lexer;
 		case (LEX_SET): {
 			lexer = gc_unique(Lex, GC_SUBSHELL);
+			da_create(input_ss, StringStream, sizeof(char), GC_SUBSHELL);
+			da_create(raw_input_ss, StringStream, sizeof(char), GC_SUBSHELL);
+			da_create(peak, StringStream, sizeof(char), GC_SUBSHELL);
+			ss_push_string(raw_input_ss, input);
+			ss_push_string(input_ss, input);
 			lexer->raw_input = input;
 			lexer->filename = (filename == NULL) ? "terminal" : filename;
-			da_create(tmp, StringStream, sizeof(char), GC_SUBSHELL);
-			lexer->input = tmp;
-			da_create(tmp2, StringStream, sizeof(char), GC_SUBSHELL);
-			lexer->peak = tmp2;
-			da_create(tmp3, StringStream, sizeof(char), GC_SUBSHELL);
-			lexer->raw_input_ss = tmp3;
-			ss_push_string(lexer->raw_input_ss, lexer->raw_input);
+			lexer->input = input_ss;
+			lexer->peak = peak;
+			lexer->raw_input_ss = raw_input_ss;
 			lexer->shell_vars = shell_vars;
-			lexer->line = 1;
-			ss_push_string(lexer->input, input);
+			lexer->pos.line = 1;
 			break;
 		}
 		case (LEX_GET): {
@@ -43,7 +43,7 @@ void *lex_interface(const LexMode mode, void *input, void *filename, bool *error
 				return ss_get_owned_slice(lexer->peak);
 			} else {
 				da_create(tmp, StringStream, sizeof(char), GC_SUBSHELL);
-				if (!get_next_token(lexer->input, tmp, &lexer->line, &lexer->column))
+				if (!get_next_token(lexer->input, tmp, &lexer->pos))
 					*error = true;
 				return ss_get_owned_slice(tmp);
 			}
@@ -53,7 +53,7 @@ void *lex_interface(const LexMode mode, void *input, void *filename, bool *error
 			if (lexer->peak->size) {
 				return lexer->peak->data;
 			} else {
-				if (!get_next_token(lexer->input, lexer->peak, &lexer->line, &lexer->column))
+				if (!get_next_token(lexer->input, lexer->peak, &lexer->pos))
 					*error = true;
 				return lexer->peak->data;
 			}
