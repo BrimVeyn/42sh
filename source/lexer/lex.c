@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/27 17:36:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/28 13:59:37 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "final_parser.h"
 #include "lexer.h"
+#include "signals.h"
 #include "utils.h"
 #include "libft.h"
 #include "ft_readline.h"
@@ -91,7 +92,8 @@ bool is_continuable(const TokenType type) {
 }
 
 void line_continuation(const Lex * const lexer) {
-	if (!shell(SHELL_GET)->interactive) return ;
+	const ShellInfos * const shell_infos = shell(SHELL_GET);
+	if (!shell_infos->interactive || shell_infos->script) return ;
 
 	const CursorPosition * pos = &lexer->pos;
 	StringStream * const input = lexer->input;
@@ -103,7 +105,9 @@ void line_continuation(const Lex * const lexer) {
 		lexer->raw_input_ss->data[i] != '\0') { return ; }
 
 	const char * const PS2 = string_list_get_value(lexer->shell_vars->set, "PS2");
+	signal_manager(SIG_HERE_DOC);
 	char * const input_continuation = ft_readline(PS2, lexer->shell_vars);
+	signal_manager(SIG_PROMPT);
 	ss_push_string(input, input_continuation);
 	ss_push_string(lexer->raw_input_ss, input_continuation);
 	FREE_POINTERS(input_continuation);
@@ -115,13 +119,16 @@ void line_continuation(const Lex * const lexer) {
 void line_continuation_backslash(StringStream * const input, CursorPosition * const pos) {
 	const char f1 = input->data[0];
 	const char f2 = input->data[1];
+	const ShellInfos * const shell_infos = shell(SHELL_GET);
 	if (f1 == '\\' && (!f2 || f2 == '\n')) {
 		da_pop_front(input); da_pop_front(input);
 		const Lex * const lexer = lex_interface(LEX_OWN, NULL, NULL, NULL, NULL);
 
-		if (shell(SHELL_GET)->interactive) {
+		if (shell_infos->interactive && !shell_infos->script) {
 			const char * const PS2 = string_list_get_value(lexer->shell_vars->set, "PS2");
+			signal_manager(SIG_HERE_DOC);
 			char * const input_continuation = ft_readline(PS2, lexer->shell_vars);
+			signal_manager(SIG_PROMPT);
 			ss_push_string(input, input_continuation);
 			ss_insert_string(lexer->raw_input_ss, input_continuation, pos->absolute);
 			FREE_POINTERS(input_continuation);
@@ -133,11 +140,11 @@ void line_continuation_backslash(StringStream * const input, CursorPosition * co
 			// dprintf(2, "input: %s\n", input->data);
 			pop_history();
 			add_history(new_history_entry, lexer->shell_vars);
-			pass_whitespace(input, pos);
+			// pass_whitespace(input, pos);
 		} else {
 			da_erase_index(lexer->raw_input_ss, lexer->pos.absolute);
 			da_erase_index(lexer->raw_input_ss, lexer->pos.absolute);
-			pass_whitespace(input, pos);
+			// pass_whitespace(input, pos);
 		}
 
 	}
@@ -150,12 +157,6 @@ void pass_whitespace(StringStream * const input, CursorPosition * const pos) {
 }
 
 bool get_next_token(StringStream *input, StringStream *cache, CursorPosition *pos) {
-
-	if (*input->data == '#') {
-		while (input->size && *input->data != '\n' && *input->data != '\0') {
-			da_pop_front(input);
-		}
-	}
 
 	static WordContextBounds map[] = {
 		[WORD_WORD] = {.start = "NONE", .end = " \t\n;&|<>()", .bitmap = WORD_MAP},
@@ -173,8 +174,17 @@ bool get_next_token(StringStream *input, StringStream *cache, CursorPosition *po
 
 	pass_whitespace(input, pos);
 	line_continuation_backslash(input, pos);
+	pass_whitespace(input, pos);
+
+	if (*input->data == '#') {
+		while (input->size && *input->data != '\n' && *input->data != '\0') {
+			da_pop_front(input);
+		}
+	}
 
 	while (input->size) {
+
+		line_continuation_backslash(input, pos);
 
 		const WordContext maybe_new_context = get_context(input, map, da_peak_back(context_stack));
 

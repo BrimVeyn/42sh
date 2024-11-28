@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/26 10:53:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/28 15:51:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,23 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <signal.h>
 
 int job_stopped(AndOrP *j) {
 	PipeLineP *p;
 
 	for (p = j->pipeline; p; p = p->next)
 		if (!p->completed && !p->stopped) {
-			// printf("stopped no\n");
 			return 0;
 		}
-	// printf("stopped yes\n");
 	return 1;
+}
+
+void job_killall(void) {
+	for (size_t i = 0; i < g_jobList->size; i++) {
+		killpg(g_jobList->data[i]->pgid, SIGTERM);
+	}
+	g_jobList->size = 0;
 }
 
 int job_completed(AndOrP *j) {
@@ -35,10 +41,8 @@ int job_completed(AndOrP *j) {
 
 	for (p = j->pipeline; p; p = p->next)
 		if (!p->completed) {
-			// printf("completed no\n");
 			return 0;
 		}
-	// printf("completed yes\n");
 	return 1;
 }
 

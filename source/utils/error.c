@@ -6,10 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/13 11:44:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/27 17:26:24 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/28 15:01:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "exec.h"
 #include "utils.h"
 #include "final_parser.h"
 #include "colors.h"
@@ -57,7 +58,9 @@ void pretty_error(char *raw_token) {
 }
 
 void fatal(const char * const msg, const int exit_code) {
-	ft_dprintf(STDERR_FILENO, "Fatal: %s\n", msg);
+	if (msg)
+		ft_dprintf(STDERR_FILENO, "Fatal: %s\n", msg);
+	close_all_fds();
 	gc(GC_CLEANUP, GC_ALL);
 	exit(exit_code);
 }

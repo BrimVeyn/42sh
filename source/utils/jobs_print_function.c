@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/26 11:37:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/28 11:13:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,8 +157,10 @@ void job_print_list(ListP * const list, StringStream * const ss) {
 	ListP *head = list;
 	while (head) {
 		job_print_andor(head->and_or, ss);
-		ss_push_string(ss, tokenTypeStr(head->separator));
-		da_push(ss, ' ');
+		if (head->separator != END)
+			ss_push_string(ss, tokenTypeStr(head->separator));
+		if (head->next)
+			da_push(ss, ' ');
 		head = head->next;
 	}
 }
