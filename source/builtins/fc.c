@@ -6,22 +6,25 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:40:48 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/27 14:55:45 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/11/29 16:35:31 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
+#include "final_parser.h"
 #include "lexer.h"
 #include "utils.h"
 #include "libft.h"
 #include "ft_readline.h"
 #include "ft_regex.h"
+#include <stdio.h>
 #include <sys/time.h>
 #include <linux/limits.h>
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 typedef enum {
 	FC_E = 0b00001,
@@ -29,18 +32,64 @@ typedef enum {
 	FC_N = 0b00100,
 	FC_R = 0b01000,
 	FC_S = 0b10000,
-} fc_options;
+} FcFlags;
 
 typedef enum {
     VALID,
 	ERROR_HISTORY_EMPTY,
 	ERROR_HISTSIZE_0,
 	ERROR_INVALID_OPTION,
-} fcStatus;
+	ERROR_FC_FATAL,
+	ERROR_COMMAND_NOT_FOUND,
+} FcStatus;
 
-int fc_status = VALID;
+typedef struct {
+	int flags;
+	char *old;
+	char *new;
+	char *editor;
+	char *first;
+	char *last;
+} FcOptions;
 
-void print_fc_error(const fcStatus n, const void ** const arg){
+static int fc_status = VALID;
+
+#define COLOR_RESET   "\033[0m"
+#define COLOR_GREEN   "\033[32m"
+#define COLOR_YELLOW  "\033[33m"
+#define COLOR_BLUE    "\033[34m"
+#define COLOR_RED     "\033[31m"
+#define COLOR_CYAN    "\033[36m"
+#define COLOR_MAGENTA "\033[35m"
+#define COLOR_BOLD    "\033[1m"
+
+void print_options(const FcOptions *options) {
+    if (!options) {
+        printf(COLOR_RED "Error: Options structure is NULL" COLOR_RESET "\n");
+        return;
+    }
+
+    printf(COLOR_BOLD COLOR_CYAN "=== FcOptions ===" COLOR_RESET "\n");
+
+    printf(COLOR_BOLD "Flags: " COLOR_RESET);
+    if (options->flags & FC_E) printf(COLOR_GREEN "FC_E " COLOR_RESET);
+    if (options->flags & FC_L) printf(COLOR_YELLOW "FC_L " COLOR_RESET);
+    if (options->flags & FC_N) printf(COLOR_BLUE "FC_N " COLOR_RESET);
+    if (options->flags & FC_R) printf(COLOR_MAGENTA "FC_R " COLOR_RESET);
+    if (options->flags & FC_S) printf(COLOR_CYAN "FC_S " COLOR_RESET);
+    if (options->flags == 0) printf(COLOR_RED "None" COLOR_RESET);
+    printf("\n");
+
+    printf(COLOR_BOLD "Old command: " COLOR_RESET "%s\n", options->old ? options->old : COLOR_RED "(null)" COLOR_RESET);
+    printf(COLOR_BOLD "New command: " COLOR_RESET "%s\n", options->new ? options->new : COLOR_RED "(null)" COLOR_RESET);
+    printf(COLOR_BOLD "Editor: " COLOR_RESET "%s\n", options->editor ? options->editor : COLOR_RED "(null)" COLOR_RESET);
+    printf(COLOR_BOLD "First: " COLOR_RESET "%s\n", options->first ? options->first : COLOR_RED "(null)" COLOR_RESET);
+    printf(COLOR_BOLD "Last: " COLOR_RESET "%s\n", options->last ? options->last : COLOR_RED "(null)" COLOR_RESET);
+
+    printf(COLOR_BOLD COLOR_CYAN "=================" COLOR_RESET "\n");
+}
+
+void print_fc_error(const FcStatus n, const void ** const arg){
 	ft_dprintf(2, "42sh: fc: ");
 	switch (n) {
 		case ERROR_INVALID_OPTION: {
@@ -54,6 +103,12 @@ void print_fc_error(const fcStatus n, const void ** const arg){
 		case ERROR_HISTORY_EMPTY:
 			ft_dprintf(2, "History is empty\n");
 			break;
+		case ERROR_FC_FATAL:
+			ft_dprintf(2, "FATAL\n");
+			break;
+		case ERROR_COMMAND_NOT_FOUND:
+			ft_dprintf(2, "no command found\n");
+			break;
 		default:
 			break;
 	}
@@ -66,23 +121,50 @@ static int max(const int n1, const int n2){
 	return (n1 > n2) ? n1 : n2;
 }
 
-static char *fc_default(void){
+static char *fc_default(){
 	return ft_strdup(history->entries[history->length - CURRENT_LINE]->line.data);
 }
 
-char *get_history_value_wd(char *word){
-	int word_len = ft_strlen(word);
-	for (int i = history->length - 1; i >= 0; i--) {
-		char *current_cmd = history->entries[i]->line.data;
-		if (!ft_strncmp(current_cmd, word, min(word_len, ft_strlen(current_cmd)))) {
-			//do not free that
-			return current_cmd; 
-		}
+int cmp_both(const char *const first, const char *const end, const char *const current_cmd) {
+	size_t first_len = ft_strlen(first);
+	size_t end_len = ft_strlen(end);
+	if (!ft_strncmp(current_cmd, first, min(first_len, ft_strlen(current_cmd)))) {
+		return 2;
 	}
-    return NULL;
+	if (!ft_strncmp(current_cmd, end, min(end_len, ft_strlen(current_cmd)))) {
+		return 1;
+	}
+	return -1;
 }
 
-char* get_history_value_nb(int first, int last) {
+StringListL *get_history_value_wd(char *first, char *end){
+	da_create(command_list, StringListL, sizeof(char *), GC_SUBSHELL);
+	int first_len = ft_strlen(first);
+	int end_len = ft_strlen(end);
+	for (int i = history->length - 1; i >= 0; i--) {
+		char * current_cmd = history->entries[i]->line.data;
+		int match = cmp_both(first, end, current_cmd);
+		if (match != -1) {
+			const char * const to_cmp = (match == 1) ? first : end;
+			const size_t to_cmp_len = (match == 1) ? first_len : end_len;
+			do {
+				current_cmd = history->entries[i]->line.data;
+				
+				if (match == 2) {
+					da_push(command_list, current_cmd);
+				} else {
+					da_push_front(command_list, current_cmd);
+				}
+
+				i--;
+			} while(i >= 0 && ft_strncmp(current_cmd, to_cmp, min(to_cmp_len, ft_strlen(current_cmd))));
+			break;
+		}
+	}
+	return command_list;
+}
+
+StringListL* get_history_value_nb(int first, int last) {
 	if (first < 0){
 		first = history->length + first;
 		if (first < 0) first = 1;
@@ -95,65 +177,81 @@ char* get_history_value_nb(int first, int last) {
 	if (first == 0) first = 1;
 	if (last == 0) last = 1;
 
+	da_create(command_list, StringListL, sizeof(char *), GC_SUBSHELL);
+
     if (max(first, last) > history->length) {
-        return fc_default();
+		da_push(command_list, fc_default());
+        return command_list;
     }
 
-    char *commands = ft_strdup("");
-    if (!commands) return NULL;
 	
 	//TODO: gerer si first > last
 	int inc = (first > last) ? -1 : 1;
     for (int i = first; (first > last) ? (i >= last ): (i <= last); i += inc) {
-        const char *line = history->entries[i - 1]->line.data;
+        char *line = history->entries[i - 1]->line.data;
         if (!line) continue;
 
-        int new_len = ft_strlen(commands) + ft_strlen(line) + 2; // +1 pour '\n', +1 pour '\0'
-        char *tmp = ft_calloc(new_len, sizeof(char));
-        if (!tmp) {
-            free(commands);
-            return NULL; 
-        }
-
-        ft_sprintf(tmp, "%s%s\n", commands, line);
-        free(commands);
-        commands = tmp;
+		da_push(command_list, line);
     }
 
-    gc(GC_ADD, commands, GC_SUBSHELL);
-    return commands;
+    return command_list;
 }
 
-int get_fc_options(char **args, int *options, StringListL *operands) {
+int get_fc_options(char **args, FcOptions *options) {
 	bool accept_options = true;
 	for (int i = 1; args[i]; i++){
 		if (accept_options && *args[i] == '-'){
-			for (int j = 1; accept_options && args[i][j]; j++){
-				switch(args[i][j]){
-					case 'e': *options |= FC_E; break;
-					case 'l': *options |= FC_L; break;
-					case 'n': *options |= FC_N; break;
-					case 'r': *options |= FC_R; break;
-					case 's': *options |= FC_S; break;
-					default: {
-						if (j == 1 && ft_isdigit(args[i][j])){ // accept negative numbers
-							accept_options = false;
+			for (int j = 1; args[i][j]; j++){
+				char current_char = args[i][j];
+				if (current_char == 'e'){
+					options->flags |= FC_E;
+					options->editor = args[++i];
+					//si NULL segfault
+					break;
+				} else if (current_char == 'l'){
+					options->flags |= FC_L;
+				} else if (current_char == 'n'){
+					options->flags |= FC_N;
+				} else if (current_char == 'r'){
+					options->flags |= FC_R;
+				} else if (current_char == 's'){
+					options->flags |= FC_S;
+					//si NULL segfault
+					char *arg = args[i + 1];
+					if (arg){
+						char *ppos = ft_strchr(arg, '=');
+						if (ppos){
+							options->old = ft_substr(arg, 0, ppos - arg);
+							options->new = ft_strdup(ppos + 1);
+							i++;
 							break;
 						}
-						fc_status = ERROR_INVALID_OPTION;
-						*options = args[i][j];
-						return -1;
 					}
+					// printf("%s\n", ft_strchr(args[++i], '='));
+					
+				} else {
+					if (j == 1 && ft_isdigit(args[i][j])){ // accept negative numbers
+						options->first = args[i];
+						accept_options = false;
+						break;
+					}
+					print_fc_error(ERROR_INVALID_OPTION, (const void **)&args[i][j]);
+					return -1;
 				}
 			}
 		}
 		else {
-			accept_options = false;
-			da_push(operands, args[i]);
+			if (options->first){
+				options->last = args[i];
+			} else {
+				accept_options = false;
+				options->first = args[i];
+			}
 		}
 	}
 	return 0;
 }
+
 
 void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 	char *c_histsize = string_list_get_value(shell_vars->set, "HISTSIZE");
@@ -169,52 +267,111 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 		return;
 	}
 
-	int options = 0;
-	da_create(operands, StringListL, sizeof(char *), GC_SUBSHELL);
-	if (get_fc_options(command->word_list->data, &options, operands) == -1){
+	FcOptions options;
+	options.first = NULL;
+	options.last = NULL;
+	options.editor = NULL;
+	options.new = NULL;
+	options.old = NULL;
+	options.flags = 0;
+
+	if (get_fc_options(command->word_list->data, &options) == -1){
 		print_fc_error(fc_status, (const void **)&options);
 	}
-	
-	char *command_list = NULL;
-	if (operands->size == 0){
-		command_list = fc_default();
-	} else if (ft_isdigit((int) **operands->data)){
-		if (operands->size == 1){
-			command_list = get_history_value_nb(ft_atoi(*operands->data), ft_atoi(*operands->data));
-		} else {
-			command_list = get_history_value_nb(ft_atoi(*operands->data), ft_atoi(operands->data[1]));
-		}
-	} else if (ft_isalpha((int) **operands->data)){
-		command_list = get_history_value_wd(*operands->data);
+
+	print_options(&options);
+	if (options.last == NULL){
+		options.last = options.first;
 	}
 	
-	struct timeval	time;
-
-	if (gettimeofday(&time, NULL) == -1){
-		//print error
-		g_exitno = 1;
-		return ;
+	StringListL *command_list = NULL;
+	if (options.first == NULL){
+		da_push(command_list, fc_default());
+	} else if (*options.first == '-' || ft_isdigit((int)*options.first)){
+		int first_number = ft_atoi(options.first);
+		int last_number = ft_atoi(options.last);
+		command_list = get_history_value_nb(first_number, last_number);
+	} else {
+		command_list = get_history_value_wd(options.first, options.last);
 	}
-	char filename[21] = {0}; //7 digit max for usec
-	ft_sprintf(filename, "/tmp/42sh-fn.%ld", time.tv_usec);
-	// printf("command_list: \n%s\n", command_list);
-	// printf("filname: %s\n", filename);
 
-	int fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, 0644);
-	if (fd == -1){
-		//print error
-		g_exitno = 1;
+	if (!command_list->size){
+		print_fc_error(ERROR_COMMAND_NOT_FOUND, NULL);
 		return;
 	}
-	write(fd, command_list, ft_strlen(command_list));
 
-	
-	char *input = gc(GC_ADD, ft_strjoin("${EDITOR} ", filename), GC_SUBSHELL);
-	parse_input(input, NULL, shell_vars);
-	lseek(fd, 0, SEEK_SET);
-	char *buffer = read_whole_file(fd);
-	parse_input(buffer, NULL, shell_vars);
+	if (options.flags & FC_S){
+		char *buffer = ft_strdup("");
+		for (size_t i = 0; i < command_list->size; i++){
+			char new_buffer[MAX_WORD_LEN] = {0};
+			ft_snprintf(new_buffer, MAX_WORD_LEN, "%s\n%s", buffer, command_list->data[i]);
+			buffer = gc(GC_ADD, ft_strdup(new_buffer), GC_SUBSHELL);
+			// char *tmp = ft_strjoin(buffer, command_list->data[i]);
+			// buffer = tmp;
+			// gc(GC_ADD, tmp, GC_SUBSHELL);
+		}
+
+		if (options.old){
+			size_t old_len = ft_strlen(options.old);
+			da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
+
+			char *ptr = buffer;
+
+			do {
+				int pos = ft_strstr(ptr, options.old);
+				if (pos == -1) break;
+
+				for (int i = 0; i < pos; i++)
+					da_push(ss, ptr[i]);
+
+				ss_push_string(ss, options.new);
+				ptr += (pos + old_len);
+
+			} while (true);
+			ss_push_string(ss, ptr);
+			buffer = ss_get_owned_slice(ss);
+		}
+
+		parse_input(buffer, NULL, shell_vars);
+	} else if (options.flags & FC_L){
+		for (size_t i = 0; i < command_list->size; i++){
+			if (!(options.flags & FC_N))
+				ft_dprintf(STDOUT_FILENO, "%d\t", i);
+			ft_dprintf(STDOUT_FILENO, "%s\n", command_list->data[i]);
+		}
+	} else {
+		struct timeval	time;
+
+		if (gettimeofday(&time, NULL) == -1){
+			print_fc_error(ERROR_FC_FATAL, NULL);
+			g_exitno = 1;
+			return ;
+		}
+		char filename[] = "/tmp/42sh_fc.XXXXXX"; //7 digit max for usec
+		int fd = mkstemp(filename);
+		if (fd == -1){
+			print_fc_error(ERROR_FC_FATAL, NULL);
+			g_exitno = 1;
+			return;
+		}
+		for (size_t i = 0; i < command_list->size; i++){
+			ft_dprintf(fd, "%s\n", command_list->data[i]);
+		}
+
+		char *input = NULL;
+		if (options.flags & FC_E){
+			input = gc(GC_CALLOC, ft_strlen(filename) + ft_strlen(options.editor) + 2, sizeof(char), GC_SUBSHELL); // +2 for \0 and ' '
+			ft_sprintf(input, "%s %s", options.editor, filename);
+		} else {
+			input = gc(GC_CALLOC, ft_strlen(filename) + sizeof("${EDITOR} ") + 1, sizeof(char), GC_SUBSHELL);
+			ft_sprintf(input, "${EDITOR} %s", filename);
+		}
+		parse_input(input, NULL, shell_vars);
+		lseek(fd, 0, SEEK_SET);
+		char *buffer = read_whole_file(fd);
+		parse_input(buffer, NULL, shell_vars);
+		free(buffer);
+	}
 
 	return ;
 }
-

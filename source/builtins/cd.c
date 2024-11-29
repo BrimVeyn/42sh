@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:46:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/27 13:46:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/28 10:07:04 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ typedef enum {
 	ERROR_OLDPWD_NOT_SET
 } DirectoryStatus;
 
-DirectoryStatus cd_status;
+static DirectoryStatus cd_status;
 
 void print_cd_error(DirectoryStatus n, void **arg){
 	ft_dprintf(2, "42sh: cd: ");
