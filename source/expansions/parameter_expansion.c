@@ -1,26 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser_parameter_expansion.c                       :+:      :+:    :+:   */
+/*   parameter_expansion.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 16:03:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/29 13:59:38 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lexer.h"
+#include "colors.h"
+#include "final_parser.h"
 #include "parser.h"
 #include "libft.h"
 #include "utils.h"
 #include "exec.h"
 #include "ft_regex.h"
+#include <math.h>
 #include <stdio.h>
 
 char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 	// printf("id: %s\nword: %s\nmetachar: %s\n", id, word, metachar);
-	char *value = shell_vars_get_value(shell_vars, id);
+	// dprintf(2, "WORD: %s\n", word);
+	char *value = get_variable_value(shell_vars, id);
 	if (!value){
 		if (!ft_strcmp(metachar, ":-")){
 			return (word);
@@ -81,13 +84,12 @@ char *parser_get_variable_value(char *to_expand, Vars *shell_vars){
 	if (to_expand[0] == '#'){
 		return gc(GC_ADD, ft_itoa(ft_strlen(shell_vars_get_value(shell_vars, to_expand + 1))), GC_GENERAL);
 	}
-
 	regex_match_t find_format = regex_match("[:#%]", to_expand);
 	int lenght_meta = (regex_match("[:#%][=?#%\\-]", to_expand).re_start != -1) ? 2:1;
 	if (find_format.re_start != -1){
 		memcpy(name, to_expand, find_format.re_start);
 		word = ft_substr(to_expand, find_format.re_end + lenght_meta - 1, ft_strlen(to_expand) - find_format.re_end);
-		gc(GC_ADD, word, GC_GENERAL);
+		gc(GC_ADD, word, GC_SUBSHELL);
 		ft_memcpy(metachar, &to_expand[find_format.re_start], sizeof(char) * lenght_meta);
 		return handle_format(metachar, name, word, shell_vars);
 	}
@@ -96,105 +98,111 @@ char *parser_get_variable_value(char *to_expand, Vars *shell_vars){
 	return value ? value : gc(GC_ADD, ft_strdup(""), GC_SUBSHELL);
 }
 
-static int get_format_pos(char *str){
+static int get_format_pos(char *full_exp){
 	const char metachars[] = ":%#";
-	for (int i = 3; str[i]; i++){
-		if (i == 2 && str[i] == '#'){
+
+	for (int i = 3; full_exp[i]; i++){
+		if (i == 2 && full_exp[i] == '#'){
 			i++;
 		}
-		if (ft_strchr(metachars, str[i])){
+		if (ft_strchr(metachars, full_exp[i])){
 			return i;
 		}
 	}
 	return -1;
 }
 
-static bool is_parameter_balanced(char *string){
-	regex_match_t r1;
-	do {
-		r1 = regex_match("\\$\\{.*\\}", string);
-		string[r1.re_end] = '\0';
-		string += r1.re_start + 2;
-	} while (r1.re_start != -1);
-	return (regex_match("\\$\\{", string).re_start != -1 || regex_match("\\}", string).re_start != -1);
-}
-
-static bool is_bad_substitution(char *str, int pos){
-	int format_pos = get_format_pos(str);
-	char *before_format = NULL;
+static bool is_bad_substitution(char *full_exp){
+	int format_pos = get_format_pos(full_exp);
+	char *variable_name = NULL;
+	const size_t str_len = ft_strlen(full_exp);
 
 	if (format_pos == -1){
-		before_format = ft_strdup(str);
+		variable_name = ft_substr(full_exp, 2, str_len - 2 - 1);
 	} else {
-		char *tmp = ft_substr(str, 0, format_pos);
-		before_format = ft_strjoin(tmp, &str[ft_strlen(str) - 1]);
-		free(tmp);
+		variable_name = ft_substr(full_exp, 2, format_pos - 2);
 	}
 
-	if (regex_match("\\$\\{\\}", before_format).re_start == pos ||
-		regex_match("\\$\\{.*:\\}", str).re_start == pos ||
-		regex_match("\\$\\{[^\\}]*$", str).re_start == pos ||
-		(regex_match("\\$\\{[0-9]+\\}", str).re_start != pos &&
-		regex_match("\\$\\{[A-Za-z_][A-Za-z0-9_]*[#%:].*\\}", str).re_start != pos &&
-		regex_match("\\$\\{[\\?#]\\}", str).re_start != pos &&
-		(regex_match("\\$\\{#?[A-Za-z_][A-Za-z0-9_]*\\}", str).re_start != pos &&
-		is_parameter_balanced(str))))
+	// dprintf(2, "full: |%s|, name: |%s|\n", full_exp, variable_name);
+
+	if (
+		( !regex_match("^[a-zA-Z_][a-zA-Z0-9_]*$", variable_name).is_found && //XBD NAME
+		!regex_match("^#[a-zA-Z_][a-zA-Z0-9_]*$", variable_name).is_found && // #XBD NAME
+		!regex_match("^[0-9]+$", variable_name).is_found && //000011---inf
+		!regex_match("^#[0-9]*$", variable_name).is_found && //#0011---inf && #
+		!regex_match("^\\?$", variable_name).is_found ) //?
+		||
+		( regex_match("^\\$\\{.*:\\}$", full_exp).is_found || // !end_with(:)
+		  regex_match("^\\$\\{#.*:.*\\}$", full_exp).is_found ) ) // begin_with(#) and has (:)
 	{ 
-		dprintf(2, "${}: bad substitution\n");
+		dprintf(2, "%s: bad substitution\n", full_exp);
 		g_exitno = 1;
-		free(before_format);
+		free(variable_name);
 		return true;
 	}
-	free(before_format);
+	free(variable_name);
 	return false;
 }
 
-char *parser_parameter_expansion(char *str, Vars *shell_vars){
+char *parser_parameter_expansion(char *full_exp, Vars *shell_vars){
 	regex_match_t result;
 	char *value = NULL;
 
-	do{
-		result = regex_match ("\\$\\{", str);
-		if (result.re_start == -1){
-			break;
-		}
-		if (is_bad_substitution(str, result.re_start) == true){
-			return NULL;
-		}
-		result = regex_match("\\$\\{[0-9]+\\}", str);
-		if (result.is_found){
-			const size_t start = result.re_start + 2;
-			const size_t end = result.re_end - 1;
-			char * const tmp = ft_substr(str, start, end - start); //+2 -> skip ${ |  -1 -> skip }
-			value = get_variable_value(shell_vars, tmp);
-			free(tmp);
-			if (!value){
-				value = ft_strdup("");
-				gc(GC_ADD, value, GC_SUBSHELL);
-			}
-		}
-		else if (regex_match("\\$\\{\\?\\}", str).is_found == true){
-			result = regex_match("\\$\\{\\?\\}", str);
-			value = ft_itoa(g_exitno);
-		}
-		else {
-			result = regex_match ("\\$\\{[^\\$]*\\}", str);
-			if (result.re_start != -1){
-				value = parser_get_variable_value(gc(GC_ADD, ft_substr(str, result.re_start + 2, result.re_end - result.re_start - 3), GC_SUBSHELL), shell_vars);
-				// printf("value: %s\n", value);	
-			} else
-			break;
-		}
-		// printf("HELLO %s\n", str);	
+	
+	if (is_bad_substitution(full_exp) == true){
+		return NULL;
+	}
 
-		char *re_start = ft_substr(str, 0, result.re_start);
-		char *re_end = ft_substr(str, result.re_end, ft_strlen(str));
-		char *tmp = ft_strjoin(re_start, value);
+	const char *rhs = ft_strchr(full_exp, ':');
+	if (rhs) {
+		size_t rhs_len = ft_strlen(rhs);
+		if (rhs[rhs_len - 1] != '}') rhs_len++;
+		char * const trimmer_rhs = ft_substr(rhs, 0, rhs_len - 1);
+		da_create(expansion_result, StringListL, sizeof(char *), GC_SUBSHELL);
+		da_push(expansion_result, trimmer_rhs);
+		expansion_result = do_expansions(expansion_result, shell_vars, false);
+		const char *final_rhs = *expansion_result->data;
+		char buffer[MAX_WORD_LEN] = {0};
+		const char *final_lhs = ft_substr(full_exp, 0, rhs - full_exp);
+		ft_snprintf(buffer, MAX_WORD_LEN, "%s%s}", final_lhs, final_rhs);
+		full_exp = gc(GC_ADD, ft_strdup(buffer), GC_SUBSHELL);
+	}
 
-		str = gc(GC_ADD, ft_strjoin(tmp, re_end), GC_GENERAL);
-		FREE_POINTERS(tmp, re_start, re_end);
-		// printf("string: %s\n\n", str);
+	result = regex_match("\\$\\{[0-9]+\\}", full_exp);
+	if (result.is_found){
+		const size_t start = result.re_start + 2;
+		const size_t end = result.re_end - 1;
+		char * const tmp = ft_substr(full_exp, start, end - start); //+2 -> skip ${ |  -1 -> skip }
+		value = get_variable_value(shell_vars, tmp);
+		free(tmp);
+		if (!value){
+			value = ft_strdup("");
+			gc(GC_ADD, value, GC_SUBSHELL);
+		}
+	}
+	else if (regex_match("\\$\\{\\?\\}", full_exp).is_found){
+		// dprintf(2, C_RED"je suis la\n"C_RESET);
+		result = regex_match("\\$\\{\\?\\}", full_exp);
+		value = ft_itoa(g_exitno);
+	}
+	else {
+		result = regex_match ("\\$\\{[^\\$]*\\}", full_exp);
+		// dprintf(2, C_RED"PASS\n"C_RESET);
+		if (result.re_start != -1){
+			value = parser_get_variable_value(gc(GC_ADD, ft_substr(full_exp, result.re_start + 2, result.re_end - result.re_start - 3), GC_SUBSHELL), shell_vars);
+			// printf("value: %s\n", value);	
+		} else return NULL;
+	}
+	// printf("HELLO %s\n", full_exp);	
 
-	} while(true);
-	return ft_strdup(str);
+	char *re_start = ft_substr(full_exp, 0, result.re_start);
+	char *re_end = ft_substr(full_exp, result.re_end, ft_strlen(full_exp));
+	char *tmp = ft_strjoin(re_start, value);
+
+	full_exp = gc(GC_ADD, ft_strjoin(tmp, re_end), GC_GENERAL);
+	FREE_POINTERS(tmp, re_start, re_end);
+	// dprintf(2, C_RED"je suis la\n"C_RESET);
+	// printf("string: %s\n\n", full_exp);
+
+	return ft_strdup(full_exp);
 }

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/28 14:49:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/29 16:03:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,10 @@
 #define NO_WAIT 0x0
 #define WAIT 0x1
 #define IS_CHILD(pid) ((pid == 0) ? true : false)
+
+extern pid_t g_masterPgid;
+extern bool is_command_sub;
+extern bool g_subshell;
 
 typedef enum TokenType {
 	AND_IF,

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/28 16:37:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/29 16:40:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+
 pid_t g_masterPgid = 0;
+bool g_subshell = false;
 
 void dup_input_and_close(int fd) {
 	secure_dup2(fd, STDIN_FILENO);
@@ -352,7 +354,7 @@ void set_group(AndOrP * const job, PipeLineP * const process, const pid_t pid) {
 	process->pid = pid;
 	if (!job->pgid)
 		job->pgid = pid;
-	setpgid(pid, job->pgid);
+	setpgid(pid, pid);
 }
 
 void process_simple_command(SimpleCommandP * const simple_command, Vars *shell_vars) {
@@ -377,6 +379,7 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 	CommandP *command = job->pipeline->command;
 	ShellInfos *shell_infos = shell(SHELL_GET);
 	switch (command->type) {
+
 		case Simple_Command: {
 			process_simple_command(command->simple_command, shell_vars);
 			char *bin = resolve_bine(command->simple_command, shell_vars);
@@ -399,12 +402,15 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 						pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
 						setpgid(pid, pgid);
 
-						if (!background) {
+						if (!background && !is_command_sub && !g_subshell) {
 							if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
-								fatal("tcestgrp: failed", 255);
+								fatal("tcsetpgrp: failed", 1);
                         }
 						signal_manager(SIG_EXEC);
 					}
+					// dprintf(2, "[DEBUG] PID: %d, PGID: %d, FG PGID: %d\n",
+					//  getpid(), getpgid(getpid()), tcgetpgrp(shell_infos->shell_terminal));
+
 					// if (background && shell_infos->script) { redirect_input_to_null(); }
 					// setpgid(pid, g_masterPgid);
 			// dprintf(2, C_DARK_CYAN"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
@@ -457,7 +463,12 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	const bool piped = (process->next != NULL);
 
 	if (!piped) {
-		return execute_single_command(job, background, shell_vars);
+		int return_status = execute_single_command(job, background, shell_vars);
+		dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
+		dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
+		dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
+		close_saved_fds(saved_fds);
+		return return_status;
 	}
 
 	while (process) {
@@ -479,9 +490,10 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 				pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
 				setpgid(pid, pgid);
 
-				if (!background)
-					if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
-						perror("setpgrp");
+				if (!background && !is_command_sub && !g_subshell)
+					if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1) {
+						fatal("tcsetpgrp: failed", 1);
+                    }
 
 				if (!shell_infos->script) signal_manager(SIG_EXEC);
 			}
@@ -540,7 +552,8 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 				put_job_foreground(andor_head, false);
 			}
 		}
-		if (WIFSIGNALED(g_exitno)) return ;
+		if (g_exitno > 128) return ;
+		// dprintf(2, "g_exino: %d\n", g_exitno);
 		bool skip = (
 			(separator == AND_IF && g_exitno != 0) ||
 			(separator == OR_IF && g_exitno == 0)
@@ -560,7 +573,11 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars, bool subshell, bool bg) {
 	ListP *list_head = complete_command->list;
 	ShellInfos *shell_infos = shell(SHELL_GET);
+	if (subshell) g_subshell = true;
+	else g_subshell = false;
 
+	// print_complete_command(complete_command);
+	//
 	while (list_head) {
 		const bool background = (
 			(shell_infos->interactive) && 
@@ -576,9 +593,8 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 			if (IS_CHILD(pid)) {
 				g_masterPgid = getpid();
 				// dprintf(2, C_BRIGHT_CYAN"[MASTER] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
+				// close_all_fds();
 				execute_list(list_head, background, shell_vars);
-				if (WIFSIGNALED(g_exitno)) return ;
-				close_all_fds();
 				gc(GC_CLEANUP, GC_ALL);
 				exit(g_exitno);
 			} else {
@@ -591,9 +607,7 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 				put_job_background(master, true);
 			}
 		} else {
-			// signal_manager(SIG_EXEC);
 			execute_list(list_head, background, shell_vars);
-			if (WIFSIGNALED(g_exitno)) return ;
 		}
 		list_head = list_head->next;
 	}
