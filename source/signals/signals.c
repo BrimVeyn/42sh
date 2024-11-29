@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:29:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/28 16:17:32 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/29 16:41:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,8 @@ void signal_exec_mode(void) {
 	signal(SIGTTIN, SIG_DFL);
 	signal(SIGTTOU, SIG_DFL);
 	signal(SIGCHLD, SIG_DFL);
+	signal(SIGPIPE, SIG_IGN);
+	//FIX: sigpipe in non-interactive
 }
 
 void signal_sigtstp_script(int code) {

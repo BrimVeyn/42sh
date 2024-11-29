@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:12:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/10/16 10:46:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/29 11:05:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void str_list_print(const StrList *list) {
 		[EXP_CMDSUB] = C_LIGHT_PINK,
 	};
 	
-	dprintf(2, C_LIME"Colors: %sWORD %sCMDSUB, %sARITHMETIC, %sVARIABLE"C_RESET"\n", colors[EXP_WORD], colors[EXP_CMDSUB], colors[EXP_ARITHMETIC], colors[EXP_VARIABLE]);
+	dprintf(2, C_LIME"Colors: %sWORD %sCMDSUB, %sARITHMETIC, %sPARAMETER"C_RESET"\n", colors[EXP_WORD], colors[EXP_CMDSUB], colors[EXP_ARITHMETIC], colors[EXP_VARIABLE]);
 	dprintf(2, C_LIME"String: "C_RESET);
 	for (size_t i = 0; i < list->size; i++) {
 		Str *node = list->data[i];

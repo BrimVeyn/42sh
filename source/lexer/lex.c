@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/28 13:59:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/29 14:38:13 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ WordContext get_context(const StringStream *input, WordContextBounds *map, const
         WordContext type;
         int check_length;
     } contexts[] = {
-		{WORD_WORD, 0},
         {WORD_ARITHMETIC, 3},
         {WORD_CMD_SUB, 2},
         {WORD_PARAM, 2},
@@ -56,7 +55,7 @@ WordContext get_context(const StringStream *input, WordContextBounds *map, const
         const WordContext current_context = contexts[i].type;
         const int length = contexts[i].check_length;
 
-        if (BIT_IS_ON(byteptr, current_context) && contexts[i].check_length &&
+        if (BIT_IS_ON(byteptr, current_context) &&
             !ft_strncmp(input->data, map[current_context].start, length)) {
 			// dprintf(2, "new context: %s\n", map[current_context].start);
             return current_context;

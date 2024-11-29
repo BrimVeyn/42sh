@@ -5,6 +5,7 @@ echo ${:VAR}
 echo ${DEFINED_VAR:-${NESTED_VARIABLE:-}
 echo ${:VAR:=default_value}
 echo ${VAR:-${NESTED_VAR}
+echo ${VARS#:salut};
 echo ${:-VAR}
 echo ${PATH}
 echo ${8PATH}

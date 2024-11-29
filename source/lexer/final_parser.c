@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/28 08:38:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/29 14:28:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,8 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 	// dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
-			((table_row != 27 && table_row != 66) || !is_keyword(i)))
+			( (table_row != 27 && table_row != 66 && table_row != 98 && table_row != 39) 
+			|| !is_keyword(i)) )
 		{
 			if (is_continuable(i)) { line_continuation(lexer); }
 			return i;
