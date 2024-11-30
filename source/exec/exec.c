@@ -80,19 +80,22 @@ bool check_filepath(char *file_path, TokenType mode) {
 	if (stat(file_path, &file_stat) != -1) {
 
 		if (S_ISDIR(file_stat.st_mode)) {
-			error("42sh: %s: Is a directory", 1);
+      dprintf(STDERR_FILENO, "42sh: %s: Is a directory", file_path);
+      g_exitno = 1;
 			return (false);
 		}
 		if (file_stat.st_mode & S_IXUSR) {
 			return file_path;
 		}
 		else {
-			error("42sh: %s: Permission Denied", 1);
+      dprintf(STDERR_FILENO, "42sh: %s: Permission Denied", file_path);
+      g_exitno = 1;
 			return (false);
 		}
 	} else {
 		if (mode == LESS) {
-			error("42sh: %s: No such file or directory", 1);
+      dprintf(STDERR_FILENO, "42sh: %s: No such file or directory", file_path);
+      g_exitno = 1;
 			return false;
 		}
 		if (mode == GREAT)
@@ -214,10 +217,10 @@ void execute_if_clause(const CommandP * const command, const bool background, Va
 
 	size_t i = 0;
 	for (; i < if_clause->conditions->size; i++) {
-		ListP *condition = if_clause->conditions->data[i];
+		ListP * const condition = if_clause->conditions->data[i];
 		execute_complete_command(wrap_list(condition), shell_vars, background, background);
 		if (g_exitno == 0) {
-			ListP *body = if_clause->bodies->data[i];
+			ListP * const body = if_clause->bodies->data[i];
 			execute_complete_command(wrap_list(body), shell_vars, background, background);
 			return ;
 		}
@@ -309,12 +312,14 @@ StringListL *save_positionals(const Vars * const shell_vars) {
 }
 
 void clear_positional(StringListL * const positional) {
+  if (positional->size <= 1) return ;
 	for (size_t i = 1; i < positional->size; i++) {
 		gc(GC_FREE, positional->data[i], GC_ENV);
 	}
 	positional->size = 1;
 }
 
+//FIX segfault in recursive function calls
 void execute_function(const CommandP * const command, const int funcNo, const bool background, Vars * const shell_vars) {
 	const SimpleCommandP * const simple_command = command->simple_command;
 	const StringListL * const positional_parameters = simple_command->word_list;
@@ -328,7 +333,6 @@ void execute_function(const CommandP * const command, const int funcNo, const bo
 
 	shell_vars->positional = saved_positionals;
 }
-
 
 int is_function(const char * const func_name) {
 	for (size_t i = 0; i < g_funcList->size; i++) {
@@ -537,6 +541,20 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	return WAIT;
 }
 
+void set_exit_number(const PipeLineP * const pipeline) {
+  const PipeLineP * head = pipeline;
+  while (head->next) {
+    head = head->next;
+  }
+  const int status = head->status;
+  if (WIFEXITED(status)) {
+    g_exitno = WEXITSTATUS(status);
+  } else if (WIFSIGNALED(status)) {
+    g_exitno = 128 + WTERMSIG(status);
+  }
+}
+
+
 void execute_list(ListP *list, bool background, Vars *shell_vars) {
 	AndOrP *andor_head = list->and_or;
 	ShellInfos *shell_infos = shell(SHELL_GET);
@@ -551,6 +569,7 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 			else { //interactive
 				put_job_foreground(andor_head, false);
 			}
+      set_exit_number(andor_head->pipeline);
 		}
 		if (g_exitno > 128) return ;
 		// dprintf(2, "g_exino: %d\n", g_exitno);
