@@ -54,7 +54,7 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 		[NEWLINE] = "\n", [AMPER] = "&", [SEMI] = ";",
 	};
 
-	// dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
+	/*dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);*/
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
 			( (table_row != 27 && table_row != 66 && table_row != 98 && table_row != 39) 
@@ -72,7 +72,7 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 	}
 
 	if (regex_match("^[a-zA-Z_][a-zA-Z0-9_]*=", (char *)raw_value).is_found) {
-		if (table_row != 66 && table_row != 27)
+		if (table_row != 66 && table_row != 27 && table_row != 98)
 			return ASSIGNMENT_WORD;
 	}
 
@@ -85,8 +85,6 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 
 	return WORD;
 }
-
-#include "exec.h"
 
 StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 
@@ -119,7 +117,7 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 				token.type = identify_token(lexer, token.raw_value, entry.value, &error);
 				da_push(lexer->produced_tokens, token.type);
 				if (error) return NULL;
-				// dprintf(2, "Token produced: %s, type: %s\n", token.raw_value, tokenTypeStr(token.type));
+				//dprintf(2, "Token produced: %s, type: %s\n", token.raw_value, tokenTypeStr(token.type));
 				break;
 			}
 			case REDUCE: {

@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "signals.h"
-#include "exec.h"
 #include "ft_readline.h"
 
 #include <stdio.h>
@@ -20,12 +19,14 @@
 
 void signal_sigint_prompt(int code) {
 	rl_done = 1;
+  g_exitno = 128 + code;
 	g_signal = code;
 
 }
 
 void signal_sigint_heredoc(int code) {
 	rl_done = 2;
+  g_exitno = 128 + code;
 	printf("\n");
 	g_signal = code;
 }
@@ -77,6 +78,7 @@ void signal_exec_mode(void) {
 void signal_sigtstp_script(int code) {
 	(void) code;
 	// Send SIGTSTP to the entire foreground process group
+  // FIX: this is weird
 	pid_t pgid = tcgetpgrp(STDIN_FILENO);
 	if (pgid > 0) {
 		killpg(pgid, SIGTSTP);
