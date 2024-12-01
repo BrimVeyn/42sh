@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:29:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 16:41:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/01 19:21:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,14 @@
 
 void signal_sigint_prompt(int code) {
 	rl_done = 1;
-  g_exitno = 128 + code;
+	g_exitno = 128 + code;
 	g_signal = code;
 
 }
 
 void signal_sigint_heredoc(int code) {
 	rl_done = 2;
-  g_exitno = 128 + code;
+	g_exitno = 128 + code;
 	printf("\n");
 	g_signal = code;
 }
@@ -85,18 +85,37 @@ void signal_sigtstp_script(int code) {
 	}
 }
 
+// void signal_script_mode(void) {
+// 	signal(SIGTSTP, SIG_DFL);
+// 	signal(SIGINT, SIG_DFL);
+// 	signal(SIGQUIT, SIG_DFL);
+// 	signal(SIGCONT, SIG_DFL);
+// 	signal(SIGTTIN, SIG_IGN);
+// 	signal(SIGTTOU, SIG_IGN);
+// 	signal(SIGCHLD, SIG_DFL);
+// }
+void signal_script_mode() {
+    struct sigaction sa;
 
-void signal_script_mode(void) {
-	signal(SIGTSTP, SIG_DFL);
-    signal(SIGINT, SIG_DFL);
+    // Reset SIGINT to default behavior
+    sa.sa_handler = SIG_DFL;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0; // No special flags
+    sigaction(SIGINT, &sa, NULL);
+
+    // Reset other signals
+    signal(SIGTSTP, SIG_DFL);
     signal(SIGQUIT, SIG_DFL);
-	signal(SIGCONT, SIG_DFL);
+    signal(SIGCONT, SIG_DFL);
     signal(SIGTTIN, SIG_IGN);
     signal(SIGTTOU, SIG_IGN);
     signal(SIGCHLD, SIG_DFL);
+
+    printf("Signal script mode set\n");
 }
 
 void signal_manager(type_of_signals mode) {
+	dprintf(2, "signal manager called with option %d\n", mode);
 	switch(mode) {
 		case SIG_PROMPT: signal_prompt_mode(); break;
 		case SIG_EXEC: signal_exec_mode(); break;

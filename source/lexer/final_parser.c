@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 14:28:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/01 18:51:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,9 +235,11 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 					}
 					case 12: { /* pipeline -> BANG pipe_sequence */
 						//FIX: !
+						PipeLineP *pipe_sequence = da_pop(stack)->token.pipeline;
 						da_pop(stack);
-						da_pop(stack);
+						pipe_sequence->banged = true;
 						reduced_entry->token.type = Pipeline;
+						reduced_entry->token.pipeline = pipe_sequence;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Pipeline].value;
 						break;

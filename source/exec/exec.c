@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 16:40:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/01 19:36:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,7 +261,7 @@ void execute_case_clause(const CommandP * const command, const bool background, 
 	const CaseClauseP * const case_clause = command->case_clause;
 	int default_index = -1;
 	for (size_t i = 0; i < case_clause->patterns->size; i++) {
-		const StringListL *condition = case_clause->patterns->data[i];
+		const StringListL * const condition = case_clause->patterns->data[i];
 		for (size_t inner_i = 0; inner_i < condition->size; inner_i++) {
 			if (!ft_strcmp("*", condition->data[inner_i]))
 				default_index = i;
@@ -296,7 +296,7 @@ void declare_positional(const StringListL * const positional_parameters, const V
 		char buffer[MAX_WORD_LEN] = {0};
 		const int ret = ft_snprintf(buffer, MAX_WORD_LEN, "%ld=%s", i, positional_parameters->data[i]);
 		if (ret == -1)
-			fatal("snprintf: exceeded buffer capacity", 255);
+			fatal("snprintf: exceeded buffer capacity", 1);
 		// dprintf(2, "BUFFER: %s\n", buffer);
 		string_list_add_or_update(shell_vars->positional, buffer);
 	}
@@ -356,9 +356,11 @@ void register_function(const CommandP * const command) {
 
 void set_group(AndOrP * const job, PipeLineP * const process, const pid_t pid) {
 	process->pid = pid;
-	if (!job->pgid)
+	if (!job->pgid && g_masterPgid != 0)
+		job->pgid = g_masterPgid;
+	else if (!job->pgid)
 		job->pgid = pid;
-	setpgid(pid, pid);
+	setpgid(pid, job->pgid);
 }
 
 void process_simple_command(SimpleCommandP * const simple_command, Vars *shell_vars) {
@@ -498,8 +500,7 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 					if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1) {
 						fatal("tcsetpgrp: failed", 1);
                     }
-
-				if (!shell_infos->script) signal_manager(SIG_EXEC);
+				signal_manager(SIG_EXEC);
 			}
 			// if (background && shell_infos->script) { redirect_input_to_null(); }
 			close_all_fds();
@@ -542,16 +543,16 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 }
 
 void set_exit_number(const PipeLineP * const pipeline) {
-  const PipeLineP * head = pipeline;
-  while (head->next) {
-    head = head->next;
-  }
-  const int status = head->status;
-  if (WIFEXITED(status)) {
-    g_exitno = WEXITSTATUS(status);
-  } else if (WIFSIGNALED(status)) {
-    g_exitno = 128 + WTERMSIG(status);
-  }
+	const PipeLineP * head = pipeline;
+	while (head->next) {
+		head = head->next;
+	}
+	const int status = head->status;
+	if (WIFEXITED(status)) {
+		g_exitno = WEXITSTATUS(status);
+	} else if (WIFSIGNALED(status)) {
+		g_exitno = 128 + WTERMSIG(status);
+	}
 }
 
 
@@ -569,8 +570,14 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 			else { //interactive
 				put_job_foreground(andor_head, false);
 			}
-      set_exit_number(andor_head->pipeline);
+			set_exit_number(andor_head->pipeline);
 		}
+		if (andor_head->pipeline->banged) {
+			if		(g_exitno == 0) g_exitno = 1;
+			else if (g_exitno != 0) g_exitno = 0;
+		}
+		// if (andor_head->pipeline->banged)
+		// 	dprintf(2, "banged, exino: %d\n", g_exitno);
 		if (g_exitno > 128) return ;
 		// dprintf(2, "g_exino: %d\n", g_exitno);
 		bool skip = (
@@ -606,6 +613,10 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 		// dprintf(2, "Background ? %s\n", boolStr(background));
 		if (!subshell)
 			g_masterPgid = 0;
+
+		if (shell_infos->script) {
+			g_masterPgid = shell_infos->shell_pgid;
+		}
 
 		if (background == true && !subshell) {
 			pid_t pid = fork();
