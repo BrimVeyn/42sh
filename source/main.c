@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/28 13:03:10 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/11/29 15:00:29 by bvan-pae         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ft_regex.h"
 #include "final_parser.h"
 #include "parser.h"
@@ -129,18 +141,18 @@ char *read_input_file(const char *path){
 		return NULL;
     }
 
-	char *file_content = ft_strdup(buffer);
-	gc(GC_ADD, file_content, GC_SUBSHELL);
+	char *file_content = gc(GC_ADD, ft_strdup(buffer), GC_SUBSHELL);
 	munmap(buffer, file_size);
 	close(fd);
+
 	return file_content;
 }
 
-ShellInfos *shell(int mode) {
+ShellInfos *shell(const int mode) {
 	static ShellInfos *self = NULL;
 
 	if (mode == SHELL_INIT) {
-		self = gc(GC_CALLOC, 1, sizeof(ShellInfos), GC_ENV);
+		self = gc_unique(ShellInfos, GC_ENV);
 		self->shell_terminal = STDIN_FILENO;
 		self->interactive = isatty(self->shell_terminal);
 		if (self->interactive) {
@@ -150,10 +162,9 @@ ShellInfos *shell(int mode) {
 			tcsetpgrp(self->shell_terminal, self->shell_pgid);
 			tcgetattr(self->shell_terminal, &self->shell_tmodes);
 		}
-	} else {
-		return self;
 	}
-	return NULL;
+
+	return self;
 }
 
 void update_last_executed_command(Vars *shell_vars, char *input) {
@@ -230,21 +241,22 @@ int main(const int ac, char *av[], const char *env[]) {
 	Vars *shell_vars = shell_vars_init(env);
 	ShellInfos *self = shell(SHELL_GET);
 
-	if (SCRIPT_MODE) { self->interactive = false; }
-	if (self->interactive) { load_42shrc(shell_vars); }
+	if (SCRIPT_MODE) { self->interactive = true; self->script = true; }
+	if (self->interactive && !self->script) { load_42shrc(shell_vars); }
 
 	char *input = NULL;
 	while (SHELL_IS_RUNNING) {
-		if (self->interactive) { signal_manager(SIG_PROMPT); }
+		if (self->interactive && !self->script) { signal_manager(SIG_PROMPT); }
+		if (self->interactive && self->script) { signal_manager(SIG_SCRIPT); }
 		if (!SCRIPT_MODE) {
 			input = read_input_prompt(input, shell_vars);
 		} else {
 			input = read_input_file(av[1]);
 			if (HAS_POSITIONAL) { save_positional_parameters(ac, av, shell_vars); }
 		}
-		if (self->interactive) { job_notification(); }
+		if (self->interactive && !self->script) { job_notification(); }
 		if (input) {
-			if (self->interactive) {
+			if (self->interactive && !self->script) {
 				if (history_expansion(&input) == false)
 					continue;
 				if (*input)
@@ -256,17 +268,16 @@ int main(const int ac, char *av[], const char *env[]) {
 			if (SCRIPT_MODE) { break; }
 		} else {
 			if (g_jobList->size) {
-				//FIX: update for stopped and not running
-				dprintf(2, "There are stopped jobs. Killing them.\n");
+				ft_dprintf(STDERR_FILENO, "There are alive background jobs. Killing them.\n");
 				job_killall();
 				continue;
-			} else {
-				dprintf(2, "exit\n");
+			} else if (self->interactive) {
+				ft_dprintf(STDERR_FILENO, "exit\n");
 			}
 			break;
 		}
 	}
-	if (self->interactive) { update_history_file(history, shell_vars); }
+	if (self->interactive && !self->script) { update_history_file(history, shell_vars); }
 	gc(GC_CLEANUP, GC_ALL);
 	close_all_fds();
 	return (EXIT_SUCCESS);

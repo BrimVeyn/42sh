@@ -6,15 +6,15 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:07:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/26 16:41:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/29 14:14:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "colors.h"
 #include "parser.h"
 #include "libft.h"
 #include "signals.h"
 #include "utils.h"
-#include "lexer.h"
 #include "ft_readline.h"
 #include "c_string.h"
 #include "final_parser.h"
@@ -129,6 +129,7 @@ void string_list_consume(StrList *str_list, Vars *shell_vars) {
 			case EXP_VARIABLE: {result = parser_parameter_expansion(curr->str, shell_vars); break;}
 			default: {}
 		}
+		// dprintf(2, C_BRIGHT_CYAN"result: %s\n"C_RESET, result);
 		if (result) {
 			gc(GC_FREE, str_list->data[i]->str, GC_SUBSHELL);
 			str_list->data[i]->str = gc(GC_ADD, result, GC_SUBSHELL);
@@ -166,13 +167,13 @@ ExpKind identify_exp_end(const char *str, const ContextMap *context_map, const E
 }
 
 bool is_var_expand_context(ExpKindList *exp_stack) {
-	bool	var_expand = (exp_stack->size != 0);
-	for (size_t i = 0; exp_stack->size && i < exp_stack->size - 1; i++) {
+	if (exp_stack->size <= 1) return false;
+	for (size_t i = 0; i < exp_stack->size - 1; i++) {
 		if (exp_stack->data[i] != EXP_ARITHMETIC) {
-			var_expand = false;
-		}
+			return false;
+        }
 	}
-	return var_expand;
+	return true;
 }
 
 StrList *get_range_list(char *candidate, Vars *shell_vars, bool *error) {
@@ -197,6 +198,7 @@ StrList *get_range_list(char *candidate, Vars *shell_vars, bool *error) {
 		ExpKind top_context = da_peak_back(exp_stack);
 		ExpKind bottom_context = da_peak_front(exp_stack);
 		bool	var_expand = is_var_expand_context(exp_stack);
+		// exp_kind_list_print(exp_stack);
 
 		if ((maybe_begin = identify_exp_begin(word->data)) != EXP_WORD) {
 			if (!exp_stack->size && can_push) {
@@ -384,6 +386,7 @@ StringListL *do_expansions(const StringListL * const word_list, Vars * const she
 		if (error) 
 			return NULL;
 		string_list_consume(string_list, shell_vars);
+		// str_list_print(string_list);
 		if (split)
 			string_list_split(string_list, shell_vars);
 		string_erase_nulls(string_list);

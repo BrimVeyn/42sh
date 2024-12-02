@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 13:04:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/27 10:47:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/27 15:52:59 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,15 +27,16 @@ void *lex_interface(const LexMode mode, void *input, void *filename, bool *error
 			da_create(input_ss, StringStream, sizeof(char), GC_SUBSHELL);
 			da_create(raw_input_ss, StringStream, sizeof(char), GC_SUBSHELL);
 			da_create(peak, StringStream, sizeof(char), GC_SUBSHELL);
+			da_create(produced_tokens, TokenTypeVect, sizeof(TokenType), GC_SUBSHELL);
 			ss_push_string(raw_input_ss, input);
 			ss_push_string(input_ss, input);
-			lexer->raw_input = input;
 			lexer->filename = (filename == NULL) ? "terminal" : filename;
 			lexer->input = input_ss;
 			lexer->peak = peak;
 			lexer->raw_input_ss = raw_input_ss;
 			lexer->shell_vars = shell_vars;
 			lexer->pos.line = 1;
+			lexer->produced_tokens = produced_tokens;
 			break;
 		}
 		case (LEX_GET): {

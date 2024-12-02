@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/30 15:11:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/26 13:47:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/01 19:26:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ typedef enum {
 	SIG_PROMPT,
 	SIG_HERE_DOC,
 	SIG_EXEC,
+	SIG_SCRIPT,
 } type_of_signals;
 
 void	*read_input_prompt(char *input, Vars *shell_vars);
