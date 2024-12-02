@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:07:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/02 18:28:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/02 19:49:08 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,8 +195,8 @@ StrList *get_range_list(char *candidate, Vars *shell_vars) {
 		const char current_char = da_peak_front(word);
 
 		if (exp_stack->size == 0) {
-			if (current_char == '\"') dquote = !dquote;
-			if (current_char == '\'') squote = !squote;
+			if		(current_char == '\"' && !squote) dquote = !dquote;
+			else if (current_char == '\'' && !dquote) squote = !squote;
 		}
 
 		ExpKind maybe_begin = 0;
@@ -380,7 +380,15 @@ void printStringList(StringListL *list) {
 }
 
 void quote_removal(StringListL *list) {
-	(void) list;
+	for (size_t i = 0; i < list->size; i++) {
+		const char *elem = list->data[i];
+		char buffer[MAX_WORD_LEN] = {0};
+		for (size_t j = 0; elem[j]; j++) {
+			ft_snprintf(buffer, MAX_WORD_LEN, "%c", elem[j]);
+		}
+		gc(GC_FREE, elem, list->gc_level);
+		list->data[i] = gc(GC_ADD, ft_strdup(buffer), list->gc_level);
+	}
 }
 
 StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const bool split) {
@@ -398,7 +406,7 @@ StringListL *do_expansions(const StringListL * const word_list, Vars * const she
 		string_erase_nulls(string_list);
 		StringListL * const result = string_list_merge(string_list);
 		// printStringList(result);
-		quote_removal(result);
+		// quote_removal(result);
 		// printStringList(result);
 		string_list_push_list(arg_list, result);
 	}

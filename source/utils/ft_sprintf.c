@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 14:44:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 17:08:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/02 19:47:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,13 @@ int ft_sprintf(char *buffer, const char *fmt, ...) {
 			i += 3;
 			continue;
 		}
+		if (!ft_strncmp(&fmt[i], "%c", 2)) {
+			const char letter = va_arg(args, int);
+			buffer[buffer_len] = letter;
+			buffer_len += 1;
+			i += 1;
+			continue;
+		}
 		buffer[buffer_len] = fmt[i];
 		buffer_len += 1;
 		i += 1;
@@ -151,6 +158,15 @@ int ft_snprintf(char *buffer, const size_t size_of_buffer, const char *fmt, ...)
 				return -1;
 			buffer_len += number_len;
 			i += 3;
+			continue;
+		}
+		if (!ft_strncmp(&fmt[i], "%c", 2)) {
+			const char letter = va_arg(args, int);
+			if (1 + buffer_len > size_of_buffer)
+				return -1;
+			buffer[buffer_len] = letter;
+			buffer_len += 1;
+			i += 2;
 			continue;
 		}
 		if (buffer_len + 1 > size_of_buffer)
