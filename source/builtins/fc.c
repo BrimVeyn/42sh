@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:40:48 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/29 16:35:31 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/02 10:07:21 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ typedef enum {
 	ERROR_INVALID_OPTION,
 	ERROR_FC_FATAL,
 	ERROR_COMMAND_NOT_FOUND,
+	ERROR_OPTION_E_REQUIRES_ARGUMENT,
 } FcStatus;
 
 typedef struct {
@@ -89,6 +90,10 @@ void print_options(const FcOptions *options) {
     printf(COLOR_BOLD COLOR_CYAN "=================" COLOR_RESET "\n");
 }
 
+void print_fc_usage(){
+	ft_dprintf(2, "fc: usage: fc [-e ename] [-lnr] [first] [last] or fc -s [old=new] [command]\n");
+}
+
 void print_fc_error(const FcStatus n, const void ** const arg){
 	ft_dprintf(2, "42sh: fc: ");
 	switch (n) {
@@ -109,6 +114,9 @@ void print_fc_error(const FcStatus n, const void ** const arg){
 		case ERROR_COMMAND_NOT_FOUND:
 			ft_dprintf(2, "no command found\n");
 			break;
+		case ERROR_OPTION_E_REQUIRES_ARGUMENT:
+			ft_dprintf(2, "-e: option requires an argument\n");
+			print_fc_usage();
 		default:
 			break;
 	}
@@ -137,8 +145,7 @@ int cmp_both(const char *const first, const char *const end, const char *const c
 	return -1;
 }
 
-StringListL *get_history_value_wd(char *first, char *end){
-	da_create(command_list, StringListL, sizeof(char *), GC_SUBSHELL);
+StringListL *get_history_value_wd(StringListL *command_list, char *first, char *end){
 	int first_len = ft_strlen(first);
 	int end_len = ft_strlen(end);
 	for (int i = history->length - 1; i >= 0; i--) {
@@ -164,7 +171,7 @@ StringListL *get_history_value_wd(char *first, char *end){
 	return command_list;
 }
 
-StringListL* get_history_value_nb(int first, int last) {
+void get_history_value_nb(StringListL *command_list, int first, int last) {
 	if (first < 0){
 		first = history->length + first;
 		if (first < 0) first = 1;
@@ -177,11 +184,10 @@ StringListL* get_history_value_nb(int first, int last) {
 	if (first == 0) first = 1;
 	if (last == 0) last = 1;
 
-	da_create(command_list, StringListL, sizeof(char *), GC_SUBSHELL);
 
     if (max(first, last) > history->length) {
 		da_push(command_list, fc_default());
-        return command_list;
+        return;
     }
 
 	
@@ -194,7 +200,7 @@ StringListL* get_history_value_nb(int first, int last) {
 		da_push(command_list, line);
     }
 
-    return command_list;
+    return;
 }
 
 int get_fc_options(char **args, FcOptions *options) {
@@ -205,6 +211,9 @@ int get_fc_options(char **args, FcOptions *options) {
 				char current_char = args[i][j];
 				if (current_char == 'e'){
 					options->flags |= FC_E;
+					if (args[i + 1] == NULL){
+						print_fc_error(ERROR_OPTION_E_REQUIRES_ARGUMENT, NULL);
+					}
 					options->editor = args[++i];
 					//si NULL segfault
 					break;
@@ -216,9 +225,8 @@ int get_fc_options(char **args, FcOptions *options) {
 					options->flags |= FC_R;
 				} else if (current_char == 's'){
 					options->flags |= FC_S;
-					//si NULL segfault
-					char *arg = args[i + 1];
-					if (arg){
+					if (args[i + 1]){
+						char *arg = args[i + 1];
 						char *ppos = ft_strchr(arg, '=');
 						if (ppos){
 							options->old = ft_substr(arg, 0, ppos - arg);
@@ -284,15 +292,15 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 		options.last = options.first;
 	}
 	
-	StringListL *command_list = NULL;
+	da_create(command_list, StringListL, sizeof(char *), GC_SUBSHELL);
 	if (options.first == NULL){
 		da_push(command_list, fc_default());
 	} else if (*options.first == '-' || ft_isdigit((int)*options.first)){
 		int first_number = ft_atoi(options.first);
 		int last_number = ft_atoi(options.last);
-		command_list = get_history_value_nb(first_number, last_number);
+		get_history_value_nb(command_list, first_number, last_number);
 	} else {
-		command_list = get_history_value_wd(options.first, options.last);
+		get_history_value_wd(command_list, options.first, options.last);
 	}
 
 	if (!command_list->size){
