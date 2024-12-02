@@ -14,7 +14,7 @@
 #include "libft.h"
 #include "final_parser.h"
 
-typedef void (*builtin_func_t)(const SimpleCommandP *, Vars *);
+typedef void (*builtin_func_t)(const SimpleCommandP *, Vars * const);
 
 bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars) {
 	if (!command->word_list->data[0]) 

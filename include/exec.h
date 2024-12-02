@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:46:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/27 13:46:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/28 09:23:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@
 typedef enum { SHELL_INIT, SHELL_GET } shell_interface_mode;
 
 typedef struct ShellInfos {
-	int		interactive;
+	bool		interactive;
+	bool		script;
 	pid_t	shell_pgid;
 	int		shell_terminal;
 	struct termios shell_tmodes;

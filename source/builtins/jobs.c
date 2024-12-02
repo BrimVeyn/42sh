@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 17:11:38 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/23 22:59:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/11/29 14:41:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,11 +75,10 @@ void print_job_entry(char *buffer, const size_t idx, int opts) {
 	if (opts >= 1)
 		ft_sprintf(buffer, "%d\t", g_jobList->data[idx]->pgid);
 	if (opts <= 1) {
-		//FIX: update these functions
-		// if (job_is_stopped(g_jobList->data[idx]))
-			// ft_sprintf(buffer, "Stopped(%s)\t%s\n", sigStr(g_jobList->data[idx]->sig), get_pipeline(g_jobList->data[idx]));
-		// else
-			// ft_sprintf(buffer, "Running\t%s\n", get_pipeline(g_jobList->data[idx]));
+		if (job_stopped(g_jobList->data[idx]))
+			ft_sprintf(buffer, "Stopped(%s)\t%s\n", sigStr(g_jobList->data[idx]->sig), job_print(g_jobList->data[idx], false));
+		else
+			ft_sprintf(buffer, "Running\t%s\n", job_print(g_jobList->data[idx], false));
 	}
 	if (opts >= 2)
 		ft_sprintf(buffer, "\n");
