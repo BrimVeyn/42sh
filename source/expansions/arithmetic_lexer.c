@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 11:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 17:22:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/02 17:18:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,13 +106,15 @@ AToken *lexer_get_next_atoken(Lexer * l) {
 			//catch unknown token and return an error;
 			self->operator = get_operator_tag(l);
 			if (self->operator == O_ERROR) {
-				ARITHMETIC_SYNTAX_ERROR((char []){l->ch});
+				char buffer[2] = {l->ch, 0};
+				ARITHMETIC_SYNTAX_ERROR(buffer);
 				return NULL;
 			}
 			break;
 		case A_OPERAND:
 			if (!fill_operand(self, l)) {
-				ARITHMETIC_SYNTAX_ERROR((char []){l->ch});
+				char buffer[2] = {l->ch, 0};
+				ARITHMETIC_SYNTAX_ERROR(buffer);
 				return NULL;
 			}
 			break;

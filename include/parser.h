@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:05:45 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/26 13:46:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/02 17:07:28 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,12 +50,16 @@ typedef enum {
 	EXP_CMDSUB,
 	EXP_SUB,
 	EXP_WORD,
+	EXP_SQUOTE,
+	EXP_DQUOTE,
 } ExpKind;
 
 typedef struct Str {
 	struct Str *next;
 	char *str;
 	ExpKind kind;
+	bool	dquote;
+	bool	squote;
 } Str;
 
 typedef struct {

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:07:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 14:14:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/02 18:28:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include "final_parser.h"
 
 #include <fcntl.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -108,7 +109,7 @@ void string_list_consume(StrList *str_list, Vars *shell_vars) {
 		Str *curr = str_list->data[i];
 		ExpKind kind = curr->kind;
 
-		if (curr->kind == EXP_WORD) 
+		if (curr->kind == EXP_WORD || curr->squote) 
 			continue;
 		else
 			remove_boundaries(curr);
@@ -140,17 +141,11 @@ void string_list_consume(StrList *str_list, Vars *shell_vars) {
 }
 
 ExpKind identify_exp_begin(char *str) {
-	if (!ft_strncmp(str, "$((", 3)) {
-		return EXP_ARITHMETIC;
-	} else if (!ft_strncmp(str, "$(", 2)) {
-		return EXP_CMDSUB;
-	} else if (!ft_strncmp(str, "${", 2)) {
-		return EXP_VARIABLE;
-	} else if (!ft_strncmp(str, "(", 1)) {
-		return EXP_SUB;
-	} else {
-		return EXP_WORD;
-	}
+	if (!ft_strncmp(str, "$((", 3)) { return EXP_ARITHMETIC; }
+	else if (!ft_strncmp(str, "$(", 2)) { return EXP_CMDSUB; }
+	else if (!ft_strncmp(str, "${", 2)) { return EXP_VARIABLE; }
+	else if (!ft_strncmp(str, "(", 1)) { return EXP_SUB; }
+	else { return EXP_WORD; }
 }
 
 typedef struct ContextMap {
@@ -176,13 +171,13 @@ bool is_var_expand_context(ExpKindList *exp_stack) {
 	return true;
 }
 
-StrList *get_range_list(char *candidate, Vars *shell_vars, bool *error) {
+StrList *get_range_list(char *candidate, Vars *shell_vars) {
 	
 	static const ContextMap map[] = {
-		[EXP_ARITHMETIC] = { .begin = "$((", .end = "))" },
-		[EXP_CMDSUB] = { .begin = "$(", .end = ")"},
-		[EXP_VARIABLE] = { .begin = "${", .end = "}" },
-		[EXP_SUB] = { .begin = "(", .end = ")" },
+		[EXP_ARITHMETIC]	= { .begin = "$((", .end = "))" },
+		[EXP_CMDSUB]		= { .begin = "$(", .end = ")"},
+		[EXP_VARIABLE]		= { .begin = "${", .end = "}" },
+		[EXP_SUB]			= { .begin = "(", .end = ")" },
 	};
 
 	da_create(self, StrList, sizeof(Str *), GC_SUBSHELL);
@@ -190,19 +185,28 @@ StrList *get_range_list(char *candidate, Vars *shell_vars, bool *error) {
 	da_create(word, StringStream, sizeof(char), GC_SUBSHELL);
 	da_create(cache_stack, StringStream, sizeof(char), GC_SUBSHELL);
 	ss_push_string(word, candidate);
-	bool can_push = false;
+
+	bool squote, dquote, can_push = false;
 
 	while (word->size) {
+		const ExpKind top_context = da_peak_back(exp_stack);
+		const ExpKind bottom_context = da_peak_front(exp_stack);
+		const bool	var_expand = is_var_expand_context(exp_stack);
+		const char current_char = da_peak_front(word);
+
+		if (exp_stack->size == 0) {
+			if (current_char == '\"') dquote = !dquote;
+			if (current_char == '\'') squote = !squote;
+		}
+
 		ExpKind maybe_begin = 0;
 		ExpKind maybe_end = 0;
-		ExpKind top_context = da_peak_back(exp_stack);
-		ExpKind bottom_context = da_peak_front(exp_stack);
-		bool	var_expand = is_var_expand_context(exp_stack);
-		// exp_kind_list_print(exp_stack);
+
+		// dprintf(STDERR_FILENO, "SQ: %s, DQ: %s, c: %c\n", boolStr(squote), boolStr(dquote), current_char);
 
 		if ((maybe_begin = identify_exp_begin(word->data)) != EXP_WORD) {
 			if (!exp_stack->size && can_push) {
-				Str *res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
+				Str * const res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
 				da_push(self, res);
 			}
 			da_push(exp_stack, maybe_begin);
@@ -217,11 +221,11 @@ StrList *get_range_list(char *candidate, Vars *shell_vars, bool *error) {
 				for (size_t i = 0; i < ft_strlen(map[maybe_end].end); i++) {
 					da_push(cache_stack, da_pop_front(word));
 				}
-				if (bottom_context == EXP_ARITHMETIC && top_context == EXP_CMDSUB) {
+				if (bottom_context == EXP_ARITHMETIC && top_context == EXP_CMDSUB && !squote) {
 					da_push(cache_stack, 0);
-					size_t idx = ft_strrstr(cache_stack->data, map[top_context].begin);
-					char *tmp = ft_substr(&cache_stack->data[idx], 2, ft_strlen(&cache_stack->data[idx]) - 2 - 1);
-					char *result = parser_command_substitution(tmp, shell_vars);
+					const size_t idx = ft_strrstr(cache_stack->data, map[top_context].begin);
+					char * const tmp = ft_substr(&cache_stack->data[idx], 2, ft_strlen(&cache_stack->data[idx]) - 2 - 1);
+					char * const result = parser_command_substitution(tmp, shell_vars);
 					free(tmp);
 					// dprintf(2, "result: %s\n", result);
 					ss_cut(cache_stack, idx);
@@ -229,10 +233,10 @@ StrList *get_range_list(char *candidate, Vars *shell_vars, bool *error) {
 					free(result);
 					// dprintf(2, "cache: %s\n", cache_stack->data);
 				}
-				if (var_expand && top_context == EXP_VARIABLE) {
+				if (var_expand && top_context == EXP_VARIABLE && !squote) {
 					da_push(cache_stack, 0);
-					size_t idx = ft_strrstr(cache_stack->data, map[top_context].begin);
-					char *result = parser_parameter_expansion(&cache_stack->data[idx], shell_vars);
+					const size_t idx = ft_strrstr(cache_stack->data, map[top_context].begin);
+					char * const result = parser_parameter_expansion(&cache_stack->data[idx], shell_vars);
 					if (result) {
 						ss_cut(cache_stack, idx);
 						ss_push_string(cache_stack, result);
@@ -243,7 +247,8 @@ StrList *get_range_list(char *candidate, Vars *shell_vars, bool *error) {
 					}
 				}
 				if (!exp_stack->size) {
-					Str *res = str_init(maybe_end, ss_get_owned_slice(cache_stack), false);
+					Str * const res = str_init(maybe_end, ss_get_owned_slice(cache_stack), false);
+					res->squote = squote; res->dquote = dquote;
 					da_push(self, res);
 				}
 			} 
@@ -254,13 +259,8 @@ StrList *get_range_list(char *candidate, Vars *shell_vars, bool *error) {
 		}
 	}
 	if (can_push) {
-		Str *res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
+		Str * const res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
 		da_push(self, res);
-	}
-	if (exp_stack->size) {
-		UNEXPECTED_EOF(')');
-		g_exitno = 2;
-		*error = true;
 	}
 	gc(GC_FREE, cache_stack->data, GC_SUBSHELL);
 	gc(GC_FREE, word->data, GC_SUBSHELL);
@@ -289,12 +289,9 @@ void str_add_back(Str **lst, Str *new_value) {
 	}
 }
 
-
 void string_list_split(StrList *list, Vars *shell_vars) {
 	char *IFS = string_list_get_value(shell_vars->set, "IFS");
-	if (!IFS) {
-		IFS = "\n\t ";
-	}
+	if (!IFS) { IFS = "\n\t "; }
 
 	unsigned char map[32] = {[0 ... 31] = 0};
 
@@ -304,7 +301,7 @@ void string_list_split(StrList *list, Vars *shell_vars) {
 	}
 
 	for (size_t i = 0; i < list->size; i++) {
-		if (list->data[i]->kind == EXP_WORD)
+		if (list->data[i]->kind == EXP_WORD || list->data[i]->squote || list->data[i]->dquote)
 			continue;
 		Str *node = NULL;
 		char *curr_str = list->data[i]->str;
@@ -312,7 +309,7 @@ void string_list_split(StrList *list, Vars *shell_vars) {
 		for (size_t it = 0; it < str_len; it++) {
 
 			const size_t start = it;
-			while (it < str_len && !(map[curr_str[it] / 8] & (1 << (curr_str[it] % 8)))){
+			while (it < str_len && !(map[curr_str[it] / 8] & (1 << (curr_str[it] % 8)))) {
 				it++;
 			}
 			const size_t end = it;
@@ -376,21 +373,33 @@ void string_erase_nulls(StrList *list) {
 	}
 }
 
-StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const bool split) {
+void printStringList(StringListL *list) {
+	for (size_t i = 0; i < list->size; i++) {
+		dprintf(2, "[%zu]: %s\n", i, list->data[i]);
+	}
+}
 
-	bool error = false;
+void quote_removal(StringListL *list) {
+	(void) list;
+}
+
+StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const bool split) {
+	if (!word_list) return NULL;
+
+	// bool error = false;
 	da_create(arg_list, StringListL, sizeof(char *), GC_SUBSHELL);
 	
 	for (size_t it = 0; it < word_list->size; it++) {
-		StrList *string_list = get_range_list(word_list->data[it], shell_vars, &error);
-		if (error) 
-			return NULL;
+		StrList * const string_list = get_range_list(word_list->data[it], shell_vars);
 		string_list_consume(string_list, shell_vars);
-		// str_list_print(string_list);
 		if (split)
 			string_list_split(string_list, shell_vars);
+		// str_list_print(string_list);
 		string_erase_nulls(string_list);
-		StringListL *result = string_list_merge(string_list);
+		StringListL * const result = string_list_merge(string_list);
+		// printStringList(result);
+		quote_removal(result);
+		// printStringList(result);
 		string_list_push_list(arg_list, result);
 	}
 	return arg_list;
