@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:53:12 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 11:53:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/02 14:22:46 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 #include "regex.h"
 #include <stdlib.h>
 
-//TODO: handle exit errors
 static void err_exit(char *msg){
 	ft_dprintf(2, "42sh: exit: %s", msg);
 }

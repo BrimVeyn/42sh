@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 13:59:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/02 14:14:41 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,10 +43,10 @@ char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 			// exit(EXIT_FAILURE);
 		}
 	}
-	if (shell_vars_get_value(shell_vars, id) == NULL)
+	if (get_variable_value(shell_vars, id) == NULL)
 		return ft_strdup("");
 	if (metachar[0] == '#' || metachar[0] == '%'){
-		char *value = ft_strdup(shell_vars_get_value(shell_vars, id));
+		char *value = ft_strdup(get_variable_value(shell_vars, id));
 		char *regexp = NULL;
 
 		if (metachar[0] == '#'){
@@ -82,7 +82,7 @@ char *parser_get_variable_value(char *to_expand, Vars *shell_vars){
 	
 
 	if (to_expand[0] == '#'){
-		return gc(GC_ADD, ft_itoa(ft_strlen(shell_vars_get_value(shell_vars, to_expand + 1))), GC_GENERAL);
+		return gc(GC_ADD, ft_itoa(ft_strlen(get_variable_value(shell_vars, to_expand + 1))), GC_GENERAL);
 	}
 	regex_match_t find_format = regex_match("[:#%]", to_expand);
 	int lenght_meta = (regex_match("[:#%][=?#%\\-]", to_expand).re_start != -1) ? 2:1;
@@ -94,7 +94,7 @@ char *parser_get_variable_value(char *to_expand, Vars *shell_vars){
 		return handle_format(metachar, name, word, shell_vars);
 	}
 	
-	char *value = shell_vars_get_value(shell_vars, to_expand);
+	char *value = get_variable_value(shell_vars, to_expand);
 	return value ? value : gc(GC_ADD, ft_strdup(""), GC_SUBSHELL);
 }
 

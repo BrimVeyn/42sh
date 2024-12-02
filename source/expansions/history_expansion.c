@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:17:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/27 10:36:51 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/02 14:20:47 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
+
+//FIX:maybe we can use fc
 
 void get_history(Vars *shell_vars) {
 	char *home = getenv("HOME");
@@ -96,8 +98,6 @@ char *get_value_wd(char *parameter, char *buffer, size_t history_length){
 	printf("return null\n");
     return value;
 }
-
-//TODO:search in struct history
 
 char *get_value_nb(char *parameter, char *buffer, size_t history_length){
     char *value = NULL;
