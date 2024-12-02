@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:40:48 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/02 10:07:21 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/02 14:23:45 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
+
+//TODO: flag -R
 
 typedef enum {
 	FC_E = 0b00001,
