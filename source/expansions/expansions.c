@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:07:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/02 19:49:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 18:25:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars){
 void remove_boundaries(Str *exp) {
 	static const size_t boundaries[][2] = {
 		[EXP_WORD] = {0, 0},
-		[EXP_CMDSUB] = {2, 1},
+		[EXP_CMDSUB] = {1, 0},
 		[EXP_ARITHMETIC] = {3, 2},
 		[EXP_VARIABLE] = {0, 0},
 	};
@@ -175,9 +175,9 @@ StrList *get_range_list(char *candidate, Vars *shell_vars) {
 	
 	static const ContextMap map[] = {
 		[EXP_ARITHMETIC]	= { .begin = "$((", .end = "))" },
-		[EXP_CMDSUB]		= { .begin = "$(", .end = ")"},
-		[EXP_VARIABLE]		= { .begin = "${", .end = "}" },
-		[EXP_SUB]			= { .begin = "(", .end = ")" },
+		[EXP_CMDSUB]		= { .begin = "$(",	.end = ")"},
+		[EXP_VARIABLE]		= { .begin = "${",	.end = "}" },
+		[EXP_SUB]			= { .begin = "(",	.end = ")" },
 	};
 
 	da_create(self, StrList, sizeof(Str *), GC_SUBSHELL);
@@ -186,7 +186,7 @@ StrList *get_range_list(char *candidate, Vars *shell_vars) {
 	da_create(cache_stack, StringStream, sizeof(char), GC_SUBSHELL);
 	ss_push_string(word, candidate);
 
-	bool squote, dquote, can_push = false;
+	bool squote = false, dquote = false, can_push = false;
 
 	while (word->size) {
 		const ExpKind top_context = da_peak_back(exp_stack);
@@ -204,7 +204,7 @@ StrList *get_range_list(char *candidate, Vars *shell_vars) {
 
 		// dprintf(STDERR_FILENO, "SQ: %s, DQ: %s, c: %c\n", boolStr(squote), boolStr(dquote), current_char);
 
-		if ((maybe_begin = identify_exp_begin(word->data)) != EXP_WORD) {
+		if (!squote && (maybe_begin = identify_exp_begin(word->data)) != EXP_WORD) {
 			if (!exp_stack->size && can_push) {
 				Str * const res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
 				da_push(self, res);
@@ -215,16 +215,16 @@ StrList *get_range_list(char *candidate, Vars *shell_vars) {
 			}
 			continue;
 		}
-		if (exp_stack->size && (maybe_end = identify_exp_end(word->data, map, top_context)) != EXP_WORD) {
+		if (!squote && exp_stack->size && (maybe_end = identify_exp_end(word->data, map, top_context)) != EXP_WORD) {
 			if (maybe_end == top_context) {
 				da_pop(exp_stack);
 				for (size_t i = 0; i < ft_strlen(map[maybe_end].end); i++) {
 					da_push(cache_stack, da_pop_front(word));
 				}
-				if (bottom_context == EXP_ARITHMETIC && top_context == EXP_CMDSUB && !squote) {
+				if (bottom_context == EXP_ARITHMETIC && top_context == EXP_CMDSUB) {
 					da_push(cache_stack, 0);
 					const size_t idx = ft_strrstr(cache_stack->data, map[top_context].begin);
-					char * const tmp = ft_substr(&cache_stack->data[idx], 2, ft_strlen(&cache_stack->data[idx]) - 2 - 1);
+					char * const tmp = ft_substr(&cache_stack->data[idx], 1, ft_strlen(&cache_stack->data[idx]) - 1);
 					char * const result = parser_command_substitution(tmp, shell_vars);
 					free(tmp);
 					// dprintf(2, "result: %s\n", result);
@@ -233,7 +233,7 @@ StrList *get_range_list(char *candidate, Vars *shell_vars) {
 					free(result);
 					// dprintf(2, "cache: %s\n", cache_stack->data);
 				}
-				if (var_expand && top_context == EXP_VARIABLE && !squote) {
+				if (var_expand && top_context == EXP_VARIABLE) {
 					da_push(cache_stack, 0);
 					const size_t idx = ft_strrstr(cache_stack->data, map[top_context].begin);
 					char * const result = parser_parameter_expansion(&cache_stack->data[idx], shell_vars);
@@ -379,15 +379,118 @@ void printStringList(StringListL *list) {
 	}
 }
 
+typedef struct {
+	int *data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} PosList;
+
 void quote_removal(StringListL *list) {
 	for (size_t i = 0; i < list->size; i++) {
 		const char *elem = list->data[i];
-		char buffer[MAX_WORD_LEN] = {0};
+		da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
+		da_create(poses, PosList, sizeof(int), GC_SUBSHELL);
+		ss_push_string(ss, elem);
+		bool squote = false, dquote = false;
+		int spair = -1, dpair = -1;
 		for (size_t j = 0; elem[j]; j++) {
-			ft_snprintf(buffer, MAX_WORD_LEN, "%c", elem[j]);
+			if	(elem[j] == '\"' && !squote) {
+				dquote = !dquote;
+				if (dpair != -1) {
+					da_push(poses, dpair); da_push(poses, j);
+					dpair = -1; continue;
+				} else { dpair = j; }
+				continue;
+			}
+			else if (elem[j] == '\'' && !dquote) {
+				squote = !squote;
+				if (spair != -1) {
+					da_push(poses, spair); da_push(poses, j);
+					spair = -1; continue;
+				} else { spair = j; }
+				continue;
+			}
+		}
+		for (size_t i = 0; i < poses->size; i++) {
+			da_erase_index(ss, (poses->data[i] - i));
 		}
 		gc(GC_FREE, elem, list->gc_level);
-		list->data[i] = gc(GC_ADD, ft_strdup(buffer), list->gc_level);
+		list->data[i] = ss_get_owned_slice(ss);
+	}
+}
+
+typedef struct {
+	int list_index;
+	int index;
+} PosInfo;
+
+typedef struct {
+	PosInfo *data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} BPosList;
+
+void b_quote_removal(StrList *list) {
+
+	PosInfo spair = { -1, -1 };
+	PosInfo dpair = { -1, -1 };
+	bool squote = false, dquote = false;
+
+	da_create(poses, BPosList, sizeof(PosInfo), GC_SUBSHELL);
+
+	for (size_t i = 0; i < list->size; i++) {
+		const char *elem = list->data[i]->str;
+		if (list->data[i]->kind != EXP_WORD)
+			continue;
+
+		for (size_t j = 0; elem[j]; j++) {
+			if	(elem[j] == '\"' && !squote) {
+				dquote = !dquote;
+				if (dpair.index != -1) {
+					da_push(poses, dpair);
+					PosInfo current = { i, j };
+					da_push(poses, current);
+					dpair = (PosInfo) { -1, -1 }; continue;
+				} else { dpair = (PosInfo) { i, j }; }
+				continue;
+			}
+			else if (elem[j] == '\'' && !dquote) {
+				squote = !squote;
+				if (spair.index != -1) {
+					da_push(poses, spair); 
+					PosInfo current = { i, j };
+					da_push(poses, current);
+					spair = (PosInfo) { -1, -1 }; 
+					continue;
+				} else { spair = (PosInfo) { i, j }; }
+				continue;
+			}
+		}
+	}
+	// for (size_t i = 0; i < list->size; i++) {
+	// 	dprintf(2, "Bebefore[%zu]: %s\n", i, list->data[i]->str);
+	// }
+	for (size_t i = 0; i < poses->size;) {
+		da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
+		ss_push_string(ss, list->data[poses->data[i].list_index]->str);
+		// dprintf(2, "Before[%d]: %s\n", poses->data[i].list_index, list->data[poses->data[i].list_index]->str);
+
+		int offset = 0;
+		int origin = poses->data[i].list_index;
+		while (i < poses->size && poses->data[i].list_index == origin) {
+			// dprintf(2, "list: %d, idx: %d\n", poses->data[i].list_index, poses->data[i].index);
+			// dprintf(2, "str: %s\n", list->data[poses->data[i].list_index]->str);
+			da_erase_index(ss, ((size_t) poses->data[i].index - offset));
+			offset++;
+			i++;
+		}
+
+		gc(GC_FREE, list->data[poses->data[i - 1].list_index]->str, GC_SUBSHELL);
+		list->data[poses->data[i - 1].list_index]->str = (ss->size == 0) ? NULL : ss_get_owned_slice(ss);
 	}
 }
 
@@ -402,8 +505,11 @@ StringListL *do_expansions(const StringListL * const word_list, Vars * const she
 		string_list_consume(string_list, shell_vars);
 		if (split)
 			string_list_split(string_list, shell_vars);
-		// str_list_print(string_list);
 		string_erase_nulls(string_list);
+		// str_list_print(string_list);
+		b_quote_removal(string_list);
+		string_erase_nulls(string_list);
+		// str_list_print(string_list);
 		StringListL * const result = string_list_merge(string_list);
 		// printStringList(result);
 		// quote_removal(result);
@@ -412,3 +518,42 @@ StringListL *do_expansions(const StringListL * const word_list, Vars * const she
 	}
 	return arg_list;
 }
+
+// #include <time.h>
+// #include <stdio.h>
+//
+// // Function to capture total time elapsed
+// StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const bool split) {
+//     if (!word_list) return NULL;
+//
+//     // Static variable to accumulate total time
+//     static double total_time_elapsed = 0.0;
+//     
+//     // Start measuring time
+//     clock_t start_time = clock();
+//
+//     da_create(arg_list, StringListL, sizeof(char *), GC_SUBSHELL);
+//
+//     for (size_t it = 0; it < word_list->size; it++) {
+//         StrList * const string_list = get_range_list(word_list->data[it], shell_vars);
+//         string_list_consume(string_list, shell_vars);
+//         if (split)
+//             string_list_split(string_list, shell_vars);
+//         string_erase_nulls(string_list);
+//         b_quote_removal(string_list);
+//         string_erase_nulls(string_list);
+//         StringListL * const result = string_list_merge(string_list);
+//         string_list_push_list(arg_list, result);
+//     }
+//
+//     // Stop measuring time
+//     clock_t end_time = clock();
+//
+//     // Update total elapsed time
+//     total_time_elapsed += (double)(end_time - start_time) / CLOCKS_PER_SEC;
+//
+//     // Optional: Print the total time (or use for debugging)
+//     printf("Total time elapsed in do_expansions: %.6f seconds\n", total_time_elapsed);
+//
+//     return arg_list;
+// }

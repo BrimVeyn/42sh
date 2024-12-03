@@ -6,14 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/02 16:45:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:48:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "final_parser.h"
-#include "lexer.h"
-#include "parser.h"
 #include "signals.h"
 #include "utils.h"
 #include "colors.h"
@@ -233,14 +231,14 @@ void execute_if_clause(const CommandP * const command, const bool background, Va
 
 void execute_while_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
 	const WhileClauseP * const while_clause = command->while_clause;
+	// print_list(while_clause->body);
 
 	while (true) {
 		ListP * const condition_save = gc_duplicate_list(while_clause->condition);
 		execute_complete_command(wrap_list(condition_save), shell_vars, true, background);
 		if (g_exitno != 0) break ;
 		ListP * const body_save = gc_duplicate_list(while_clause->body);
-		execute_complete_command(wrap_list(body_save), shell_vars, false, background);
-		if (g_exitno != 0) break ;
+		execute_complete_command(wrap_list(body_save), shell_vars, true, background);
 	}
 }
 
@@ -250,7 +248,6 @@ void execute_until_clause(const CommandP * const command, const bool background,
 	while (true) {
 		ListP * const body_save = gc_duplicate_list(while_clause->body);
 		execute_complete_command(wrap_list(body_save), shell_vars, false, background);
-		if (g_exitno != 0) break ;
 		ListP * const condition_save = gc_duplicate_list(while_clause->condition);
 		execute_complete_command(wrap_list(condition_save), shell_vars, true, background);
 		if (g_exitno != 0) break ;
@@ -445,8 +442,8 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 		}
 		case Brace_Group: { execute_brace_group(process->command, background, shell_vars); return NO_WAIT; }
 		case If_Clause: { execute_if_clause(process->command, background, shell_vars); return NO_WAIT; }
-		case While_Clause: { execute_while_clause(process->command, background, shell_vars);  return NO_WAIT; }
-		case Until_Clause: { execute_until_clause(process->command, background, shell_vars);  return NO_WAIT; }
+		case While_Clause: { execute_while_clause(process->command, background, shell_vars); return NO_WAIT; }
+		case Until_Clause: { execute_until_clause(process->command, background, shell_vars); return NO_WAIT; }
 		case Case_Clause: { execute_case_clause(process->command, background, shell_vars); return NO_WAIT; }
 		case For_Clause: { execute_for_clause(process->command, background, shell_vars); return NO_WAIT; }
 		case Function_Definition: { register_function(process->command); return NO_WAIT; }
@@ -578,8 +575,8 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 		}
 		// if (andor_head->pipeline->banged)
 		// 	dprintf(2, "banged, exino: %d\n", g_exitno);
-		if (g_exitno > 128) return ;
 		// dprintf(2, "g_exino: %d\n", g_exitno);
+		if (g_exitno > 128) return ;
 		bool skip = (
 			(separator == AND_IF && g_exitno != 0) ||
 			(separator == OR_IF && g_exitno == 0)
@@ -610,7 +607,6 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 			( (list_head->separator == END && complete_command->separator == AMPER) ||
 			(list_head->separator == AMPER) || (bg) )
 		);
-		// dprintf(2, "Background ? %s\n", boolStr(background));
 		if (!subshell)
 			g_masterPgid = 0;
 

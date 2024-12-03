@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 14:38:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 18:20:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,13 +115,12 @@ void line_continuation(const Lex * const lexer) {
 	add_history(new_history_entry, lexer->shell_vars);
 }
 
-void line_continuation_backslash(StringStream * const input, CursorPosition * const pos) {
+void line_continuation_backslash(Lex *lexer, StringStream * const input, CursorPosition * const pos) {
 	const char f1 = input->data[0];
 	const char f2 = input->data[1];
 	const ShellInfos * const shell_infos = shell(SHELL_GET);
 	if (f1 == '\\' && (!f2 || f2 == '\n')) {
 		da_pop_front(input); da_pop_front(input);
-		const Lex * const lexer = lex_interface(LEX_OWN, NULL, NULL, NULL, NULL);
 
 		if (shell_infos->interactive && !shell_infos->script) {
 			const char * const PS2 = string_list_get_value(lexer->shell_vars->set, "PS2");
@@ -132,20 +131,14 @@ void line_continuation_backslash(StringStream * const input, CursorPosition * co
 			ss_insert_string(lexer->raw_input_ss, input_continuation, pos->absolute);
 			FREE_POINTERS(input_continuation);
 			if (f2 == '\n') da_pop(lexer->raw_input_ss);
-			// da_pop(lexer->raw_input_ss);
 			da_pop(lexer->raw_input_ss);
 			const char * const new_history_entry = ss_to_string(lexer->raw_input_ss);
-			// dprintf(2, "new_string: %s\n", new_history_entry);
-			// dprintf(2, "input: %s\n", input->data);
 			pop_history();
 			add_history(new_history_entry, lexer->shell_vars);
-			// pass_whitespace(input, pos);
 		} else {
 			da_erase_index(lexer->raw_input_ss, lexer->pos.absolute);
 			da_erase_index(lexer->raw_input_ss, lexer->pos.absolute);
-			// pass_whitespace(input, pos);
 		}
-
 	}
 }
 
@@ -155,7 +148,10 @@ void pass_whitespace(StringStream * const input, CursorPosition * const pos) {
 	}
 }
 
-bool get_next_token(StringStream *input, StringStream *cache, CursorPosition *pos) {
+bool get_next_token(Lex * const lexer, StringStream * const cache) {
+
+	StringStream * const input = lexer->input;
+	CursorPosition * const  pos = &lexer->pos;
 
 	static WordContextBounds map[] = {
 		[WORD_WORD] = {.start = "NONE", .end = " \t\n;&|<>()", .bitmap = WORD_MAP},
@@ -172,7 +168,7 @@ bool get_next_token(StringStream *input, StringStream *cache, CursorPosition *po
 	da_push(context_stack, WORD_WORD);
 
 	pass_whitespace(input, pos);
-	line_continuation_backslash(input, pos);
+	line_continuation_backslash(lexer, input, pos);
 	pass_whitespace(input, pos);
 
 	if (*input->data == '#') {
@@ -183,7 +179,7 @@ bool get_next_token(StringStream *input, StringStream *cache, CursorPosition *po
 
 	while (input->size) {
 
-		line_continuation_backslash(input, pos);
+		line_continuation_backslash(lexer, input, pos);
 
 		const WordContext maybe_new_context = get_context(input, map, da_peak_back(context_stack));
 
@@ -242,7 +238,7 @@ bool get_next_token(StringStream *input, StringStream *cache, CursorPosition *po
 
 	if (context_stack->size != 0) {
 		const WordContext context = da_peak_back(context_stack);	
-		if (context != WORD_WORD) { pretty_error(""); return false; }
+		if (context != WORD_WORD) { pretty_error(lexer, ""); return false; }
 	}
 	return true;
 }

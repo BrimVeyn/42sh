@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:46:35 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 13:08:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 09:00:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,13 +46,13 @@ typedef struct {
 
 //This represent a small automaton. 1 means can transition to
 #define WORD_MAP				0b11011011  // Binary equivalent of {0, 1, 0, 1, 1, 0, 1, 1}
-#define CMD_SUB_MAP        		0b01111011  // Binary equivalent of {0, 1, 1, 1, 1, 0, 1, 1}
-#define PARAM_MAP          		0b00011110  // Binary equivalent of {0, 0, 0, 1, 0, 0, 0, 0}
+#define CMD_SUB_MAP        		0b11111011  // Binary equivalent of {0, 1, 1, 1, 1, 0, 1, 1}
+#define PARAM_MAP          		0b11011110  // Binary equivalent of {0, 0, 0, 1, 0, 0, 0, 0}
 #define SUBSHELL_MAP       		0b01111011  // Binary equivalent of {0, 1, 1, 1, 1, 0, 1, 1}
-#define ARITHMETIC_MAP			0b01011100  // Binary equivalent of {0, 1, 0, 1, 1, 1, 0, 0}
+#define ARITHMETIC_MAP			0b11011100  // Binary equivalent of {0, 1, 0, 1, 1, 1, 0, 0}
 #define ARITHMETIC_PAREN_MAP	0b01011100 // Binary equivalent of {0, 1, 0, 1, 1, 1, 0, 0}
 #define SINGLE_QUOTE_MAP		0b00000000  // Binary equivalent of {0, 0, 0, 0, 0, 0, 0, 0}
-#define DOUBLE_QUOTE_MAP   		0b01010110  // Binary equivalent of {0, 1, 0, 1, 1, 0, 0, 0}
+#define DOUBLE_QUOTE_MAP   		0b00010110  // Binary equivalent of {0, 1, 0, 1, 1, 0, 0, 0}
 
 typedef struct {
 	char		*input;

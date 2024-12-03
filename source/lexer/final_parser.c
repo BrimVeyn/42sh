@@ -6,11 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/01 18:51:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 18:13:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "final_parser.h"
+#include "exec.h"
 #include "ft_regex.h"
 #include "utils.h"
 #include "libft.h"
@@ -29,7 +30,7 @@ extern TableEntry parsingTable[182][86];
 
 bool is_keyword(const TokenType type) {
 	return (type == IF || type == FI || type == CASE || type == ESAC ||
-		 type == FOR || type == IN || type == WHILE || type == UNTIL ||
+		 type == FOR || type == IN || type == WHILE || type == UNTIL || type == BANG ||
 		 type == DONE || type == DO || type == LBRACE || type == RBRACE || type == THEN);
 }
 
@@ -54,7 +55,7 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 		[NEWLINE] = "\n", [AMPER] = "&", [SEMI] = ";",
 	};
 
-	/*dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);*/
+	// dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
 			( (table_row != 27 && table_row != 66 && table_row != 98 && table_row != 39) 
@@ -66,7 +67,7 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 	}
 
 	if (regex_match("^[0-9]+$", (char *)raw_value).is_found) {
-		char *peak = lex_interface(LEX_PEAK_CHAR, NULL, NULL, error, NULL);
+		char *peak = lexer_peak_char(lexer);
 		if (peak && (*peak == '<' || *peak == '>'))
 			return IO_NUMBER;
 	}
@@ -79,7 +80,7 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 	// dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
 	if (regex_match("^[a-zA-Z_][a-zA-Z0-9_]*$", (char *)raw_value).is_found) {
 		if (table_row == 30 || 
-			((table_row == 48 || table_row == 0) && !ft_strcmp("(", lex_interface(LEX_PEAK, NULL, NULL, error, NULL))))
+			((table_row == 48 || table_row == 0) && !ft_strcmp("(", lexer_peak(lexer, error))))
 			return NAME;
 	}
 
@@ -92,11 +93,12 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 	da_create(stack, TokenStack, sizeof(StackEntry), GC_SUBSHELL);
 
 	Tokenn token;
-	token.raw_value = lex_interface(LEX_GET, NULL, NULL, &error, NULL);
+	token.raw_value = lexer_get(lexer, &error);
 	if (error) return NULL;
 	token.type = identify_token(lexer, token.raw_value, 0, &error);
 	da_push(lexer->produced_tokens, token.type);
 	if (error) return NULL;
+	// dprintf(2, "Token produced: %s, type: %s\n", token.raw_value, tokenTypeStr(token.type));
 
 	size_t action_no = 0;
 	while (true && ++action_no < 2000) {
@@ -112,12 +114,12 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 				new_entry->token = token;
 				new_entry->state = entry.value;
 				da_push(stack, new_entry);
-				token.raw_value = lex_interface(LEX_GET, NULL, NULL, &error, NULL);
+				token.raw_value = lexer_get(lexer, &error);
 				if (error) return NULL;
 				token.type = identify_token(lexer, token.raw_value, entry.value, &error);
 				da_push(lexer->produced_tokens, token.type);
 				if (error) return NULL;
-				//dprintf(2, "Token produced: %s, type: %s\n", token.raw_value, tokenTypeStr(token.type));
+				// dprintf(2, "Token produced: %s, type: %s\n", token.raw_value, tokenTypeStr(token.type));
 				break;
 			}
 			case REDUCE: {
@@ -145,7 +147,6 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
 						da_pop(stack); //newline_list
 						da_pop(stack); //complete_commands
-						// dprintf(2, "ONE COMMAND !\n");
 						// print_complete_command(complete_command);
 						execute_complete_command(complete_command, shell_vars, false, false);
 						reduced_entry->token.type = Complete_Commands;
@@ -155,7 +156,6 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 					}
 					case 3: { /* complete_commands -> complete_command */
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
-						// dprintf(2, "ONE COMMAND !\n");
 						// print_complete_command(complete_command);
 						execute_complete_command(complete_command, shell_vars, false, false);
 						reduced_entry->token.type = Complete_Commands;
@@ -740,7 +740,6 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 						ListP *body = da_pop(stack)->token.list;
 						da_pop(stack); //THEN
 						ListP *condition = da_pop(stack)->token.list;
-						print_list(condition);
 						da_pop(stack); //IF
 						reduced_entry->token.type = If_Clause;
 						reduced_entry->token.if_clause = ifClauseNew(condition, body);
@@ -1229,7 +1228,7 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 			case ERROR: {
 				for (size_t i = 0; i < lexer->produced_tokens->size; i++) {
 					if (lexer->produced_tokens->data[i] != NEWLINE && lexer->produced_tokens->data[i] != END)
-						return (pretty_error(token.raw_value), NULL);
+						return (pretty_error(lexer, token.raw_value), NULL);
 				}
 				return NULL;
 				break;
@@ -1242,7 +1241,6 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 
 void parse_input(char *in, char *filename, Vars *shell_vars) {
 	if (!*in) return ;
-	lex_interface(LEX_SET, in, filename, NULL, shell_vars);
-	Lex *lexer = lex_interface(LEX_OWN, NULL, NULL, NULL, NULL);
+	Lex *lexer = lex_init(in, filename, shell_vars);
 	parse(lexer, shell_vars);
 }

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/26 13:55:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 16:27:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ bool string_list_update(StringListL *sl, const char *var) {
 	return false;
 }
 
-void string_list_add_or_update(StringListL * const sl, char * const var) {
+void string_list_add_or_update(StringListL * const sl, const char * const var) {
 	if (!string_list_update(sl, var))
 		da_push(sl, gc(GC_ADD, ft_strdup(var), GC_ENV));
 }
@@ -126,7 +126,7 @@ void string_list_append(const StringListL * const sl, char * const var) {
 	}
 }
 
-char *string_list_get_value(const StringListL * const sl, char * const id) {
+char *string_list_get_value(const StringListL * const sl, const char * const id) {
 	for (size_t i = 0; i < sl->size; i++) {
 		const char *curr_equal_ptr = ft_strchr(sl->data[i], '=');
 		const size_t curr_equal_pos = curr_equal_ptr - sl->data[i];

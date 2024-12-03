@@ -147,6 +147,7 @@ test_lists=(
 	"src/redirections"
 	"src/syntax"
 	"src/expand"
+	"src/quotes"
 	"src/subshell"
 	"src/command_sub"
 	"src/command_group"
@@ -158,7 +159,7 @@ test_lists=(
 )
 
 PS3="Enter a number to run associated tests, * for all: "
-select option in redirections syntax expand subshell command_sub command_group arithmetic_expansion builtin_export builtin_cd builtin_exit mixed
+select option in redirections syntax expand quotes subshell command_sub command_group arithmetic_expansion builtin_export builtin_cd builtin_exit mixed
 do
     case $option in
         redirections)
@@ -173,6 +174,10 @@ do
 			test_lists=("src/expand");
 			start_tests;
             ;;
+		quotes)
+			test_lists=("src/quotes");
+			start_tests;
+			;;
         subshell)
 			test_lists=("src/subshell");
 			start_tests;
