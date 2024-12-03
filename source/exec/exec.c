@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/01 19:36:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 15:16:19 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,35 +75,50 @@ char  *resolve_bine(SimpleCommandP * const command, Vars * const shell_vars) {
 #define MAX_FD 1024
 #include <sys/stat.h>
 
-bool check_filepath(char *file_path, TokenType mode) {
+typedef enum {
+	F_ISDIR = 0b00001,
+	F_EXEC =  0b00010,
+	F_EXIST = 0b00100,
+	F_WRITE = 0b01000,
+	F_READ =  0b10000,
+} FilepathMode;
+
+bool check_filepath(char *file_path, FilepathMode mode) {
 	struct stat file_stat;
 	if (stat(file_path, &file_stat) != -1) {
 
-		if (S_ISDIR(file_stat.st_mode)) {
-      dprintf(STDERR_FILENO, "42sh: %s: Is a directory", file_path);
-      g_exitno = 1;
-			return (false);
-		}
-		if (file_stat.st_mode & S_IXUSR) {
-			return file_path;
-		}
-		else {
-      dprintf(STDERR_FILENO, "42sh: %s: Permission Denied", file_path);
-      g_exitno = 1;
-			return (false);
-		}
-	} else {
-		if (mode == LESS) {
-      dprintf(STDERR_FILENO, "42sh: %s: No such file or directory", file_path);
-      g_exitno = 1;
+		if (mode & F_ISDIR && S_ISDIR(file_stat.st_mode)) {
+			ft_dprintf(STDERR_FILENO, "42sh: %s: Is a directory\n", file_path);
+			g_exitno = 1;
 			return false;
 		}
-		if (mode == GREAT)
-			return true;
+		if ((!(file_stat.st_mode & S_IRUSR) && mode & F_READ) || 
+			(!(file_stat.st_mode & S_IWUSR) && mode & F_WRITE) ||
+			(!(file_stat.st_mode & S_IXUSR) && mode & F_EXEC )){
+			ft_dprintf(STDERR_FILENO, "42sh: %s: Permission Denied\n", file_path);
+			g_exitno = 1;
+			return false;
+		}
+		return file_path;
+	} else if (mode & F_EXIST){
+		ft_dprintf(STDERR_FILENO, "42sh: %s: No such file or directory\n", file_path);
+		g_exitno = 1;
+		return false;
 	}
 	return true;
 }
 
+int get_filepath_mode(TokenType type){
+	if (type == LESS)
+		return F_EXIST | F_READ | F_ISDIR;
+	else if (type == GREAT || type == DGREAT || type == CLOBBER)
+		return F_WRITE | F_ISDIR;
+	else if (type == LESSGREAT)
+		return F_EXIST | F_WRITE | F_READ | F_ISDIR;
+	return 0;
+}
+
+//TODO:change redir->filename to redir->word
 bool redirect_ios(RedirectionL *redir_list) {
 	if (!redir_list) {
 		return true;
@@ -119,54 +134,95 @@ bool redirect_ios(RedirectionL *redir_list) {
 			return false;
 		}
 		//TODO: error managment when open fails
-		if (!check_filepath(redir->filename, redir->type)) {
+		
+		int mode = get_filepath_mode(redir->type);
+		if (!check_filepath(redir->filename, mode)) {
 			g_exitno = 1;
 			return false;
 		}
-		switch (redir->type) {
-			case (GREAT): { //>
-				const int open_flags = (O_CREAT | O_TRUNC | O_WRONLY);
-				const int fd = open(redir->filename, open_flags, 0664);
-				int dup_to = STDOUT_FILENO;
-				if (io_number != -1)
-					dup_to = io_number;
-				if (!secure_dup2(fd, dup_to))
-					return false;
-				close(fd);
-				break;
+
+		if (redir->type == GREAT || redir->type == CLOBBER){ //>
+			const int open_flags = (O_CREAT | O_TRUNC | O_WRONLY);
+			const int fd = open(redir->filename, open_flags, 0664);
+			int dup_to = STDOUT_FILENO;
+			if (io_number != -1)
+				dup_to = io_number;
+			if (!secure_dup2(fd, dup_to))
+				return false;
+			close(fd);
+		}
+		else if (redir->type == DGREAT){ //>>
+			const int open_flags = (O_CREAT | O_APPEND | O_WRONLY);
+			const int fd = open(redir->filename, open_flags, 0664);
+			int dup_to = STDOUT_FILENO;
+			if (io_number != -1)
+				dup_to = io_number;
+			if (!secure_dup2(fd, dup_to))
+				return false;
+			close(fd);
+		}
+		else if (redir->type == LESSGREAT){ //<>
+			const int open_flags = (O_CREAT | O_TRUNC | O_RDWR);
+			const int fd = open(redir->filename, open_flags, 0664);
+			if (!secure_dup2(fd, STDOUT_FILENO) || !secure_dup2(fd, STDIN_FILENO))
+				return false;
+			close(fd);
+		}
+		else if (redir->type == LESS){ // <
+			const int open_flags = (O_RDONLY);
+			int dup_to = STDIN_FILENO;
+			const int fd = open(redir->filename, open_flags, 0664);
+			if (io_number != -1) {
+				dup_to = io_number;
 			}
-			case (DGREAT): { //>>
-				const int open_flags = (O_CREAT | O_APPEND);
-				const int fd = open(redir->filename, open_flags, 0664);
-				int dup_to = STDOUT_FILENO;
-				if (io_number != -1)
-					dup_to = io_number;
-				if (!secure_dup2(fd, dup_to))
-					return false;
-				close(fd);
-				break;
+			if (!secure_dup2(fd, dup_to))
+				return (g_exitno = 1, false);
+			close(fd);
+		}
+		else if (redir->type == LESSAND){ // <&
+			//
+			if (!is_number(redir->filename) && ft_strcmp(redir->filename, "-")){
+				return false;
 			}
-			case (LESSGREAT): { //<>
-				const int open_flags = (O_CREAT | O_TRUNC | O_RDWR);
-				const int fd = open(redir->filename, open_flags, 0664);
-				if (!secure_dup2(fd, STDOUT_FILENO) || !secure_dup2(fd, STDIN_FILENO))
-					return false;
-				close(fd);
-				break;
+
+			const int n = (io_number == -1) ? STDIN_FILENO : io_number;
+
+			const int fd = ft_atoi(redir->filename);
+			if (fd < 0 || fcntl(fd, F_GETFD) == -1) {
+				ft_dprintf(STDERR_FILENO, "42sh: %d: Bad file descriptor\n", fd);
+				return false;
 			}
-			case (LESS): { //<
-				const int open_flags = (O_RDONLY);
-				int dup_to = STDIN_FILENO;
-				const int fd = open(redir->filename, open_flags, 0664);
-				if (io_number != -1) {
-					dup_to = io_number;
+
+			if (!ft_strcmp("-", redir->filename) || fd == n){
+				close(n);
+			} else {
+				if (!secure_dup2(fd, n)){
+					return false;
 				}
-				if (!secure_dup2(fd, dup_to))
-					return false;
 				close(fd);
-				break;
 			}
-			default: break;
+		}
+		else if (redir->type == GREATAND){
+			if (!is_number(redir->filename) && ft_strcmp(redir->filename, "-")){
+				return false;
+			}
+
+			const int n = (io_number == -1) ? STDOUT_FILENO : io_number;
+
+			const int fd = ft_atoi(redir->filename);
+			if (fd < 0 || fcntl(fd, F_GETFD) == -1) {
+				ft_dprintf(STDERR_FILENO, "42sh: %d: Bad file descriptor\n", fd);
+				return false;
+			}
+
+			if (!ft_strcmp("-", redir->filename) || fd == n){
+				close(n);
+			} else {
+				if (!secure_dup2(fd, n)){
+					return false;
+				}
+				close(fd);
+			}
 		}
 	}
 	return true;
@@ -394,6 +450,7 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 				execute_function(command, funcNo, background, shell_vars);
 				return NO_WAIT;
             } else if (is_builtin(bin)) {
+				redirect_ios(command->simple_command->redir_list);
 				execute_builtin(command->simple_command, shell_vars);
 				return NO_WAIT;
 			} else {
