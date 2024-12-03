@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:03:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 15:00:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 09:33:57 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -259,8 +259,6 @@ int main(const int ac, char *av[], const char *env[]) {
 			if (self->interactive && !self->script) {
 				if (history_expansion(&input) == false)
 					continue;
-				if (*input)
-					add_history(input, shell_vars);
 			}
 			parse_input(input, av[1], shell_vars);
 			update_last_executed_command(shell_vars, input);

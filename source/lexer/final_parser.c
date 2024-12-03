@@ -6,11 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/01 18:51:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 09:33:51 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "final_parser.h"
+#include "exec.h"
+#include "ft_readline.h"
 #include "ft_regex.h"
 #include "utils.h"
 #include "libft.h"
@@ -1242,6 +1244,10 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 
 void parse_input(char *in, char *filename, Vars *shell_vars) {
 	if (!*in) return ;
+	ShellInfos *self = shell(SHELL_GET);
+	if (self->interactive && !self->script){
+		add_history(in, shell_vars);
+	}
 	lex_interface(LEX_SET, in, filename, NULL, shell_vars);
 	Lex *lexer = lex_interface(LEX_OWN, NULL, NULL, NULL, NULL);
 	parse(lexer, shell_vars);

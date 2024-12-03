@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:40:48 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/02 14:23:45 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/03 09:39:08 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 #include <stdlib.h>
 
 //TODO: flag -R
+//FIX: remove fc from history when command is succesfully executed
 
 typedef enum {
 	FC_E = 0b00001,
@@ -278,12 +279,8 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 	}
 
 	FcOptions options;
-	options.first = NULL;
-	options.last = NULL;
-	options.editor = NULL;
-	options.new = NULL;
-	options.old = NULL;
-	options.flags = 0;
+	ft_memset(&options, 0, sizeof(FcOptions));
+	char *last_hist = pop_history()->line.data;
 
 	if (get_fc_options(command->word_list->data, &options) == -1){
 		print_fc_error(fc_status, (const void **)&options);
@@ -307,6 +304,7 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 
 	if (!command_list->size){
 		print_fc_error(ERROR_COMMAND_NOT_FOUND, NULL);
+		add_history(last_hist, shell_vars);
 		return;
 	}
 
@@ -349,12 +347,14 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 				ft_dprintf(STDOUT_FILENO, "%d\t", i);
 			ft_dprintf(STDOUT_FILENO, "%s\n", command_list->data[i]);
 		}
+		add_history(last_hist, shell_vars);
 	} else {
 		struct timeval	time;
 
 		if (gettimeofday(&time, NULL) == -1){
 			print_fc_error(ERROR_FC_FATAL, NULL);
 			g_exitno = 1;
+			add_history(last_hist, shell_vars);
 			return ;
 		}
 		char filename[] = "/tmp/42sh_fc.XXXXXX"; //7 digit max for usec
@@ -362,6 +362,7 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 		if (fd == -1){
 			print_fc_error(ERROR_FC_FATAL, NULL);
 			g_exitno = 1;
+			add_history(last_hist, shell_vars);
 			return;
 		}
 		for (size_t i = 0; i < command_list->size; i++){
@@ -377,6 +378,7 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 			ft_sprintf(input, "${EDITOR} %s", filename);
 		}
 		parse_input(input, NULL, shell_vars);
+		pop_history();
 		lseek(fd, 0, SEEK_SET);
 		char *buffer = read_whole_file(fd);
 		parse_input(buffer, NULL, shell_vars);

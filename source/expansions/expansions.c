@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:07:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 14:14:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 14:14:54 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #include <unistd.h>
 
 //FIX: unlink heredoc
+//TODO: << && <<-
 void exp_kind_list_print(ExpKindList *list);
 
 char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars){
@@ -52,7 +53,7 @@ char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars){
 
 	signal_manager(SIG_PROMPT);
 	if (!input){
-		ft_dprintf(2, "42sh: warning: here-document at line %d delimited by end-of-file (wanted `%s')", line_number, eof);
+		ft_dprintf(2, "42sh: warning: here-document at line %d delimited by end-of-file (wanted `%s')\n", line_number, eof);
 	}
 	else if (rl_done == 2){
 		rl_done = 0;
