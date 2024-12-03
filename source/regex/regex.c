@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/02 10:10:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:13:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ void regex_append_node(regex_compiled_t *regexp, regex_node_t *node) {
 void regex_compile_pattern(regex_compiled_t *regexp, const char *pattern){
 	regexp->size = 0;
 	regexp->capacity = 10;
+	//FIX: not liberated sometimes { GOLDEN crotte }
 	regexp->pattern = ft_calloc(10, sizeof(regex_node_t *));
 	regexp->err = "Success";
 	regexp->is_pattern_valid = true;

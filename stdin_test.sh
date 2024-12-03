@@ -12,5 +12,3 @@ done
 for fruit in pomme poire banane $(echo ananas); do
 	echo "Le fruit du jour est ${fruit}";
 done;
-
-

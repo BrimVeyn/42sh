@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/13 11:44:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/28 15:01:02 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 18:09:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void pretty_error(char *raw_token) {
-	const Lex *lexer = lex_interface(LEX_OWN, NULL, NULL, NULL, NULL);
+void pretty_error(const Lex *const lexer, char *raw_token) {
 	char * const raw_input = ss_to_string(lexer->raw_input_ss);
 	char buffer[MAX_WORD_LEN] = {0};
 

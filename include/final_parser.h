@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 16:03:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 18:10:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -317,7 +317,6 @@ void		caseClauseMerge(CaseClauseP *parent, const CaseClauseP *child);
 
 SimpleCommandP *simpleCommandNew(void);
 
-void pretty_error(char *raw_token);
 
 /*------------------------------DEBUG-----------------------*/
 void print_redir_list(const RedirectionL *redir_list);
@@ -349,12 +348,12 @@ void			parse_input(char *in, char *filename, Vars * const shell_vars);
 
 char			*get_positional_value(const StringListL * const sl, const size_t idx);
 char			*get_variable_value(Vars * const shell_vars, char * const name);
-void			string_list_add_or_update(StringListL * const sl, char * const var);
+void			string_list_add_or_update(StringListL * const sl, const char * const var);
 bool			string_list_update(StringListL *sl, const char *var);
 void			string_list_append(const StringListL * const sl, char * const var);
 void			string_list_clear(StringListL *list);
 bool			string_list_remove(StringListL *sl, char *id);
-char			*string_list_get_value(const StringListL * const sl, char * const id);
+char			*string_list_get_value(const StringListL * const sl, const char * const id);
 char			*shell_vars_get_value(const Vars * const shell_vars, char * const id);
 void			string_list_print(const StringListL *list);
 
@@ -382,11 +381,17 @@ typedef struct {
 	TokenTypeVect *produced_tokens;
 } Lex;
 
-typedef enum {LEX_SET, LEX_GET, LEX_OWN, LEX_PEAK, LEX_PEAK_CHAR, LEX_DEBUG} LexMode;
-void	*lex_interface(const LexMode mode, void *input, void *filename, bool *error, Vars * const shell_vars);
+Lex *lex_init(const char * const input, char * const filename, Vars * const shell_vars);
+char *lexer_get(Lex * const lexer, bool * const error);
+char *lexer_peak(Lex * const lexer, bool * const error);
+char *lexer_peak_char(Lex * const lexer);
+
+void pretty_error(const Lex *const lexer, char *raw_token);
+
+
 bool	is_continuable(const TokenType type);
 void	line_continuation(const Lex * const lexer);
-void 	line_continuation_backslash(StringStream * const input, CursorPosition * const pos);
+void	line_continuation_backslash(Lex *lexer, StringStream * const input, CursorPosition * const pos);
 void 	pass_whitespace(StringStream * const input, CursorPosition * const pos);
 
 // #define HIGH_FD_MAX 256

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:53:12 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/18 11:53:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:12:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ void builtin_exit(const SimpleCommandP *command, __attribute__((unused)) Vars *s
 
 	if (regex_match("[^0-9]", command->word_list->data[1]).is_found == true){
 		err_exit("numeric argument required\n");
+		close_all_fds();
+		gc(GC_CLEANUP, GC_ALL);
 		exit (2);
 	}
 
@@ -35,5 +37,9 @@ void builtin_exit(const SimpleCommandP *command, __attribute__((unused)) Vars *s
 		return;
 	}
 
-	exit(ft_atol(command->word_list->data[1]) % 256);
+	long exit_no = ft_atol(command->word_list->data[1]) % 256;
+	close_all_fds();
+	gc(GC_CLEANUP, GC_ALL);
+
+	exit(exit_no);
 }

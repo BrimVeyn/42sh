@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:43:08 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 17:01:26 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:45:01 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,10 +176,10 @@ void print_if_clause(const IFClauseP *if_clause) {
 }
 
 void print_while_clause(const WhileClauseP *while_clause) {
-	dprintf(2, C_EMERALD"---------------------------"C_RESET"\n");
+	dprintf(2, C_EMERALD"-------------While_clause-----------"C_RESET"\n");
 	print_list(while_clause->condition);
 	print_list(while_clause->body);
-	dprintf(2, C_EMERALD"---------------------------"C_RESET"\n");
+	dprintf(2, C_EMERALD"-----------While_clause_end---------"C_RESET"\n");
 }
 
 void print_token_stack(const TokenStack *stack) {

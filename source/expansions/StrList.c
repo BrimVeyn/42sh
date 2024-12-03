@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:12:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/02 17:40:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 14:03:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void str_list_print(const StrList *list) {
 		Str *node = list->data[i];
 		while (node) {
 			if (list->data[i]) {
-				dprintf(2, "{ %s%s"C_RESET" } %s%c%s%c"C_RESET", ", colors[node->kind], node->str,
+				dprintf(2, "{ [%zu]: %s%s"C_RESET" } %s%c%s%c"C_RESET", ", i, colors[node->kind], node->str,
 				colors[EXP_DQUOTE], list->data[i]->dquote ? 'T' : 'F', 
 				colors[EXP_SQUOTE], list->data[i]->squote ? 'T' : 'F');
 			} else {
