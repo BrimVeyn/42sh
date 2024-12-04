@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 11:52:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/03 18:10:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/04 10:15:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -440,7 +440,9 @@ typedef enum {
 
 char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars);
 
-StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const bool split);
+StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options);
+
+typedef enum { O_NONE = 0, O_SPLIT = 1, O_ALLOWNULLS = 2, } ExpansionsOpt;
 
 void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars, bool subshell, bool background);
 bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars);

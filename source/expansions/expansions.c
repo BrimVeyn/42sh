@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:07:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/03 18:25:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/04 10:16:37 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -494,7 +494,7 @@ void b_quote_removal(StrList *list) {
 	}
 }
 
-StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const bool split) {
+StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options) {
 	if (!word_list) return NULL;
 
 	// bool error = false;
@@ -503,12 +503,13 @@ StringListL *do_expansions(const StringListL * const word_list, Vars * const she
 	for (size_t it = 0; it < word_list->size; it++) {
 		StrList * const string_list = get_range_list(word_list->data[it], shell_vars);
 		string_list_consume(string_list, shell_vars);
-		if (split)
+		if (options & O_SPLIT)
 			string_list_split(string_list, shell_vars);
 		string_erase_nulls(string_list);
 		// str_list_print(string_list);
 		b_quote_removal(string_list);
-		string_erase_nulls(string_list);
+		if (!(options & O_ALLOWNULLS))
+			string_erase_nulls(string_list);
 		// str_list_print(string_list);
 		StringListL * const result = string_list_merge(string_list);
 		// printStringList(result);
@@ -518,42 +519,3 @@ StringListL *do_expansions(const StringListL * const word_list, Vars * const she
 	}
 	return arg_list;
 }
-
-// #include <time.h>
-// #include <stdio.h>
-//
-// // Function to capture total time elapsed
-// StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const bool split) {
-//     if (!word_list) return NULL;
-//
-//     // Static variable to accumulate total time
-//     static double total_time_elapsed = 0.0;
-//     
-//     // Start measuring time
-//     clock_t start_time = clock();
-//
-//     da_create(arg_list, StringListL, sizeof(char *), GC_SUBSHELL);
-//
-//     for (size_t it = 0; it < word_list->size; it++) {
-//         StrList * const string_list = get_range_list(word_list->data[it], shell_vars);
-//         string_list_consume(string_list, shell_vars);
-//         if (split)
-//             string_list_split(string_list, shell_vars);
-//         string_erase_nulls(string_list);
-//         b_quote_removal(string_list);
-//         string_erase_nulls(string_list);
-//         StringListL * const result = string_list_merge(string_list);
-//         string_list_push_list(arg_list, result);
-//     }
-//
-//     // Stop measuring time
-//     clock_t end_time = clock();
-//
-//     // Update total elapsed time
-//     total_time_elapsed += (double)(end_time - start_time) / CLOCKS_PER_SEC;
-//
-//     // Optional: Print the total time (or use for debugging)
-//     printf("Total time elapsed in do_expansions: %.6f seconds\n", total_time_elapsed);
-//
-//     return arg_list;
-// }

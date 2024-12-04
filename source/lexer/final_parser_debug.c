@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:43:08 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/03 17:45:01 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/04 10:36:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,11 @@ close_print:
 }
 
 void print_simple_command(const SimpleCommandP *self) {
+	dprintf(2, C_LIGHT_YELLOW"----------SC---------"C_RESET"\n");
 	print_word_list("Vars", self->assign_list);
 	print_word_list("Words", self->word_list);
 	print_redir_list(self->redir_list);
+	dprintf(2, C_LIGHT_YELLOW"--------SC_end----------"C_RESET"\n");
 }
 
 void print_subshell(const ListP *subshell) {

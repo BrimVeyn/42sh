@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:56:30 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 13:59:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/04 10:15:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,7 +160,7 @@ char *parser_parameter_expansion(char *full_exp, Vars *shell_vars){
 		char * const trimmer_rhs = ft_substr(rhs, 0, rhs_len - 1);
 		da_create(expansion_result, StringListL, sizeof(char *), GC_SUBSHELL);
 		da_push(expansion_result, trimmer_rhs);
-		expansion_result = do_expansions(expansion_result, shell_vars, false);
+		expansion_result = do_expansions(expansion_result, shell_vars, O_NONE);
 		const char *final_rhs = *expansion_result->data;
 		char buffer[MAX_WORD_LEN] = {0};
 		const char *final_lhs = ft_substr(full_exp, 0, rhs - full_exp);
