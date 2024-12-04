@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 16:29:50 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/02 16:40:14 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/04 10:34:55 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,9 +98,9 @@ void signal_script_mode() {
     struct sigaction sa;
 
     // Reset SIGINT to default behavior
-    sa.sa_handler = SIG_DFL;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0; // No special flags
+	sa.sa_handler = signal_sigterm_exec;
     sigaction(SIGINT, &sa, NULL);
 
     // Reset other signals

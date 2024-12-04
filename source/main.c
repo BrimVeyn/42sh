@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:03:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 15:00:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/04 10:29:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,12 +120,14 @@ char *read_input_file(const char *path){
     int fd = open(path, O_RDWR | O_CREAT, 0644);
     if (fd == -1) {
         perror("Can't open file");
+		gc(GC_CLEANUP, GC_ALL);
         exit(EXIT_FAILURE);
     }
 
 	struct stat st;
 	if (fstat(fd, &st) == -1){
         perror("Can't get file's stats");
+		gc(GC_CLEANUP, GC_ALL);
         exit(EXIT_FAILURE);
 	}
     size_t file_size = st.st_size;

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/03 17:48:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/04 10:44:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -273,8 +273,13 @@ void execute_case_clause(const CommandP * const command, const bool background, 
 
 void execute_for_clause(const CommandP * const command, const bool background, Vars *const shell_vars) {
 	const ForClauseP * const for_clause = command->for_clause;
-	const StringListL *expanded_words = do_expansions(for_clause->word_list, shell_vars, true);
+	const StringListL *expanded_words = do_expansions(for_clause->word_list, shell_vars, O_SPLIT | O_ALLOWNULLS);
 	const StringListL * const word_list = (for_clause->in == true) ? expanded_words : shell_vars->positional;
+
+	// print_for_clause(for_clause);
+	// ListP * save = gc_duplicate_list(for_clause->body);
+	// print_list(save);
+	// fatal("fdp\n", 1);
 	for (size_t i = (0 + !for_clause->in); word_list && i < word_list->size; i++) {
 		char buffer[MAX_WORD_LEN] = {0};
 		const char * const value = (for_clause->in == true) ? word_list->data[i] : get_positional_value(word_list, i); 
@@ -361,8 +366,8 @@ void set_group(AndOrP * const job, PipeLineP * const process, const pid_t pid) {
 }
 
 void process_simple_command(SimpleCommandP * const simple_command, Vars *shell_vars) {
-	StringListL *args = do_expansions(simple_command->word_list, shell_vars, true);
-	StringListL *vars = do_expansions(simple_command->assign_list, shell_vars, false);
+	StringListL *args = do_expansions(simple_command->word_list, shell_vars, O_SPLIT);
+	StringListL *vars = do_expansions(simple_command->assign_list, shell_vars, O_NONE);
 	simple_command->word_list = args;
 	simple_command->assign_list = vars;
 	if (!args->data[0])
@@ -600,7 +605,7 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 	else g_subshell = false;
 
 	// print_complete_command(complete_command);
-	//
+
 	while (list_head) {
 		const bool background = (
 			(shell_infos->interactive) && 
