@@ -41,6 +41,42 @@ setup_cd_test_environment() {
     cd ..
 }
 
+setup_redirection_test_environment() {
+	mkdir -p infiles
+	mkdir -p outfiles
+	touch infiles/no_perms
+	touch infiles/no_exec
+	touch infiles/no_write
+	touch infiles/no_read
+
+	echo "salut voici un fichier test" > infiles/test
+	cat infiles/test > infiles/no_read
+	cat infiles/test > infiles/no_write
+
+	chmod 000 infiles/no_perms
+	chmod -x infiles/no_exec
+	chmod -r infiles/no_read
+	chmod -w infiles/no_write
+	touch outfiles/no_perms
+	touch outfiles/no_exec
+	touch outfiles/no_write
+	touch outfiles/no_read
+
+	echo "salut voici un fichier test" > outfiles/test
+	cat outfiles/test > outfiles/no_read
+	cat outfiles/test > outfiles/no_write
+
+	chmod 000 outfiles/no_perms
+	chmod -x outfiles/no_exec
+	chmod -r outfiles/no_read
+	chmod -w outfiles/no_write
+}
+
+clean_redirection() {
+	chmod 777 infiles/*
+	rm -rf infiles
+}
+
 start_tests ()
 {
 	mkdir -p ./outfiles
@@ -49,7 +85,6 @@ start_tests ()
 	mkdir -p ./bash_outfiles
 	mkdir -p ./bash_error
 
-	chmod 000 infiles/no_perms
 
 	i=0
 	ok=0
@@ -164,7 +199,9 @@ do
     case $option in
         redirections)
 			test_lists=("src/redirections");
+			setup_redirection_test_environment;
 			start_tests;
+			clean_redirection;
             ;;
         syntax)
 			test_lists=("src/syntax");
@@ -222,4 +259,3 @@ done
 rm -rf ./outfiles 2>/dev/null
 rm -rf ./42sh_outfiles 2>/dev/null
 rm -rf ./bash_outfiles 2>/dev/null
-chmod 777 infiles/no_perms

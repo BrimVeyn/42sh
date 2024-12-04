@@ -1,268 +1,106 @@
-Value: 1
-Value: 2
-Value: 3
-Value: 4
-Value: 5
-Reverse: 5
-Reverse: 4
-Reverse: 3
-Reverse: 2
-Reverse: 1
-Letter: a
-Letter: b
-Letter: c
-Letter: d
-Letter: e
-Empty string: 
-Var: 'one word'
-Var: 'two words'
-Var: ''
-Negative: 0
-Negative: 1
-Negative: 2
-Negative: 3
-Negative: 4
-Negative: 5
-i=1, j=1
-i=1, j=2
-i=1, j=3
-i=2, j=1
-i=2, j=2
-i=2, j=3
-i=3, j=1
-i=3, j=2
-i=3, j=3
-0 squared is 0
-1 squared is 1
-2 squared is 4
-3 squared is 9
-4 squared is 16
-5 squared is 25
-Letter: a
-Letter: b
-Letter: c
-Letter: d
-Letter: e
-0 is divisible by 3
-3 is divisible by 3
-6 is divisible by 3
-9 is divisible by 3
-12 is divisible by 3
-15 is divisible by 3
-18 is divisible by 3
-1 is odd
-3 is odd
-5 is odd
-7 is odd
-9 is odd
-Start outer loop: 1
-  Inner loop: 1
-Start outer loop: 2
-  Inner loop: 1
-  Inner loop: 2
-Start outer loop: 3
-  Inner loop: 1
-  Inner loop: 2
-  Inner loop: 3
-Start outer loop: 4
-  Inner loop: 1
-  Inner loop: 2
-  Inner loop: 3
-  Inner loop: 4
-Start outer loop: 5
-  Inner loop: 1
-  Inner loop: 2
-  Inner loop: 3
-  Inner loop: 4
-  Inner loop: 5
+value: 8
+value: 6
+value: 4
+value: 2
+value: 0
+9
+8
+7
+6
+5
+4
+3
+2
 1
-3
-5
-7
-9
-11
-13
-15
-17
-19
-10
-8
-6
-4
-2
 0
-1 1
-2 1
-2
-3 1
-2
-3
-4 1
-2
-3
-4
-5 1
-2
-3
-4
-5
-6 1
-2
-3
-4
-5
-6
-7 1
-2
-3
-4
-5
-6
-7
-8 1
-2
-3
-4
-5
-6
-7
-8
-9 1
-2
-3
-4
-5
-6
-7
-8
-9
-10 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-b
-c
-d
-e
-f
+Countdown: 4
+Countdown: 3
+Countdown: 2
+Countdown: 1
+Countdown: 0
+Counting up: 1
+Counting up: 2
+Counting up: 3
+Counting up: 4
+Counting up: 5
+Counting up: 6
+Counting up: 7
+Counting up: 8
+Counting up: 9
+Counting up: 10
+Not divisible by 3: 14
+Not divisible by 3: 13
+Skipping multiples of 5: 1
+Skipping multiples of 5: 2
+Skipping multiples of 5: 3
+Skipping multiples of 5: 4
+1 is even
+3 is even
+5 is even
+7 is even
+9 is even
+i=2, j=2
+i=2, j=1
+i=2, j=0
+i=1, j=2
+i=1, j=1
+i=1, j=0
+i=0, j=2
+i=0, j=1
+i=0, j=0
+echo Value: 9
+echo Value: 8
+echo Value: 7
+echo Value: 6
+echo Value: 5
+echo Value: 4
+echo Value: 3
+echo Value: 2
+echo Value: 1
+echo Value: 0
+Value: 9
+Value: 8
+Value: 7
+Value: 6
+Value: 5
+Value: 4
+Value: 3
+Value: 2
+Value: 1
+Value: 0
 g
 h
 i
 j
 ba
-1 1
-2
-2 1
-2
-3
-4
-3 1
-2
-3
-4
-5
-6
-4 1
-2
-3
-4
-5
-6
-7
-8
-5 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-6 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-7 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-8 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-9 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-10 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
+bb
+bc
+bd
+be
+bf
+18 is odd
+16 is odd
+14 is odd
+12 is odd
+10 is odd
+8 is odd
+6 is odd
+4 is odd
+2 is odd
+48 is divisible by 3
+45 is divisible by 3
+42 is divisible by 3
+39 is divisible by 3
+36 is divisible by 3
+33 is divisible by 3
+30 is divisible by 3
+27 is divisible by 3
+24 is divisible by 3
+21 is divisible by 3
+18 is divisible by 3
+15 is divisible by 3
+12 is divisible by 3
+9 is divisible by 3
+6 is divisible by 3
+3 is divisible by 3
+0 is divisible by 3

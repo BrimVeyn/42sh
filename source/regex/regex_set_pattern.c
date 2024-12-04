@@ -6,15 +6,16 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/24 14:45:26 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/09/30 15:08:01 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/04 10:52:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_regex.h"
 #include "libft.h"
+#include "utils.h"
 
 void set_single_char(regex_compiled_t *regexp, char c){
-	regex_node_t *node = (regex_node_t *) ft_calloc(1, sizeof(regex_node_t));
+	regex_node_t *node = gc_unique(regex_node_t, GC_SUBSHELL);
 	node->type = REGEX_SINGLE_CHAR;
 	node->c = c;
 	node->quantifier = REGEX_NO_QUANTIFIER;
@@ -26,28 +27,28 @@ void set_quantifier(regex_compiled_t *regexp, regex_quantifier_type quantifier){
 }
 
 void set_end_of_pattern(regex_compiled_t *regexp){
-	regex_node_t *node = (regex_node_t *) ft_calloc(1, sizeof(regex_node_t));
+	regex_node_t *node = gc_unique(regex_node_t, GC_SUBSHELL);
 	node->type = REGEX_END_OF_PATTERN;
 	node->quantifier = REGEX_NO_QUANTIFIER;
 	regex_append_node(regexp, node);
 }
 
 void set_dot(regex_compiled_t *regexp){
-	regex_node_t *node = (regex_node_t *) ft_calloc(1, sizeof(regex_node_t));
+	regex_node_t *node = gc_unique(regex_node_t, GC_SUBSHELL);
 	node->type = REGEX_DOT;
 	node->quantifier = REGEX_NO_QUANTIFIER;
 	regex_append_node(regexp, node);
 }
 
 void set_end(regex_compiled_t *regexp){
-	regex_node_t *node = (regex_node_t *) ft_calloc(1, sizeof(regex_node_t));
+	regex_node_t *node = gc_unique(regex_node_t, GC_SUBSHELL);
 	node->type = REGEX_END;
 	node->quantifier = REGEX_NO_QUANTIFIER;
 	regex_append_node(regexp, node);
 }
 
 void set_begin(regex_compiled_t *regexp){
-	regex_node_t *node = (regex_node_t *) ft_calloc(1, sizeof(regex_node_t));
+	regex_node_t *node = gc_unique(regex_node_t, GC_SUBSHELL);
 	node->type = REGEX_BEGIN;
 	node->quantifier = REGEX_NO_QUANTIFIER;
 	regex_append_node(regexp, node);
@@ -84,7 +85,7 @@ void set_range(regex_compiled_t *regexp, const char *pattern, int *index){
 
 	*index += i + 2;
 
-	regex_node_t *node = (regex_node_t *) ft_calloc(1, sizeof(regex_node_t));
+	regex_node_t *node = gc_unique(regex_node_t, GC_SUBSHELL);
 
 	node->type = REGEX_RANGE;
 	if (pattern[0] == '^')

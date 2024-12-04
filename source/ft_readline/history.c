@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:44 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 15:48:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 09:26:12 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,6 @@
 
 bool history_defined = false;
 HISTORY_STATE *history;
-
-//TODO:builtin fc
-//
-//FIX: reset history cursor when leaving readline
 
 void init_history(Vars *shell_vars) {
 
@@ -139,13 +135,16 @@ void add_history(const char *str, Vars *shell_vars) {
     }
 }
 
-void pop_history(){
+HIST_ENTRY *pop_history(){
+	HIST_ENTRY *last = NULL;
 	if (history->length > 0){
-		gc(GC_FREE, history->entries[history->length - 1]->line.data, GC_READLINE);
-		gc(GC_FREE, history->entries[history->length - 1], GC_READLINE);
+		last = history->entries[history->length - 1];
+		// gc(GC_FREE, history->entries[history->length - 1]->line.data, GC_READLINE);
+		// gc(GC_FREE, history->entries[history->length - 1], GC_READLINE);
 		history->entries[history->length - 1] = NULL;
 		history->length--;
 	}
+	return last;
 }
 
 char *search_in_history(char *str){

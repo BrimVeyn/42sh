@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/13 14:12:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/03 16:27:24 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/04 10:47:02 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/04 10:47:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,14 +139,6 @@ char *string_list_get_value(const StringListL * const sl, const char * const id)
 		free(curr_id);
 	}
 	return NULL;
-}
-
-//FIX: This function should be replaced by get_variable_value everythwer CROTTE
-char *shell_vars_get_value(const Vars * const shell_vars, char * const id) {
-	char *return_value = string_list_get_value(shell_vars->env, id);
-	if (!return_value)
-		return_value = string_list_get_value(shell_vars->set, id);
-	return return_value;
 }
 
 char *get_positional_value(const StringListL * const sl, const size_t idx) {

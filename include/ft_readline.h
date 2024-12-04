@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/11/26 13:46:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/03 09:27:10 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ extern HISTORY_STATE *history;
 extern bool history_defined;
 
 void destroy_history();
-void pop_history();
+HIST_ENTRY *pop_history();
 void str_info(const string *str);
 void set_prompt(readline_state_t *rl_state, const char *new_prompt);
 char *search_in_history(char *str);
