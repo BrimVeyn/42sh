@@ -5,16 +5,17 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/25 11:38:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/03 18:13:20 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/04 10:47:31 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/04 10:49:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "final_parser.h"
-#include "exec.h"
+#include "ft_readline.h"
 #include "ft_regex.h"
 #include "utils.h"
 #include "libft.h"
+#include "exec.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -1241,6 +1242,10 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 
 void parse_input(char *in, char *filename, Vars *shell_vars) {
 	if (!*in) return ;
+	ShellInfos *self = shell(SHELL_GET);
+	if (self->interactive && !self->script){
+		add_history(in, shell_vars);
+	}
 	Lex *lexer = lex_init(in, filename, shell_vars);
 	parse(lexer, shell_vars);
 }
