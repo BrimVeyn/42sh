@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:47:26 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/04 10:50:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/04 11:32:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -311,14 +311,21 @@ void execute_until_clause(const CommandP * const command, const bool background,
 }
 
 void execute_case_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
-	const CaseClauseP * const case_clause = command->case_clause;
+	CaseClauseP * const case_clause = command->case_clause;
+	da_create(tmp, StringListL, sizeof(char *), GC_SUBSHELL);
+	da_push(tmp, case_clause->expression);
+	case_clause->expression = do_expansions(tmp, shell_vars, O_ALLOWNULLS)->data[0];
+	for (size_t i = 0; i < case_clause->patterns->size; i++) {
+		case_clause->patterns->data[i] = do_expansions(case_clause->patterns->data[i], shell_vars, O_ALLOWNULLS);
+	}
+
 	int default_index = -1;
 	for (size_t i = 0; i < case_clause->patterns->size; i++) {
-		const StringListL * const condition = case_clause->patterns->data[i];
-		for (size_t inner_i = 0; inner_i < condition->size; inner_i++) {
-			if (!ft_strcmp("*", condition->data[inner_i]))
+		const StringListL * const patterns = case_clause->patterns->data[i];
+		for (size_t inner_i = 0; inner_i < patterns->size; inner_i++) {
+			if (!ft_strcmp("*", patterns->data[inner_i]))
 				default_index = i;
-			if (!ft_strcmp(condition->data[inner_i], case_clause->expression))
+			if (!ft_strcmp(patterns->data[inner_i], case_clause->expression))
 				return execute_complete_command(wrap_list(case_clause->bodies->data[i]), shell_vars, true, background);
 		}
 	}

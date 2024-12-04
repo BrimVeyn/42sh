@@ -1,106 +1,382 @@
-value: 8
-value: 6
-value: 4
-value: 2
-value: 0
-9
-8
-7
-6
-5
-4
-3
-2
-1
-0
-Countdown: 4
-Countdown: 3
-Countdown: 2
-Countdown: 1
-Countdown: 0
-Counting up: 1
-Counting up: 2
-Counting up: 3
-Counting up: 4
-Counting up: 5
-Counting up: 6
-Counting up: 7
-Counting up: 8
-Counting up: 9
-Counting up: 10
-Not divisible by 3: 14
-Not divisible by 3: 13
-Skipping multiples of 5: 1
-Skipping multiples of 5: 2
-Skipping multiples of 5: 3
-Skipping multiples of 5: 4
-1 is even
-3 is even
-5 is even
-7 is even
-9 is even
-i=2, j=2
-i=2, j=1
-i=2, j=0
-i=1, j=2
-i=1, j=1
-i=1, j=0
-i=0, j=2
-i=0, j=1
-i=0, j=0
-echo Value: 9
-echo Value: 8
-echo Value: 7
-echo Value: 6
-echo Value: 5
-echo Value: 4
-echo Value: 3
-echo Value: 2
-echo Value: 1
-echo Value: 0
-Value: 9
-Value: 8
-Value: 7
-Value: 6
-Value: 5
-Value: 4
-Value: 3
-Value: 2
-Value: 1
-Value: 0
-g
-h
-i
-j
-ba
-bb
-bc
-bd
-be
-bf
-18 is odd
-16 is odd
-14 is odd
-12 is odd
-10 is odd
-8 is odd
-6 is odd
-4 is odd
-2 is odd
-48 is divisible by 3
-45 is divisible by 3
-42 is divisible by 3
-39 is divisible by 3
-36 is divisible by 3
-33 is divisible by 3
-30 is divisible by 3
-27 is divisible by 3
-24 is divisible by 3
-21 is divisible by 3
-18 is divisible by 3
-15 is divisible by 3
-12 is divisible by 3
-9 is divisible by 3
-6 is divisible by 3
-3 is divisible by 3
-0 is divisible by 3
+Odd value: 10
+Odd value: 8
+Odd value: 6
+Odd value: 4
+Odd value: 2
+Odd value: 0
+Odd value: -2
+Odd value: -4
+Odd value: -6
+Odd value: -8
+Odd value: -10
+Odd value: -12
+Odd value: -14
+Odd value: -16
+Odd value: -18
+Odd value: -20
+Odd value: -22
+Odd value: -24
+Odd value: -26
+Odd value: -28
+Odd value: -30
+Odd value: -32
+Odd value: -34
+Odd value: -36
+Odd value: -38
+Odd value: -40
+Odd value: -42
+Odd value: -44
+Odd value: -46
+Odd value: -48
+Odd value: -50
+Odd value: -52
+Odd value: -54
+Odd value: -56
+Odd value: -58
+Odd value: -60
+Odd value: -62
+Odd value: -64
+Odd value: -66
+Odd value: -68
+Odd value: -70
+Odd value: -72
+Odd value: -74
+Odd value: -76
+Odd value: -78
+Odd value: -80
+Odd value: -82
+Odd value: -84
+Odd value: -86
+Odd value: -88
+Odd value: -90
+Odd value: -92
+Odd value: -94
+Odd value: -96
+Odd value: -98
+Odd value: -100
+Odd value: -102
+Odd value: -104
+Odd value: -106
+Odd value: -108
+Odd value: -110
+Odd value: -112
+Odd value: -114
+Odd value: -116
+Odd value: -118
+Odd value: -120
+Odd value: -122
+Odd value: -124
+Odd value: -126
+Odd value: -128
+Odd value: -130
+Odd value: -132
+Odd value: -134
+Odd value: -136
+Odd value: -138
+Odd value: -140
+Odd value: -142
+Odd value: -144
+Odd value: -146
+Odd value: -148
+Odd value: -150
+Odd value: -152
+Odd value: -154
+Odd value: -156
+Odd value: -158
+Odd value: -160
+Odd value: -162
+Odd value: -164
+Odd value: -166
+Odd value: -168
+Odd value: -170
+Odd value: -172
+Odd value: -174
+Odd value: -176
+Odd value: -178
+Odd value: -180
+Odd value: -182
+Odd value: -184
+Odd value: -186
+Odd value: -188
+Odd value: -190
+Odd value: -192
+Odd value: -194
+Odd value: -196
+Odd value: -198
+Odd value: -200
+Odd value: -202
+Odd value: -204
+Odd value: -206
+Odd value: -208
+Odd value: -210
+Odd value: -212
+Odd value: -214
+Odd value: -216
+Odd value: -218
+Odd value: -220
+Odd value: -222
+Odd value: -224
+Odd value: -226
+Odd value: -228
+Odd value: -230
+Odd value: -232
+Odd value: -234
+Odd value: -236
+Odd value: -238
+Odd value: -240
+Odd value: -242
+Odd value: -244
+Odd value: -246
+Odd value: -248
+Odd value: -250
+Odd value: -252
+Odd value: -254
+Odd value: -256
+Odd value: -258
+Odd value: -260
+Odd value: -262
+Odd value: -264
+Odd value: -266
+Odd value: -268
+Odd value: -270
+Odd value: -272
+Odd value: -274
+Odd value: -276
+Odd value: -278
+Odd value: -280
+Odd value: -282
+Odd value: -284
+Odd value: -286
+Odd value: -288
+Odd value: -290
+Odd value: -292
+Odd value: -294
+Odd value: -296
+Odd value: -298
+Odd value: -300
+Odd value: -302
+Odd value: -304
+Odd value: -306
+Odd value: -308
+Odd value: -310
+Odd value: -312
+Odd value: -314
+Odd value: -316
+Odd value: -318
+Odd value: -320
+Odd value: -322
+Odd value: -324
+Odd value: -326
+Odd value: -328
+Odd value: -330
+Odd value: -332
+Odd value: -334
+Odd value: -336
+Odd value: -338
+Odd value: -340
+Odd value: -342
+Odd value: -344
+Odd value: -346
+Odd value: -348
+Odd value: -350
+Odd value: -352
+Odd value: -354
+Odd value: -356
+Odd value: -358
+Odd value: -360
+Odd value: -362
+Odd value: -364
+Odd value: -366
+Odd value: -368
+Odd value: -370
+Odd value: -372
+Odd value: -374
+Odd value: -376
+Odd value: -378
+Odd value: -380
+Odd value: -382
+Odd value: -384
+Odd value: -386
+Odd value: -388
+Odd value: -390
+Odd value: -392
+Odd value: -394
+Odd value: -396
+Odd value: -398
+Odd value: -400
+Odd value: -402
+Odd value: -404
+Odd value: -406
+Odd value: -408
+Odd value: -410
+Odd value: -412
+Odd value: -414
+Odd value: -416
+Odd value: -418
+Odd value: -420
+Odd value: -422
+Odd value: -424
+Odd value: -426
+Odd value: -428
+Odd value: -430
+Odd value: -432
+Odd value: -434
+Odd value: -436
+Odd value: -438
+Odd value: -440
+Odd value: -442
+Odd value: -444
+Odd value: -446
+Odd value: -448
+Odd value: -450
+Odd value: -452
+Odd value: -454
+Odd value: -456
+Odd value: -458
+Odd value: -460
+Odd value: -462
+Odd value: -464
+Odd value: -466
+Odd value: -468
+Odd value: -470
+Odd value: -472
+Odd value: -474
+Odd value: -476
+Odd value: -478
+Odd value: -480
+Odd value: -482
+Odd value: -484
+Odd value: -486
+Odd value: -488
+Odd value: -490
+Odd value: -492
+Odd value: -494
+Odd value: -496
+Odd value: -498
+Odd value: -500
+Odd value: -502
+Odd value: -504
+Odd value: -506
+Odd value: -508
+Odd value: -510
+Odd value: -512
+Odd value: -514
+Odd value: -516
+Odd value: -518
+Odd value: -520
+Odd value: -522
+Odd value: -524
+Odd value: -526
+Odd value: -528
+Odd value: -530
+Odd value: -532
+Odd value: -534
+Odd value: -536
+Odd value: -538
+Odd value: -540
+Odd value: -542
+Odd value: -544
+Odd value: -546
+Odd value: -548
+Odd value: -550
+Odd value: -552
+Odd value: -554
+Odd value: -556
+Odd value: -558
+Odd value: -560
+Odd value: -562
+Odd value: -564
+Odd value: -566
+Odd value: -568
+Odd value: -570
+Odd value: -572
+Odd value: -574
+Odd value: -576
+Odd value: -578
+Odd value: -580
+Odd value: -582
+Odd value: -584
+Odd value: -586
+Odd value: -588
+Odd value: -590
+Odd value: -592
+Odd value: -594
+Odd value: -596
+Odd value: -598
+Odd value: -600
+Odd value: -602
+Odd value: -604
+Odd value: -606
+Odd value: -608
+Odd value: -610
+Odd value: -612
+Odd value: -614
+Odd value: -616
+Odd value: -618
+Odd value: -620
+Odd value: -622
+Odd value: -624
+Odd value: -626
+Odd value: -628
+Odd value: -630
+Odd value: -632
+Odd value: -634
+Odd value: -636
+Odd value: -638
+Odd value: -640
+Odd value: -642
+Odd value: -644
+Odd value: -646
+Odd value: -648
+Odd value: -650
+Odd value: -652
+Odd value: -654
+Odd value: -656
+Odd value: -658
+Odd value: -660
+Odd value: -662
+Odd value: -664
+Odd value: -666
+Odd value: -668
+Odd value: -670
+Odd value: -672
+Odd value: -674
+Odd value: -676
+Odd value: -678
+Odd value: -680
+Odd value: -682
+Odd value: -684
+Odd value: -686
+Odd value: -688
+Odd value: -690
+Odd value: -692
+Odd value: -694
+Odd value: -696
+Odd value: -698
+Odd value: -700
+Odd value: -702
+Odd value: -704
+Odd value: -706
+Odd value: -708
+Odd value: -710
+Odd value: -712
+Odd value: -714
+Odd value: -716
+Odd value: -718
+Odd value: -720
+Odd value: -722
+Odd value: -724
+Odd value: -726
+Odd value: -728
+Odd value: -730
+Odd value: -732
+Odd value: -734
+Odd value: -736
+Odd value: -738
+Odd value: -740
+Odd value: -742
+Odd value: -744
+Odd value: -746
+Odd value: -748
+Odd value: -750
+Odd value: -752
