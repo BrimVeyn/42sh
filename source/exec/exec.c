@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:38:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/03 15:16:19 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/04 10:19:00 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -450,7 +450,9 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 				execute_function(command, funcNo, background, shell_vars);
 				return NO_WAIT;
             } else if (is_builtin(bin)) {
-				redirect_ios(command->simple_command->redir_list);
+				if (!redirect_ios(command->simple_command->redir_list)) {
+					return NO_WAIT;
+				}
 				execute_builtin(command->simple_command, shell_vars);
 				return NO_WAIT;
 			} else {

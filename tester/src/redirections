@@ -1,1 +1,17 @@
-echo a > ./outfiles/test1.txt; echo b >> ./outfiles/test1.txt
+echo test1 > ./outfiles/file1
+cat < infiles/no_perms
+cat < infiles/no_write
+cat < infiles/no_read
+cat < infiles/non_existing
+cat < infiles
+echo test1 > ./outfiles/file1
+echo test2 > ./outfiles/file1
+echo test3 > ./outfiles/no_perms
+echo test4 > ./outfiles/no_write
+echo test5 > ./outfiles/non_existing
+echo test6 > ./outfiles
+echo test3 >> ./outfiles/file2
+echo test3 >> ./outfiles/file2
+echo test3 >> ./outfiles/no_perms
+echo test3>> ./outfiles/no_write
+echo test3>> ./outfiles/non_existing

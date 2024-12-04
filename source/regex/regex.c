@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 12:10:41 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/02 10:10:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/04 10:40:57 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,8 @@ regex_match_t regex_exec_pattern(regex_compiled_t *regexp, char *string);
 void regex_append_node(regex_compiled_t *regexp, regex_node_t *node) {
 	if (regexp->size >= regexp->capacity - 1) {
 		regexp->capacity *= 2;
-		regexp->pattern = (regex_node_t **)ft_realloc(regexp->pattern, regexp->size, regexp->capacity, sizeof(regex_node_t *));
+		// regexp->pattern = (regex_node_t **)ft_realloc(regexp->pattern, regexp->size, regexp->capacity, sizeof(regex_node_t *));
+		regexp->pattern = gc(GC_REALLOC, regexp->pattern, regexp->size, regexp->capacity, sizeof(regex_node_t *), GC_SUBSHELL);
 	}
 	regexp->pattern[regexp->size] = node;
 	regexp->size += 1;
@@ -36,7 +37,7 @@ void regex_append_node(regex_compiled_t *regexp, regex_node_t *node) {
 void regex_compile_pattern(regex_compiled_t *regexp, const char *pattern){
 	regexp->size = 0;
 	regexp->capacity = 10;
-	regexp->pattern = ft_calloc(10, sizeof(regex_node_t *));
+	regexp->pattern = gc(GC_CALLOC, 10, sizeof(regex_node_t *), GC_SUBSHELL);
 	regexp->err = "Success";
 	regexp->is_pattern_valid = true;
 	
@@ -191,9 +192,9 @@ int matchhere(regex_node_t **pattern, char *string, int *end_pos) {
 
 void regex_free_pattern(regex_compiled_t *regexp){
 	for (int i = 0; regexp->pattern[i]; i++){
-		free(regexp->pattern[i]);
+		gc(GC_FREE, regexp->pattern[i], GC_SUBSHELL);
 	}
-	free(regexp->pattern);
+	gc(GC_FREE, regexp->pattern, GC_SUBSHELL);
 }
 
 regex_match_t regex_match(const char *pattern, char *string){
