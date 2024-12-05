@@ -5,11 +5,14 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/04 10:46:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:20:19 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/05 15:21:23 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/05 15:27:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
+//TODO:HOME=/tmp cd
+//BRAKIS
 #include "ft_regex.h"
 #include "final_parser.h"
 #include "utils.h"
@@ -211,6 +214,7 @@ void update_history_file(HISTORY_STATE *history, Vars *shell_vars){
 
 void load_42shrc(Vars *shell_vars) {
 	get_history(shell_vars);
+	shell(SHELL_GET)->script = true;
 	signal_manager(SIG_SCRIPT);
 
 	const char * const home = string_list_get_value(shell_vars->env, "HOME");
@@ -220,6 +224,7 @@ void load_42shrc(Vars *shell_vars) {
 	char * const file_content = read_input_file(config_filename);
 	if (file_content)
 		parse_input(file_content, config_filename, shell_vars);
+	shell(SHELL_GET)->script = false;
 }
 
 void load_positional_parameters(const int ac, char **av, Vars * const shell_vars, ShellInfos * const shell_infos) {

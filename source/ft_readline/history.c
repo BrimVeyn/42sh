@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:44 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/03 09:26:12 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/05 15:13:37 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,13 +147,16 @@ HIST_ENTRY *pop_history(){
 	return last;
 }
 
-char *search_in_history(char *str){
+int search_in_history(readline_state_t *rl_state, char *str){
 	for (int i = history->length - 1; i > 0; i--){
-		if (ft_strstr(history->entries[i]->line.data, str) != -1){
-			return history->entries[i]->line.data;
+		rl_state->search_mode.word_start = ft_strstr(history->entries[i]->line.data, str);
+		if (rl_state->search_mode.word_start != -1){
+			rl_state->search_mode.word_found = history->entries[i]->line.data;
+			return 1;
 		}
 	}
-	return NULL;
+	rl_state->search_mode.word_found = NULL;
+	return 0;
 }
 
 void adapt_histsize(int new_histsize, HISTORY_STATE *history){
