@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/03 16:45:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/02 13:55:07 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/05 10:17:39 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <linux/limits.h>
 #include <unistd.h>
 #include "exec.h"
+#include "final_parser.h"
 #include "libft.h"
 #include "utils.h"
 
@@ -45,7 +46,7 @@ void builtin_pwd(__attribute__((unused)) const SimpleCommandP *command, __attrib
 	
 	char *cwd = NULL;
 	if (!(options & PWD_P)){
-		cwd = getenv("PWD");
+		cwd = get_variable_value(shell_vars, "PWD");
 	}
 	if (!cwd && options & PWD_P){
 		cwd = getcwd(NULL, PATH_MAX);

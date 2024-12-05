@@ -94,3 +94,94 @@ start_test () {
 
 
 }
+
+test_lists=(
+	"src/test"
+	"src/redirections"
+	"src/syntax"
+	"src/expand"
+	"src/quotes"
+	"src/subshell"
+	"src/command_sub"
+	"src/command_group"
+	"src/arithmetic_expansion"
+	"src/builtin_export"
+	"src/builtin_cd"
+	"src/builtin_exit"
+	"src/builtin_echo"
+	"src/mixed"
+)
+
+PS3="Enter a number to run associated tests, * for all: "
+select option in redirections syntax expand quotes subshell command_sub command_group arithmetic_expansion builtin_export builtin_cd builtin_exit builtin_echo mixed
+do
+    case $option in
+        redirections)
+			test_lists=("src/redirections");
+			setup_redirection_test_environment;
+			start_tests;
+			clean_redirection;
+            ;;
+        syntax)
+			test_lists=("src/syntax");
+			start_tests;
+            ;;
+        expand)
+			test_lists=("src/expand");
+			start_tests;
+            ;;
+		quotes)
+			test_lists=("src/quotes");
+			start_tests;
+			;;
+        subshell)
+			test_lists=("src/subshell");
+			start_tests;
+            ;;
+        command_sub)
+			test_lists=("src/command_sub");
+			start_tests;
+            ;;
+        command_group)
+			test_lists=("src/command_group");
+			start_tests;
+            ;;
+        arithmetic_expansion)
+			test_lists=("src/arithmetic_expansion");
+			start_tests;
+            ;;
+        builtin_export)
+			test_lists=("src/builtin_export");
+			start_tests;
+            ;;
+		builtin_cd)
+			test_lists=("src/builtin_cd");
+			setup_cd_test_environment
+			start_tests;
+			chmod 777 test_cd/protected
+			rm -rf test_cd;
+            ;;
+        builtin_exit)
+			test_lists=("src/builtin_exit");
+			start_tests;
+            ;;
+        builtin_echo)
+			test_lists=("src/builtin_echo");
+			start_tests;
+            ;;
+        mixed)
+			test_lists=("src/mixed");
+			start_tests;
+            ;;
+        *)
+			start_tests;
+            ;;
+    esac
+done
+
+rm -rf ./outfiles 2>/dev/null
+rm -rf ./42sh_outfiles 2>/dev/null
+rm -rf ./bash_outfiles 2>/dev/null
+
+
+>>>>>>> origin/nathan

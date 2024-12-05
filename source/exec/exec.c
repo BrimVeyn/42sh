@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/04 10:47:26 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:14:19 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/05 15:22:03 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/05 15:22:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,162 +68,6 @@ char  *resolve_bine(SimpleCommandP * const command, Vars * const shell_vars) {
 			return NULL;
 		}
 	}
-}
-
-#define MAX_FD 1024
-#include <sys/stat.h>
-
-typedef enum {
-	F_ISDIR = 0b00001,
-	F_EXEC =  0b00010,
-	F_EXIST = 0b00100,
-	F_WRITE = 0b01000,
-	F_READ =  0b10000,
-} FilepathMode;
-
-bool check_filepath(char *file_path, FilepathMode mode) {
-	struct stat file_stat;
-	if (stat(file_path, &file_stat) != -1) {
-
-		if (mode & F_ISDIR && S_ISDIR(file_stat.st_mode)) {
-			ft_dprintf(STDERR_FILENO, "42sh: %s: Is a directory\n", file_path);
-			g_exitno = 1;
-			return false;
-		}
-		if ((!(file_stat.st_mode & S_IRUSR) && mode & F_READ) || 
-			(!(file_stat.st_mode & S_IWUSR) && mode & F_WRITE) ||
-			(!(file_stat.st_mode & S_IXUSR) && mode & F_EXEC )){
-			ft_dprintf(STDERR_FILENO, "42sh: %s: Permission Denied\n", file_path);
-			g_exitno = 1;
-			return false;
-		}
-		return file_path;
-	} else if (mode & F_EXIST){
-		ft_dprintf(STDERR_FILENO, "42sh: %s: No such file or directory\n", file_path);
-		g_exitno = 1;
-		return false;
-	}
-	return true;
-}
-
-int get_filepath_mode(TokenType type){
-	if (type == LESS)
-		return F_EXIST | F_READ | F_ISDIR;
-	else if (type == GREAT || type == DGREAT || type == CLOBBER)
-		return F_WRITE | F_ISDIR;
-	else if (type == LESSGREAT)
-		return F_EXIST | F_WRITE | F_READ | F_ISDIR;
-	return 0;
-}
-
-//TODO:change redir->filename to redir->word
-bool redirect_ios(RedirectionL *redir_list) {
-	if (!redir_list) {
-		return true;
-	}
-	// print_redir_list(redir_list);
-
-	for (size_t i = 0; i < redir_list->size; i++) {
-		const RedirectionP *redir = redir_list->data[i];
-		const bool has_io_number = (redir->io_number != NULL);
-		int io_number = (has_io_number) ? ft_atoi(redir->io_number) : -1;
-		if (io_number >= MAX_FD) {
-			error("42sh: %d: Bad file descriptor", 1);
-			return false;
-		}
-		//TODO: error managment when open fails
-		
-		int mode = get_filepath_mode(redir->type);
-		if (!check_filepath(redir->filename, mode)) {
-			g_exitno = 1;
-			return false;
-		}
-
-		if (redir->type == GREAT || redir->type == CLOBBER){ //>
-			const int open_flags = (O_CREAT | O_TRUNC | O_WRONLY);
-			const int fd = open(redir->filename, open_flags, 0664);
-			int dup_to = STDOUT_FILENO;
-			if (io_number != -1)
-				dup_to = io_number;
-			if (!secure_dup2(fd, dup_to))
-				return false;
-			close(fd);
-		}
-		else if (redir->type == DGREAT){ //>>
-			const int open_flags = (O_CREAT | O_APPEND | O_WRONLY);
-			const int fd = open(redir->filename, open_flags, 0664);
-			int dup_to = STDOUT_FILENO;
-			if (io_number != -1)
-				dup_to = io_number;
-			if (!secure_dup2(fd, dup_to))
-				return false;
-			close(fd);
-		}
-		else if (redir->type == LESSGREAT){ //<>
-			const int open_flags = (O_CREAT | O_TRUNC | O_RDWR);
-			const int fd = open(redir->filename, open_flags, 0664);
-			if (!secure_dup2(fd, STDOUT_FILENO) || !secure_dup2(fd, STDIN_FILENO))
-				return false;
-			close(fd);
-		}
-		else if (redir->type == LESS){ // <
-			const int open_flags = (O_RDONLY);
-			int dup_to = STDIN_FILENO;
-			const int fd = open(redir->filename, open_flags, 0664);
-			if (io_number != -1) {
-				dup_to = io_number;
-			}
-			if (!secure_dup2(fd, dup_to))
-				return (g_exitno = 1, false);
-			close(fd);
-		}
-		else if (redir->type == LESSAND){ // <&
-			//
-			if (!is_number(redir->filename) && ft_strcmp(redir->filename, "-")){
-				return false;
-			}
-
-			const int n = (io_number == -1) ? STDIN_FILENO : io_number;
-
-			const int fd = ft_atoi(redir->filename);
-			if (fd < 0 || fcntl(fd, F_GETFD) == -1) {
-				ft_dprintf(STDERR_FILENO, "42sh: %d: Bad file descriptor\n", fd);
-				return false;
-			}
-
-			if (!ft_strcmp("-", redir->filename) || fd == n){
-				close(n);
-			} else {
-				if (!secure_dup2(fd, n)){
-					return false;
-				}
-				close(fd);
-			}
-		}
-		else if (redir->type == GREATAND){
-			if (!is_number(redir->filename) && ft_strcmp(redir->filename, "-")){
-				return false;
-			}
-
-			const int n = (io_number == -1) ? STDOUT_FILENO : io_number;
-
-			const int fd = ft_atoi(redir->filename);
-			if (fd < 0 || fcntl(fd, F_GETFD) == -1) {
-				ft_dprintf(STDERR_FILENO, "42sh: %d: Bad file descriptor\n", fd);
-				return false;
-			}
-
-			if (!ft_strcmp("-", redir->filename) || fd == n){
-				close(n);
-			} else {
-				if (!secure_dup2(fd, n)){
-					return false;
-				}
-				close(fd);
-			}
-		}
-	}
-	return true;
 }
 
 void execute_simple_command(CommandP *command, char *bin, int *pipefd, Vars *shell_vars) {
@@ -532,7 +376,6 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	PipeLineP *process = job->pipeline;
 	int *saved_fds = save_std_fds();
 	// dprintf(2, "fd: %d %d %d\n", saved_fds[0], saved_fds[1], saved_fds[2]);
-
 	ShellInfos *shell_infos = shell(SHELL_GET);
 	bool hadPipe = false;
 	int pipefd[2] = {-1, -1};
@@ -583,6 +426,10 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 					if (funcNo != -1) {
 						execute_function(process->command, funcNo, background, shell_vars);
 					} else if (is_builtin(bin)) {
+						if (redirect_ios(process->command->simple_command->redir_list) == false) {
+							gc(GC_CLEANUP, GC_ALL); 
+							exit(g_exitno);
+						}
 						execute_builtin(process->command->simple_command, shell_vars);
 					} else {
 						execute_simple_command(process->command, bin, pipefd, shell_vars);

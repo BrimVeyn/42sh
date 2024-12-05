@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 11:37:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 14:58:14 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@
 
 //TODO: Clean handle_enter_function
 
-//FIX:ne pas get histsize uniquement du set
 int handle_enter_key(readline_state_t *rl_state, string *line) {
 	if (rl_state->interactive){
 		if (rl_state->search_mode.active){
