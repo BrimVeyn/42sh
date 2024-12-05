@@ -1,1 +1,1 @@
-42sh: ./outfiles: Is a directory
+42sh: echo: write error: No space left on device

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:46:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/28 09:23:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 14:35:10 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ void	secure_pipe2(int pipefd[2], int flags);
 void	secure_execve(const char *pathname, char **const argv, char **const envp);
 bool	is_builtin(const char *bin);
 char	*find_bin_location(char *bin, StringListL *env, bool *absolute);
+bool	redirect_ios(RedirectionL *redir_list);
 
 char	*sigStr(const int sig);
 //-------------------------------------------------------------//

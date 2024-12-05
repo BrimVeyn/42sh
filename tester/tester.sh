@@ -190,11 +190,12 @@ test_lists=(
 	"src/builtin_export"
 	"src/builtin_cd"
 	"src/builtin_exit"
+	"src/builtin_echo"
 	"src/mixed"
 )
 
 PS3="Enter a number to run associated tests, * for all: "
-select option in redirections syntax expand quotes subshell command_sub command_group arithmetic_expansion builtin_export builtin_cd builtin_exit mixed
+select option in redirections syntax expand quotes subshell command_sub command_group arithmetic_expansion builtin_export builtin_cd builtin_exit builtin_echo mixed
 do
     case $option in
         redirections)
@@ -246,6 +247,10 @@ do
 			test_lists=("src/builtin_exit");
 			start_tests;
             ;;
+        builtin_echo)
+			test_lists=("src/builtin_echo");
+			start_tests;
+            ;;
         mixed)
 			test_lists=("src/mixed");
 			start_tests;
@@ -259,3 +264,5 @@ done
 rm -rf ./outfiles 2>/dev/null
 rm -rf ./42sh_outfiles 2>/dev/null
 rm -rf ./bash_outfiles 2>/dev/null
+
+

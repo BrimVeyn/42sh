@@ -1,1 +1,1 @@
-bash: line 1: ./outfiles: Is a directory
+bash: line 1: echo: write error: No space left on device
