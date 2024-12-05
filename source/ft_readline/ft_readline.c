@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:16:50 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/05 16:57:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,17 +62,17 @@ void enable_raw_mode()
 {
     struct termios raw;
 
-    tcgetattr(STDIN_FILENO, &raw);
+    tcgetattr(shell(SHELL_GET)->shell_terminal, &raw);
     raw.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+    tcsetattr(shell(SHELL_GET)->shell_terminal, TCSAFLUSH, &raw);
 }
 
 void disable_raw_mode()
 {
     struct termios raw;
-    tcgetattr(STDIN_FILENO, &raw);
+    tcgetattr(shell(SHELL_GET)->shell_terminal, &raw);
     raw.c_lflag |= (ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+    tcsetattr(shell(SHELL_GET)->shell_terminal, TCSAFLUSH, &raw);
 }
 
 //TODO:Organiser ca, fonction donne envie de se pendre la
@@ -349,7 +349,7 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
 
     do {
 		char c = '\0';
-        ssize_t bytes_read = read(STDIN_FILENO, &c, 1);
+        ssize_t bytes_read = read(shell(SHELL_GET)->shell_terminal, &c, 1);
 		//maybe rl_set_position
 
 		if (c == '\n' && !should_process_enter()) {

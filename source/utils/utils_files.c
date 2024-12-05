@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 16:35:28 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:11:25 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 16:49:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void close_all_fds(void) {
-	for (uint16_t i = 3; i < 1024; i++) {
-		close(i);
-	}
-}
-
-void close_std_fds(void) {
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
-}
 
 char *get_line_x(char *in, const size_t n) {
     if (!in || n == 0) return NULL;

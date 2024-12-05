@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/27 12:54:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 16:30:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,6 +178,7 @@ char			*get_line_x(char *in, const size_t n);
 
 //------------------Error-----------------------//
 void error(const char * const msg, const int exit_code);
+void exit_clean(void);
 void fatal(const char * const msg, const int exit_code);
 //----------------------------------------------//
 

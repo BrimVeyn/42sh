@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:56 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:21:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 16:49:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,15 +36,15 @@ ShellInfos *shell(int mode);
 //-------------------------------------------//
 
 void	close_std_fds(void);
+void	close_saved_fds(int *saved_fds);
+void	close_fd_set();
 void	close_all_fds(void);
 int		get_highest_free_fd();
 int		move_to_high_fd(int fd);
 int		*save_std_fds();
-void close_fd_set();
 
 int		secure_fork(void);
 bool	secure_dup2(int from, int to);
-void	secure_pipe2(int pipefd[2], int flags);
 void	secure_execve(const char *pathname, char **const argv, char **const envp);
 bool	is_builtin(const char *bin);
 char	*find_bin_location(char *bin, StringListL *env, bool *absolute);

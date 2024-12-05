@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:22:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:22:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 17:32:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include "signals.h"
 #include "utils.h"
 #include "libft.h"
-#include "lexer.h"
 
 #include <fcntl.h>
 #include <stdbool.h>
@@ -37,10 +36,10 @@ void dup_input_and_close(int fd) {
 
 void create_pipe(bool *hadPipe, int *pipefd) {
 	(*hadPipe) = true;
-	pipe(pipefd);
-	da_push(g_fdSet, pipefd[0]);
-	da_push(g_fdSet, pipefd[1]);
-	secure_dup2(pipefd[1], STDOUT_FILENO);
+	if (pipe(pipefd) == -1)
+		fatal("pipe: pipe creation failed", 1);
+	// secure_dup2(pipefd[1], STDOUT_FILENO);
+	dup2(pipefd[1], STDOUT_FILENO);
 	close(pipefd[1]);
 }
 
@@ -73,17 +72,22 @@ char  *resolve_bine(SimpleCommandP * const command, Vars * const shell_vars) {
 void execute_simple_command(CommandP *command, char *bin, int *pipefd, Vars *shell_vars) {
 	SimpleCommandP *simple_command = command->simple_command;
 	if (!redirect_ios(simple_command->redir_list)) {
-		return ;
+		return;
 	}
 	if (!bin) {
-		return ;
+		return;
 	}
+	
+	close_fd_set();
+
+	//FIX: why can't we close this fd ffs
 	execve(bin, simple_command->word_list->data, shell_vars->env->data);
 	if (pipefd) {
 		close(pipefd[0]);
 		close(pipefd[1]);
 	}
 }
+
 
 
 void execute_list(ListP *list, const bool background, Vars * const shell_vars);
@@ -327,16 +331,8 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
                         }
 						signal_manager(SIG_EXEC);
 					}
-					// dprintf(2, "[DEBUG] PID: %d, PGID: %d, FG PGID: %d\n",
-					//  getpid(), getpgid(getpid()), tcgetpgrp(shell_infos->shell_terminal));
-
-					// if (background && shell_infos->script) { redirect_input_to_null(); }
-					// setpgid(pid, g_masterPgid);
-			// dprintf(2, C_DARK_CYAN"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
-					close_fd_set();
 					execute_simple_command(command, bin, NULL, shell_vars);
-					gc(GC_CLEANUP, GC_ALL);
-					exit(g_exitno);
+					exit_clean();
 				} else { set_group(job, process, pid); }
 				return WAIT;
 			}
@@ -348,11 +344,8 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 			}
 			pid_t pid = fork();
 			if (IS_CHILD(pid)) {
-				close_fd_set();
-				// if (background && shell_infos->script) { redirect_input_to_null(); }
 				execute_subshell(command, background, shell_vars);
-				gc(GC_CLEANUP, GC_ALL);
-				exit(g_exitno);
+				exit_clean(); 
 			} else { set_group(job, process, pid); }
 			return WAIT;
 		}
@@ -368,32 +361,24 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 	return ERROR;
 }
 
-
-
-
-
 int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	PipeLineP *process = job->pipeline;
-	int *saved_fds = save_std_fds();
-	// dprintf(2, "fd: %d %d %d\n", saved_fds[0], saved_fds[1], saved_fds[2]);
 	ShellInfos *shell_infos = shell(SHELL_GET);
 	bool hadPipe = false;
 	int pipefd[2] = {-1, -1};
+
 	const bool piped = (process->next != NULL);
 
+	int *saved_fds = save_std_fds();
+
 	if (!piped) {
-		int return_status = execute_single_command(job, background, shell_vars);
-		dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
-		dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
-		dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
-		close_fd_set();
-		return return_status;
+		int exit_info = execute_single_command(job, background, shell_vars);
+		close_saved_fds(saved_fds);
+		return exit_info;
 	}
 
 	while (process) {
 		const bool hasPipe = (process->next != NULL);
-
-		// dprintf(2, "hasPipe: %s | hadPipe: %s\n", boolStr(hasPipe), boolStr(hadPipe));
 
 		if (hadPipe) dup_input_and_close(pipefd[0]);
 		if (hasPipe) create_pipe(&hadPipe, pipefd);
@@ -409,14 +394,13 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 				pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
 				setpgid(pid, pgid);
 
-				if (!background && !is_command_sub && !g_subshell)
-					if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1) {
+				if (!background && !is_command_sub && !g_subshell) {
+					if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
 						fatal("tcsetpgrp: failed", 1);
-                    }
+                }
+
 				signal_manager(SIG_EXEC);
 			}
-			// if (background && shell_infos->script) { redirect_input_to_null(); }
-			close_fd_set();
 
 			switch (process->command->type) {
 				case Simple_Command: { 
@@ -426,36 +410,35 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 					if (funcNo != -1) {
 						execute_function(process->command, funcNo, background, shell_vars);
 					} else if (is_builtin(bin)) {
-						if (redirect_ios(process->command->simple_command->redir_list) == false) {
-							gc(GC_CLEANUP, GC_ALL); 
-							exit(g_exitno);
+						if (!redirect_ios(process->command->simple_command->redir_list)) {
+							exit_clean();
 						}
 						execute_builtin(process->command->simple_command, shell_vars);
 					} else {
 						execute_simple_command(process->command, bin, pipefd, shell_vars);
 					}
-					gc(GC_CLEANUP, GC_ALL);
-					exit(g_exitno);
+					exit_clean();
 					break;
 				}
-				case Subshell: { execute_subshell(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
-				case Brace_Group: { execute_brace_group(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
-				case If_Clause: { execute_if_clause(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
-				case While_Clause: { execute_while_clause(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
-				case Until_Clause: { execute_until_clause(process->command, background, shell_vars);  gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
-				case Case_Clause: { execute_case_clause(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
-				case For_Clause: { execute_for_clause(process->command, background, shell_vars); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
-				case Function_Definition: { register_function(process->command); gc(GC_CLEANUP, GC_ALL); exit(g_exitno); break; }
+				case Subshell: { execute_subshell(process->command, background, shell_vars); exit_clean(); break; }
+				case Brace_Group: { execute_brace_group(process->command, background, shell_vars); exit_clean(); break; }
+				case If_Clause: { execute_if_clause(process->command, background, shell_vars); exit_clean(); break; }
+				case While_Clause: { execute_while_clause(process->command, background, shell_vars); exit_clean(); break; }
+				case Until_Clause: { execute_until_clause(process->command, background, shell_vars);  exit_clean(); break; }
+				case Case_Clause: { execute_case_clause(process->command, background, shell_vars); exit_clean(); break; }
+				case For_Clause: { execute_for_clause(process->command, background, shell_vars); exit_clean(); break; }
+				case Function_Definition: { register_function(process->command); exit_clean(); break; }
 				default: { break; }
 			}
 		} else { set_group(job, process, pid); }
+
 		process = process->next;
 
 		dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
 		dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
 		dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
 	}
-	close_fd_set();
+	close_saved_fds(saved_fds);
 	return WAIT;
 }
 
@@ -493,10 +476,9 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 			if		(g_exitno == 0) g_exitno = 1;
 			else if (g_exitno != 0) g_exitno = 0;
 		}
-		// if (andor_head->pipeline->banged)
-		// 	dprintf(2, "banged, exino: %d\n", g_exitno);
-		// dprintf(2, "g_exino: %d\n", g_exitno);
+
 		if (g_exitno > 128) return ;
+
 		bool skip = (
 			(separator == AND_IF && g_exitno != 0) ||
 			(separator == OR_IF && g_exitno == 0)
@@ -539,10 +521,8 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 			if (IS_CHILD(pid)) {
 				g_masterPgid = getpid();
 				// dprintf(2, C_BRIGHT_CYAN"[MASTER] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
-				close_fd_set();
 				execute_list(list_head, background, shell_vars);
-				gc(GC_CLEANUP, GC_ALL);
-				exit(g_exitno);
+				exit_clean(); break;
 			} else {
 				setpgid(pid, pid);
 				AndOrP *master = list_head->and_or;
