@@ -1,16 +1,5 @@
-func () {
-	for arg in ${@}; do
-		echo ${arg};
-	done
-}
-
-func un deux trois
-
-print_all_args () { 
-	for arg in ${@}; do 
-		echo "${arg}"; 
-	done; 
-}
-
-print_all_args "arg1" "arg2" "arg3"
-
+var=10000; while true $((--var)) && ! (exit $((var >= 0))); do
+	if ! (exit $((var % 2 == 0)) ); then
+		echo "value: ${var}";
+	fi
+done

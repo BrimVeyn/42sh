@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:23 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:35:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 17:35:25 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,6 +163,7 @@ ShellInfos *shell(const int mode) {
 		self->interactive = isatty(self->shell_terminal);
 		if (self->interactive) {
 			self->shell_terminal = open("/dev/tty", O_RDWR);
+			// da_push(g_fdSet, self->shell_terminal);
 			while (tcgetpgrp(self->shell_terminal) != (self->shell_pgid = getpgrp()))
 				kill(- self->shell_pgid, SIGTTIN);
 			tcsetpgrp(self->shell_terminal, self->shell_pgid);
@@ -212,15 +213,16 @@ void update_history_file(HISTORY_STATE *history, Vars *shell_vars){
 #define SCRIPT_MODE ((ac == 1) ? false : true)
 #define HAS_POSITIONAL (ac > 2)
 
+
+//FIX: fix script mess
 void load_42shrc(Vars *shell_vars) {
 	get_history(shell_vars);
 	shell(SHELL_GET)->script = true;
 	signal_manager(SIG_SCRIPT);
 
-	const char * const home = string_list_get_value(shell_vars->env, "HOME");
+	char * home = string_list_get_value(shell_vars->env, "HOME");
 	char config_filename[1024] = {0};
 	ft_sprintf(config_filename, "%s/.42shrc", home);
-	dprintf(2, "filename: %s\n", config_filename);
 
 	char * const file_content = read_input_file(config_filename);
 	if (file_content)
@@ -256,8 +258,8 @@ void init_globals() {
 
 int main(const int ac, char *av[], const char *env[]) {
 
-	shell(SHELL_INIT);
 	init_globals();
+	shell(SHELL_INIT);
 
 	Vars *shell_vars = shell_vars_init(env);
 	ShellInfos *self = shell(SHELL_GET);

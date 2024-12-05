@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:52:42 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/17 12:12:24 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 16:19:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,14 +32,6 @@ bool secure_dup2(int from, int to) {
 	if (!is_valid_fd(from)) return error_bad_file_descriptor(from);
 	dup2(from, to);
 	return true;
-}
-
-void secure_pipe2(int pipefd[2], int flags){
-	if (pipe2(pipefd, flags) == -1){
-		perror("Fatal error pipe2: ");
-    gc(GC_CLEANUP, GC_ALL);
-		exit(EXIT_FAILURE);
-	}
 }
 
 void secure_execve(const char *pathname, char **const argv, char **const envp){

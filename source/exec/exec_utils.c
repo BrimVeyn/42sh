@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:03:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:10:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 17:25:38 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "libft.h"
 
+#include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -99,4 +100,34 @@ void close_fd_set() {
 	while (g_fdSet->size != 0) {
 		close(da_pop(g_fdSet));
 	}
+}
+
+void close_all_fds(void) {
+	for (uint16_t i = 3; i < 1024; i++) {
+		close(i);
+	}
+}
+
+void close_saved_fds(int *saved_fds) {
+	while (true) {
+		bool hit = false;
+		for (size_t i = 0; i < g_fdSet->size; i++) {
+			if (g_fdSet->data[i] == saved_fds[0] || 
+				g_fdSet->data[i] == saved_fds[1] || 
+				g_fdSet->data[i] == saved_fds[2])
+			{
+				close(g_fdSet->data[i]);
+				da_erase_index(g_fdSet, i);
+				hit = true;
+				break;
+			}
+		}
+		if (!hit) break;
+	}
+}
+
+void close_std_fds(void) {
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
 }
