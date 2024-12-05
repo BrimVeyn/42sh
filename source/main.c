@@ -6,10 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/04 10:46:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 13:52:21 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
+//TODO:HOME=/tmp cd
+//BRAKIS
 #include "ft_regex.h"
 #include "final_parser.h"
 #include "parser.h"

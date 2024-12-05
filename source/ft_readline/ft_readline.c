@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/02 14:16:47 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/05 13:56:41 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@
 #include <sys/time.h>
 
 //FIX: FIX ^C one line up 
+
+//TODO:fix ^R surlignement
 
 int rl_done = 0;
 
