@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:23 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:27:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 15:35:04 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,6 +220,7 @@ void load_42shrc(Vars *shell_vars) {
 	const char * const home = string_list_get_value(shell_vars->env, "HOME");
 	char config_filename[1024] = {0};
 	ft_sprintf(config_filename, "%s/.42shrc", home);
+	dprintf(2, "filename: %s\n", config_filename);
 
 	char * const file_content = read_input_file(config_filename);
 	if (file_content)
