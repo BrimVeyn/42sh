@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 13:56:41 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/05 15:16:50 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 //FIX: FIX ^C one line up 
 
 //TODO:fix ^R surlignement
-
+//
 int rl_done = 0;
 
 void move_cursor(int x, int y);
@@ -214,7 +214,7 @@ void update_line(readline_state_t *rl_state, string *line) {
 	} else {
 		move_cursor(0, rl_state->cursor_offset.y);
 		if (line->data[0]){
-			rl_state->search_mode.word_found = search_in_history(line->data);
+			search_in_history(rl_state, line->data);
 		}
 		if (!rl_state->search_mode.word_found){
 			rl_state->prompt.size = sizeof("(failed reverse-i-search)`") - 1;
@@ -226,10 +226,18 @@ void update_line(readline_state_t *rl_state, string *line) {
 		}
 		write(STDOUT_FILENO, line->data, str_length(line));
 		write(STDOUT_FILENO, "':", 2);
-		write(STDOUT_FILENO, "\033[7m", 4);
-		write(STDOUT_FILENO, rl_state->search_mode.word_found, line->size);
-		write(STDOUT_FILENO, "\033[0m", 4);
-		write(STDOUT_FILENO, rl_state->search_mode.word_found + line->size, ft_strlen(rl_state->search_mode.word_found) - line->size);
+		if (rl_state->search_mode.word_found){
+			int word_end = rl_state->search_mode.word_start + ft_strlen(line->data);
+			for (int i = 0; rl_state->search_mode.word_found[i]; i++){
+				if (i == rl_state->search_mode.word_start)
+					write(STDOUT_FILENO, "\033[7m", 4);
+				if (i == word_end){
+					write(STDOUT_FILENO, "\033[0m", 4);
+				}
+				write(STDOUT_FILENO, &rl_state->search_mode.word_found[i], 1);
+			}
+			write(STDOUT_FILENO, "\033[0m", 4);
+		}
 	}
 }
 
