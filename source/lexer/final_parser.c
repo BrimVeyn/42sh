@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:47:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/04 10:49:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 13:28:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,8 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 			return IO_NUMBER;
 	}
 
-	if (regex_match("^[a-zA-Z_][a-zA-Z0-9_]*=", (char *)raw_value).is_found) {
+	if (regex_match("^[a-zA-Z_][a-zA-Z0-9_]*=", (char *)raw_value).is_found ||
+		regex_match("^[a-zA-Z_][a-zA-Z0-9_]*\\+=", (char *)raw_value).is_found) {
 		if (table_row != 66 && table_row != 27 && table_row != 98)
 			return ASSIGNMENT_WORD;
 	}
@@ -81,7 +82,8 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 	// dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
 	if (regex_match("^[a-zA-Z_][a-zA-Z0-9_]*$", (char *)raw_value).is_found) {
 		if (table_row == 30 || 
-			((table_row == 48 || table_row == 0) && !ft_strcmp("(", lexer_peak(lexer, error))))
+			((table_row == 48 || table_row == 0 || table_row == 3)
+			&& !ft_strcmp("(", lexer_peak(lexer, error))))
 			return NAME;
 	}
 
@@ -1243,7 +1245,7 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 void parse_input(char *in, char *filename, Vars *shell_vars) {
 	if (!*in) return ;
 	ShellInfos *self = shell(SHELL_GET);
-	if (self->interactive && !self->script){
+	if (self->interactive && !self->script && !is_command_sub){
 		add_history(in, shell_vars);
 	}
 	Lex *lexer = lex_init(in, filename, shell_vars);

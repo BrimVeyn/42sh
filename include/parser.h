@@ -6,18 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:05:45 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/02 17:07:28 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 14:17:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PARSER_H
-#define PARSER_H
-
-#include <stdint.h>
-#include <stdio.h>
-
-#include "lexer.h"
-#include "utils.h"
+#ifndef ERROR_H
+#define ERROR_H
 
 //-----------------------------SHELL ------------------------------------------------------------------
 #define UNEXPECTED_TOKEN_STR "42sh: syntax error near unexpected token "
@@ -44,52 +38,5 @@
 #define ERROR_NO_SUCH_JOB(builtin, arg) ft_dprintf(STDERR_FILENO, "42sh: %s: %s: no such job\n", builtin, arg);
 
 //-------------------Expands related-----------------------------//
-typedef enum {
-	EXP_ARITHMETIC,
-	EXP_VARIABLE,
-	EXP_CMDSUB,
-	EXP_SUB,
-	EXP_WORD,
-	EXP_SQUOTE,
-	EXP_DQUOTE,
-} ExpKind;
 
-typedef struct Str {
-	struct Str *next;
-	char *str;
-	ExpKind kind;
-	bool	dquote;
-	bool	squote;
-} Str;
-
-typedef struct {
-	Str		**data;
-	size_t	size;
-	size_t	capacity;
-	size_t	size_of_element;
-	int		gc_level;
-} StrList;
-
-typedef struct {
-	ExpKind *data;
-	int gc_level;
-	size_t size;
-	size_t capacity;
-	size_t size_of_element;
-} ExpKindList;
-
-#include "final_parser.h"
-
-Str					*str_init(const ExpKind kind, char *str, bool add_to_gc);
-void				str_list_print(const StrList *list);
-//---------------------------------------------------------------//
-char				*parser_parameter_expansion(char *str, Vars *shell_vars);
-char				*parser_command_substitution(char *str, Vars *shell_vars);
-char				*parser_arithmetic_expansion(char *str, Vars *shell_vars);
-
-//-------------------history modules------------//
-bool				history_expansion (char **pstring);
-void				add_input_to_history(char *input, int *history_fd, Vars *shell_vars);
-void				get_history(Vars *shell_vars);
-
-#endif // !PARSER_H
+#endif // !ERROR_H
