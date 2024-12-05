@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/03 09:27:10 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/05 15:08:27 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ typedef struct s_position{
 
 typedef struct s_search_mode {
 	char *word_found;
+	int word_start;
 	bool active;
 } search_mode_t;
 
@@ -78,7 +79,7 @@ void destroy_history();
 HIST_ENTRY *pop_history();
 void str_info(const string *str);
 void set_prompt(readline_state_t *rl_state, const char *new_prompt);
-char *search_in_history(char *str);
+int search_in_history(readline_state_t *rl_state, char *str);
 
 void handle_control_keys(readline_state_t *rl_state, char char_c);
 int handle_printable_keys(readline_state_t *rl_state, char c, string *line);
