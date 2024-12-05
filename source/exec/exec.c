@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:47:26 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/04 11:32:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 15:14:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-
 pid_t g_masterPgid = 0;
 bool g_subshell = false;
+
 
 void dup_input_and_close(int fd) {
 	secure_dup2(fd, STDIN_FILENO);
@@ -37,12 +37,12 @@ void dup_input_and_close(int fd) {
 
 void create_pipe(bool *hadPipe, int *pipefd) {
 	(*hadPipe) = true;
-	secure_pipe2(pipefd, O_CLOEXEC);
+	pipe(pipefd);
+	da_push(g_fdSet, pipefd[0]);
+	da_push(g_fdSet, pipefd[1]);
 	secure_dup2(pipefd[1], STDOUT_FILENO);
 	close(pipefd[1]);
 }
-
-int is_function(const char * const func_name);
 
 char  *resolve_bine(SimpleCommandP * const command, Vars * const shell_vars) {
 	if (!command || !command->word_list->data[0]) {
@@ -302,11 +302,11 @@ void execute_until_clause(const CommandP * const command, const bool background,
 	const WhileClauseP * const while_clause = command->while_clause;
 
 	while (true) {
-		ListP * const body_save = gc_duplicate_list(while_clause->body);
-		execute_complete_command(wrap_list(body_save), shell_vars, false, background);
 		ListP * const condition_save = gc_duplicate_list(while_clause->condition);
 		execute_complete_command(wrap_list(condition_save), shell_vars, true, background);
-		if (g_exitno != 0) break ;
+		if (g_exitno == 0) break ;
+		ListP * const body_save = gc_duplicate_list(while_clause->body);
+		execute_complete_command(wrap_list(body_save), shell_vars, false, background);
 	}
 }
 
@@ -393,6 +393,7 @@ void execute_function(const CommandP * const command, const int funcNo, const bo
 
 	clear_positional(shell_vars->positional);
 	declare_positional(positional_parameters, shell_vars);
+	// string_list_print(shell_vars->positional);
 	execute_brace_group(function_copy->function_body, background, shell_vars);
 	string_list_clear(shell_vars->positional);
 
@@ -488,7 +489,7 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 					// if (background && shell_infos->script) { redirect_input_to_null(); }
 					// setpgid(pid, g_masterPgid);
 			// dprintf(2, C_DARK_CYAN"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
-					close_all_fds();
+					close_fd_set();
 					execute_simple_command(command, bin, NULL, shell_vars);
 					gc(GC_CLEANUP, GC_ALL);
 					exit(g_exitno);
@@ -503,7 +504,7 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 			}
 			pid_t pid = fork();
 			if (IS_CHILD(pid)) {
-				close_all_fds();
+				close_fd_set();
 				// if (background && shell_infos->script) { redirect_input_to_null(); }
 				execute_subshell(command, background, shell_vars);
 				gc(GC_CLEANUP, GC_ALL);
@@ -523,13 +524,14 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 	return ERROR;
 }
 
+
+
+
+
 int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	PipeLineP *process = job->pipeline;
-	int saved_fds[] = {
-		[STDIN_FILENO] = dup(STDIN_FILENO),
-		[STDOUT_FILENO] = dup(STDOUT_FILENO),
-		[STDERR_FILENO] = dup(STDERR_FILENO),
-	};
+	int *saved_fds = save_std_fds();
+	// dprintf(2, "fd: %d %d %d\n", saved_fds[0], saved_fds[1], saved_fds[2]);
 
 	ShellInfos *shell_infos = shell(SHELL_GET);
 	bool hadPipe = false;
@@ -541,7 +543,7 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 		dup2(saved_fds[STDIN_FILENO], STDIN_FILENO);
 		dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
 		dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
-		close_saved_fds(saved_fds);
+		close_fd_set();
 		return return_status;
 	}
 
@@ -571,7 +573,7 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 				signal_manager(SIG_EXEC);
 			}
 			// if (background && shell_infos->script) { redirect_input_to_null(); }
-			close_all_fds();
+			close_fd_set();
 
 			switch (process->command->type) {
 				case Simple_Command: { 
@@ -606,7 +608,7 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 		dup2(saved_fds[STDOUT_FILENO], STDOUT_FILENO);
 		dup2(saved_fds[STDERR_FILENO], STDERR_FILENO);
 	}
-	close_saved_fds(saved_fds);
+	close_fd_set();
 	return WAIT;
 }
 
@@ -690,7 +692,7 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 			if (IS_CHILD(pid)) {
 				g_masterPgid = getpid();
 				// dprintf(2, C_BRIGHT_CYAN"[MASTER] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
-				// close_all_fds();
+				close_fd_set();
 				execute_list(list_head, background, shell_vars);
 				gc(GC_CLEANUP, GC_ALL);
 				exit(g_exitno);

@@ -6,34 +6,54 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:47:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/04 10:47:02 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 13:52:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "final_parser.h"
-#include "lexer.h"
+#include "ft_regex.h"
 #include "utils.h"
 #include "libft.h"
 
+#include <linux/limits.h>
 #include <stdio.h>
 
-char *get_variable_value(Vars * const shell_vars, char * const name){
-	char *result = string_list_get_value(shell_vars->positional, name);
+char *get_variable_value(Vars * const shell_vars, const char * const id){
+	char *result = string_list_get_value(shell_vars->positional, id);
 	if (result) return result;
-	result = string_list_get_value(shell_vars->local, name);
+	result = string_list_get_value(shell_vars->local, id);
 	if (result) return result;
-	result = string_list_get_value(shell_vars->env, name);
+	result = string_list_get_value(shell_vars->env, id);
 	if (result) return result;
-	result = string_list_get_value(shell_vars->set, name);
+	result = string_list_get_value(shell_vars->set, id);
 	return result;
 }
 
-void add_vars_to_set(const Vars * const shell_vars, const StringListL * const vars) {
+void add_vars_to_set(Vars * const shell_vars, const StringListL * const vars) {
 	StringListL * const set = shell_vars->set;
 	StringListL * const env = shell_vars->env;
 	for (size_t i = 0; i < vars->size; i++) {
-		string_list_update(env, vars->data[i]);
-		string_list_add_or_update(set, vars->data[i]);
+		char buffer[MAX_WORD_LEN] = {0};
+		char *new_var = vars->data[i];
+
+		if (regex_match("^[_a-zA-Z][_a-zA-Z0-9]*\\+=", vars->data[i]).is_found) {
+			const size_t equal_pos = ft_strchr(vars->data[i], '=') - vars->data[i];
+			const size_t var_len = ft_strlen(vars->data[i]);
+			const char * const id = ft_substr(vars->data[i], 0, equal_pos - 1);
+			const char * const value = ft_substr(vars->data[i], equal_pos + 1, var_len - equal_pos - 1);
+			const char * const maybe_value = get_variable_value(shell_vars, id);
+
+			if (maybe_value) {
+				if (ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s%s", id, maybe_value, value) == -1)
+					fatal("snprintf: buffer overflow", 1);
+			} else {
+				if (ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s", id, value) == -1)
+					fatal("snprintf: buffer overflow", 1);
+			}
+			new_var = buffer;
+		}
+		string_list_update(env, new_var);
+		string_list_add_or_update(set, new_var);
 	}
 }
 

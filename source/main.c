@@ -6,19 +6,19 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/04 10:46:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 15:20:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_regex.h"
 #include "final_parser.h"
-#include "parser.h"
 #include "utils.h"
 #include "signals.h"
 #include "lexer.h"
 #include "exec.h"
 #include "libft.h"
 #include "ft_readline.h"
+#include "expansion.h"
 
 #include <linux/limits.h>
 #include <signal.h>
@@ -38,13 +38,14 @@
 int g_debug = 0;
 int g_exitno = 0;
 int g_signal = 0;
+IntList *g_fdSet = NULL;
 
 FunctionList *g_funcList = NULL;
 JobListe *g_jobList = NULL;
 
 //FIX: tilde expansion
 
-#include "readline/readline.h"
+// #include "readline/readline.h"
 
 void	*read_input_prompt(char *input, Vars *shell_vars) {
 	char *PS1 = string_list_get_value(shell_vars->set, "PS1");
@@ -210,7 +211,7 @@ void update_history_file(HISTORY_STATE *history, Vars *shell_vars){
 
 void load_42shrc(Vars *shell_vars) {
 	get_history(shell_vars);
-	signal_manager(SIG_PROMPT);
+	signal_manager(SIG_SCRIPT);
 
 	const char * const home = string_list_get_value(shell_vars->env, "HOME");
 	char config_filename[1024] = {0};
@@ -221,24 +222,36 @@ void load_42shrc(Vars *shell_vars) {
 		parse_input(file_content, config_filename, shell_vars);
 }
 
-void save_positional_parameters(const int ac, char **av, Vars * const shell_vars) {
-	for (int i = 1; i < ac; i++){
-		char buffer[MAX_WORD_LEN] = {0};
-		char *positional_number = ft_itoa(i - 1);
-		if (ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s", positional_number, av[i]) == -1)
-			fatal("snprintf: MAX_WORD_LEN exceeded", 255);
-		free(positional_number);
+void load_positional_parameters(const int ac, char **av, Vars * const shell_vars, ShellInfos * const shell_infos) {
+	if (!shell_infos->script) {
+		char buffer[] = "0=42sh";
 		string_list_add_or_update(shell_vars->positional, buffer);
+	} else {
+		for (int i = 1; i < ac; i++){
+			char buffer[MAX_WORD_LEN] = {0};
+			char *positional_number = ft_itoa(i - 1);
+			if (ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s", positional_number, av[i]) == -1)
+				fatal("snprintf: MAX_WORD_LEN exceeded", 255);
+			free(positional_number);
+			string_list_add_or_update(shell_vars->positional, buffer);
+		}
 	}
 }
 
-int main(const int ac, char *av[], const char *env[]) {
-	
-	shell(SHELL_INIT);
+void init_globals() {
 	da_create(jobListTmp, JobListe, sizeof(AndOrP *), GC_ENV);
 	da_create(funcListTmp, FunctionList, sizeof(FunctionP *), GC_ENV);
+	da_create(fdSetTmp, IntList, sizeof(int), GC_ENV);
+
+	g_fdSet = fdSetTmp;
 	g_jobList = jobListTmp;
 	g_funcList = funcListTmp;
+}
+
+int main(const int ac, char *av[], const char *env[]) {
+
+	shell(SHELL_INIT);
+	init_globals();
 
 	Vars *shell_vars = shell_vars_init(env);
 	ShellInfos *self = shell(SHELL_GET);
@@ -250,12 +263,11 @@ int main(const int ac, char *av[], const char *env[]) {
 	while (SHELL_IS_RUNNING) {
 		if (self->interactive && !self->script) { signal_manager(SIG_PROMPT); }
 		if (self->interactive && self->script) { signal_manager(SIG_SCRIPT); }
-		if (!SCRIPT_MODE) {
+		if (!SCRIPT_MODE)
 			input = read_input_prompt(input, shell_vars);
-		} else {
+		else
 			input = read_input_file(av[1]);
-			if (HAS_POSITIONAL) { save_positional_parameters(ac, av, shell_vars); }
-		}
+		load_positional_parameters(ac, av, shell_vars, self);
 		if (self->interactive && !self->script) { job_notification(); }
 		if (input) {
 			if (self->interactive && !self->script) {
@@ -278,7 +290,7 @@ int main(const int ac, char *av[], const char *env[]) {
 		}
 	}
 	if (self->interactive && !self->script) { update_history_file(history, shell_vars); }
+	close_fd_set();
 	gc(GC_CLEANUP, GC_ALL);
-	close_all_fds();
 	return (EXIT_SUCCESS);
 }

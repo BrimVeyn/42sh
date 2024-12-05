@@ -1,14 +1,16 @@
-var=10;
+func () {
+	for arg in ${@}; do
+		echo ${arg};
+	done
+}
 
-while true $((var--)); ! (exit $((var >= 0))); do
-	echo ${var};
-	sleep 0.01;
-done
+func un deux trois
 
-for positional; do
-	echo ${positional}; #should output every positional arg passed to the script
-done
+print_all_args () { 
+	for arg in ${@}; do 
+		echo "${arg}"; 
+	done; 
+}
 
-for fruit in pomme poire banane $(echo ananas); do
-	echo "Le fruit du jour est ${fruit}";
-done;
+print_all_args "arg1" "arg2" "arg3"
+

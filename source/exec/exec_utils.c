@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   exec_utils.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:03:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 15:00:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 15:10:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,18 +61,42 @@ char *find_bin_location(char *bin, StringListL *env, bool *absolute){
 	return NULL;
 }
 
-void close_saved_fds(int *saved_fds) {
-	if (saved_fds[STDIN_FILENO] != -1) {
-		close(saved_fds[STDIN_FILENO]);
-		saved_fds[STDIN_FILENO] = -1;
-	}	
-	if (saved_fds[STDOUT_FILENO] != -1) {
-		close(saved_fds[STDOUT_FILENO]);
-		saved_fds[STDOUT_FILENO] = -1;
+int get_highest_free_fd() {
+	int highest = 0;
+	for (size_t i = 0; i < g_fdSet->size; i++) {
+		if (g_fdSet->data[i] >= highest) {
+			highest = g_fdSet->data[i];
+		}
 	}
-	if (saved_fds[STDERR_FILENO] != -1) {
-		close(saved_fds[STDERR_FILENO]);
-		saved_fds[STDERR_FILENO] = -1;
-	}
+	return (highest == 0) ? 500 : highest + 1;
 }
 
+int move_to_high_fd(int fd) {
+	int high_fd = get_highest_free_fd();
+	if (dup2(fd, high_fd) == -1)
+		fatal("dup2: fatal", 1);
+	close(fd);
+	return high_fd;
+}
+
+int *save_std_fds() {
+	int *fds = gc(GC_CALLOC, 3, sizeof(int), GC_SUBSHELL);
+	fds[0] = dup(STDIN_FILENO);
+	fds[1] = dup(STDOUT_FILENO);
+	fds[2] = dup(STDERR_FILENO);
+
+	fds[0] = move_to_high_fd(fds[0]);
+	da_push(g_fdSet, fds[0]);
+	fds[1] = move_to_high_fd(fds[1]);
+	da_push(g_fdSet, fds[1]);
+	fds[2] = move_to_high_fd(fds[2]);
+	da_push(g_fdSet, fds[2]);
+	
+	return fds;
+}
+
+void close_fd_set() {
+	while (g_fdSet->size != 0) {
+		close(da_pop(g_fdSet));
+	}
+}

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/04 10:46:25 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 13:50:59 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,8 @@ static bool is_bad_substitution(char *full_exp){
 		!regex_match("^#[a-zA-Z_][a-zA-Z0-9_]*$", variable_name).is_found && // #XBD NAME
 		!regex_match("^[0-9]+$", variable_name).is_found && //000011---inf
 		!regex_match("^#[0-9]*$", variable_name).is_found && //#0011---inf && #
-		!regex_match("^\\?$", variable_name).is_found ) //?
+		!regex_match("^\\?$", variable_name).is_found && //?
+		!regex_match("^\\@$", variable_name).is_found ) //@
 		||
 		( regex_match("^\\$\\{.*:\\}$", full_exp).is_found || // !end_with(:)
 		  regex_match("^\\$\\{#.*:.*\\}$", full_exp).is_found ) ) // begin_with(#) and has (:)
@@ -142,6 +143,24 @@ static bool is_bad_substitution(char *full_exp){
 	}
 	free(variable_name);
 	return false;
+}
+
+char *positionals_to_string(Vars * const shell_vars) {
+	const StringListL *positional = shell_vars->positional;
+	char buffer[MAX_WORD_LEN] = {0};
+
+	for (size_t i = 1; i < positional->size; i++) {
+		char * const id = ft_ltoa(i);
+		const char * const value = string_list_get_value(positional, id);
+		free(id);
+		if (ft_snprintf(buffer, MAX_WORD_LEN, "%s", value) == -1)
+			fatal("snprintf: buffer overflow", 1);
+		if (i + 1 < positional->size) {
+			if (ft_snprintf(buffer, MAX_WORD_LEN, " ", positional->data[i]) == -1)
+				fatal("snprintf: buffer overflow", 1);
+        }
+	}
+	return gc(GC_ADD, ft_strdup(buffer), GC_SUBSHELL);
 }
 
 char *parser_parameter_expansion(char *full_exp, Vars *shell_vars){
@@ -180,29 +199,29 @@ char *parser_parameter_expansion(char *full_exp, Vars *shell_vars){
 			gc(GC_ADD, value, GC_SUBSHELL);
 		}
 	}
-	else if (regex_match("\\$\\{\\?\\}", full_exp).is_found){
-		// dprintf(2, C_RED"je suis la\n"C_RESET);
-		result = regex_match("\\$\\{\\?\\}", full_exp);
+	else if ((result = regex_match("\\$\\{\\?\\}", full_exp)).is_found){
 		value = ft_itoa(g_exitno);
+	}
+	else if ((result = regex_match("\\$\\{\\@\\}", full_exp)).is_found) {
+		value = positionals_to_string(shell_vars);
+	}
+	else if ((result = regex_match("\\$\\{\\#\\}", full_exp)).is_found) {
+		value = gc(GC_ADD, ft_ltoa(shell_vars->positional->size - 1), GC_SUBSHELL);
 	}
 	else {
 		result = regex_match ("\\$\\{[^\\$]*\\}", full_exp);
-		// dprintf(2, C_RED"PASS\n"C_RESET);
 		if (result.re_start != -1){
 			value = parser_get_variable_value(gc(GC_ADD, ft_substr(full_exp, result.re_start + 2, result.re_end - result.re_start - 3), GC_SUBSHELL), shell_vars);
-			// printf("value: %s\n", value);	
 		} else return NULL;
 	}
-	// printf("HELLO %s\n", full_exp);	
-
 	char *re_start = ft_substr(full_exp, 0, result.re_start);
 	char *re_end = ft_substr(full_exp, result.re_end, ft_strlen(full_exp));
 	char *tmp = ft_strjoin(re_start, value);
 
 	full_exp = gc(GC_ADD, ft_strjoin(tmp, re_end), GC_GENERAL);
 	FREE_POINTERS(tmp, re_start, re_end);
-	// dprintf(2, C_RED"je suis la\n"C_RESET);
-	// printf("string: %s\n\n", full_exp);
 
 	return ft_strdup(full_exp);
 }
+
+

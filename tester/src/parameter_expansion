@@ -48,3 +48,4 @@ echo ${PATH:}
 echo ${#PATH:-DSADAS}
 echo ${#DFPASDAS}
 echo ${#}
+var=1; var+='salut mec'; var+="salope"; var+='hey'; echo ${var}

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:46:41 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/28 09:23:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 15:10:14 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,13 @@
 # define EXEC_H
 
 #include "final_parser.h"
+#include "expansion.h"
 
 #include <termios.h>
 #include <stdbool.h>
+
+extern IntList *g_fdSet;
+
 //--------------Shell Infos------------------//
 typedef enum { SHELL_INIT, SHELL_GET } shell_interface_mode;
 
@@ -31,9 +35,12 @@ typedef struct ShellInfos {
 ShellInfos *shell(int mode);
 //-------------------------------------------//
 
-void	close_saved_fds(int *saved_fds);
 void	close_std_fds(void);
 void	close_all_fds(void);
+int		get_highest_free_fd();
+int		move_to_high_fd(int fd);
+int		*save_std_fds();
+void close_fd_set();
 
 int		secure_fork(void);
 bool	secure_dup2(int from, int to);
@@ -68,13 +75,10 @@ typedef enum {
 void *hash_interface(hash_mode mode, char *arg, Vars *shell_vars);
 char *hash_find_bin(char *bin, Vars *shell_vars);
 
-#include "final_parser.h"
-
 char *job_print(AndOrP * const andor, const bool newline);
 
 void add_vars_to_local(StringListL * const list, const StringListL * const vars);
 void add_vars_to_set(const Vars * const shell_vars, const StringListL * const vars);
-char *get_variable_value(Vars *shell_vars, char *name);
 
 void builtin_hash(const SimpleCommandP *command, Vars * const shell_vars);
 void builtin_set(const SimpleCommandP *command, Vars * const shell_vars);

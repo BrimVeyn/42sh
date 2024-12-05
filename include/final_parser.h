@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:33 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/04 10:47:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/05 14:12:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -347,7 +347,7 @@ typedef struct {
 void			parse_input(char *in, char *filename, Vars * const shell_vars);
 
 char			*get_positional_value(const StringListL * const sl, const size_t idx);
-char			*get_variable_value(Vars * const shell_vars, char * const name);
+char			*get_variable_value(Vars * const shell_vars, const char * const name);
 void			string_list_add_or_update(StringListL * const sl, const char * const var);
 bool			string_list_update(StringListL *sl, const char *var);
 void			string_list_append(const StringListL * const sl, char * const var);
@@ -356,8 +356,6 @@ bool			string_list_remove(StringListL *sl, char *id);
 char			*string_list_get_value(const StringListL * const sl, const char * const id);
 char			*shell_vars_get_value(const Vars * const shell_vars, char * const id);
 void			string_list_print(const StringListL *list);
-
-//FIX: update raw_input when line_continuation
 
 typedef struct {
 	size_t line, column, absolute;
@@ -444,6 +442,7 @@ StringListL *do_expansions(const StringListL * const word_list, Vars * const she
 
 typedef enum { O_NONE = 0, O_SPLIT = 1, O_ALLOWNULLS = 2, } ExpansionsOpt;
 
+int is_function(const char * const func_name);
 void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars, bool subshell, bool background);
 bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars);
 #endif // !FINAL_PARSER
