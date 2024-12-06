@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/27 12:54:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 11:53:13 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ void	ss_push_string(StringStream * const ss, const char * const str);
 void	ss_cut(StringStream * const ss, const size_t new_size);
 char	ss_pop_front(StringStream * const ss);
 void	ss_insert_string(StringStream * const ss, const char * const str, const size_t pos);
+void	da_transfer(StringStream *in, StringStream *out, int number);
 //------------------------------------------//
 
 #define gc_unique(datatype, garbage_collector_level) \
