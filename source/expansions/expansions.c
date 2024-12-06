@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 14:14:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 15:35:25 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,21 +89,6 @@ void remove_boundaries(Str *exp) {
 	exp->str = tmp;
 }
 
-char *parser_tilde_expansion(char *word, Vars *shell_vars) {
-	int result = -1;
-	string str = string_init_str(word);
-    char *home = string_list_get_value(shell_vars->env, "HOME");
-	while ((result = ft_strstr(str.data, "~")) != -1){
-		str_erase(&str, result, 1);
-		if (home){
-			str_insert_str(&str, home, result);
-		}
-	}
-	char *resultchar = ft_strdup(str.data);
-	free(str.data);
-	return resultchar;
-}
-
 void string_list_consume(StrList *str_list, Vars *shell_vars) {
 	for (size_t i = 0; i < str_list->size; i++) {
 		char *result = NULL;
@@ -115,7 +100,6 @@ void string_list_consume(StrList *str_list, Vars *shell_vars) {
 		else
 			remove_boundaries(curr);
 		// printf("trimmed: %s\n", curr->str);
-		result = parser_tilde_expansion(curr->str, shell_vars);
 		
 		// printf("result: %s\n", result);
 		if (result) {
@@ -175,7 +159,7 @@ void pos_list_print(IntList *list) {
 	}
 }
 
-StrList *get_range_list(const char * const candidate, Vars * const shell_vars) {
+StrList *get_range_list(const char * const candidate, Vars * const shell_vars, const int options) {
 	
 	static const ContextMap map[] = {
 		[EXP_ARITHMETIC]	= { .begin = "$((", .end = "))" },
@@ -192,8 +176,10 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars) {
 	da_create(word, StringStream, sizeof(char), GC_SUBSHELL);
 	da_create(cache_stack, StringStream, sizeof(char), GC_SUBSHELL);
 	ss_push_string(word, candidate);
+	parser_tilde_expansion(cache_stack, word, shell_vars, options);
+	// printf("word: %s\n", word->data);
 
-	bool squote = false, dquote = false, can_push = false;
+	bool squote = false, dquote = false, can_push = (word->size == 0);
 
 	while (word->size) {
 		const ExpKind top_context = da_peak_back(exp_stack);
@@ -210,7 +196,6 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars) {
 		ExpKind maybe_end = 0;
 
 		// dprintf(STDERR_FILENO, "SQ: %s, DQ: %s, c: %c\n", boolStr(squote), boolStr(dquote), current_char);
-
 		if (!squote && (maybe_begin = identify_exp_begin(word->data)) != EXP_WORD) {
 			if (!exp_stack->size && can_push) {
 				Str * const res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
@@ -464,7 +449,7 @@ StringListL *do_expansions(const StringListL * const word_list, Vars * const she
 	da_create(arg_list, StringListL, sizeof(char *), GC_SUBSHELL);
 	
 	for (size_t it = 0; it < word_list->size; it++) {
-		StrList * const string_list = get_range_list(word_list->data[it], shell_vars);
+		StrList * const string_list = get_range_list(word_list->data[it], shell_vars, options);
 		// str_list_print(string_list);
 		string_list_consume(string_list, shell_vars);
 		if (options & O_SPLIT)

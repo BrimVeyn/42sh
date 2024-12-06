@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:33 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 14:12:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 14:16:13 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -440,7 +440,7 @@ char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars);
 
 StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options);
 
-typedef enum { O_NONE = 0, O_SPLIT = 1, O_ALLOWNULLS = 2, } ExpansionsOpt;
+typedef enum { O_NONE = 0, O_SPLIT = 1, O_ALLOWNULLS = 2, O_ASSIGN = 4, } ExpansionsOpt;
 
 int is_function(const char * const func_name);
 void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars, bool subshell, bool background);
