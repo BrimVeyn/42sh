@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:47:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 13:52:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 14:37:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,10 +45,10 @@ void add_vars_to_set(Vars * const shell_vars, const StringListL * const vars) {
 
 			if (maybe_value) {
 				if (ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s%s", id, maybe_value, value) == -1)
-					fatal("snprintf: buffer overflow", 1);
+					fatal("snprintf: buffer overflow", __LINE__, __FILE_NAME__, 1);
 			} else {
 				if (ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s", id, value) == -1)
-					fatal("snprintf: buffer overflow", 1);
+					fatal("snprintf: buffer overflow", __LINE__, __FILE_NAME__, 1);
 			}
 			new_var = buffer;
 		}

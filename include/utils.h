@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 16:30:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 14:44:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,15 @@
 #include <stdbool.h>
 
 extern int g_exitno;
+
+#define _fatal(msg, exitno) fatal(msg, __LINE__, __FILE_NAME__, exitno);
+
+#ifndef __FILE_NAME__
+
+#include "libft.h"
+#define __FILE_NAME__ (ft_strrchr(__FILE__, '/') ? ft_strrchr(__FILE__, '/') + 1 : __FILE__)
+
+#endif
 
 #define BUFFER_SIZE 1024
 #define MAX_WORD_LEN 65536
@@ -179,7 +188,7 @@ char			*get_line_x(char *in, const size_t n);
 //------------------Error-----------------------//
 void error(const char * const msg, const int exit_code);
 void exit_clean(void);
-void fatal(const char * const msg, const int exit_code);
+void fatal(const char * const msg, const int line, const char *filename, const int exit_code);
 //----------------------------------------------//
 
 #endif // !UTILS_H

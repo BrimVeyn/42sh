@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:23 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 17:35:25 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 14:35:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,11 +161,17 @@ ShellInfos *shell(const int mode) {
 		self = gc_unique(ShellInfos, GC_ENV);
 		self->shell_terminal = STDIN_FILENO;
 		self->interactive = isatty(self->shell_terminal);
+
 		if (self->interactive) {
-			self->shell_terminal = open("/dev/tty", O_RDWR);
-			// da_push(g_fdSet, self->shell_terminal);
+
 			while (tcgetpgrp(self->shell_terminal) != (self->shell_pgid = getpgrp()))
-				kill(- self->shell_pgid, SIGTTIN);
+				kill(-self->shell_pgid, SIGTTIN);
+
+			self->shell_pgid = getpid();
+
+			if (setpgid(self->shell_pgid, self->shell_pgid) == -1)
+				fatal("setpgid: couldn't set the shell in its own pgid", __LINE__, __FILE_NAME__, 1);
+
 			tcsetpgrp(self->shell_terminal, self->shell_pgid);
 			tcgetattr(self->shell_terminal, &self->shell_tmodes);
 		}
@@ -239,7 +245,7 @@ void load_positional_parameters(const int ac, char **av, Vars * const shell_vars
 			char buffer[MAX_WORD_LEN] = {0};
 			char *positional_number = ft_itoa(i - 1);
 			if (ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s", positional_number, av[i]) == -1)
-				fatal("snprintf: MAX_WORD_LEN exceeded", 255);
+				fatal("snprintf: MAX_WORD_LEN exceeded", __LINE__, __FILE_NAME__, 1);
 			free(positional_number);
 			string_list_add_or_update(shell_vars->positional, buffer);
 		}

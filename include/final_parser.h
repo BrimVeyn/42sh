@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:33 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 14:12:47 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 12:19:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -419,12 +419,11 @@ void		gc_move_andor(AndOrP *andor);
 FunctionP	*gc_duplicate_function(FunctionP *func);
 ListP		*gc_duplicate_list(ListP *list);
 
-void	put_job_background(AndOrP *job, bool add);
+void	put_job_background(AndOrP *job);
 void	put_job_foreground(AndOrP *job, int cont);
 void	andor_move(AndOrP *job);
 void	update_job_status(void);
 void	job_wait(AndOrP *job);
-void	job_wait_2 (AndOrP *job);
 void	job_notification(void);
 void	job_killall(void);
 int		job_stopped(AndOrP *j);

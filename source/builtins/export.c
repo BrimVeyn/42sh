@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:33:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/03 16:25:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 14:34:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void builtin_export(const SimpleCommandP *command, Vars *shell_vars) {
 
 			if (maybe_value) {
 				if (ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s", arg, maybe_value) == -1)
-					fatal("snprintf: buffer overflow", 1);
+					fatal("snprintf: buffer overflow", __LINE__, __FILE_NAME__, 1);
 				string_list_add_or_update(shell_vars->env, buffer);
 			} else {
 				string_list_add_or_update(shell_vars->env, arg);
@@ -102,10 +102,10 @@ void builtin_export(const SimpleCommandP *command, Vars *shell_vars) {
 
 			if (maybe_value) {
 				if (ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s%s", id, maybe_value, additional_value) == -1)
-					fatal("snprintf: buffer overflow", 1);
+					fatal("snprintf: buffer overflow", __LINE__, __FILE_NAME__, 1);
 			} else {
 				if (ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s", id, additional_value) == -1)
-					fatal("sprintf: buffer overflow", 1);
+					fatal("sprintf: buffer overflow", __LINE__, __FILE_NAME__, 1);
 			}
 			string_list_add_or_update(shell_vars->env, buffer);
 			string_list_add_or_update(shell_vars->set, buffer);
