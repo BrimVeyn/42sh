@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:46:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/28 10:07:04 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/06 14:46:36 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -304,10 +304,10 @@ void builtin_cd(const SimpleCommandP *command, Vars * const shell_vars) {
 		char buffer[MAX_WORD_LEN] = {0};
 		if (pwd && !last_elem_is(pwd, '/')){
 			if (ft_snprintf(buffer, MAX_WORD_LEN, "%s/%s", pwd, curpath) == -1)
-				fatal("cd: FATAL", 255);
+				_fatal("cd: FATAL", 1);
 		} else{
 			if (ft_snprintf(buffer, MAX_WORD_LEN, "%s%s", pwd, curpath) == -1)
-				fatal("cd: FATAL", 255);
+				_fatal("cd: FATAL", 1);
 		}
 		
 		curpath = gc(GC_ADD, ft_strdup(buffer), GC_SUBSHELL);
@@ -338,7 +338,7 @@ void builtin_cd(const SimpleCommandP *command, Vars * const shell_vars) {
 	}
 
 	if (chdir(curpath) == -1){
-		fatal("cd: Fatal", 255);
+		_fatal("cd: Fatal", 1);
 	}
 
 	// printf("curpath: %s\n", curpath);

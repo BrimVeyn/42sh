@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:03:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 17:25:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 15:29:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ int get_highest_free_fd() {
 int move_to_high_fd(int fd) {
 	int high_fd = get_highest_free_fd();
 	if (dup2(fd, high_fd) == -1)
-		fatal("dup2: fatal", 1);
+		_fatal("dup2: fatal", 1);
 	close(fd);
 	return high_fd;
 }

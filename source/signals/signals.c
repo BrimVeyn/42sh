@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:47:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:23:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 15:36:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void signal_sigint_heredoc(int code) {
 }
 
 void signal_sigterm_exec(int code) {
-	fatal(NULL, 128 + code);
+	_fatal(NULL, 128 + code);
 }
 
 void signal_heredoc_mode(void) {
@@ -71,29 +71,9 @@ void signal_exec_mode(void) {
 	signal(SIGTTIN, SIG_DFL);
 	signal(SIGTTOU, SIG_DFL);
 	signal(SIGCHLD, SIG_DFL);
-	signal(SIGPIPE, SIG_IGN);
-	//FIX: sigpipe in non-interactive
+	signal(SIGPIPE, SIG_DFL);
 }
 
-void signal_sigtstp_script(int code) {
-	(void) code;
-	// Send SIGTSTP to the entire foreground process group
-  // FIX: this is weird
-	pid_t pgid = tcgetpgrp(STDIN_FILENO);
-	if (pgid > 0) {
-		killpg(pgid, SIGTSTP);
-	}
-}
-
-// void signal_script_mode(void) {
-// 	signal(SIGTSTP, SIG_DFL);
-// 	signal(SIGINT, SIG_DFL);
-// 	signal(SIGQUIT, SIG_DFL);
-// 	signal(SIGCONT, SIG_DFL);
-// 	signal(SIGTTIN, SIG_IGN);
-// 	signal(SIGTTOU, SIG_IGN);
-// 	signal(SIGCHLD, SIG_DFL);
-// }
 void signal_script_mode() {
     struct sigaction sa;
 

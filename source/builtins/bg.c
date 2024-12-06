@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 13:04:09 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 16:00:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 14:46:04 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 void revive_job(AndOrP *job) {
 	job->bg = true;
 	if (kill(-job->pgid, SIGCONT) < 0)
-		fatal("SIGCONT failed\n", 255);
+		_fatal("SIGCONT failed\n", 1);
 }
 
 void builtin_bg(const SimpleCommandP *command, __attribute__((unused)) Vars * const shell_vars) {

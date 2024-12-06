@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/03 17:39:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 15:36:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,36 +26,16 @@
 void job_wait (AndOrP *job) {
 	int status;
 	pid_t pid;
-	ShellInfos *shell_infos = shell(SHELL_GET);
 	da_create(list, JobListe, sizeof(AndOrP *), GC_ENV);
-	list->data[list->size++] = job;
+	da_push(list, job);
 
-	// dprintf(2, "is it stopped : %s\n", job->first_process->stopped ? "true" : "false");	
 	do {
-	back_to_wait:
 		pid = waitpid(-job->pgid, &status, WUNTRACED);
-		// dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
-		if (pid != -1) {
-		// } else {
-			// dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
-			//
-			if (WIFSTOPPED(status) && shell_infos->script) {
-				pid_t pgid = shell_infos->shell_pgid; // Foreground process group
-				if (killpg(pgid, SIGTSTP) < 0) {
-					perror("killpg");
-					fatal("Jobs: killpg failed", 255);
-				}
-				if (tcsetpgrp(shell_infos->shell_terminal, job->pgid) < 0) {
-					perror("tcsetpgrp(shell)");
-					fatal("Jobs: tcsetpgrp(shell) failed", 255);
-				}
-				if (killpg(job->pgid, SIGCONT) < 0) {
-					perror("killpg");
-					fatal("Jobs: killpg failed", 255);
-				}
-				goto back_to_wait;
-			}
-		}
+		// if (pid != -1) {
+		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
+		// 	} else {
+		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
+		// }
 	} while (!mark_process(list, pid, status, true)
 	&& !job_stopped(job)
 	&& !job_completed(job));
@@ -63,76 +43,40 @@ void job_wait (AndOrP *job) {
 
 #include "signal.h"
 
-void job_wait_2 (AndOrP *job) {
-	int status;
-	pid_t pid;
-	ShellInfos *shell_infos = shell(SHELL_GET);
-	da_create(list, JobListe, sizeof(AndOrP *), GC_ENV);
-	list->data[list->size++] = job;
-
-	do {
-		pid = waitpid(-1, &status, WUNTRACED);
-		// dprintf(2, C_BRIGHT_CYAN"WAIT2"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
-		if (pid != -1) {
-
-		// } else {
-			// dprintf(2, C_BRIGHT_CYAN"WAIT2"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
-		// 	perror("WAIT");
-			if (WIFSTOPPED(status) && shell_infos->interactive && !shell_infos->script) {
-				// dprintf(2, "pid = %d\n", getpid());
-				signal_manager(SIG_EXEC);
-				mark_process(list, pid, status, true);
-				if (kill(getpid(), SIGTSTP) < 0) {
-					perror("KILL");
-					fatal("Jobs: kill failed", 255);
-				}
-				signal_manager(SIG_PROMPT);
-				continue;
-			}
-			// } else if (shell_infos->interactive && shell_infos->script)
-		}
-            
-	} while (!mark_process(list, pid, status, false)
-	// && !job_stopped(job)
-	&& !job_completed(job));
-
-}
-
-void put_job_background (AndOrP *job, bool add) {
+void put_job_background (AndOrP *job) {
 	job->bg = true;
-	if (add) {
-		gc_move_andor(job);
-		job->id = g_jobList->size;
-		da_push(g_jobList, job);
-		if (!job->subshell)
-			dprintf(2, "[%zu]\t%d\n", job->id, job->pgid);
-		job->notified = true;
-    }
+	gc_move_andor(job);
+	job->id = g_jobList->size;
+	da_push(g_jobList, job);
+	dprintf(2, "[%zu]\t%d\n", job->id, job->pgid);
+	job->notified = true;
 }
 
 void put_job_foreground (AndOrP *job, int cont) {
 	ShellInfos *self = shell(SHELL_GET);
 	/* Put the job into the foreground.  */
-	tcsetpgrp(self->shell_terminal, job->pgid);
+	if (tcsetpgrp(self->shell_terminal, job->pgid) == -1)
+		_fatal("tcsetpgrp: failed", 1);
 	// dprintf(2, "shell->pgid: %d, job->pgid: %d\n", self->shell_pgid, job->pgid);
 	// dprintf(2, "JOB->PGID: %d\n", job->pgid);
 	/* Send the job a continue signal, if necessary.  */
 	if (cont) {
 		// job->notified = false;
-		tcsetattr(self->shell_terminal, TCSADRAIN, &job->tmodes);
+		if (tcsetattr(self->shell_terminal, TCSADRAIN, &job->tmodes) == -1)
+			_fatal("tcsetattr: failed", 1);
 		if (kill(-job->pgid, SIGCONT) < 0)
-        {
-			perror("SIGCONT");
-			fatal("SIGCONT failed\n", 255);
-        }
+			_fatal("SIGCONT failed\n", 1);
 	}
 	/* Wait for it to report.  */
 	job_wait(job);
 	/* Put the self->shell back in the foreground.  */
-	tcsetpgrp(self->shell_terminal, self->shell_pgid);
+	if (tcsetpgrp(self->shell_terminal, self->shell_pgid) == -1)
+		_fatal("tcsetpgrp: failed", 1);
 	/* Restore the self->shell’s terminal modes.  */
-	tcgetattr(self->shell_terminal, &job->tmodes);
-	tcsetattr(self->shell_terminal, TCSADRAIN, &self->shell_tmodes);
+	if (tcgetattr(self->shell_terminal, &job->tmodes) == -1)
+		_fatal("tcgetattr: failed", 1);
+	if (tcsetattr(self->shell_terminal, TCSADRAIN, &self->shell_tmodes) == -1)
+		_fatal("tcsetattr: failed", 1);
 }
 
 void update_job_status(void) {

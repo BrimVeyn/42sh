@@ -6,18 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 13:50:59 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 14:45:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "colors.h"
 #include "final_parser.h"
-#include "parser.h"
 #include "libft.h"
 #include "utils.h"
-#include "exec.h"
 #include "ft_regex.h"
-#include <math.h>
 #include <stdio.h>
 
 char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
@@ -154,10 +150,10 @@ char *positionals_to_string(Vars * const shell_vars) {
 		const char * const value = string_list_get_value(positional, id);
 		free(id);
 		if (ft_snprintf(buffer, MAX_WORD_LEN, "%s", value) == -1)
-			fatal("snprintf: buffer overflow", 1);
+			fatal("snprintf: buffer overflow", __LINE__, __FILE_NAME__, 1);
 		if (i + 1 < positional->size) {
 			if (ft_snprintf(buffer, MAX_WORD_LEN, " ", positional->data[i]) == -1)
-				fatal("snprintf: buffer overflow", 1);
+				_fatal("snprintf: buffer overflow", 1);
         }
 	}
 	return gc(GC_ADD, ft_strdup(buffer), GC_SUBSHELL);
