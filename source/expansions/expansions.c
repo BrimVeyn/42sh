@@ -6,10 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 14:14:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 12:43:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "exec.h"
 #include "parser.h"
 #include "libft.h"
 #include "signals.h"
@@ -23,29 +24,36 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
-//FIX: unlink heredoc
-//TODO: << && <<-
 void exp_kind_list_print(ExpKindList *list);
 
 char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars){
 	char *input = NULL;
 	const char *PS2 = string_list_get_value(shell_vars->set, "PS2");
-
-	static int heredoc_number = 0;
 	static int line_number = 0;
-	char filename[50]; 
-	sprintf(filename, "/tmp/here_doc_%d", heredoc_number++);
-	int file_fd = open(filename, O_CREAT | O_WRONLY | O_TRUNC, 0664);
+
+	char filename[] = "/tmp/here_doc_XXXXXX";
+	int file_fd = mkstemp(filename);
 	if (file_fd == -1) {
-		return NULL;
+		_fatal("mkstemp: failed to create here_doc", 1);
 	}
+	da_push(g_fdSet, file_fd);
 
 	signal_manager(SIG_HERE_DOC);
+
+	//FIX: crotte start heredoc and press ^D imediately --> leaks
+	//FIX: unlink heredoc
 	while(++line_number && (input = ft_readline(PS2, shell_vars)) && ft_strcmp(eof, input) && rl_done != 2){
 		if (mode == HD_EXPAND){
-			ft_dprintf(file_fd, "%s\n", input);
+			//TODO: abberant en memoire
+			//FIX: readline leaks
+			//FIX: fd of expansions stays open
+			da_create(tmp, StringListL, sizeof(char *), GC_SUBSHELL);
+			da_push(tmp, input);
+			StringListL *expanded_word = do_expansions(tmp, shell_vars, O_NONE);
+			ft_dprintf(file_fd, "%s\n", expanded_word->data[0]);
 		} else if (mode == HD_NO_EXPAND){
 			ft_dprintf(file_fd, "%s\n", input);
 		}

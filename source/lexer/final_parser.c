@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:47:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:23:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 12:44:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -237,7 +237,6 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 						break;
 					}
 					case 12: { /* pipeline -> BANG pipe_sequence */
-						//FIX: !
 						PipeLineP *pipe_sequence = da_pop(stack)->token.pipeline;
 						da_pop(stack);
 						pipe_sequence->banged = true;
@@ -1086,31 +1085,21 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 						reduced_entry->state = parsingTable[state][Io_File].value;
 						break;
 					}
-					case 99: /* io_here -> DLESS here_end *//*      TODO: start here_doc */
-					case 100: { /* io_here -> DLESSDASH here_end */ //  TODO: start here_doc no expansions */
-						Tokenn here_end = da_pop(stack)->token;
+					case 99: /* io_here -> DLESS here_end */
+					case 100: { /* io_here -> DLESSDASH here_end */
+						//TODO: apply quote removal on delimiter
+						char *delimiter = da_pop(stack)->token.raw_value;
 						TokenType type = da_pop(stack)->token.type;
 
 						char *heredoc_filename = NULL;
 						switch (type) {
-							case DLESS: //<<
-								{
-									// start_here_doc expansion on
-									heredoc_filename = here_doc(here_end.raw_value, HD_EXPAND, shell_vars);
-									break;
-								}
-							case DLESSDASH:
-								{
-									// start_here_doc expansions off
-									heredoc_filename = here_doc(here_end.raw_value, HD_NO_EXPAND, shell_vars);
-									break;
-								}
-							default: {};
+							case DLESS: { heredoc_filename = here_doc(delimiter, HD_EXPAND, shell_vars); break; } //<<
+							case DLESSDASH: { heredoc_filename = here_doc(delimiter, HD_NO_EXPAND, shell_vars); break; } //<<-
+							default: { break; };
 						}
-						if (!heredoc_filename){
-							return NULL;
-						}
-						//start here doc probleme reutrn NULL
+						//if any SIGINT is trigger or mkstemp fails
+						if (!heredoc_filename){ return NULL; }
+
 						reduced_entry->token.type = Io_Redirect;
 						reduced_entry->token.redir = gc_unique(RedirectionP, GC_SUBSHELL);
 						reduced_entry->token.redir->filename = heredoc_filename;
