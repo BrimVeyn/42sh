@@ -6,11 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/03 16:45:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 10:17:39 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/07 11:05:14 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <linux/limits.h>
+#include <limits.h>
 #include <unistd.h>
 #include "exec.h"
 #include "final_parser.h"

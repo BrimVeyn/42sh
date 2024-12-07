@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   fc.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:40:48 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/03 09:39:08 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/07 11:05:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 #include "ft_regex.h"
 #include <stdio.h>
 #include <sys/time.h>
-#include <linux/limits.h>
+#include <limits.h>
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <time.h>

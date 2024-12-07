@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:44 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:13:37 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/07 11:06:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "libft.h"
 #include "utils.h"
 #include "ft_regex.h"
-#include <linux/limits.h>
+#include <limits.h>
 #include <string.h>
 
 bool history_defined = false;

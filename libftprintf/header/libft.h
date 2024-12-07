@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:00:03 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/13 10:26:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 10:59:40 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,9 @@
 # include <string.h>
 
 // definitions
-
+#ifndef SIZE_MAX
 # define SIZE_MAX (18446744073709551615UL)
+#endif
 
 // definitions de structures
 

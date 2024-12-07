@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 14:33:24 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 14:34:39 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 11:04:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include "parser.h"
 #include "ft_regex.h"
 #include "utils.h"
-#include <linux/limits.h>
+#include <limits.h>
 #include <regex.h>
 #include <stdio.h>
 #include <unistd.h>

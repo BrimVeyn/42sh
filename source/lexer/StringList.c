@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:47:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 14:37:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 11:03:36 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "utils.h"
 #include "libft.h"
 
-#include <linux/limits.h>
+#include <limits.h>
 #include <stdio.h>
 
 char *get_variable_value(Vars * const shell_vars, const char * const id){

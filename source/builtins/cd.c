@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:46:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 14:46:36 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 11:04:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@
 #include "utils.h"
 #include "exec.h"
 #include "regex.h"
-#include <linux/limits.h>
+
+#include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <limits.h>

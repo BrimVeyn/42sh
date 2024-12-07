@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:23 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 14:35:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 11:03:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 #include "ft_readline.h"
 #include "expansion.h"
 
-#include <linux/limits.h>
+#include <limits.h>
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>

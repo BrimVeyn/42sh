@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 16:57:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 11:05:59 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include "libft.h"
 #include "utils.h"
 
-#include <linux/limits.h>
+#include <limits.h>
 #include <stdio.h>
 #include <termios.h>
 #include <termcap.h>

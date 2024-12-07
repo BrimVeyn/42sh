@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:11 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 14:42:14 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 11:03:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include "utils.h" 
 #include "final_parser.h"
 
-#include <linux/limits.h>
+#include <limits.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
