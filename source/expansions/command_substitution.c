@@ -6,11 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:11 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/07 11:03:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 12:10:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "parser.h"
+#include "exec.h"
 #include "utils.h" 
 #include "final_parser.h"
 
@@ -28,6 +28,7 @@ char *parser_command_substitution(char *str, Vars *shell_vars) {
     int output_fd = mkstemp(file_name);
 
 	const int STDOUT_SAVE = dup(STDOUT_FILENO);
+	da_push(g_fdSet, STDOUT_SAVE);
 
 	dup2(output_fd, STDOUT_FILENO);
 	close(output_fd);
@@ -41,7 +42,7 @@ char *parser_command_substitution(char *str, Vars *shell_vars) {
 
 	output_fd = open(file_name, O_RDONLY, 0644);
 	if (output_fd == -1)
-		fatal("open: command_sub file not found", __LINE__, __FILE_NAME__, 1);
+		_fatal("open: command_sub file not found", 1);
 
 	char * const result = read_whole_file(output_fd);
 	close(output_fd); 
