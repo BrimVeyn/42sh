@@ -1,5 +1,5 @@
 GCC=cc
-CFLAGS=-Wall -Wextra -Werror -g3 -mtune=native -march=native -O3 -fomit-frame-pointer -Iinclude -mavx -mavx2 -fPIE
+CFLAGS=-Wall -Wextra -g3 -mtune=native -march=native -O3 -fomit-frame-pointer -Iinclude -fPIE
 
 SRCDIR=srcs
 OBJDIR=objs

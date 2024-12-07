@@ -3,16 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   str_find.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/24 14:44:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/05/27 14:11:33 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/07 11:02:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/c_string.h"
 #include <string.h>
-#include <immintrin.h>
 
 size_t str_find(const string *str, const char *to_find){
 	size_t len = strlen(to_find);
