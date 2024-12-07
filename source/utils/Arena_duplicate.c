@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 17:40:48 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 11:43:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdalign.h>
-#include <stdio.h>
 
 StringListL *arena_dup_stringlist(ArenaAllocator *arena, StringListL *stringList) {
-    StringListL *self = arena_alloc(arena, sizeof(StringListL), alignof(StringListL));
+    StringListL *self = arena_unique(arena, StringListL);
     self->data = arena_alloc(arena, stringList->size_of_element * stringList->size, alignof(char **));
     self->size = stringList->size;
     self->capacity = stringList->capacity;
@@ -28,13 +27,12 @@ StringListL *arena_dup_stringlist(ArenaAllocator *arena, StringListL *stringList
     self->size_of_element = stringList->size_of_element;
     for (size_t i = 0; i < stringList->size; i++) {
         self->data[i] = arena_strdup(arena, stringList->data[i]);
-		dprintf(2, "copied: %s\n", self->data[i]);
     }
     return self;
 }
 
 RedirectionL *arena_dup_redirlist(ArenaAllocator *arena, RedirectionL *redirList) {
-    RedirectionL *self = arena_alloc(arena, sizeof(RedirectionL), alignof(RedirectionL));
+    RedirectionL *self = arena_unique(arena, RedirectionL);
     self->data = arena_alloc(arena, redirList->size_of_element * redirList->size, alignof(RedirectionP **));
     self->size = redirList->size;
     self->capacity = redirList->capacity;
@@ -78,14 +76,14 @@ StringListVect *arena_dup_stringlistvect(ArenaAllocator *arena, StringListVect *
 
 
 CommandP *arena_dup_command(ArenaAllocator *arena, CommandP *command) {
-    CommandP *self = arena_alloc(arena, sizeof(CommandP), alignof(CommandP));
+    CommandP *self = arena_unique(arena, CommandP);
     self->type = command->type;
     if (command->redir_list) {
         self->redir_list = arena_dup_redirlist(arena, command->redir_list);
     }
     switch (command->type) {
         case Simple_Command: {
-            self->simple_command = arena_alloc(arena, sizeof(SimpleCommandP), alignof(SimpleCommandP));
+            self->simple_command = arena_unique(arena, SimpleCommandP);
             self->simple_command->assign_list = arena_dup_stringlist(arena, command->simple_command->assign_list);
             self->simple_command->word_list = arena_dup_stringlist(arena, command->simple_command->word_list);
             self->simple_command->redir_list = arena_dup_redirlist(arena, command->simple_command->redir_list);
@@ -140,14 +138,14 @@ CommandP *arena_dup_command(ArenaAllocator *arena, CommandP *command) {
 
 
 PipeLineP *arena_dup_pipeline(ArenaAllocator *arena, PipeLineP *pipeline) {
-	PipeLineP *self = arena_alloc(arena, sizeof(PipeLineP *), alignof(PipeLineP *));
+	PipeLineP *self = arena_unique(arena, PipeLineP);
 	PipeLineP *head = pipeline;
 	PipeLineP *it = self;
 	while (head) {
 		it->command = arena_dup_command(arena, head->command);
 		it->banged = head->banged;
 		if (head->next)
-			it->next = arena_alloc(arena, sizeof(PipeLineP *), alignof(PipeLineP *));
+			it->next = arena_unique(arena, PipeLineP *);
 		it = it->next;
 		head = head->next;
 	}
@@ -155,14 +153,14 @@ PipeLineP *arena_dup_pipeline(ArenaAllocator *arena, PipeLineP *pipeline) {
 }
 
 AndOrP *arena_dup_andor(ArenaAllocator *arena, AndOrP *andor) {
-	AndOrP *self = arena_alloc(arena, sizeof(AndOrP *), alignof(AndOrP *));
+	AndOrP *self = arena_unique(arena, AndOrP);
 	AndOrP *head = andor;
 	AndOrP *it = self;
 	while (head) {
 		it->pipeline = arena_dup_pipeline(arena, head->pipeline);
 		it->separator = head->separator;
 		if (head->next)
-			it->next = arena_alloc(arena, sizeof(AndOrP *), alignof(AndOrP *));
+			it->next = arena_unique(arena, AndOrP);
 		it = it->next;
 		head = head->next;
 	}
@@ -170,14 +168,14 @@ AndOrP *arena_dup_andor(ArenaAllocator *arena, AndOrP *andor) {
 }
 
 ListP *arena_dup_list(ArenaAllocator *arena, ListP *list) {
-	ListP *self = arena_alloc(arena, sizeof(ListP *), alignof(ListP *));
+	ListP *self = arena_unique(arena, ListP);
 	ListP *head = list;
 	ListP *it = self;
 	while (head) {
 		it->and_or = arena_dup_andor(arena, head->and_or);
 		it->separator = head->separator;
 		if (head->next)
-			it->next = arena_alloc(arena, sizeof(ListP *), alignof(ListP *));
+			it->next = arena_unique(arena, ListP);
 		it = it->next;
 		head = head->next;
 	}
@@ -185,7 +183,7 @@ ListP *arena_dup_list(ArenaAllocator *arena, ListP *list) {
 }
 
 FunctionP *arena_dup_function(ArenaAllocator *arena, FunctionP *func) {
-	FunctionP *self = arena_alloc(arena, sizeof(FunctionP *), alignof(FunctionP *));
+	FunctionP *self = arena_unique(arena, FunctionP);
 	self->function_name = arena_strdup(arena, func->function_name);
 	self->function_body = arena_dup_command(arena, func->function_body);
 	return self;

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:22:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 17:43:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 12:24:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,23 +127,17 @@ void execute_if_clause(const CommandP * const command, const bool background, Va
 
 void execute_while_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
 	const WhileClauseP * const while_clause = command->while_clause;
-	// print_list(while_clause->body);
 
 	ArenaAllocator *arena = arena_create(1e5);
 
-	ListP *cond = arena_dup_list(arena, while_clause->body);
-	print_list(while_clause->body);
-	print_list(cond);
-	_fatal("salut !", 1);
-
 	while (true) {
-		ListP * const condition_save = gc_duplicate_list(while_clause->condition);
-		// ListP * const condition_save = arena_dup_list(arena, while_clause->condition);
+		ListP * const condition_save = arena_dup_list(arena, while_clause->condition);
 		execute_complete_command(wrap_list(condition_save), shell_vars, true, background);
+		arena_reset(arena);
 		if (g_exitno != 0) break ;
-		ListP * const body_save = gc_duplicate_list(while_clause->body);
-		// ListP * const body_save = arena_dup_list(arena, while_clause->body);
+		ListP * const body_save = arena_dup_list(arena, while_clause->body);
 		execute_complete_command(wrap_list(body_save), shell_vars, true, background);
+		arena_reset(arena);
 	}
 	arena_destroy(arena);
 }
@@ -425,10 +419,18 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 				signal_manager(SIG_EXEC);
 			}
 
-            if (prev_pipe[0] != -1) { dup_input(prev_pipe[0]); close(prev_pipe[0]); }
-            if (hasNext) { dup_output(curr_pipe[1]); close(curr_pipe[1]); }
+            if (prev_pipe[0] != -1) { 
+				dup_input(prev_pipe[0]); 
+				close(prev_pipe[0]); 
+			}
+            if (hasNext) { 
+				dup_output(curr_pipe[1]); 
+				close(curr_pipe[1]); 
+			}
 
-            close(prev_pipe[1]);
+			if (prev_pipe[1] != -1) {
+				close(prev_pipe[1]);
+			}
             close(curr_pipe[0]);
             close(curr_pipe[1]);
 

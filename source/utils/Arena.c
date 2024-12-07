@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 16:34:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 17:43:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 11:48:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "utils.h"
 #include "libft.h"
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdalign.h>
 
@@ -38,10 +39,10 @@ void *arena_alloc(ArenaAllocator *arena, size_t size, size_t alignment) {
 	size_t current_offset = (size_t)arena->memory + arena->offset;
 
 	size_t aligned_offset = (current_offset + (alignment - 1)) & ~(alignment - 1);
+    ft_memset((void *)aligned_offset, 0, size); // Ensure memory is initialized to zero
 
 	size_t next_offset = aligned_offset + size;
 	if (next_offset > (size_t)arena->memory + arena->capacity) {
-		//FIX: Realloc
 		_fatal("arena: max capacity exceeded", 1);
 	}
 

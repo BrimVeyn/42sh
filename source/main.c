@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:23 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/07 11:03:24 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/07 12:24:27 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,6 +159,7 @@ ShellInfos *shell(const int mode) {
 
 	if (mode == SHELL_INIT) {
 		self = gc_unique(ShellInfos, GC_ENV);
+
 		self->shell_terminal = STDIN_FILENO;
 		self->interactive = isatty(self->shell_terminal);
 
@@ -167,6 +168,13 @@ ShellInfos *shell(const int mode) {
 			while (tcgetpgrp(self->shell_terminal) != (self->shell_pgid = getpgrp()))
 				kill(-self->shell_pgid, SIGTTIN);
 
+			signal (SIGINT, SIG_IGN);
+			signal (SIGQUIT, SIG_IGN);
+			signal (SIGTSTP, SIG_IGN);
+			signal (SIGTTIN, SIG_IGN);
+			signal (SIGTTOU, SIG_IGN);
+			signal (SIGCHLD, SIG_IGN);
+			
 			self->shell_pgid = getpid();
 
 			if (setpgid(self->shell_pgid, self->shell_pgid) == -1)
