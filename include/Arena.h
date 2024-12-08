@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 16:42:45 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/07 11:31:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/08 12:47:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,13 @@ char			*arena_strdup(ArenaAllocator *arena, const char *str);
 void			arena_destroy(ArenaAllocator *arena);
 void			arena_reset(ArenaAllocator *arena);
 
+FunctionP			*arena_dup_function(ArenaAllocator *arena, FunctionP *func);
+ListP				*arena_dup_list(ArenaAllocator *arena, ListP *list);
+CompleteCommandP	*arena_dup_complete_command(ArenaAllocator *arena, CompleteCommandP *cc);
+
 #include  <stdalign.h>
 
 #define arena_unique(ptr, type) arena_alloc(ptr, sizeof(type), alignof(type));
 
-FunctionP		*arena_dup_function(ArenaAllocator *arena, FunctionP *func);
-ListP			*arena_dup_list(ArenaAllocator *arena, ListP *list);
 
 #endif // !ARENA_H

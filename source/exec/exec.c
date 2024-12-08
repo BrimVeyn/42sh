@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:22:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/07 12:24:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/08 12:50:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,8 +78,6 @@ void execute_simple_command(CommandP *command, char *bin, Vars *shell_vars) {
 	execve(bin, simple_command->word_list->data, shell_vars->env->data);
 }
 
-
-
 void execute_list(ListP *list, const bool background, Vars * const shell_vars);
 
 CompleteCommandP *wrap_list(ListP * const list) {
@@ -145,13 +143,19 @@ void execute_while_clause(const CommandP * const command, const bool background,
 void execute_until_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
 	const WhileClauseP * const while_clause = command->while_clause;
 
+	ArenaAllocator *arena = arena_create(1e5);
+
 	while (true) {
-		ListP * const condition_save = gc_duplicate_list(while_clause->condition);
+		ListP * const condition_save = arena_dup_list(arena, while_clause->condition);
 		execute_complete_command(wrap_list(condition_save), shell_vars, true, background);
+		arena_reset(arena);
 		if (g_exitno == 0) break ;
-		ListP * const body_save = gc_duplicate_list(while_clause->body);
+		ListP * const body_save = arena_dup_list(arena, while_clause->body);
 		execute_complete_command(wrap_list(body_save), shell_vars, false, background);
+		arena_reset(arena);
 	}
+
+	arena_destroy(arena);
 }
 
 void execute_case_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
@@ -183,10 +187,8 @@ void execute_for_clause(const CommandP * const command, const bool background, V
 	const StringListL *expanded_words = do_expansions(for_clause->word_list, shell_vars, O_SPLIT | O_ALLOWNULLS);
 	const StringListL * const word_list = (for_clause->in == true) ? expanded_words : shell_vars->positional;
 
-	// print_for_clause(for_clause);
-	// ListP * save = gc_duplicate_list(for_clause->body);
-	// print_list(save);
-	// fatal("fdp\n", 1);
+	ArenaAllocator *arena = arena_create(1e5);
+
 	for (size_t i = (0 + !for_clause->in); word_list && i < word_list->size; i++) {
 		char buffer[MAX_WORD_LEN] = {0};
 		const char * const value = (for_clause->in == true) ? word_list->data[i] : get_positional_value(word_list, i); 
@@ -194,9 +196,15 @@ void execute_for_clause(const CommandP * const command, const bool background, V
 		if (ret == -1)
 			_fatal("snprintf: buffer overflow", 1);
 		string_list_add_or_update(shell_vars->set, buffer);
-		ListP * const body_save = gc_duplicate_list(for_clause->body);
+
+
+		ListP * const body_save = arena_dup_list(arena, for_clause->body);
 		execute_complete_command(wrap_list(body_save), shell_vars, background, background);
+		arena_reset(arena);
 	}
+
+	arena_destroy(arena);
+
 	return ;
 }
 

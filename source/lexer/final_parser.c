@@ -6,11 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:47:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/07 12:44:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/08 12:47:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "final_parser.h"
+#include "Arena.h"
 #include "ft_readline.h"
 #include "ft_regex.h"
 #include "utils.h"
@@ -150,7 +151,6 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
 						da_pop(stack); //newline_list
 						da_pop(stack); //complete_commands
-						// print_complete_command(complete_command);
 						execute_complete_command(complete_command, shell_vars, false, false);
 						reduced_entry->token.type = Complete_Commands;
 						state = da_peak_back(stack)->state;
@@ -1232,11 +1232,16 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 
 
 void parse_input(char *in, char *filename, Vars *shell_vars) {
-	if (!*in) return ;
+	if (!*in)
+		return ;
+
 	ShellInfos *self = shell(SHELL_GET);
+
 	if (self->interactive && !self->script && !is_command_sub){
 		add_history(in, shell_vars);
 	}
+
 	Lex *lexer = lex_init(in, filename, shell_vars);
+
 	parse(lexer, shell_vars);
 }

@@ -6,7 +6,7 @@
 #    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/06 10:05:24 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/12/07 12:37:40 by bvan-pae         ###   ########.fr        #
+#    Updated: 2024/12/08 12:51:47 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -126,7 +126,7 @@ endef
 all: compute_total $(NAME)
 
 compute_total:
-	$(eval TOTAL_FILES := $(shell var=$$(./test.sh); if [ $${var} -ne 0 ]; then echo $${var} ; else echo $(TOTAL_FILES); fi))
+	$(eval TOTAL_FILES := $(shell var=$$(./progression_bar.sh); if [ $${var} -ne 0 ]; then echo $${var} ; else echo $(TOTAL_FILES); fi))
 
 $(SAN): $(LIBFT) $(STRING) $(STRING) $(OBJDIR) $(OBJ)
 	@echo "$(GREEN)Making binary with sanitizer: $(NAME)"
