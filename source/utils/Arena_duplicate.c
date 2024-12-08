@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/07 11:43:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/08 12:24:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,6 +179,13 @@ ListP *arena_dup_list(ArenaAllocator *arena, ListP *list) {
 		it = it->next;
 		head = head->next;
 	}
+	return self;
+}
+
+CompleteCommandP *arena_dup_complete_command(ArenaAllocator *arena, CompleteCommandP *cc) {
+	CompleteCommandP *self = arena_unique(arena, CompleteCommandP);
+	self->list = arena_dup_list(arena, cc->list);
+	self->separator = cc->separator;
 	return self;
 }
 

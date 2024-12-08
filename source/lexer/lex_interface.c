@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 13:04:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/03 18:16:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/08 12:47:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ Lex *lex_init(const char * const input, char * const filename, Vars * const shel
 	da_create(produced_tokens, TokenTypeVect, sizeof(TokenType), GC_SUBSHELL);
 	ss_push_string(raw_input_ss, input);
 	ss_push_string(input_ss, input);
-	lexer->filename = (filename == NULL) ? "terminal" : filename;
+	lexer->filename = (filename == NULL) ? "42sh" : filename;
 	lexer->input = input_ss;
 	lexer->peak = peak;
 	lexer->raw_input_ss = raw_input_ss;
