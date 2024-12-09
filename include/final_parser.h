@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:33 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 12:19:39 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 17:20:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -379,28 +379,18 @@ typedef struct {
 	TokenTypeVect *produced_tokens;
 } Lex;
 
-Lex *lex_init(const char * const input, char * const filename, Vars * const shell_vars);
-char *lexer_get(Lex * const lexer, bool * const error);
-char *lexer_peak(Lex * const lexer, bool * const error);
-char *lexer_peak_char(Lex * const lexer);
+Lex		*lex_init(const char * const input, char * const filename, Vars * const shell_vars);
+char	*lexer_get(Lex * const lexer, bool * const error);
+char	*lexer_peak(Lex * const lexer, bool * const error);
+char	*lexer_peak_char(Lex * const lexer);
 
-void pretty_error(const Lex *const lexer, char *raw_token);
+void	pretty_error(const Lex *const lexer, char *raw_token);
 
 
 bool	is_continuable(const TokenType type);
 void	line_continuation(const Lex * const lexer);
 void	line_continuation_backslash(Lex *lexer, StringStream * const input, CursorPosition * const pos);
 void 	pass_whitespace(StringStream * const input, CursorPosition * const pos);
-
-// #define HIGH_FD_MAX 256
-
-typedef struct {
-	AndOrP **data;
-	size_t size;
-	size_t capacity;
-	size_t size_of_element;
-	int	gc_level;
-} JobListe;
 
 typedef struct {
 	FunctionP **data;
@@ -410,25 +400,13 @@ typedef struct {
 	int gc_level;
 } FunctionList;
 
-
-extern JobListe *g_jobList;
 extern FunctionList *g_funcList;
 
 void		gc_move_function(FunctionP *func);
 void		gc_move_andor(AndOrP *andor);
 FunctionP	*gc_duplicate_function(FunctionP *func);
+AndOrP		*gc_duplicate_andor(AndOrP *andor);
 ListP		*gc_duplicate_list(ListP *list);
-
-void	put_job_background(AndOrP *job);
-void	put_job_foreground(AndOrP *job, int cont);
-void	andor_move(AndOrP *job);
-void	update_job_status(void);
-void	job_wait(AndOrP *job);
-void	job_notification(void);
-void	job_killall(void);
-int		job_stopped(AndOrP *j);
-int		job_completed(AndOrP *j);
-int		mark_process(JobListe *list, pid_t pid, int status, bool print);
 
 typedef enum {
 	HD_EXPAND,
@@ -442,6 +420,6 @@ StringListL *do_expansions(const StringListL * const word_list, Vars * const she
 typedef enum { O_NONE = 0, O_SPLIT = 1, O_ALLOWNULLS = 2, } ExpansionsOpt;
 
 int is_function(const char * const func_name);
-void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars, bool subshell, bool background);
+void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars, bool bg);
 bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars);
 #endif // !FINAL_PARSER

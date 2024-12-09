@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:46:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/07 11:04:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 11:33:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -280,8 +280,7 @@ void builtin_cd(const SimpleCommandP *command, Vars * const shell_vars) {
 			return;
 		}
 		operand = gc(GC_ADD, ft_strdup(oldpwd), GC_SUBSHELL);
-		write(1, operand, ft_strlen(operand));
-		write(1, "\n", 1);
+		ft_dprintf(1, "%s\n", operand);
 	}
 	
 

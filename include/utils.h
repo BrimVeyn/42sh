@@ -6,12 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 14:44:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 15:03:32 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef UTILS_H
 #define UTILS_H
+
+#include "libft.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -23,7 +25,6 @@ extern int g_exitno;
 
 #ifndef __FILE_NAME__
 
-#include "libft.h"
 #define __FILE_NAME__ (ft_strrchr(__FILE__, '/') ? ft_strrchr(__FILE__, '/') + 1 : __FILE__)
 
 #endif
@@ -58,6 +59,7 @@ typedef enum {
 	GC_FREE,
 	GC_CLEANUP,
 	GC_RESET,
+	GC_CLEAN_IDX,
 	GC_GET,
 } gc_mode;
 

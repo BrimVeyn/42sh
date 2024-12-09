@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/07 12:43:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 15:18:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars){
 
 	free(input);
 	close(file_fd);
-	return gc(GC_ADD, ft_strdup(filename), GC_GENERAL);
+	return gc(GC_ADD, ft_strdup(filename), GC_SUBSHELL);
 }
 
 void remove_boundaries(Str *exp) {
@@ -479,8 +479,6 @@ StringListL *do_expansions(const StringListL * const word_list, Vars * const she
 			string_list_split(string_list, shell_vars);
 		string_erase_nulls(string_list);
 		quote_removal(string_list);
-		if (!(options & O_ALLOWNULLS))
-			string_erase_nulls(string_list);
 		// str_list_print(string_list);
 		StringListL * const result = string_list_merge(string_list);
 		// printStringList(result);

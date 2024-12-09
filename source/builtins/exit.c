@@ -6,18 +6,17 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:10:41 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 13:59:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "ft_regex.h"
 #include "utils.h"
-#include "regex.h"
 #include <stdlib.h>
 
 static void err_exit(char *msg){
-	ft_dprintf(2, "42sh: exit: %s", msg);
+	ft_dprintf(2, "42sh: exit: %s\n", msg);
 }
 
 void builtin_exit(const SimpleCommandP *command, __attribute__((unused)) Vars *shell_vars) {
@@ -27,7 +26,7 @@ void builtin_exit(const SimpleCommandP *command, __attribute__((unused)) Vars *s
 		err_exit("numeric argument required\n");
 		close_fd_set();
 		gc(GC_CLEANUP, GC_ALL);
-		exit (2);
+		exit(2);
 	}
 
 	if (command->word_list->data[2]){

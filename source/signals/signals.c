@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:47:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/08 12:41:54 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 16:09:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,6 @@ void signal_script_mode() {
     signal(SIGTTIN, SIG_IGN);
     signal(SIGTTOU, SIG_IGN);
     signal(SIGCHLD, SIG_DFL);
-
 }
 
 void signal_manager(type_of_signals mode) {

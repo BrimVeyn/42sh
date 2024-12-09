@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/08 12:24:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 13:20:37 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 
 StringListL *arena_dup_stringlist(ArenaAllocator *arena, StringListL *stringList) {
     StringListL *self = arena_unique(arena, StringListL);
-    self->data = arena_alloc(arena, stringList->size_of_element * stringList->size, alignof(char **));
+    self->data = _arena_alloc(arena, stringList->size, char *);
     self->size = stringList->size;
     self->capacity = stringList->capacity;
     self->gc_level = stringList->gc_level; // Not used with arena, but kept for consistency
@@ -33,13 +33,13 @@ StringListL *arena_dup_stringlist(ArenaAllocator *arena, StringListL *stringList
 
 RedirectionL *arena_dup_redirlist(ArenaAllocator *arena, RedirectionL *redirList) {
     RedirectionL *self = arena_unique(arena, RedirectionL);
-    self->data = arena_alloc(arena, redirList->size_of_element * redirList->size, alignof(RedirectionP **));
+    self->data = _arena_alloc(arena, redirList->size, RedirectionP *);
     self->size = redirList->size;
     self->capacity = redirList->capacity;
     self->gc_level = redirList->gc_level; // Not relevant for arena
     self->size_of_element = redirList->size_of_element;
     for (size_t i = 0; i < redirList->size; i++) {
-        self->data[i] = arena_alloc(arena, sizeof(RedirectionP), alignof(RedirectionP));
+        self->data[i] = arena_unique(arena, RedirectionP);
         self->data[i]->filename = arena_strdup(arena, redirList->data[i]->filename);
         if (redirList->data[i]->io_number) {
             self->data[i]->io_number = arena_strdup(arena, redirList->data[i]->io_number);
@@ -49,8 +49,8 @@ RedirectionL *arena_dup_redirlist(ArenaAllocator *arena, RedirectionL *redirList
 }
 
 ListPVect *arena_dup_listvect(ArenaAllocator *arena, ListPVect *vect) {
-	ListPVect *self = gc_unique(StringListVect, GC_SUBSHELL);
-	self->data = gc(GC_CALLOC, vect->capacity, vect->size_of_element, GC_SUBSHELL);
+	ListPVect *self = arena_unique(arena, StringListVect);
+	self->data = _arena_alloc(arena, vect->size, ListP *);
 	self->size = vect->size;
 	self->capacity = vect->capacity;
 	self->gc_level = vect->gc_level;
@@ -62,8 +62,8 @@ ListPVect *arena_dup_listvect(ArenaAllocator *arena, ListPVect *vect) {
 }
 
 StringListVect *arena_dup_stringlistvect(ArenaAllocator *arena, StringListVect *vect) {
-	StringListVect *self = gc_unique(StringListVect, GC_SUBSHELL);
-	self->data = gc(GC_CALLOC, vect->capacity, vect->size_of_element, GC_SUBSHELL);
+	StringListVect *self = arena_unique(arena, StringListVect);
+	self->data = _arena_alloc(arena , vect->size, StringListL *);
 	self->size = vect->size;
 	self->capacity = vect->capacity;
 	self->gc_level = vect->gc_level;
@@ -98,13 +98,13 @@ CommandP *arena_dup_command(ArenaAllocator *arena, CommandP *command) {
             break;
         }
         case If_Clause: {
-            self->if_clause = arena_alloc(arena, sizeof(IFClauseP), alignof(IFClauseP));
+            self->if_clause = arena_unique(arena, IFClauseP);
             self->if_clause->bodies = arena_dup_listvect(arena, command->if_clause->bodies);
             self->if_clause->conditions = arena_dup_listvect(arena, command->if_clause->conditions);
             break;
         }
         case For_Clause: {
-            self->for_clause = arena_alloc(arena, sizeof(ForClauseP), alignof(ForClauseP));
+            self->for_clause = arena_unique(arena, ForClauseP);
             self->for_clause->iterator = arena_strdup(arena, command->for_clause->iterator);
             self->for_clause->in = command->for_clause->in;
             if (command->for_clause->word_list) {
@@ -114,7 +114,7 @@ CommandP *arena_dup_command(ArenaAllocator *arena, CommandP *command) {
             break;
         }
         case Case_Clause: {
-            self->case_clause = arena_alloc(arena, sizeof(CaseClauseP), alignof(CaseClauseP));
+            self->case_clause = arena_unique(arena, CaseClauseP);
             self->case_clause->expression = arena_strdup(arena, command->case_clause->expression);
             self->case_clause->patterns = arena_dup_stringlistvect(arena, command->case_clause->patterns);
             self->case_clause->bodies = arena_dup_listvect(arena, command->case_clause->bodies);
@@ -122,7 +122,7 @@ CommandP *arena_dup_command(ArenaAllocator *arena, CommandP *command) {
         }
         case Until_Clause:
         case While_Clause: {
-            self->while_clause = arena_alloc(arena, sizeof(WhileClauseP), alignof(WhileClauseP));
+            self->while_clause = arena_unique(arena, WhileClauseP);
             self->while_clause->body = arena_dup_list(arena, command->while_clause->body);
             self->while_clause->condition = arena_dup_list(arena, command->while_clause->condition);
             break;

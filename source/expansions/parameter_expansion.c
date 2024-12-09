@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 14:45:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 13:57:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "ft_regex.h"
 #include <stdio.h>
 
+//TODO: replace gc by arena
 char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 	// printf("id: %s\nword: %s\nmetachar: %s\n", id, word, metachar);
 	// dprintf(2, "WORD: %s\n", word);
@@ -25,7 +26,7 @@ char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 			return (word);
 		}
 		else if (!ft_strcmp(metachar, ":=")){
-			char *variable = gc(GC_ADD, ft_calloc(ft_strlen(word) + ft_strlen(id) + 3, sizeof(char)), GC_GENERAL);
+			char *variable = gc(GC_ADD, ft_calloc(ft_strlen(word) + ft_strlen(id) + 3, sizeof(char)), GC_SUBSHELL);
 			ft_sprintf(variable, "%s=%s", id, word);
 			string_list_add_or_update(shell_vars->env, variable);
 			return (word);
@@ -64,7 +65,7 @@ char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 			new_value = NULL;
 		}
 		free(regexp);
-		gc(GC_ADD, value, GC_GENERAL);
+		gc(GC_ADD, value, GC_SUBSHELL);
 		return value;
 	}
 	return ft_strdup(value);
@@ -78,7 +79,7 @@ char *parser_get_variable_value(char *to_expand, Vars *shell_vars){
 	
 
 	if (to_expand[0] == '#'){
-		return gc(GC_ADD, ft_itoa(ft_strlen(get_variable_value(shell_vars, to_expand + 1))), GC_GENERAL);
+		return gc(GC_ADD, ft_itoa(ft_strlen(get_variable_value(shell_vars, to_expand + 1))), GC_SUBSHELL);
 	}
 	regex_match_t find_format = regex_match("[:#%]", to_expand);
 	int lenght_meta = (regex_match("[:#%][=?#%\\-]", to_expand).re_start != -1) ? 2:1;
@@ -171,7 +172,8 @@ char *parser_parameter_expansion(char *full_exp, Vars *shell_vars){
 	const char *rhs = ft_strchr(full_exp, ':');
 	if (rhs) {
 		size_t rhs_len = ft_strlen(rhs);
-		if (rhs[rhs_len - 1] != '}') rhs_len++;
+		if (rhs[rhs_len - 1] != '}')
+			rhs_len++;
 		char * const trimmer_rhs = ft_substr(rhs, 0, rhs_len - 1);
 		da_create(expansion_result, StringListL, sizeof(char *), GC_SUBSHELL);
 		da_push(expansion_result, trimmer_rhs);
@@ -196,7 +198,7 @@ char *parser_parameter_expansion(char *full_exp, Vars *shell_vars){
 		}
 	}
 	else if ((result = regex_match("\\$\\{\\?\\}", full_exp)).is_found){
-		value = ft_itoa(g_exitno);
+		value = gc(GC_ADD, ft_itoa(g_exitno), GC_SUBSHELL);
 	}
 	else if ((result = regex_match("\\$\\{\\@\\}", full_exp)).is_found) {
 		value = positionals_to_string(shell_vars);
@@ -214,7 +216,7 @@ char *parser_parameter_expansion(char *full_exp, Vars *shell_vars){
 	char *re_end = ft_substr(full_exp, result.re_end, ft_strlen(full_exp));
 	char *tmp = ft_strjoin(re_start, value);
 
-	full_exp = gc(GC_ADD, ft_strjoin(tmp, re_end), GC_GENERAL);
+	full_exp = gc(GC_ADD, ft_strjoin(tmp, re_end), GC_SUBSHELL);
 	FREE_POINTERS(tmp, re_start, re_end);
 
 	return ft_strdup(full_exp);

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:56 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 16:49:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 14:33:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ ShellInfos *shell(int mode);
 void	close_std_fds(void);
 void	close_saved_fds(int *saved_fds);
 void	close_fd_set();
+void	remove_fd_set(int fd);
 void	close_all_fds(void);
 int		get_highest_free_fd();
 int		move_to_high_fd(int fd);

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 10:40:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 14:38:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 11:06:06 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ static void gc_init(Garbage *gc) {
 		gc[n].capacity = 10;
 		gc[n].garbage = ft_calloc(10, sizeof(void *));
 		if (!gc[n].garbage)
-			fatal("alloc error", __LINE__, __FILE_NAME__, 1);
+			_fatal("alloc error", 1);
 	}
 }
 
@@ -35,7 +35,7 @@ static void *gc_add(Garbage *gc, void *ptr, const gc_level n) {
 		gc[n].garbage = (void **) ft_realloc(gc[n].garbage, gc[n].size, gc[n].capacity, sizeof(void *));
 		free(tmp);
 		if (!gc[n].garbage)
-			fatal("alloc error", __LINE__, __FILE_NAME__, 1);
+			_fatal("alloc error", 1);
 	}
 	gc[n].garbage[gc[n].size] = ptr;
 	gc[n].size += 1;
@@ -84,6 +84,14 @@ static void gc_reset(Garbage *gc, const gc_level n) {
 	gc[n].size = 0;
 }
 
+static void gc_clean_idx(Garbage *gc, const size_t idx, const gc_level n) {
+	for (size_t i = idx; i < gc[n].size; i++) {
+		free(gc[n].garbage[i]);
+		gc[n].garbage[i] = NULL;
+	}
+	gc[n].size = idx;
+}
+
 void *gc(gc_mode mode, ...) {
 	static Garbage GC[GC_LEVELS] = {{NULL, 0, 10}};
 	if (GC[0].garbage == NULL) {
@@ -121,7 +129,7 @@ void *gc(gc_mode mode, ...) {
 			void *ptr = va_arg(args, void *);
 			const int level = va_arg(args, int);
 			if (!ptr) 
-				fatal("Fatal error: alloc\n", __LINE__, __FILE_NAME__, 1);
+				_fatal("Fatal error: alloc\n", 1);
 			va_end(args);
 			return gc_add(GC, ptr, level);
 		}
@@ -145,6 +153,13 @@ void *gc(gc_mode mode, ...) {
 			const int level = va_arg(args, int);
 			va_end(args);
 			gc_cleanup(GC, level);
+			return NULL;
+		}
+		case GC_CLEAN_IDX: {
+			const size_t idx = va_arg(args, size_t);
+			const gc_level level = va_arg(args, int);
+			va_end(args);
+			gc_clean_idx(GC, idx, level);
 			return NULL;
 		}
 		case GC_MOVE: {
