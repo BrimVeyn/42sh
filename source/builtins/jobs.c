@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 17:11:38 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/29 14:41:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 13:39:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "lexer.h"
+#include "jobs.h"
 #include "parser.h"
 #include "utils.h"
 #include "ft_regex.h"

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 17:22:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 12:33:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,6 @@ ATokenStack *tokens_to_rpn(ATokenStack *list) {
 	da_create(output, ATokenStack, sizeof(AToken *), GC_SUBSHELL);
 	da_create(operator, ATokenStack, sizeof(AToken *), GC_SUBSHELL);
 	
-	// aTokenListToString(list);
 	for (int i = 0; i < list->size; i++) {
 		AToken *current = list->data[i];
 		if (is_lparen(current)) {
@@ -132,6 +131,8 @@ static Lexer * lexer_init(char *input) {
 
 	return lexer;
 }
+
+void aTokenListToString(ATokenStack *tokens);
 
 char *parser_arithmetic_expansion(char *str, Vars *shell_vars) {
 

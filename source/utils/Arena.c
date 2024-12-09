@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 16:34:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/07 11:48:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 12:37:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,19 +15,12 @@
 #include "libft.h"
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdalign.h>
 
-ArenaAllocator *arena_create(size_t size) {
-	ArenaAllocator *arena = malloc(sizeof(ArenaAllocator));
-	if (!arena)
-		_fatal("arena: failed to allocate arena pointer", 1);
+ArenaAllocator *arena_create(const size_t size, const gc_level garbage_level) {
+	ArenaAllocator *arena = gc_unique(ArenaAllocator, garbage_level);
 
-	arena->memory = malloc(size);
-	if (!arena->memory) {
-		free(arena);
-		_fatal("arena: failed to allocated arena memory", 1);
-	}
+	arena->memory = gc(GC_CALLOC, size, sizeof(char), garbage_level);
 
 	arena->capacity = size;
 	arena->offset = 0;
@@ -35,11 +28,10 @@ ArenaAllocator *arena_create(size_t size) {
 	return arena;
 }
 
-void *arena_alloc(ArenaAllocator *arena, size_t size, size_t alignment) {
+void *arena_alloc(ArenaAllocator * const arena, size_t const size, size_t const alignment) {
 	size_t current_offset = (size_t)arena->memory + arena->offset;
 
 	size_t aligned_offset = (current_offset + (alignment - 1)) & ~(alignment - 1);
-    ft_memset((void *)aligned_offset, 0, size); // Ensure memory is initialized to zero
 
 	size_t next_offset = aligned_offset + size;
 	if (next_offset > (size_t)arena->memory + arena->capacity) {
@@ -50,11 +42,12 @@ void *arena_alloc(ArenaAllocator *arena, size_t size, size_t alignment) {
 	return (void *)aligned_offset;
 }
 
-void arena_destroy(ArenaAllocator *arena) {
+void arena_destroy(ArenaAllocator * const arena) {
 	FREE_POINTERS(arena->memory, arena);
 }
 
-void arena_reset(ArenaAllocator *arena) {
+void arena_reset(ArenaAllocator * const arena) {
+	ft_memset(arena->memory, 0, arena->capacity);
 	arena->offset = 0;
 }
 

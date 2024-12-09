@@ -6,14 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/28 15:51:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 15:02:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "final_parser.h"
+#include "jobs.h"
 #include "utils.h"
-#include "libft.h"
 
 #include <stdio.h>
 #include <unistd.h>

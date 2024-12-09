@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:03:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 15:29:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 14:34:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "libft.h"
+#include "utils.h"
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -98,7 +99,20 @@ int *save_std_fds() {
 
 void close_fd_set() {
 	while (g_fdSet->size != 0) {
-		close(da_pop(g_fdSet));
+		int fd = da_pop(g_fdSet);
+		// dprintf(2, "fd = %d\n", fd);
+		if (fd != -1) {
+			close(fd);
+        }
+	}
+}
+
+void remove_fd_set(int fd) {
+	for (size_t i = 0; i < g_fdSet->size; i++) {
+		if (g_fdSet->data[i] == fd) {
+			da_erase_index(g_fdSet, i);
+			return ;
+        }
 	}
 }
 

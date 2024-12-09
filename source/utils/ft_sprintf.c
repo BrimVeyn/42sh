@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 14:44:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 16:13:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 11:32:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,8 @@ void ft_dprintf(int fd, const char *fmt, ...){
 			ft_putchar_fd(c, fd);
 			i += 2;
 		}
-		write(fd, &fmt[i], 1);
+		if (write(fd, &fmt[i], 1) == -1)
+			_fatal("write error", 1);
 	}
 	va_end(args);
 }

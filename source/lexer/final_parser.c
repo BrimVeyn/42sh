@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:47:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/08 12:47:11 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 14:50:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,7 +151,7 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
 						da_pop(stack); //newline_list
 						da_pop(stack); //complete_commands
-						execute_complete_command(complete_command, shell_vars, false, false);
+						execute_complete_command(complete_command, shell_vars, false);
 						reduced_entry->token.type = Complete_Commands;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Complete_Commands].value;
@@ -160,7 +160,7 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 					case 3: { /* complete_commands -> complete_command */
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
 						// print_complete_command(complete_command);
-						execute_complete_command(complete_command, shell_vars, false, false);
+						execute_complete_command(complete_command, shell_vars, false);
 						reduced_entry->token.type = Complete_Commands;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Complete_Commands].value;

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:11 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/07 12:32:24 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 15:01:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ char *parser_command_substitution(char *str, Vars *shell_vars) {
 	is_command_sub = false;
 
 	dup2(STDOUT_SAVE, STDOUT_FILENO); 
+	remove_fd_set(STDOUT_SAVE);
 	close(STDOUT_SAVE);
 
 	output_fd = open(file_name, O_RDONLY, 0644);

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:22:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/08 12:50:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 17:40:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "signals.h"
 #include "utils.h"
 #include "libft.h"
+#include "jobs.h"
 
 #include <fcntl.h>
 #include <stdbool.h>
@@ -25,7 +26,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-pid_t g_masterPgid = 0;
+#include "colors.h"
+
 bool g_subshell = false;
 
 
@@ -74,7 +76,6 @@ void execute_simple_command(CommandP *command, char *bin, Vars *shell_vars) {
 		return;
 	
 	close_fd_set();
-	// dprintf(2, "Starting: %s with id: %d\n", bin, getpid());
 	execve(bin, simple_command->word_list->data, shell_vars->env->data);
 }
 
@@ -91,7 +92,7 @@ void execute_subshell(const CommandP * const command, const bool background, Var
 	if (!redirect_ios(command->redir_list)) {
 		return ;
 	}
-	execute_complete_command(wrap_list(subshell), shell_vars, true, background);
+	execute_complete_command(wrap_list(subshell), shell_vars, background);
 }
 
 void execute_brace_group(const CommandP * const command, const bool background, Vars * const shell_vars) {
@@ -99,7 +100,7 @@ void execute_brace_group(const CommandP * const command, const bool background, 
 	if (!redirect_ios(command->redir_list)) {
 		return ;
 	}
-	execute_complete_command(wrap_list(command_group), shell_vars, false, background);
+	execute_complete_command(wrap_list(command_group), shell_vars, background);
 }
 
 void execute_if_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
@@ -108,16 +109,16 @@ void execute_if_clause(const CommandP * const command, const bool background, Va
 	size_t i = 0;
 	for (; i < if_clause->conditions->size; i++) {
 		ListP * const condition = if_clause->conditions->data[i];
-		execute_complete_command(wrap_list(condition), shell_vars, background, background);
+		execute_complete_command(wrap_list(condition), shell_vars, background);
 		if (g_exitno == 0) {
 			ListP * const body = if_clause->bodies->data[i];
-			execute_complete_command(wrap_list(body), shell_vars, background, background);
+			execute_complete_command(wrap_list(body), shell_vars, background);
 			return ;
 		}
 	}
 	if (i < if_clause->bodies->size) {
 		ListP *else_body = if_clause->bodies->data[i];
-		execute_complete_command(wrap_list(else_body), shell_vars, background, background);
+		execute_complete_command(wrap_list(else_body), shell_vars, background);
 	}
 }
 
@@ -126,45 +127,61 @@ void execute_if_clause(const CommandP * const command, const bool background, Va
 void execute_while_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
 	const WhileClauseP * const while_clause = command->while_clause;
 
-	ArenaAllocator *arena = arena_create(1e5);
+	ArenaAllocator *arena = arena_create(1e5, GC_SUBSHELL);
 
 	while (true) {
+		Garbage *GC = gc(GC_GET);
+		const size_t base_size = GC[GC_SUBSHELL].size;
+
 		ListP * const condition_save = arena_dup_list(arena, while_clause->condition);
-		execute_complete_command(wrap_list(condition_save), shell_vars, true, background);
+		execute_complete_command(wrap_list(condition_save), shell_vars, background);
+
+		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
-		if (g_exitno != 0) break ;
+
+		if (g_exitno != 0)
+			break ;
+
 		ListP * const body_save = arena_dup_list(arena, while_clause->body);
-		execute_complete_command(wrap_list(body_save), shell_vars, true, background);
+		execute_complete_command(wrap_list(body_save), shell_vars, background);
+
+		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
 	}
-	arena_destroy(arena);
 }
 
 void execute_until_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
 	const WhileClauseP * const while_clause = command->while_clause;
 
-	ArenaAllocator *arena = arena_create(1e5);
+	ArenaAllocator *arena = arena_create(1e5, GC_SUBSHELL);
 
 	while (true) {
+		Garbage *GC = gc(GC_GET);
+		const size_t base_size = GC[GC_SUBSHELL].size;
+
 		ListP * const condition_save = arena_dup_list(arena, while_clause->condition);
-		execute_complete_command(wrap_list(condition_save), shell_vars, true, background);
+		execute_complete_command(wrap_list(condition_save), shell_vars, background);
+
+		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
-		if (g_exitno == 0) break ;
+
+		if (g_exitno == 0)
+			break ;
 		ListP * const body_save = arena_dup_list(arena, while_clause->body);
-		execute_complete_command(wrap_list(body_save), shell_vars, false, background);
+		execute_complete_command(wrap_list(body_save), shell_vars, background);
+
+		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
 	}
-
-	arena_destroy(arena);
 }
 
 void execute_case_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
 	CaseClauseP * const case_clause = command->case_clause;
 	da_create(tmp, StringListL, sizeof(char *), GC_SUBSHELL);
 	da_push(tmp, case_clause->expression);
-	case_clause->expression = do_expansions(tmp, shell_vars, O_ALLOWNULLS)->data[0];
+	case_clause->expression = do_expansions(tmp, shell_vars, O_NONE)->data[0];
 	for (size_t i = 0; i < case_clause->patterns->size; i++) {
-		case_clause->patterns->data[i] = do_expansions(case_clause->patterns->data[i], shell_vars, O_ALLOWNULLS);
+		case_clause->patterns->data[i] = do_expansions(case_clause->patterns->data[i], shell_vars, O_NONE);
 	}
 
 	int default_index = -1;
@@ -174,20 +191,20 @@ void execute_case_clause(const CommandP * const command, const bool background, 
 			if (!ft_strcmp("*", patterns->data[inner_i]))
 				default_index = i;
 			if (!ft_strcmp(patterns->data[inner_i], case_clause->expression))
-				return execute_complete_command(wrap_list(case_clause->bodies->data[i]), shell_vars, true, background);
+				return execute_complete_command(wrap_list(case_clause->bodies->data[i]), shell_vars, background);
 		}
 	}
 	if (default_index != -1)
-		return execute_complete_command(wrap_list(case_clause->bodies->data[default_index]), shell_vars, true, background);
+		return execute_complete_command(wrap_list(case_clause->bodies->data[default_index]), shell_vars, background);
 	return ;
 }
 
 void execute_for_clause(const CommandP * const command, const bool background, Vars *const shell_vars) {
 	const ForClauseP * const for_clause = command->for_clause;
-	const StringListL *expanded_words = do_expansions(for_clause->word_list, shell_vars, O_SPLIT | O_ALLOWNULLS);
+	const StringListL *expanded_words = do_expansions(for_clause->word_list, shell_vars, O_SPLIT);
 	const StringListL * const word_list = (for_clause->in == true) ? expanded_words : shell_vars->positional;
 
-	ArenaAllocator *arena = arena_create(1e5);
+	ArenaAllocator *arena = arena_create(1e5, GC_SUBSHELL);
 
 	for (size_t i = (0 + !for_clause->in); word_list && i < word_list->size; i++) {
 		char buffer[MAX_WORD_LEN] = {0};
@@ -197,15 +214,15 @@ void execute_for_clause(const CommandP * const command, const bool background, V
 			_fatal("snprintf: buffer overflow", 1);
 		string_list_add_or_update(shell_vars->set, buffer);
 
+		Garbage *GC = gc(GC_GET);
+		const size_t base_size = GC[GC_SUBSHELL].size;
 
 		ListP * const body_save = arena_dup_list(arena, for_clause->body);
-		execute_complete_command(wrap_list(body_save), shell_vars, background, background);
+		execute_complete_command(wrap_list(body_save), shell_vars, background);
+
+		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
 	}
-
-	arena_destroy(arena);
-
-	return ;
 }
 
 void declare_positional(const StringListL * const positional_parameters, const Vars * const shell_vars) {
@@ -357,6 +374,8 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
                         }
 						signal_manager(SIG_EXEC);
 					}
+
+					// dprintf(2, C_BRIGHT_YELLOW"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
 					execute_simple_command(command, bin, shell_vars);
 					exit_clean();
 				} else { set_group(job, process, pid); }
@@ -408,7 +427,6 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 		if (hasNext && pipe(curr_pipe) == -1)
 			_fatal("failed to open pipe", 1);
 
-
 		pid_t pid = fork();
 		if (IS_CHILD(pid)) {
 
@@ -426,6 +444,7 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
                 }
 				signal_manager(SIG_EXEC);
 			}
+
 
             if (prev_pipe[0] != -1) { 
 				dup_input(prev_pipe[0]); 
@@ -502,7 +521,6 @@ void set_exit_number(const PipeLineP * const pipeline) {
 	}
 }
 
-
 void execute_list(ListP *list, bool background, Vars *shell_vars) {
 	AndOrP *andor_head = list->and_or;
 	ShellInfos *shell_infos = shell(SHELL_GET);
@@ -517,16 +535,18 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 			} else if (!background) {
 				put_job_foreground(andor_head, false);
 			} else if (background) {
-				put_job_background(andor_head);
+				job_wait_background(andor_head);
 			}
 			set_exit_number(andor_head->pipeline);
 		}
+
 		if (andor_head->pipeline->banged) {
 			if		(g_exitno == 0) g_exitno = 1;
 			else if (g_exitno != 0) g_exitno = 0;
 		}
 
-		if (g_exitno > 128) return ;
+		if (andor_head->sig == SIGINT)
+			return ;
 
 		bool skip = (
 			(separator == AND_IF && g_exitno != 0) ||
@@ -544,39 +564,37 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 	}
 }
 
-void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars, bool subshell, bool bg) {
+void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars, bool bg) {
 	ListP *list_head = complete_command->list;
 	ShellInfos *shell_infos = shell(SHELL_GET);
-	if (subshell) g_subshell = true;
-	else g_subshell = false;
 
-	// print_complete_command(complete_command);
 
 	while (list_head) {
+
+		g_masterPgid = 0;
+
 		const bool background = (
 			(shell_infos->interactive) && 
 			( (list_head->separator == END && complete_command->separator == AMPER) ||
 			(list_head->separator == AMPER) || (bg) )
 		);
-		if (!subshell)
-			g_masterPgid = 0;
 
 		if (shell_infos->script) {
 			g_masterPgid = shell_infos->shell_pgid;
 		}
 
-		if (background == true && !subshell) {
+		if (background) {
 			pid_t pid = fork();
 			if (IS_CHILD(pid)) {
 				g_masterPgid = getpid();
 				// dprintf(2, C_BRIGHT_CYAN"[MASTER] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
 				execute_list(list_head, background, shell_vars);
-				exit_clean(); break;
+				exit_clean(); 
+				break;
 			} else {
 				setpgid(pid, pid);
 				AndOrP *master = list_head->and_or;
 				master->tmodes = shell_infos->shell_tmodes;
-				master->subshell = subshell;
 				master->id = g_jobList->size;
 				master->pgid = pid;
 				put_job_background(master);
@@ -586,5 +604,6 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 		}
 		list_head = list_head->next;
 	}
+
 	return ;
 }

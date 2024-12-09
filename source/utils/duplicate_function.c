@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/04 10:44:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 17:27:37 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,10 @@ PipeLineP *gc_duplicate_pipeline(PipeLineP *pipeline) {
 	PipeLineP *head = pipeline;
 	PipeLineP *it = self;
 	while (head) {
+		it->pid = pipeline->pid;
+		it->completed = pipeline->completed;
+		it->stopped = pipeline->stopped;
+		it->status = pipeline->status;
 		it->command = gc_duplicate_command(head->command);
 		it->banged = head->banged;
 		if (head->next)
@@ -144,9 +148,19 @@ PipeLineP *gc_duplicate_pipeline(PipeLineP *pipeline) {
 
 AndOrP *gc_duplicate_andor(AndOrP *andor) {
 	AndOrP *self = gc_unique(AndOrP, GC_SUBSHELL);
+	ft_memcpy(self, andor, sizeof(AndOrP));
 	AndOrP *head = andor;
 	AndOrP *it = self;
 	while (head) {
+		it->id = head->id;
+		it->pgid = head->id;
+		it->pid = head->id;
+		it->notified = head->notified;
+		it->subshell = head->subshell;
+		it->bg = head->bg;
+		it->sig = head->sig;
+		it->completed = head->completed;
+		it->tmodes = head->tmodes;
 		it->pipeline = gc_duplicate_pipeline(head->pipeline);
 		it->separator = head->separator;
 		if (head->next)

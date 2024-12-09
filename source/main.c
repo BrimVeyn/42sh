@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:23 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/07 12:24:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 14:51:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include "lexer.h"
 #include "exec.h"
 #include "libft.h"
+#include "jobs.h"
 #include "ft_readline.h"
 #include "expansion.h"
 
@@ -43,20 +44,19 @@ int g_exitno = 0;
 int g_signal = 0;
 IntList *g_fdSet = NULL;
 
+pid_t g_masterPgid = 0;
+
 FunctionList *g_funcList = NULL;
-JobListe *g_jobList = NULL;
-
-//FIX: tilde expansion
-
-// #include "readline/readline.h"
+JobList *g_jobList = NULL;
 
 void	*read_input_prompt(char *input, Vars *shell_vars) {
 	char *PS1 = string_list_get_value(shell_vars->set, "PS1");
+
 	if (PS1)
 		input = ft_readline(PS1, shell_vars);
 	else
 		input = ft_readline("42sh> ", shell_vars);
-		// input = readline("42sh> ");
+
 	if (!input)
 		return NULL;
 
@@ -261,7 +261,7 @@ void load_positional_parameters(const int ac, char **av, Vars * const shell_vars
 }
 
 void init_globals() {
-	da_create(jobListTmp, JobListe, sizeof(AndOrP *), GC_ENV);
+	da_create(jobListTmp, JobList, sizeof(AndOrP *), GC_ENV);
 	da_create(funcListTmp, FunctionList, sizeof(FunctionP *), GC_ENV);
 	da_create(fdSetTmp, IntList, sizeof(int), GC_ENV);
 

@@ -6,13 +6,15 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 13:04:09 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 14:46:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/09 13:38:14 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "parser.h"
+#include "jobs.h"
 #include "utils.h"
+
 #include <signal.h>
 #include <unistd.h>
 
