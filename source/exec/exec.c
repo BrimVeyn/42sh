@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:18:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:21:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 15:14:55 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "utils.h"
 #include "libft.h"
 #include "jobs.h"
+#include "Arena.h"
 
 #include <fcntl.h>
 #include <stdbool.h>
@@ -27,22 +28,20 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "colors.h"
+static void execute_list(const ListP * const list, const bool background, Vars * const shell_vars);
+static int is_function(const char * const func_name);
 
-bool g_subshell = false;
-
-
-void dup_input(int fd) {
+static void dup_input(const int fd) {
 	if (dup2(fd, STDIN_FILENO) == -1)
 		_fatal("dup2 failed", 1);
 }
 
-void dup_output(int fd) {
+static void dup_output(const int fd) {
 	if (dup2(fd, STDOUT_FILENO) == -1)
 		_fatal("dup2 failed", 1);
 }
 
-char  *resolve_bine(SimpleCommandP * const command, Vars * const shell_vars) {
+static char  *resolve_bine(SimpleCommandP * const command, Vars * const shell_vars) {
 	if (!command || !command->word_list->data[0]) {
 		return NULL;
 	}
@@ -68,10 +67,10 @@ char  *resolve_bine(SimpleCommandP * const command, Vars * const shell_vars) {
 	}
 }
 
-void execute_simple_command(CommandP *command, char *bin, Vars *shell_vars) {
+static void execute_simple_command(CommandP *command, char *bin, Vars *shell_vars) {
 	SimpleCommandP *simple_command = command->simple_command;
 
-	if (!redirect_ios(simple_command->redir_list))
+	if (!redirect_ios(simple_command->redir_list, shell_vars))
 		return;
 	if (!bin)
 		return;
@@ -80,31 +79,29 @@ void execute_simple_command(CommandP *command, char *bin, Vars *shell_vars) {
 	execve(bin, simple_command->word_list->data, shell_vars->env->data);
 }
 
-void execute_list(ListP *list, const bool background, Vars * const shell_vars);
-
-CompleteCommandP *wrap_list(ListP * const list) {
+static CompleteCommandP *wrap_list(ListP * const list) {
 	CompleteCommandP * const complete_command = gc_unique(CompleteCommandP, GC_SUBSHELL);
 	complete_command->list = list;
 	return complete_command;
 }
 
-void execute_subshell(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static void execute_subshell(const CommandP * const command, const bool background, Vars * const shell_vars) {
 	ListP * const subshell = command->subshell;
-	if (!redirect_ios(command->redir_list)) {
+	if (!redirect_ios(command->redir_list, shell_vars)) {
 		return ;
 	}
 	execute_complete_command(wrap_list(subshell), shell_vars, background);
 }
 
-void execute_brace_group(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static void execute_brace_group(const CommandP * const command, const bool background, Vars * const shell_vars) {
 	ListP * const command_group = command->brace_group;
-	if (!redirect_ios(command->redir_list)) {
+	if (!redirect_ios(command->redir_list, shell_vars)) {
 		return ;
 	}
 	execute_complete_command(wrap_list(command_group), shell_vars, background);
 }
 
-void execute_if_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static void execute_if_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
 	const IFClauseP * const if_clause = command->if_clause;
 
 	size_t i = 0;
@@ -123,9 +120,8 @@ void execute_if_clause(const CommandP * const command, const bool background, Va
 	}
 }
 
-#include "Arena.h"
 
-void execute_while_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static void execute_while_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
 	const WhileClauseP * const while_clause = command->while_clause;
 
 	ArenaAllocator *arena = arena_create(1e5, GC_SUBSHELL);
@@ -151,7 +147,7 @@ void execute_while_clause(const CommandP * const command, const bool background,
 	}
 }
 
-void execute_until_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static void execute_until_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
 	const WhileClauseP * const while_clause = command->while_clause;
 
 	ArenaAllocator *arena = arena_create(1e5, GC_SUBSHELL);
@@ -176,7 +172,7 @@ void execute_until_clause(const CommandP * const command, const bool background,
 	}
 }
 
-void execute_case_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static void execute_case_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
 	CaseClauseP * const case_clause = command->case_clause;
 	da_create(tmp, StringListL, sizeof(char *), GC_SUBSHELL);
 	da_push(tmp, case_clause->expression);
@@ -200,7 +196,7 @@ void execute_case_clause(const CommandP * const command, const bool background, 
 	return ;
 }
 
-void execute_for_clause(const CommandP * const command, const bool background, Vars *const shell_vars) {
+static void execute_for_clause(const CommandP * const command, const bool background, Vars *const shell_vars) {
 	const ForClauseP * const for_clause = command->for_clause;
 	const StringListL *expanded_words = do_expansions(for_clause->word_list, shell_vars, O_SPLIT);
 	const StringListL * const word_list = (for_clause->in == true) ? expanded_words : shell_vars->positional;
@@ -226,18 +222,17 @@ void execute_for_clause(const CommandP * const command, const bool background, V
 	}
 }
 
-void declare_positional(const StringListL * const positional_parameters, const Vars * const shell_vars) {
+static void declare_positional(const StringListL * const positional_parameters, const Vars * const shell_vars) {
 	for (size_t i = 1; i < positional_parameters->size; i++) {
 		char buffer[MAX_WORD_LEN] = {0};
 		const int ret = ft_snprintf(buffer, MAX_WORD_LEN, "%ld=%s", i, positional_parameters->data[i]);
 		if (ret == -1)
 			_fatal("snprintf: exceeded buffer capacity", 1);
-		// dprintf(2, "BUFFER: %s\n", buffer);
 		string_list_add_or_update(shell_vars->positional, buffer);
 	}
 }
 
-StringListL *save_positionals(const Vars * const shell_vars) {
+static StringListL *save_positionals(const Vars * const shell_vars) {
 	da_create(saved_positionals, StringListL, sizeof(char *), GC_ENV);
 	for (size_t i = 0; i < shell_vars->positional->size; i++) {
 		char * const copy = gc(GC_ADD, ft_strdup(shell_vars->positional->data[i]), GC_ENV);
@@ -246,7 +241,7 @@ StringListL *save_positionals(const Vars * const shell_vars) {
 	return saved_positionals;
 }
 
-void clear_positional(StringListL * const positional) {
+static void clear_positional(StringListL * const positional) {
   if (positional->size <= 1) return ;
 	for (size_t i = 1; i < positional->size; i++) {
 		gc(GC_FREE, positional->data[i], GC_ENV);
@@ -254,8 +249,7 @@ void clear_positional(StringListL * const positional) {
 	positional->size = 1;
 }
 
-//FIX segfault in recursive function calls
-void execute_function(const CommandP * const command, const int funcNo, const bool background, Vars * const shell_vars) {
+static void execute_function(const CommandP * const command, const int funcNo, const bool background, Vars * const shell_vars) {
 	const SimpleCommandP * const simple_command = command->simple_command;
 	const StringListL * const positional_parameters = simple_command->word_list;
 	StringListL * const saved_positionals = save_positionals(shell_vars);
@@ -263,14 +257,13 @@ void execute_function(const CommandP * const command, const int funcNo, const bo
 
 	clear_positional(shell_vars->positional);
 	declare_positional(positional_parameters, shell_vars);
-	// string_list_print(shell_vars->positional);
 	execute_brace_group(function_copy->function_body, background, shell_vars);
 	string_list_clear(shell_vars->positional);
 
 	shell_vars->positional = saved_positionals;
 }
 
-int is_function(const char * const func_name) {
+static int is_function(const char * const func_name) {
 	for (size_t i = 0; i < g_funcList->size; i++) {
 		if (!ft_strcmp(g_funcList->data[i]->function_name, func_name))
 			return i;
@@ -278,7 +271,7 @@ int is_function(const char * const func_name) {
 	return -1;
 }
 
-void register_function(const CommandP * const command) {
+static void register_function(const CommandP * const command) {
 	FunctionP * const func = command->function_definition;
 	for (size_t i = 0; i < g_funcList->size; i++) {
 		if (!ft_strcmp(func->function_name, g_funcList->data[i]->function_name)) {
@@ -290,7 +283,7 @@ void register_function(const CommandP * const command) {
 }
 
 
-void set_group(AndOrP * const job, PipeLineP * const process, const pid_t pid) {
+static void set_group(AndOrP * const job, PipeLineP * const process, const pid_t pid) {
 	process->pid = pid;
 	if (!job->pgid && g_masterPgid != 0)
 		job->pgid = g_masterPgid;
@@ -300,25 +293,21 @@ void set_group(AndOrP * const job, PipeLineP * const process, const pid_t pid) {
 		_fatal("setpgid: failed", 1);
 }
 
-void process_simple_command(SimpleCommandP * const simple_command, Vars *shell_vars) {
+static void process_simple_command(SimpleCommandP * const simple_command, Vars *shell_vars) {
 	StringListL *args = do_expansions(simple_command->word_list, shell_vars, O_SPLIT);
 	StringListL *vars = do_expansions(simple_command->assign_list, shell_vars, O_ASSIGN);
+
 	simple_command->word_list = args;
 	simple_command->assign_list = vars;
-	if (!args->data[0])
+
+	if (!args->data[0]) {
 		add_vars_to_set(shell_vars, vars);
-	else
+    } else {
 		add_vars_to_local(shell_vars->local, vars);
+    }
 }
 
-void redirect_input_to_null() {
-	int devnull = open("/dev/null", O_RDONLY);
-	dup2(devnull, STDIN_FILENO);
-	close(devnull);
-}
-
-
-void restore_std_fds(int *saved_fds) {
+static void restore_std_fds(int *saved_fds) {
 	if (dup2(saved_fds[0], STDIN_FILENO) == -1)
 		_fatal("dup2 failed: restoring stdin", 1);
 	if (dup2(saved_fds[1], STDOUT_FILENO) == -1)
@@ -327,14 +316,31 @@ void restore_std_fds(int *saved_fds) {
 		_fatal("dup2 failed: restoring stderr", 1);
 }
 
-int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars) {
+static void setup_process(const bool background, AndOrP * const job, const ShellInfos * const shell_infos) {
+	if (shell_infos->interactive && !shell_infos->script)
+	{
+		pid_t pid = getpid();
+		if (job->pgid == 0) 
+			job->pgid = pid;
+		pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
+		if (setpgid(pid, pgid) == -1)
+			_fatal("setpgid: failed", 1);
+
+		if (!background) {
+			if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
+				_fatal("tcsetpgrp: failed", 1);
+		}
+		signal_manager(SIG_EXEC);
+	}
+}
+
+static int execute_single_command(AndOrP * const job, const bool background, Vars * const shell_vars) {
 	PipeLineP *process = job->pipeline;
 	CommandP *command = job->pipeline->command;
 	ShellInfos *shell_infos = shell(SHELL_GET);
 	switch (command->type) {
 
 		case Simple_Command: {
-			//FIX: move process simple command
 			process_simple_command(command->simple_command, shell_vars);
 			char *bin = resolve_bine(command->simple_command, shell_vars);
 			int funcNo = is_function(bin);
@@ -347,11 +353,12 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 
 				if (hasRedir) { saved_fds = save_std_fds(); }
 
-				if (!redirect_ios(command->simple_command->redir_list)) {
+				if (!redirect_ios(command->simple_command->redir_list, shell_vars)) {
 					return NO_WAIT;
 				}
 
 				execute_builtin(command->simple_command, shell_vars);
+				string_list_clear(shell_vars->local);
 
 				if (hasRedir) {
 					restore_std_fds(saved_fds);
@@ -359,29 +366,16 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 				}
 				return NO_WAIT;
 			} else {
-				pid_t pid = fork();
+				pid_t pid;
+				if ((pid = fork()) == -1)
+					_fatal("fork: failed", 1);
 				if (IS_CHILD(pid)) {
-
-					if (shell_infos->interactive && !shell_infos->script)
-					{
-						pid_t pid = getpid();
-						if (job->pgid == 0) 
-							job->pgid = pid;
-						pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
-						if (setpgid(pid, pgid) == -1)
-							_fatal("setpgid: failed", 1);
-
-						if (!background) {
-							if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
-								_fatal("tcsetpgrp: failed", 1);
-                        }
-						signal_manager(SIG_EXEC);
-					}
-
-					// dprintf(2, C_BRIGHT_YELLOW"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
+					setup_process(background, job, shell_infos);
 					execute_simple_command(command, bin, shell_vars);
 					exit_clean();
-				} else { set_group(job, process, pid); }
+				} else { 
+					set_group(job, process, pid); 
+				}
 				return WAIT;
 			}
 		}
@@ -390,15 +384,15 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 				execute_subshell(command, background, shell_vars);
 				return NO_WAIT;
 			}
-			pid_t pid = fork();
+			pid_t pid;
+			if ((pid = fork()) == -1)
+				_fatal("fork: failed", 1);
 			if (IS_CHILD(pid)) {
-				g_subshell = true;
-				g_masterPgid = pid;
-				if (setpgid(pid, pid) == -1)
-					_fatal("setpgid: failed", 1);
 				execute_subshell(command, background, shell_vars);
 				exit_clean(); 
-			} else { set_group(job, process, pid); }
+			} else { 
+				set_group(job, process, pid); 
+			}
 			return WAIT;
 		}
 		case Brace_Group: { execute_brace_group(process->command, background, shell_vars); return NO_WAIT; }
@@ -413,7 +407,7 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 	return ERROR;
 }
 
-int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
+static int execute_pipeline(AndOrP * const job, const bool background, Vars * const shell_vars) {
 	PipeLineP *process = job->pipeline;
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
@@ -434,25 +428,12 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 		if (hasNext && pipe(curr_pipe) == -1)
 			_fatal("failed to open pipe", 1);
 
-		pid_t pid = fork();
+		pid_t pid;
+		if ((pid = fork()) == -1)
+			_fatal("fork: failed", 1);
 		if (IS_CHILD(pid)) {
 
-			if (shell_infos->interactive && !shell_infos->script)
-			{
-				pid_t pid = getpid();
-				if (job->pgid == 0) 
-					job->pgid = pid;
-				pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
-				if (setpgid(pid, pgid) == -1)
-					_fatal("setpgid: failed", 1);
-
-				if (!background) {
-					if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
-						_fatal("tcsetpgrp: failed", 1);
-                }
-				signal_manager(SIG_EXEC);
-			}
-
+			setup_process(background, job, shell_infos);
 
             if (prev_pipe[0] != -1) { 
 				dup_input(prev_pipe[0]); 
@@ -477,7 +458,7 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 					if (funcNo != -1) {
 						execute_function(process->command, funcNo, background, shell_vars);
 					} else if (is_builtin(bin)) {
-						if (!redirect_ios(process->command->simple_command->redir_list)) {
+						if (!redirect_ios(process->command->simple_command->redir_list, shell_vars)) {
 							exit_clean();
 						}
 						execute_builtin(process->command->simple_command, shell_vars);
@@ -516,7 +497,7 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	return WAIT;
 }
 
-void set_exit_number(const PipeLineP * const pipeline) {
+static void set_exit_number(const PipeLineP * const pipeline) {
 	const PipeLineP * head = pipeline;
 	while (head->next) {
 		head = head->next;
@@ -529,7 +510,7 @@ void set_exit_number(const PipeLineP * const pipeline) {
 	}
 }
 
-void execute_list(ListP *list, bool background, Vars *shell_vars) {
+static void execute_list(const ListP * const list, const bool background, Vars * const shell_vars) {
 	AndOrP *andor_head = list->and_or;
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
@@ -577,15 +558,13 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 	}
 }
 
-void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars, bool bg) {
+void execute_complete_command(const CompleteCommandP * const complete_command, Vars *const shell_vars, const bool bg) {
 	ListP *list_head = complete_command->list;
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
-
 	while (list_head) {
 
-		if (!g_subshell)
-			g_masterPgid = 0;
+		g_masterPgid = 0;
 
 		const bool background = (
 			(shell_infos->interactive) && 

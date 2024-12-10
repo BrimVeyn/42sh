@@ -6,19 +6,16 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 10:52:02 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/10 11:12:57 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/10 12:48:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "final_parser.h"
-#include "parser.h"
 #include "ft_regex.h"
 #include "libft.h"
 #include "utils.h"
 #include "utils.h"
 #include <pwd.h>
-
-//TODO:
 
 const char *get_suffix(const char *name, const int len, Vars *shell_vars){
 	if (len > 0){

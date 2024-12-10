@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 14:24:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/05 14:33:49 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/10 15:40:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,11 +78,25 @@ int get_filepath_mode(TokenType type){
 	return 0;
 }
 
+static void expand_filenames(RedirectionL *const redir_list, Vars *const shell_vars) {
+	da_create(tmp_redirs, StringListL, sizeof(char *), GC_SUBSHELL);
+	for (size_t i =0; i < redir_list->size; i++) {
+		da_push(tmp_redirs, redir_list->data[i]->filename);
+	}
+	StringListL *result = do_expansions(tmp_redirs, shell_vars, O_NONE);
+	for (size_t i = 0; i < redir_list->size; i++) {
+		redir_list->data[i]->filename = result->data[i];
+	}
+}
+
+
 //TODO:change redir->filename to redir->word
-bool redirect_ios(RedirectionL *redir_list) {
+bool redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars) {
 	if (!redir_list) {
 		return true;
 	}
+
+	expand_filenames(redir_list, shell_vars);
 	// print_redir_list(redir_list);
 
 	for (size_t i = 0; i < redir_list->size; i++) {

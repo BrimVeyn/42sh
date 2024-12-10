@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 14:13:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 15:17:49 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/10 14:30:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,9 @@ void				parser_tilde_expansion(StringStream *cache, StringStream *word, Vars *sh
 bool				history_expansion (char **pstring);
 void				add_input_to_history(char *input, int *history_fd, Vars *shell_vars);
 void				get_history(Vars *shell_vars);
+
+StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options);
+char *remove_quotes(char *word);
 
 
 #endif // !EXPANSION

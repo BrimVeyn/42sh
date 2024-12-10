@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:15:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:25:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 13:20:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,9 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-bool is_command_sub = 0;
-
 char *parser_command_substitution(char *str, Vars *shell_vars) {
+
+	ShellInfos *shell_infos = shell(SHELL_GET);
 
     char file_name[] = "/tmp/command_sub_XXXXXX";
 
@@ -36,9 +36,12 @@ char *parser_command_substitution(char *str, Vars *shell_vars) {
 	dup2(output_fd, STDOUT_FILENO);
 	close(output_fd);
 
-	is_command_sub = true;
+	bool was_interactive = shell_infos->interactive;
+	if (was_interactive) shell_infos->interactive = false;
+
 	parse_input(str, "command_sub", shell_vars);
-	is_command_sub = false;
+
+	if (was_interactive) shell_infos->interactive = true;
 
 	dup2(STDOUT_SAVE, STDOUT_FILENO); 
 	remove_fd_set(STDOUT_SAVE);

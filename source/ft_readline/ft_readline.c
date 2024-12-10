@@ -5,14 +5,13 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/10 11:16:15 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:16:15 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/10 14:12:14 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_readline.h"
 #include "c_string.h"
-#include "lexer.h"
 #include "libft.h"
 #include "utils.h"
 #include "exec.h"
@@ -242,11 +241,15 @@ void update_line(readline_state_t *rl_state, string *line) {
 }
 
 void init_readline(readline_state_t *rl_state, const char *prompt, Vars *shell_vars){
-    char buffer[2048] = {0};
+    char buffer[PATH_MAX] = {0};
 
 	const char *final_prompt = (prompt != NULL) ? prompt : "";
     set_prompt(rl_state, final_prompt);
-	tgetent(buffer, getenv("TERM"));
+	const char * const term = getenv("TERM");
+	if (!term)
+		_fatal("getenv: TERM undefined", 1);
+	if (tgetent(buffer, term) <= 0)
+		_fatal("tgetent: failed", 1);
 
 	if (!history_defined) {
 		init_history(shell_vars);

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:33 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:14:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 14:13:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,12 @@
 void signal_sigint_prompt(int code) {
 	rl_done = 1;
 	g_exitno = 128 + code;
-	g_signal = code;
-
 }
 
 void signal_sigint_heredoc(int code) {
 	rl_done = 2;
 	g_exitno = 128 + code;
 	printf("\n");
-	g_signal = code;
 }
 
 void signal_sigterm_exec(int code) {
@@ -92,7 +89,7 @@ void signal_script_mode() {
     signal(SIGCHLD, SIG_DFL);
 }
 
-void signal_manager(type_of_signals mode) {
+void signal_manager(const type_of_signals mode) {
 	// dprintf(2, "signal manager called with option %d\n", mode);
 	switch(mode) {
 		case SIG_PROMPT: signal_prompt_mode(); break;

@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:47:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 14:50:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 14:58:34 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "final_parser.h"
 #include "Arena.h"
+#include "expansion.h"
 #include "ft_readline.h"
 #include "ft_regex.h"
 #include "utils.h"
@@ -98,14 +99,17 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 
 	Tokenn token;
 	token.raw_value = lexer_get(lexer, &error);
-	if (error) return NULL;
+	if (error) 
+		return NULL;
+
 	token.type = identify_token(lexer, token.raw_value, 0, &error);
+	if (error) 
+		return NULL;
+
 	da_push(lexer->produced_tokens, token.type);
-	if (error) return NULL;
 	// dprintf(2, "Token produced: %s, type: %s\n", token.raw_value, tokenTypeStr(token.type));
 
-	size_t action_no = 0;
-	while (true && ++action_no < 2000) {
+	while (true) {
 		int state = da_peak_back(stack)->state;
 		TableEntry entry = parsingTable[state][token.type];
 		// print_token_stack(stack);
@@ -118,11 +122,15 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 				new_entry->token = token;
 				new_entry->state = entry.value;
 				da_push(stack, new_entry);
+
 				token.raw_value = lexer_get(lexer, &error);
-				if (error) return NULL;
+				if (error) 
+					return NULL;
+
 				token.type = identify_token(lexer, token.raw_value, entry.value, &error);
 				da_push(lexer->produced_tokens, token.type);
-				if (error) return NULL;
+				if (error) 
+					return NULL;
 				// dprintf(2, "Token produced: %s, type: %s\n", token.raw_value, tokenTypeStr(token.type));
 				break;
 			}
@@ -1087,14 +1095,14 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 					}
 					case 99: /* io_here -> DLESS here_end */
 					case 100: { /* io_here -> DLESSDASH here_end */
-						//TODO: apply quote removal on delimiter
 						char *delimiter = da_pop(stack)->token.raw_value;
+						char *raw_delimiter = remove_quotes(delimiter);
 						TokenType type = da_pop(stack)->token.type;
 
 						char *heredoc_filename = NULL;
 						switch (type) {
-							case DLESS: { heredoc_filename = here_doc(delimiter, HD_EXPAND, shell_vars); break; } //<<
-							case DLESSDASH: { heredoc_filename = here_doc(delimiter, HD_NO_EXPAND, shell_vars); break; } //<<-
+							case DLESS: { heredoc_filename = here_doc(raw_delimiter, HD_EXPAND, shell_vars); break; } //<<
+							case DLESSDASH: { heredoc_filename = here_doc(raw_delimiter, HD_NO_EXPAND, shell_vars); break; } //<<-
 							default: { break; };
 						}
 						//if any SIGINT is trigger or mkstemp fails
@@ -1117,7 +1125,6 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 						break;
 					}
 					case 101: { /* here_end -> WORD */
-						//TODO: Directly apply quote removal cuz of no expansions
 						Tokenn word = da_pop(stack)->token;
 						reduced_entry->token.type = Here_End;
 						reduced_entry->token.raw_value = word.raw_value;
@@ -1237,7 +1244,7 @@ void parse_input(char *in, char *filename, Vars *shell_vars) {
 
 	ShellInfos *self = shell(SHELL_GET);
 
-	if (self->interactive && !self->script && !is_command_sub){
+	if (self->interactive && !self->script){
 		add_history(in, shell_vars);
 	}
 
