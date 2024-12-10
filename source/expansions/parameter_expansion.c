@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/04 10:46:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 13:57:09 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/10 11:16:20 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/10 11:16:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,7 +151,7 @@ char *positionals_to_string(Vars * const shell_vars) {
 		const char * const value = string_list_get_value(positional, id);
 		free(id);
 		if (ft_snprintf(buffer, MAX_WORD_LEN, "%s", value) == -1)
-			fatal("snprintf: buffer overflow", __LINE__, __FILE_NAME__, 1);
+			_fatal("snprintf: buffer overflow", 1);
 		if (i + 1 < positional->size) {
 			if (ft_snprintf(buffer, MAX_WORD_LEN, " ", positional->data[i]) == -1)
 				_fatal("snprintf: buffer overflow", 1);

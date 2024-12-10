@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/04 10:46:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 12:02:13 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,6 @@ void regex_compile_pattern(regex_compiled_t *regexp, const char *pattern){
 	set_end_of_pattern(regexp);
 }
 
-
 int matchchar(regex_node_t *pattern, char c){
 	if (pattern->type == REGEX_DOT)
 		return 1;
@@ -113,6 +112,7 @@ int matchrange(regex_node_t *pattern, char c) {
     }
     return invert;
 }
+
 const char *get_regex_type(regex_pattern_type type);
 
 int matchquestion(regex_node_t *search, regex_node_t **pattern, char *string, int *end_pos) {

@@ -5,13 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:08:15 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/10 11:19:35 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/10 11:20:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
-#include "signals.h"
 #include "utils.h"
 #include "jobs.h"
 #include "signal.h"

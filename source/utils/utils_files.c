@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils_files.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/14 16:35:28 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 14:38:29 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/10 11:19:10 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/10 11:19:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ char *read_whole_file(int fd) {
 	size_t bytes_read = 0;
 	char *result = ft_calloc(BUFFER_SIZE, sizeof(char));
 	if (!result) {
-		fatal("read error", __LINE__, __FILE_NAME__, 1);
+		_fatal("read error", 1);
 	}
 
 	while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) != 0) {

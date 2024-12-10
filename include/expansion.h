@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 14:13:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 14:16:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/06 15:17:49 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,7 @@ void				str_list_print(const StrList *list);
 char				*parser_parameter_expansion(char *str, Vars *shell_vars);
 char				*parser_command_substitution(char *str, Vars *shell_vars);
 char				*parser_arithmetic_expansion(char *str, Vars *shell_vars);
+void				parser_tilde_expansion(StringStream *cache, StringStream *word, Vars *shell_vars, const int options);
 
 //-------------------history modules------------//
 bool				history_expansion (char **pstring);
