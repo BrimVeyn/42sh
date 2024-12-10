@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:11 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 15:01:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 09:54:50 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ bool is_command_sub = 0;
 char *parser_command_substitution(char *str, Vars *shell_vars) {
 
     char file_name[] = "/tmp/command_sub_XXXXXX";
+
     int output_fd = mkstemp(file_name);
 	if (output_fd == -1)
 		_fatal("mkstemp: failed to create command_sub", 1);

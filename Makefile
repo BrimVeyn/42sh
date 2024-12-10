@@ -6,7 +6,7 @@
 #    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/06 10:05:24 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/12/09 12:17:48 by bvan-pae         ###   ########.fr        #
+#    Updated: 2024/12/10 09:32:28 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,11 +16,13 @@ LIBFT			:= libftprintf/libftprintf.a
 STRING 			:= libstring/libstring.a
 CC 				:= gcc
 LDFLAGS			:= -lreadline -lncurses
+
 WWFLAGS = $(WFLAGS) -Wpedantic -Wshadow -Wconversion -Wcast-align \
   -Wstrict-prototypes -Wmissing-prototypes -Wunreachable-code -Winit-self \
   -Wmissing-declarations -Wfloat-equal -Wbad-function-cast -Wundef \
   -Waggregate-return -Wstrict-overflow=5 -Wold-style-definition -Wpadded \
   -Wredundant-decls -Wall -Werror -Wextra
+
 CFLAGS 			:= -Wall -Wextra -Werror -g3 #$(WWFLAGS) #-fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-call
 SANFLAGS		:= -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fstack-protector-strong -fno-optimize-sibling-calls
 

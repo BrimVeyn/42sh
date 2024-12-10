@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:33 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 17:20:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 11:10:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -413,7 +413,7 @@ typedef enum {
 	HD_NO_EXPAND
 } heredoc_mode;
 
-char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars);
+char *here_doc(const char *eof, const heredoc_mode mode, Vars * const shell_vars);
 
 StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options);
 

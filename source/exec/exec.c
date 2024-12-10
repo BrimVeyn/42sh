@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:22:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 17:40:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 11:08:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <termios.h>
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -295,7 +296,8 @@ void set_group(AndOrP * const job, PipeLineP * const process, const pid_t pid) {
 		job->pgid = g_masterPgid;
 	else if (!job->pgid)
 		job->pgid = pid;
-	setpgid(pid, job->pgid);
+	if (setpgid(pid, job->pgid) == -1)
+		_fatal("setpgid: failed", 1);
 }
 
 void process_simple_command(SimpleCommandP * const simple_command, Vars *shell_vars) {
@@ -366,7 +368,8 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 						if (job->pgid == 0) 
 							job->pgid = pid;
 						pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
-						setpgid(pid, pgid);
+						if (setpgid(pid, pgid) == -1)
+							_fatal("setpgid: failed", 1);
 
 						if (!background) {
 							if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
@@ -389,6 +392,10 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 			}
 			pid_t pid = fork();
 			if (IS_CHILD(pid)) {
+				g_subshell = true;
+				g_masterPgid = pid;
+				if (setpgid(pid, pid) == -1)
+					_fatal("setpgid: failed", 1);
 				execute_subshell(command, background, shell_vars);
 				exit_clean(); 
 			} else { set_group(job, process, pid); }
@@ -436,7 +443,8 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 				if (job->pgid == 0) 
 					job->pgid = pid;
 				pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
-				setpgid(pid, pgid);
+				if (setpgid(pid, pgid) == -1)
+					_fatal("setpgid: failed", 1);
 
 				if (!background) {
 					if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
@@ -529,13 +537,18 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 		TokenType separator = andor_head->separator; (void)separator;
 		const int wait_status = execute_pipeline(andor_head, background, shell_vars);
 
+		if (shell_infos->interactive) {
+			if (tcgetattr(shell_infos->shell_terminal, &andor_head->tmodes) == -1)
+				_fatal("tcgetattr: failed", 1);
+		}
+
 		if (wait_status == WAIT) {
 			if (!shell_infos->interactive) {
 				job_wait(andor_head);
 			} else if (!background) {
 				put_job_foreground(andor_head, false);
 			} else if (background) {
-				job_wait_background(andor_head);
+				put_job_background(andor_head);
 			}
 			set_exit_number(andor_head->pipeline);
 		}
@@ -571,7 +584,8 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 
 	while (list_head) {
 
-		g_masterPgid = 0;
+		if (!g_subshell)
+			g_masterPgid = 0;
 
 		const bool background = (
 			(shell_infos->interactive) && 
@@ -583,25 +597,8 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 			g_masterPgid = shell_infos->shell_pgid;
 		}
 
-		if (background) {
-			pid_t pid = fork();
-			if (IS_CHILD(pid)) {
-				g_masterPgid = getpid();
-				// dprintf(2, C_BRIGHT_CYAN"[MASTER] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
-				execute_list(list_head, background, shell_vars);
-				exit_clean(); 
-				break;
-			} else {
-				setpgid(pid, pid);
-				AndOrP *master = list_head->and_or;
-				master->tmodes = shell_infos->shell_tmodes;
-				master->id = g_jobList->size;
-				master->pgid = pid;
-				put_job_background(master);
-			}
-		} else {
-			execute_list(list_head, background, shell_vars);
-		}
+		execute_list(list_head, background, shell_vars);
+
 		list_head = list_head->next;
 	}
 
