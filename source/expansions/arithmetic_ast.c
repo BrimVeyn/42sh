@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/27 11:11:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 12:24:36 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/10 11:15:10 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/10 11:16:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ static ANode *incr(ANode * const self, const Vars * const shell_vars) {
 		char tmp[MAX_WORD_LEN] = {0};
 		const long var_value = get_value(self, shell_vars);
 		if (ft_snprintf(tmp, MAX_WORD_LEN, "%s=%ld", self->value->variable, var_value + 1) == -1)
-			fatal("snprintf: buffer overflow", __LINE__, __FILE_NAME__, 1);
+			_fatal("snprintf: buffer overflow", 1);
 		const char * const maybe_value = string_list_get_value(shell_vars->env, self->value->variable);
 		if (maybe_value)
 			string_list_add_or_update(shell_vars->env, tmp);
@@ -46,7 +46,7 @@ static ANode *decr(ANode * const self, const Vars * const shell_vars) {
 		char tmp[MAX_WORD_LEN] = {0};
 		const long var_value = get_value(self, shell_vars);
 		if (ft_snprintf(tmp, MAX_WORD_LEN, "%s=%ld", self->value->variable, var_value - 1) == -1)
-			fatal("snprintf: buffer overflow", __LINE__, __FILE_NAME__, 1);
+			_fatal("snprintf: buffer overflow", 1);
 		const char * const maybe_value = string_list_get_value(shell_vars->env, self->value->variable);
 		if (maybe_value)
 			string_list_add_or_update(shell_vars->env, tmp);
@@ -137,7 +137,7 @@ long aAST_execute(const ANode * const node, Vars * const shell_vars, int * const
 				case O_DIFFERENT: return aAST_execute(node->left, shell_vars, error) != aAST_execute(node->right, shell_vars, error);
 				case O_AND: return aAST_execute(node->left, shell_vars, error) && aAST_execute(node->right, shell_vars, error);
 				case O_OR: return aAST_execute(node->left, shell_vars, error) || aAST_execute(node->right, shell_vars, error);
-				default: fatal("arithmetic AST: unhandled case", __LINE__, __FILE_NAME__, 1);
+				default: _fatal("arithmetic AST: unhandled case", 1);
 			}
 			return 0;
 		}

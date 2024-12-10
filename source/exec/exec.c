@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/05 15:22:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:08:17 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/10 11:18:05 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/10 11:21:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -302,7 +302,7 @@ void set_group(AndOrP * const job, PipeLineP * const process, const pid_t pid) {
 
 void process_simple_command(SimpleCommandP * const simple_command, Vars *shell_vars) {
 	StringListL *args = do_expansions(simple_command->word_list, shell_vars, O_SPLIT);
-	StringListL *vars = do_expansions(simple_command->assign_list, shell_vars, O_NONE);
+	StringListL *vars = do_expansions(simple_command->assign_list, shell_vars, O_ASSIGN);
 	simple_command->word_list = args;
 	simple_command->assign_list = vars;
 	if (!args->data[0])
