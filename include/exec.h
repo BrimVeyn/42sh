@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:56 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 14:33:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 15:12:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,12 +44,10 @@ int		get_highest_free_fd();
 int		move_to_high_fd(int fd);
 int		*save_std_fds();
 
-int		secure_fork(void);
-bool	secure_dup2(int from, int to);
-void	secure_execve(const char *pathname, char **const argv, char **const envp);
+bool	secure_dup2(const int from, const int to);
 bool	is_builtin(const char *bin);
 char	*find_bin_location(char *bin, StringListL *env, bool *absolute);
-bool	redirect_ios(RedirectionL *redir_list);
+bool redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars);
 
 char	*sigStr(const int sig);
 //-------------------------------------------------------------//

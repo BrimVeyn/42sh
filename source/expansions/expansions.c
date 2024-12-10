@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:15:44 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:34:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 14:54:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,17 +41,17 @@ char *here_doc(const char *eof, const heredoc_mode mode, Vars * const shell_vars
 
 	signal_manager(SIG_HERE_DOC);
 
-	//FIX: crotte start heredoc and press ^D imediately --> leaks
-	//FIX: unlink heredoc
-	while(++line_number && (input = ft_readline(PS2, shell_vars)) != NULL && ft_strcmp(eof, input) && rl_done != 2){
+	while(++line_number && (input = ft_readline(PS2, shell_vars)) != NULL){
 		gc(GC_ADD, input, GC_SUBSHELL);
+		if (!ft_strcmp(eof, input) || rl_done == 2) {
+			break;
+		}
 		if (mode == HD_EXPAND){
-			//TODO: abberant en memoire
-			//FIX: readline leaks
-			//FIX: fd of expansions stays open
+
 			da_create(tmp, StringListL, sizeof(char *), GC_SUBSHELL);
 			da_push(tmp, input);
 			StringListL *expanded_word = do_expansions(tmp, shell_vars, O_NONE);
+
 			ft_dprintf(file_fd, "%s\n", expanded_word->data[0]);
 		} else if (mode == HD_NO_EXPAND){
 			ft_dprintf(file_fd, "%s\n", input);
@@ -112,7 +112,6 @@ void string_list_consume(StrList *str_list, Vars *shell_vars) {
 			case EXP_VARIABLE: {result = parser_parameter_expansion(curr->str, shell_vars); break;}
 			default: {}
 		}
-		// dprintf(2, C_BRIGHT_CYAN"result: %s\n"C_RESET, result);
 		if (result) {
 			gc(GC_FREE, str_list->data[i]->str, GC_SUBSHELL);
 			str_list->data[i]->str = gc(GC_ADD, result, GC_SUBSHELL);
@@ -192,7 +191,6 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars, c
 		ExpKind maybe_begin = 0;
 		ExpKind maybe_end = 0;
 
-		// dprintf(STDERR_FILENO, "SQ: %s, DQ: %s, c: %c\n", boolStr(squote), boolStr(dquote), current_char);
 		if (!squote && (maybe_begin = identify_exp_begin(word->data)) != EXP_WORD) {
 			if (!exp_stack->size && can_push) {
 				Str * const res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
@@ -207,30 +205,19 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars, c
 		}
 		if (!squote && exp_stack->size && (maybe_end = identify_exp_end(word->data, map, top_context)) != EXP_WORD) {
 			if (maybe_end == top_context) {
-				// dprintf(2, "-------B-------\n");
-				// exp_kind_list_print(exp_stack);
 				da_pop(exp_stack);
-				// da_pop(pos_stack);
-				// dprintf(2, "-------A-------\n");
-				// exp_kind_list_print(exp_stack);
 				for (size_t i = 0; i < ft_strlen(map[maybe_end].end); i++) {
 					da_push(cache_stack, da_pop_front(word));
 				}
 				if (bottom_context == EXP_ARITHMETIC && top_context == EXP_CMDSUB) {
 					da_push(cache_stack, 0);
-					// dprintf(2, "cache:  %s\n", cache_stack->data);
-					// exp_kind_list_print(exp_stack);
-					// pos_list_print(pos_stack);
 					const size_t idx = da_peak_back(pos_stack);
 					char * const tmp = ft_substr(&cache_stack->data[idx], 1, ft_strlen(&cache_stack->data[idx]) - 1);
-					// dprintf(2, "BEFOR: %s\n", tmp);
 					char * const result = parser_command_substitution(tmp, shell_vars);
 					free(tmp);
-					// dprintf(2, "result: %s\n", result);
 					ss_cut(cache_stack, idx);
 					ss_push_string(cache_stack, result);
 					free(result);
-					// dprintf(2, "cache: %s\n", cache_stack->data);
 				}
 				if (var_expand && top_context == EXP_VARIABLE) {
 					da_push(cache_stack, 0);
@@ -416,19 +403,13 @@ void quote_removal(const StrList * const list) {
 			}
 		}
 	}
-	// for (size_t i = 0; i < list->size; i++) {
-	// 	dprintf(2, "Bebefore[%zu]: %s\n", i, list->data[i]->str);
-	// }
 	for (size_t i = 0; i < poses->size;) {
 		da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
 		ss_push_string(ss, list->data[poses->data[i].list_index]->str);
-		// dprintf(2, "Before[%d]: %s\n", poses->data[i].list_index, list->data[poses->data[i].list_index]->str);
 
 		int offset = 0;
 		int origin = poses->data[i].list_index;
 		while (i < poses->size && poses->data[i].list_index == origin) {
-			// dprintf(2, "list: %d, idx: %d\n", poses->data[i].list_index, poses->data[i].index);
-			// dprintf(2, "str: %s\n", list->data[poses->data[i].list_index]->str);
 			da_erase_index(ss, ((size_t) poses->data[i].index - offset));
 			offset++;
 			i++;
@@ -439,25 +420,28 @@ void quote_removal(const StrList * const list) {
 	}
 }
 
+char *remove_quotes(char *word) {
+	da_create(list, StrList, sizeof(Str *), GC_SUBSHELL);
+	Str *tmp = str_init(EXP_WORD, word, false);
+	da_push(list, tmp);
+	quote_removal(list);
+	return list->data[0]->str;
+}
+
 StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options) {
 	if (!word_list) return NULL;
 
-	// bool error = false;
 	da_create(arg_list, StringListL, sizeof(char *), GC_SUBSHELL);
+	// str_list_print(string_list);
 	
 	for (size_t it = 0; it < word_list->size; it++) {
 		StrList * const string_list = get_range_list(word_list->data[it], shell_vars, options);
-		// str_list_print(string_list);
 		string_list_consume(string_list, shell_vars);
 		if (options & O_SPLIT)
 			string_list_split(string_list, shell_vars);
 		string_erase_nulls(string_list);
 		quote_removal(string_list);
-		// str_list_print(string_list);
 		StringListL * const result = string_list_merge(string_list);
-		// printStringList(result);
-		// quote_removal(result);
-		// printStringList(result);
 		string_list_push_list(arg_list, result);
 	}
 	return arg_list;

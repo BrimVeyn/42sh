@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:16:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 14:30:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,10 @@
 #include "libft.h"
 #include "utils.h"
 #include "ft_regex.h"
+#include "expansion.h"
+
 #include <stdio.h>
 
-//TODO: replace gc by arena
 char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 	// printf("id: %s\nword: %s\nmetachar: %s\n", id, word, metachar);
 	// dprintf(2, "WORD: %s\n", word);
