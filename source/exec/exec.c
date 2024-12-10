@@ -5,12 +5,13 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/10 11:18:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 15:14:55 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/10 15:42:02 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/10 17:31:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
+#include "expansion.h"
 #include "final_parser.h"
 #include "signals.h"
 #include "utils.h"
@@ -29,6 +30,7 @@
 #include <stdlib.h>
 
 static void execute_list(const ListP * const list, const bool background, Vars * const shell_vars);
+static void restore_std_fds(int *saved_fds);
 static int is_function(const char * const func_name);
 
 static void dup_input(const int fd) {
@@ -85,24 +87,48 @@ static CompleteCommandP *wrap_list(ListP * const list) {
 	return complete_command;
 }
 
-static void execute_subshell(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static void execute_subshell(const CommandP * const command, const bool background, Vars * const shell_vars, const int flag) {
 	ListP * const subshell = command->subshell;
+
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
+
 	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
 		return ;
 	}
+
 	execute_complete_command(wrap_list(subshell), shell_vars, background);
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
 }
 
-static void execute_brace_group(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static void execute_brace_group(const CommandP * const command, const bool background, Vars * const shell_vars, const int flag) {
 	ListP * const command_group = command->brace_group;
+
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
+
 	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
 		return ;
 	}
+
 	execute_complete_command(wrap_list(command_group), shell_vars, background);
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
 }
 
-static void execute_if_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static void execute_if_clause(const CommandP * const command, const bool background, Vars * const shell_vars, const int flag) {
 	const IFClauseP * const if_clause = command->if_clause;
+
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
+
+	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return ;
+	}
 
 	size_t i = 0;
 	for (; i < if_clause->conditions->size; i++) {
@@ -111,6 +137,7 @@ static void execute_if_clause(const CommandP * const command, const bool backgro
 		if (g_exitno == 0) {
 			ListP * const body = if_clause->bodies->data[i];
 			execute_complete_command(wrap_list(body), shell_vars, background);
+			if (SAVE_FD) restore_std_fds(saved_fds);
 			return ;
 		}
 	}
@@ -118,13 +145,23 @@ static void execute_if_clause(const CommandP * const command, const bool backgro
 		ListP *else_body = if_clause->bodies->data[i];
 		execute_complete_command(wrap_list(else_body), shell_vars, background);
 	}
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
 }
 
 
-static void execute_while_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static void execute_while_clause(const CommandP * const command, const bool background, Vars * const shell_vars, const int flag) {
 	const WhileClauseP * const while_clause = command->while_clause;
 
 	ArenaAllocator *arena = arena_create(1e5, GC_SUBSHELL);
+
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
+
+	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return ;
+	}
 
 	while (true) {
 		Garbage *GC = gc(GC_GET);
@@ -145,12 +182,22 @@ static void execute_while_clause(const CommandP * const command, const bool back
 		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
 	}
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
 }
 
-static void execute_until_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static void execute_until_clause(const CommandP * const command, const bool background, Vars * const shell_vars, const int flag) {
 	const WhileClauseP * const while_clause = command->while_clause;
 
 	ArenaAllocator *arena = arena_create(1e5, GC_SUBSHELL);
+
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
+
+	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return ;
+	}
 
 	while (true) {
 		Garbage *GC = gc(GC_GET);
@@ -170,15 +217,34 @@ static void execute_until_clause(const CommandP * const command, const bool back
 		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
 	}
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
 }
 
-static void execute_case_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static void execute_case_clause(const CommandP * const command, const bool background, Vars * const shell_vars, const int flag) {
+
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
+
+	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return ;
+	}
+
 	CaseClauseP * const case_clause = command->case_clause;
 	da_create(tmp, StringListL, sizeof(char *), GC_SUBSHELL);
 	da_push(tmp, case_clause->expression);
-	case_clause->expression = do_expansions(tmp, shell_vars, O_NONE)->data[0];
+
+	ExpReturn ret = do_expansions(tmp, shell_vars, O_NONE);
+	if (ret.error != 0)
+		return ;
+	case_clause->expression = ret.ret->data[0];
+
 	for (size_t i = 0; i < case_clause->patterns->size; i++) {
-		case_clause->patterns->data[i] = do_expansions(case_clause->patterns->data[i], shell_vars, O_NONE);
+		ExpReturn ret = do_expansions(case_clause->patterns->data[i], shell_vars, O_NONE);
+		if (ret.error != 0)
+			return ; 
+		case_clause->patterns->data[i] = ret.ret;
 	}
 
 	int default_index = -1;
@@ -187,18 +253,34 @@ static void execute_case_clause(const CommandP * const command, const bool backg
 		for (size_t inner_i = 0; inner_i < patterns->size; inner_i++) {
 			if (!ft_strcmp("*", patterns->data[inner_i]))
 				default_index = i;
-			if (!ft_strcmp(patterns->data[inner_i], case_clause->expression))
-				return execute_complete_command(wrap_list(case_clause->bodies->data[i]), shell_vars, background);
+			if (!ft_strcmp(patterns->data[inner_i], case_clause->expression)) {
+				execute_complete_command(wrap_list(case_clause->bodies->data[i]), shell_vars, background);
+				if (SAVE_FD) restore_std_fds(saved_fds);
+				return ;
+            }
 		}
 	}
 	if (default_index != -1)
-		return execute_complete_command(wrap_list(case_clause->bodies->data[default_index]), shell_vars, background);
-	return ;
+		execute_complete_command(wrap_list(case_clause->bodies->data[default_index]), shell_vars, background);
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
 }
 
-static void execute_for_clause(const CommandP * const command, const bool background, Vars *const shell_vars) {
+static void execute_for_clause(const CommandP * const command, const bool background, Vars *const shell_vars, const int flag) {
+
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
+
+	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return ;
+	}
+
 	const ForClauseP * const for_clause = command->for_clause;
-	const StringListL *expanded_words = do_expansions(for_clause->word_list, shell_vars, O_SPLIT);
+	ExpReturn ret = do_expansions(for_clause->word_list, shell_vars, O_SPLIT);
+	if (ret.error != 0)
+		return ;
+	const StringListL *expanded_words = ret.ret;
 	const StringListL * const word_list = (for_clause->in == true) ? expanded_words : shell_vars->positional;
 
 	ArenaAllocator *arena = arena_create(1e5, GC_SUBSHELL);
@@ -220,6 +302,8 @@ static void execute_for_clause(const CommandP * const command, const bool backgr
 		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
 	}
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
 }
 
 static void declare_positional(const StringListL * const positional_parameters, const Vars * const shell_vars) {
@@ -249,7 +333,7 @@ static void clear_positional(StringListL * const positional) {
 	positional->size = 1;
 }
 
-static void execute_function(const CommandP * const command, const int funcNo, const bool background, Vars * const shell_vars) {
+static void execute_function(const CommandP * const command, const int funcNo, const bool background, Vars * const shell_vars, const int flag) {
 	const SimpleCommandP * const simple_command = command->simple_command;
 	const StringListL * const positional_parameters = simple_command->word_list;
 	StringListL * const saved_positionals = save_positionals(shell_vars);
@@ -257,7 +341,7 @@ static void execute_function(const CommandP * const command, const int funcNo, c
 
 	clear_positional(shell_vars->positional);
 	declare_positional(positional_parameters, shell_vars);
-	execute_brace_group(function_copy->function_body, background, shell_vars);
+	execute_brace_group(function_copy->function_body, background, shell_vars, flag);
 	string_list_clear(shell_vars->positional);
 
 	shell_vars->positional = saved_positionals;
@@ -294,8 +378,16 @@ static void set_group(AndOrP * const job, PipeLineP * const process, const pid_t
 }
 
 static void process_simple_command(SimpleCommandP * const simple_command, Vars *shell_vars) {
-	StringListL *args = do_expansions(simple_command->word_list, shell_vars, O_SPLIT);
-	StringListL *vars = do_expansions(simple_command->assign_list, shell_vars, O_ASSIGN);
+
+	ExpReturn ret = do_expansions(simple_command->word_list, shell_vars, O_SPLIT);
+	if (ret.error != 0)
+		return ;
+	StringListL *args = ret.ret;
+
+	ret = do_expansions(simple_command->assign_list, shell_vars, O_ASSIGN);
+	if (ret.error != 0)
+		return ;
+	StringListL *vars = ret.ret;
 
 	simple_command->word_list = args;
 	simple_command->assign_list = vars;
@@ -345,7 +437,7 @@ static int execute_single_command(AndOrP * const job, const bool background, Var
 			char *bin = resolve_bine(command->simple_command, shell_vars);
 			int funcNo = is_function(bin);
 			if (funcNo != -1) {
-				execute_function(command, funcNo, background, shell_vars);
+				execute_function(command, funcNo, background, shell_vars, O_NOFORK);
 				return NO_WAIT;
             } else if (is_builtin(bin)) {
 				const bool hasRedir = (command->simple_command->redir_list->size != 0);
@@ -381,26 +473,26 @@ static int execute_single_command(AndOrP * const job, const bool background, Var
 		}
 		case Subshell: {
 			if (background) {
-				execute_subshell(command, background, shell_vars);
+				execute_subshell(command, background, shell_vars, O_NOFORK);
 				return NO_WAIT;
 			}
 			pid_t pid;
 			if ((pid = fork()) == -1)
 				_fatal("fork: failed", 1);
 			if (IS_CHILD(pid)) {
-				execute_subshell(command, background, shell_vars);
+				execute_subshell(command, background, shell_vars, O_FORKED);
 				exit_clean(); 
 			} else { 
 				set_group(job, process, pid); 
 			}
 			return WAIT;
 		}
-		case Brace_Group: { execute_brace_group(process->command, background, shell_vars); return NO_WAIT; }
-		case If_Clause: { execute_if_clause(process->command, background, shell_vars); return NO_WAIT; }
-		case While_Clause: { execute_while_clause(process->command, background, shell_vars); return NO_WAIT; }
-		case Until_Clause: { execute_until_clause(process->command, background, shell_vars); return NO_WAIT; }
-		case Case_Clause: { execute_case_clause(process->command, background, shell_vars); return NO_WAIT; }
-		case For_Clause: { execute_for_clause(process->command, background, shell_vars); return NO_WAIT; }
+		case Brace_Group: { execute_brace_group(process->command, background, shell_vars, O_NOFORK); return NO_WAIT; }
+		case If_Clause: { execute_if_clause(process->command, background, shell_vars, O_NOFORK); return NO_WAIT; }
+		case While_Clause: { execute_while_clause(process->command, background, shell_vars, O_NOFORK); return NO_WAIT; }
+		case Until_Clause: { execute_until_clause(process->command, background, shell_vars, O_NOFORK); return NO_WAIT; }
+		case Case_Clause: { execute_case_clause(process->command, background, shell_vars, O_NOFORK); return NO_WAIT; }
+		case For_Clause: { execute_for_clause(process->command, background, shell_vars, O_NOFORK); return NO_WAIT; }
 		case Function_Definition: { register_function(process->command); return NO_WAIT; }
 		default: { break; };
 	}
@@ -456,7 +548,7 @@ static int execute_pipeline(AndOrP * const job, const bool background, Vars * co
 					char *bin = resolve_bine(process->command->simple_command, shell_vars);
 					int funcNo = is_function(bin);
 					if (funcNo != -1) {
-						execute_function(process->command, funcNo, background, shell_vars);
+						execute_function(process->command, funcNo, background, shell_vars, O_FORKED);
 					} else if (is_builtin(bin)) {
 						if (!redirect_ios(process->command->simple_command->redir_list, shell_vars)) {
 							exit_clean();
@@ -468,13 +560,13 @@ static int execute_pipeline(AndOrP * const job, const bool background, Vars * co
 					exit_clean();
 					break;
 				}
-				case Subshell: { execute_subshell(process->command, background, shell_vars); exit_clean(); break; }
-				case Brace_Group: { execute_brace_group(process->command, background, shell_vars); exit_clean(); break; }
-				case If_Clause: { execute_if_clause(process->command, background, shell_vars); exit_clean(); break; }
-				case While_Clause: { execute_while_clause(process->command, background, shell_vars); exit_clean(); break; }
-				case Until_Clause: { execute_until_clause(process->command, background, shell_vars);  exit_clean(); break; }
-				case Case_Clause: { execute_case_clause(process->command, background, shell_vars); exit_clean(); break; }
-				case For_Clause: { execute_for_clause(process->command, background, shell_vars); exit_clean(); break; }
+				case Subshell: { execute_subshell(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
+				case Brace_Group: { execute_brace_group(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
+				case If_Clause: { execute_if_clause(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
+				case While_Clause: { execute_while_clause(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
+				case Until_Clause: { execute_until_clause(process->command, background, shell_vars, O_FORKED);  exit_clean(); break; }
+				case Case_Clause: { execute_case_clause(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
+				case For_Clause: { execute_for_clause(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
 				case Function_Definition: { register_function(process->command); exit_clean(); break; }
 				default: { break; }
 			}

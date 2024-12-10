@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 14:13:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 14:30:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 17:25:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ void				str_list_print(const StrList *list);
 //---------------------------------------------------------------//
 char				*parser_parameter_expansion(char *str, Vars *shell_vars);
 char				*parser_command_substitution(char *str, Vars *shell_vars);
-char				*parser_arithmetic_expansion(char *str, Vars *shell_vars);
+char				*parser_arithmetic_expansion(char *const str, Vars *const shell_vars, int *error);
 void				parser_tilde_expansion(StringStream *cache, StringStream *word, Vars *shell_vars, const int options);
 
 //-------------------history modules------------//
@@ -92,7 +92,12 @@ bool				history_expansion (char **pstring);
 void				add_input_to_history(char *input, int *history_fd, Vars *shell_vars);
 void				get_history(Vars *shell_vars);
 
-StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options);
+typedef struct {
+	StringListL *ret;
+	int error;
+} ExpReturn;
+
+ExpReturn do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options);
 char *remove_quotes(char *word);
 
 

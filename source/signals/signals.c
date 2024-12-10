@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:33 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 14:13:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 16:17:36 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,6 @@ void signal_script_mode() {
 }
 
 void signal_manager(const type_of_signals mode) {
-	// dprintf(2, "signal manager called with option %d\n", mode);
 	switch(mode) {
 		case SIG_PROMPT: signal_prompt_mode(); break;
 		case SIG_EXEC: signal_exec_mode(); break;

@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/10 11:15:44 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 14:54:02 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/10 15:41:56 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/10 17:26:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,8 +50,11 @@ char *here_doc(const char *eof, const heredoc_mode mode, Vars * const shell_vars
 
 			da_create(tmp, StringListL, sizeof(char *), GC_SUBSHELL);
 			da_push(tmp, input);
-			StringListL *expanded_word = do_expansions(tmp, shell_vars, O_NONE);
+			ExpReturn ret = do_expansions(tmp, shell_vars, O_NONE);
+			if (ret.error != 0)
+				return NULL;
 
+			StringListL *expanded_word = ret.ret;
 			ft_dprintf(file_fd, "%s\n", expanded_word->data[0]);
 		} else if (mode == HD_NO_EXPAND){
 			ft_dprintf(file_fd, "%s\n", input);
@@ -95,7 +98,7 @@ void remove_boundaries(Str *exp) {
 	exp->str = tmp;
 }
 
-void string_list_consume(StrList *str_list, Vars *shell_vars) {
+void string_list_consume(StrList *str_list, Vars *shell_vars, int *error) {
 	for (size_t i = 0; i < str_list->size; i++) {
 		char *result = NULL;
 		Str *curr = str_list->data[i];
@@ -108,10 +111,14 @@ void string_list_consume(StrList *str_list, Vars *shell_vars) {
 
 		switch (kind) {
 			case EXP_CMDSUB: { result = parser_command_substitution(curr->str, shell_vars); break;}
-			case EXP_ARITHMETIC: {result = parser_arithmetic_expansion(curr->str, shell_vars); break;}
+			case EXP_ARITHMETIC: {result = parser_arithmetic_expansion(curr->str, shell_vars, error); break;}
 			case EXP_VARIABLE: {result = parser_parameter_expansion(curr->str, shell_vars); break;}
 			default: {}
 		}
+		
+		if (*error == 1)
+			return ;
+
 		if (result) {
 			gc(GC_FREE, str_list->data[i]->str, GC_SUBSHELL);
 			str_list->data[i]->str = gc(GC_ADD, result, GC_SUBSHELL);
@@ -172,8 +179,8 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars, c
 	da_create(word, StringStream, sizeof(char), GC_SUBSHELL);
 	da_create(cache_stack, StringStream, sizeof(char), GC_SUBSHELL);
 	ss_push_string(word, candidate);
-	// parser_tilde_expansion(cache_stack, word, shell_vars, options);
-	(void)options;
+
+	parser_tilde_expansion(cache_stack, word, shell_vars, options);
 
 	bool squote = false, dquote = false, can_push = (word->size == 0);
 
@@ -428,15 +435,16 @@ char *remove_quotes(char *word) {
 	return list->data[0]->str;
 }
 
-StringListL *do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options) {
-	if (!word_list) return NULL;
+ExpReturn do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options) {
+	ExpReturn ret_value = { .ret = NULL, .error = 0 };
+
+	if (!word_list) return ret_value;
 
 	da_create(arg_list, StringListL, sizeof(char *), GC_SUBSHELL);
 	// str_list_print(string_list);
-	
 	for (size_t it = 0; it < word_list->size; it++) {
 		StrList * const string_list = get_range_list(word_list->data[it], shell_vars, options);
-		string_list_consume(string_list, shell_vars);
+		string_list_consume(string_list, shell_vars, &ret_value.error);
 		if (options & O_SPLIT)
 			string_list_split(string_list, shell_vars);
 		string_erase_nulls(string_list);
@@ -444,5 +452,6 @@ StringListL *do_expansions(const StringListL * const word_list, Vars * const she
 		StringListL * const result = string_list_merge(string_list);
 		string_list_push_list(arg_list, result);
 	}
-	return arg_list;
+	ret_value.ret = arg_list;	
+	return ret_value;
 }
