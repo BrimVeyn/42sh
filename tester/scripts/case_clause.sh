@@ -42,6 +42,8 @@ case "${var}" in
 	"salut mec") echo "Match";;
 	*) echo "No Match";;
 esac
+
+echo Done;
 #
 # var="file.txt"
 # case "${var}" in

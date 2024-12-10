@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:00 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 14:24:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 17:03:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,9 +80,9 @@ Vars *shell_vars_init(const char **env) {
 }
 
 static char *read_input_file(const char *path){
-    int fd = open(path, O_RDWR | O_CREAT, 0644);
+    int fd = open(path, O_RDWR, 0644);
     if (fd == -1)
-		_fatal("open: can't open file", 1);
+		_fatal("open: no such file", 1);
 
 	struct stat st;
 	if (fstat(fd, &st) == -1)
@@ -231,7 +231,7 @@ int main(const int ac, char *av[], const char *env[]) {
 	Vars *shell_vars = shell_vars_init(env);
 	ShellInfos *self = shell(SHELL_GET);
 
-	if (SCRIPT_MODE) { self->interactive = true; self->script = true; }
+	if (SCRIPT_MODE) { self->script = true; }
 	if (self->interactive && !self->script) { load_42shrc(shell_vars); }
 
 	char *input = NULL;

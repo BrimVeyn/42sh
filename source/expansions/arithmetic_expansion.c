@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 12:33:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 17:10:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,7 @@ static Lexer * lexer_init(char *input) {
 
 void aTokenListToString(ATokenStack *tokens);
 
-char *parser_arithmetic_expansion(char *str, Vars *shell_vars) {
+char *parser_arithmetic_expansion(char *const str, Vars *const shell_vars, int *error) {
 
 	char *tmp = ft_strdup(str);
 	replace_nested_greedy(tmp, str);
@@ -150,22 +150,21 @@ char *parser_arithmetic_expansion(char *str, Vars *shell_vars) {
 
 	if (!token_stack) { 
 		g_exitno = 1;
-		return NULL; 
+		return (*error) = 1, NULL; 
 	}
 	if (!token_stack->size) {
 		goto empty;	
 	}
 	if (!arithmetic_syntax_check(token_stack)) {
-		return NULL;
+		return (*error) = 1, NULL;
 	}
 
 	ATokenStack *token_queue = tokens_to_rpn(token_stack);
 	ANode *AST = generate_atree(token_queue);
-	int error = 0;
-	result = aAST_execute(AST, shell_vars, &error);
-	if (error == -1) {
+	result = aAST_execute(AST, shell_vars, error);
+	if ((*error) == -1) {
 		dprintf(2, DIVISION_BY_0"\n"); g_exitno = 1;
-		return NULL;
+		return (*error) = 1, NULL;
 	}
 
 	char *result_str = NULL;

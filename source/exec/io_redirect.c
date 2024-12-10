@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   io_redirect.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/05 14:24:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/10 15:40:17 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/10 15:41:47 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/10 17:24:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "exec.h"
+#include "expansion.h"
 #include "final_parser.h"
-#include "signals.h"
 #include "utils.h"
 #include "libft.h"
 #include "lexer.h"
@@ -83,7 +83,10 @@ static void expand_filenames(RedirectionL *const redir_list, Vars *const shell_v
 	for (size_t i =0; i < redir_list->size; i++) {
 		da_push(tmp_redirs, redir_list->data[i]->filename);
 	}
-	StringListL *result = do_expansions(tmp_redirs, shell_vars, O_NONE);
+	ExpReturn ret = do_expansions(tmp_redirs, shell_vars, O_NONE);
+	if (ret.error != 0)
+		return ;
+	StringListL *result = ret.ret;
 	for (size_t i = 0; i < redir_list->size; i++) {
 		redir_list->data[i]->filename = result->data[i];
 	}
@@ -171,10 +174,7 @@ bool redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars) {
 			if (!ft_strcmp("-", redir->filename) || fd == n){
 				close(n);
 			} else {
-				if (!secure_dup2(fd, n)){
-					return false;
-				}
-				close(fd);
+				if (!secure_dup2(fd, n)) return false;
 			}
 		}
 		else if (redir->type == GREATAND){ //>&
@@ -190,14 +190,12 @@ bool redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars) {
 				ft_dprintf(STDERR_FILENO, "42sh: %d: Bad file descriptor\n", fd);
 				return false;
 			}
-
+			
+			// ft_dprintf(2, "n: %d\nfd: %d\n", n, fd);
 			if (!ft_strcmp("-", redir->filename) || fd == n){
 				close(n);
 			} else {
-				if (!secure_dup2(fd, n)){
-					return false;
-				}
-				close(fd);
+				if (!secure_dup2(fd, n)) return false;
 			}
 		}
 	}

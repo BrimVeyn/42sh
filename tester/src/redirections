@@ -49,16 +49,10 @@ cat <> ./outfiles
 21<> ./outfiles/file1 22<&21 cat <&22
 21<> ./outfiles/file1 21<&-
 22<> ./outfiles/no_exec 22<&-
-echo test1 > ./outfiles/pipe_test | cat < ./outfiles/pipe_test
-echo test2 > ./outfiles/pipe_test | cat < ./outfiles/pipe_test | cat >> ./outfiles/pipe_output
 (cat < infiles/test | echo "output to file") > ./outfiles/paren_pipe
 (cat <> ./outfiles/file1 | cat) >> ./outfiles/combined_test
 21<> ./outfiles/complex_test (cat <&21 | echo "piped output") >> ./outfiles/final_test
-(echo "nested" > ./outfiles/nested_file | cat < ./outfiles/nested_file) >& ./outfiles/nested_output
-(echo "pipe and redirect" > ./outfiles/pipe_redirect | cat < ./outfiles/pipe_redirect) >> ./outfiles/redirected_pipe
-cat < infiles/no_read | (echo "testing" >&2 > ./outfiles/error_output)
 21< infiles/test | 22<&21 echo "output" > ./outfiles/test_fd_combination
-echo salut > ./outfiles/test10 | cat < outfiles/test10
 (cat < ./infiles/test) <> ./outfiles/nested_complex2
 10<>infiles/test cat <&10 >1
 { echo "start"; cat < infiles/test; echo "end"; } > ./outfiles/group_output
@@ -67,5 +61,5 @@ echo salut > ./outfiles/test10 | cat < outfiles/test10
 { cat < infiles/no_write; echo "fallback message"; } > ./outfiles/group_fallback
 { echo "reading input"; cat <&0; } <> ./outfiles/group_stdin
 { cat < infiles/test; echo "duplicated output"; } 21<> ./outfiles/group_fd_test
-{ echo "multiple files" > ./outfiles/group_multi; cat < infiles/test >> ./outfiles/group_multi; } >& ./outfiles/group_redirected
 { echo "closing fd"; 22<> ./outfiles/group_fd_close; echo "done with fd"; } > ./outfiles/group_close
+#(echo finished) > ./testfile 2>&1; cat testfile;

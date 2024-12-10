@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:56 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 15:12:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 16:21:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,11 @@ typedef struct ShellInfos {
 ShellInfos *shell(int mode);
 //-------------------------------------------//
 
-void	close_std_fds(void);
+#define O_FORKED 0x1
+#define O_NOFORK 0x0
+
+#define SAVE_FD (flag == O_NOFORK && command->redir_list)
+
 void	close_saved_fds(int *saved_fds);
 void	close_fd_set();
 void	remove_fd_set(int fd);
