@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 10:52:02 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/10 11:12:57 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/10 14:33:51 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,56 +28,61 @@ const char *get_suffix(const char *name, const int len, Vars *shell_vars){
 		else
 			return NULL;
 	} else {
-		return get_variable_value(shell_vars, "HOME");
+		char *maybe_home = get_variable_value(shell_vars, "HOME");
+		if (!maybe_home){
+			maybe_home = getenv("HOME");
+		}
+		return maybe_home;
 	}
 }
 
 void parser_tilde_expansion(StringStream *cache, StringStream *word, Vars *shell_vars, const int options){
 	(void)shell_vars;
-	if (options & O_ASSIGN){
-		regex_match_t result = regex_match("[!-~]+[:/]?", word->data);
-		if (!result.is_found){
+
+
+	do {
+		regex_match_t result = {0};
+
+		if (!ss_to_string(word))
 			return;
+
+		if (options & O_ASSIGN){
+			result = regex_match("~[!-.0-9;-~]*", ss_to_string(word));
+		} else {
+			result = regex_match("^~[!-.0-~]*", ss_to_string(word));
 		}
-		
-		//case: ~name				case: :~name							case: =~name
-		if (result.re_start == 0 || word->data[result.re_start - 1] == ':' || word->data[result.re_start - 1] == '='){
-			const char *name = ft_substr(word->data, result.re_start + 1, result.re_end - 1); // -1 for removing ~
-			const char *suffix = get_suffix(name, result.re_end - result.re_start, shell_vars);
+
+		if (!result.is_found)
+			return;
+
+		size_t word_end = result.re_end;
+		const size_t word_start = result.re_start;
+
+		const size_t word_len = word_end - word_start;
+
+		bool is_at_start = (result.re_start == 0);
+		bool is_after_delimiter = (options & O_ASSIGN && (word->data[result.re_start - 1] == ':' || word->data[result.re_start - 1] == '='));
+
+		if (is_at_start || is_after_delimiter){
+			//-1 for removing ~
+			const char *name = ft_substr(ss_to_string(word), word_start + 1, word_len - 1);
+			const char *suffix = get_suffix(name, word_len - 1, shell_vars);
 			free((void *)name);
-			
+
 			da_transfer(cache, word, result.re_start);
+
 			if (suffix){
-				for (int i = 0; i < result.re_end - result.re_start; i++){
+				//removing ~name
+				for (size_t i = 0; i < word_len; i++){
 					ss_pop_front(word);
 				}
 				ss_push_string(cache, suffix);
 			} else {
-				da_transfer(cache, word, result.re_end - result.re_start);
+				//not changing ~name
+				da_transfer(cache, word, word_len);
 			}
-		}
-	}
-	else {
-		if (da_peak_front(word) != '~'){
-			da_transfer(cache, word, 0);
-			return;
-		}
-
-		int name_end = 1;
-		while(word->data[name_end] && word->data[name_end] != '/')
-			name_end++;
-		
-		const char *name = ft_substr(word->data, 1, name_end - 1); // -1 for removing ~
-		const char *suffix = get_suffix(name, name_end - 1, shell_vars);
-		free((void *)name);
-		if (suffix){
-			ss_push_string(cache, suffix);
-			for (int i = 0; i < name_end; i++){
-				ss_pop_front(word);
-			}
-			return;
 		} else {
 			return;
 		}
-	}
+	} while (options & O_ASSIGN);
 }

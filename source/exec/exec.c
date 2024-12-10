@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:18:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:21:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 15:23:43 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,12 +96,18 @@ void execute_subshell(const CommandP * const command, const bool background, Var
 	execute_complete_command(wrap_list(subshell), shell_vars, background);
 }
 
+void restore_std_fds(int *saved_fds);
+
 void execute_brace_group(const CommandP * const command, const bool background, Vars * const shell_vars) {
 	ListP * const command_group = command->brace_group;
+
+	int *saved_fds = save_std_fds();
 	if (!redirect_ios(command->redir_list)) {
 		return ;
 	}
 	execute_complete_command(wrap_list(command_group), shell_vars, background);
+
+	restore_std_fds(saved_fds);
 }
 
 void execute_if_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 12:20:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 13:51:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 14:59:23 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ void builtin_echo(const SimpleCommandP *command, __attribute__((unused)) Vars * 
 	if (newline)
 		buffer_size = ft_sprintf(buffer, "\n");
 	if (write(STDOUT_FILENO, buffer, buffer_size) == -1){
+		perror("");
 		error("42sh: echo: write error: No space left on device", 1);
 	}
 	g_exitno = 0;
