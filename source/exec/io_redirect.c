@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 14:24:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/05 14:33:49 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/10 15:08:25 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,10 +157,7 @@ bool redirect_ios(RedirectionL *redir_list) {
 			if (!ft_strcmp("-", redir->filename) || fd == n){
 				close(n);
 			} else {
-				if (!secure_dup2(fd, n)){
-					return false;
-				}
-				close(fd);
+				if (!secure_dup2(fd, n)) return false;
 			}
 		}
 		else if (redir->type == GREATAND){ //>&
@@ -176,14 +173,12 @@ bool redirect_ios(RedirectionL *redir_list) {
 				ft_dprintf(STDERR_FILENO, "42sh: %d: Bad file descriptor\n", fd);
 				return false;
 			}
-
+			
+			// ft_dprintf(2, "n: %d\nfd: %d\n", n, fd);
 			if (!ft_strcmp("-", redir->filename) || fd == n){
 				close(n);
 			} else {
-				if (!secure_dup2(fd, n)){
-					return false;
-				}
-				close(fd);
+				if (!secure_dup2(fd, n)) return false;
 			}
 		}
 	}

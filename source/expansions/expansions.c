@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:15:44 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:34:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 13:01:18 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,8 +173,8 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars, c
 	da_create(word, StringStream, sizeof(char), GC_SUBSHELL);
 	da_create(cache_stack, StringStream, sizeof(char), GC_SUBSHELL);
 	ss_push_string(word, candidate);
-	// parser_tilde_expansion(cache_stack, word, shell_vars, options);
-	(void)options;
+
+	parser_tilde_expansion(cache_stack, word, shell_vars, options);
 
 	bool squote = false, dquote = false, can_push = (word->size == 0);
 
