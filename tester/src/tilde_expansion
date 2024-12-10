@@ -1,0 +1,23 @@
+echo ~nbardavi
+echo ~bvan-pae
+echo ~/file
+echo ~nbardavi/file
+echo ~bvan-pae/file/subdir
+MY_PATH=~/bin:~nbardavi/bin:~bvan-pae/bin; echo ${MY_PATH}
+MY_PATH="~/bin:~nbardavi/bin"; echo ${MY_PATH}
+echo ~
+unset HOME; echo ~
+echo ~/
+echo ~nbardavi/
+echo ~bvan-pae/
+echo ~+:~/bin
+echo ~-/bin
+MY_PATH=~/bin:~/scripts:~nbardavi:/etc; echo ${MY_PATH}
+echo "~/bin:~/scripts"
+unset HOME; MY_PATH=~/bin; echo ${MY_PATH}
+echo ~invaliduser/documents
+echo ~nbardavi::
+echo ~nbardavi:/bin
+echo ~bvan-pae::
+echo ~bvan-pae:/bin:~/scripts
+echo ~nbardavi:~bvan-pae:~/scripts

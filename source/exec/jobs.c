@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/03 17:39:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 10:18:51 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,15 +43,15 @@ void job_wait (AndOrP *job) {
 				pid_t pgid = shell_infos->shell_pgid; // Foreground process group
 				if (killpg(pgid, SIGTSTP) < 0) {
 					perror("killpg");
-					fatal("Jobs: killpg failed", 255);
+					_fatal("Jobs: killpg failed", 255);
 				}
 				if (tcsetpgrp(shell_infos->shell_terminal, job->pgid) < 0) {
 					perror("tcsetpgrp(shell)");
-					fatal("Jobs: tcsetpgrp(shell) failed", 255);
+					_fatal("Jobs: tcsetpgrp(shell) failed", 255);
 				}
 				if (killpg(job->pgid, SIGCONT) < 0) {
 					perror("killpg");
-					fatal("Jobs: killpg failed", 255);
+					_fatal("Jobs: killpg failed", 255);
 				}
 				goto back_to_wait;
 			}
@@ -84,7 +84,7 @@ void job_wait_2 (AndOrP *job) {
 				mark_process(list, pid, status, true);
 				if (kill(getpid(), SIGTSTP) < 0) {
 					perror("KILL");
-					fatal("Jobs: kill failed", 255);
+					_fatal("Jobs: kill failed", 255);
 				}
 				signal_manager(SIG_PROMPT);
 				continue;
@@ -123,7 +123,7 @@ void put_job_foreground (AndOrP *job, int cont) {
 		if (kill(-job->pgid, SIGCONT) < 0)
         {
 			perror("SIGCONT");
-			fatal("SIGCONT failed\n", 255);
+			_fatal("SIGCONT failed\n", 255);
         }
 	}
 	/* Wait for it to report.  */

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:22:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 14:14:47 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/10 10:18:59 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,13 +186,13 @@ void execute_for_clause(const CommandP * const command, const bool background, V
 	// print_for_clause(for_clause);
 	// ListP * save = gc_duplicate_list(for_clause->body);
 	// print_list(save);
-	// fatal("fdp\n", 1);
+	// _fatal("fdp\n", 1);
 	for (size_t i = (0 + !for_clause->in); word_list && i < word_list->size; i++) {
 		char buffer[MAX_WORD_LEN] = {0};
 		const char * const value = (for_clause->in == true) ? word_list->data[i] : get_positional_value(word_list, i); 
 		const int ret = ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s", for_clause->iterator, value);
 		if (ret == -1)
-			fatal("snprintf: buffer overflow", 255);
+			_fatal("snprintf: buffer overflow", 255);
 		string_list_add_or_update(shell_vars->set, buffer);
 		ListP * const body_save = gc_duplicate_list(for_clause->body);
 		execute_complete_command(wrap_list(body_save), shell_vars, background, background);
@@ -205,7 +205,7 @@ void declare_positional(const StringListL * const positional_parameters, const V
 		char buffer[MAX_WORD_LEN] = {0};
 		const int ret = ft_snprintf(buffer, MAX_WORD_LEN, "%ld=%s", i, positional_parameters->data[i]);
 		if (ret == -1)
-			fatal("snprintf: exceeded buffer capacity", 1);
+			_fatal("snprintf: exceeded buffer capacity", 1);
 		// dprintf(2, "BUFFER: %s\n", buffer);
 		string_list_add_or_update(shell_vars->positional, buffer);
 	}
@@ -323,7 +323,7 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 
 						if (!background && !is_command_sub && !g_subshell) {
 							if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
-								fatal("tcsetpgrp: failed", 1);
+								_fatal("tcsetpgrp: failed", 1);
                         }
 						signal_manager(SIG_EXEC);
 					}
@@ -411,7 +411,7 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 
 				if (!background && !is_command_sub && !g_subshell)
 					if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1) {
-						fatal("tcsetpgrp: failed", 1);
+						_fatal("tcsetpgrp: failed", 1);
                     }
 				signal_manager(SIG_EXEC);
 			}
