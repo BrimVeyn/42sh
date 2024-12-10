@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 10:52:02 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/06 15:50:57 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/10 11:12:57 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,42 @@
 
 //TODO:
 
+const char *get_suffix(const char *name, const int len, Vars *shell_vars){
+	if (len > 0){
+		const struct passwd *passwd = getpwnam(name);
+		if (passwd)
+			return passwd->pw_dir;
+		else
+			return NULL;
+	} else {
+		return get_variable_value(shell_vars, "HOME");
+	}
+}
+
 void parser_tilde_expansion(StringStream *cache, StringStream *word, Vars *shell_vars, const int options){
 	(void)shell_vars;
 	if (options & O_ASSIGN){
-		// char *username;
+		regex_match_t result = regex_match("[!-~]+[:/]?", word->data);
+		if (!result.is_found){
+			return;
+		}
+		
+		//case: ~name				case: :~name							case: =~name
+		if (result.re_start == 0 || word->data[result.re_start - 1] == ':' || word->data[result.re_start - 1] == '='){
+			const char *name = ft_substr(word->data, result.re_start + 1, result.re_end - 1); // -1 for removing ~
+			const char *suffix = get_suffix(name, result.re_end - result.re_start, shell_vars);
+			free((void *)name);
+			
+			da_transfer(cache, word, result.re_start);
+			if (suffix){
+				for (int i = 0; i < result.re_end - result.re_start; i++){
+					ss_pop_front(word);
+				}
+				ss_push_string(cache, suffix);
+			} else {
+				da_transfer(cache, word, result.re_end - result.re_start);
+			}
+		}
 	}
 	else {
 		if (da_peak_front(word) != '~'){
@@ -31,26 +63,21 @@ void parser_tilde_expansion(StringStream *cache, StringStream *word, Vars *shell
 			return;
 		}
 
-		regex_match_t result = regex_match("[!-~]+[/:]?", word->data);
-		if (result.is_found){
-			const char *name = ft_substr(word->data, 1, result.re_end - 1); // -1 for removing ~
-			printf("name: %s\n", name);
-			struct passwd *passwd = getpwnam(name);
-			if (passwd){
-				ss_push_string(cache, passwd->pw_dir);
-				for (int i = 0; i < result.re_end; i++){
-					ss_pop_front(word);
-				}
-				return;
-				// da_push(cache, )
-				// printf("Username: %s\n", passwd->pw_name);
-				// printf("UID: %d\n", passwd->pw_uid);
-				// printf("GID: %d\n", passwd->pw_gid);
-				// printf("Home directory: %s\n", passwd->pw_dir);
-				// printf("Shell: %s\n", passwd->pw_shell);
-			} else {
-				return;
+		int name_end = 1;
+		while(word->data[name_end] && word->data[name_end] != '/')
+			name_end++;
+		
+		const char *name = ft_substr(word->data, 1, name_end - 1); // -1 for removing ~
+		const char *suffix = get_suffix(name, name_end - 1, shell_vars);
+		free((void *)name);
+		if (suffix){
+			ss_push_string(cache, suffix);
+			for (int i = 0; i < name_end; i++){
+				ss_pop_front(word);
 			}
+			return;
+		} else {
+			return;
 		}
 	}
 }

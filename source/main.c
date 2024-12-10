@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:23 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:35:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 10:18:40 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -237,7 +237,7 @@ void load_positional_parameters(const int ac, char **av, Vars * const shell_vars
 			char buffer[MAX_WORD_LEN] = {0};
 			char *positional_number = ft_itoa(i - 1);
 			if (ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s", positional_number, av[i]) == -1)
-				fatal("snprintf: MAX_WORD_LEN exceeded", 255);
+				_fatal("snprintf: MAX_WORD_LEN exceeded", 255);
 			free(positional_number);
 			string_list_add_or_update(shell_vars->positional, buffer);
 		}

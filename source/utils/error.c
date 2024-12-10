@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/13 11:44:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:11:50 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 10:19:10 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,12 +56,13 @@ void pretty_error(const Lex *const lexer, char *raw_token) {
 	FREE_POINTERS(line);
 }
 
-void fatal(const char * const msg, const int exit_code) {
-	if (msg)
-		ft_dprintf(STDERR_FILENO, "Fatal: %s\n", msg);
-	close_fd_set();
-	gc(GC_CLEANUP, GC_ALL);
-	exit(exit_code);
+void fatal(const char * const msg, const int line, const char *filename, const int exit_code) {
+    // perror("_fatal");
+    if (msg)
+        ft_dprintf(STDERR_FILENO, "%s:%d Fatal: %s\n", filename, line, msg);
+    close_fd_set();
+    gc(GC_CLEANUP, GC_ALL);
+    exit(exit_code);
 }
 
 void error(const char * const msg, const int exit_code) {

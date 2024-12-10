@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 16:35:28 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:11:25 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 10:18:46 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ char *read_whole_file(int fd) {
 	size_t bytes_read = 0;
 	char *result = ft_calloc(BUFFER_SIZE, sizeof(char));
 	if (!result) {
-		fatal("read error", 1);
+		_fatal("read error", 1);
 	}
 
 	while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) != 0) {

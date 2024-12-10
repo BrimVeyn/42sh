@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:11 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 11:21:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 10:18:41 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ char *parser_command_substitution(char *str, Vars *shell_vars) {
 
 	output_fd = open(file_name, O_RDONLY, 0644);
 	if (output_fd == -1)
-		fatal("open: command_sub file not found", 1);
+		_fatal("open: command_sub file not found", 1);
 
 	char * const result = read_whole_file(output_fd);
 	close(output_fd); 

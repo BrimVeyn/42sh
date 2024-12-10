@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 15:16:50 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/10 10:20:10 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ size_t get_col(void){
 }
 
 void rl_print_prompt(int fd, readline_state_t *rl_state){
-	write(fd, rl_state->prompt.data, rl_state->prompt.size);
+	if (write(fd, rl_state->prompt.data, rl_state->prompt.size) == -1) {_fatal("write error", 1);}
 }
 
 size_t get_row(void) {
@@ -102,7 +102,7 @@ void update_cursor_x(readline_state_t *rl_state, string *line, ssize_t n) {
     }
 	if (rl_state->cursor.y + (int)rl_state->cursor_offset.y >= (int)rows){
 		rl_state->cursor_offset.y = rows - 1 - ((nlines > 0) ? nlines : 1);
-		write(STDOUT_FILENO, "\n", 1);
+		if (write(STDOUT_FILENO, "\n", 1) == -1) {_fatal("write error", 1);}
 	}
 }
 
@@ -119,8 +119,8 @@ readline_state_t *manage_rl_state(manage_rl_state_mode mode, readline_state_t *n
 void ft_rl_newline() {
 	readline_state_t *rl_state = manage_rl_state(RL_GET, NULL);
 
-    write(1, "^C", 2);
-	write(1, "\n", 1);
+    if (write(1, "^C", 2) == -1) {_fatal("write error", 1);}
+	if (write(1, "\n", 1) == -1) {_fatal("write error", 1);}
 	rl_state->search_mode.active = false;
 	rl_state->cursor_offset.y++;
 	rl_state->cursor_offset.x = 0;
@@ -162,7 +162,7 @@ void get_cursor_pos(position_t *position){
     int rows = 0, cols = 0;
     int parse_mode = 0;
 
-    write(STDOUT_FILENO, "\033[6n", 4);
+    if (write(STDOUT_FILENO, "\033[6n", 4) == -1) {_fatal("write error", 1);}
 
     while (i < sizeof(buf) - 1) {
         if (read(STDIN_FILENO, &buf[i], 1) != 1 || buf[i] == 'R') {
@@ -202,15 +202,15 @@ void update_line(readline_state_t *rl_state, string *line) {
     // int nlines = tchars / cols;
 
 	move_cursor(rl_state->cursor_offset.x, rl_state->cursor_offset.y);
-	write(STDOUT_FILENO, "\033[0J", 4);
+	if (write(STDOUT_FILENO, "\033[0J", 4) == -1) {_fatal("write error", 1);}
 	// for (int i = 0; i <= nlines; i++){
-	// 	write(STDOUT_FILENO, "\033[0K", 4);
+	// 	if (write(STDOUT_FILENO, "\033[0K", 4); == -1) {_fatal("write error", 1);}
 	// 	move_cursor(rl_state->prompt.size, rl_state->cursor_offset.y + i + 1);
 	// }
 	if (rl_state->search_mode.active == false){
 		move_cursor(rl_state->cursor_offset.x, rl_state->cursor_offset.y);
 		rl_print_prompt(STDOUT_FILENO, rl_state);
-		write(STDOUT_FILENO, line->data, line->size);
+		if (write(STDOUT_FILENO, line->data, line->size) == -1) {_fatal("write error", 1);}
 	} else {
 		move_cursor(0, rl_state->cursor_offset.y);
 		if (line->data[0]){
@@ -218,25 +218,25 @@ void update_line(readline_state_t *rl_state, string *line) {
 		}
 		if (!rl_state->search_mode.word_found){
 			rl_state->prompt.size = sizeof("(failed reverse-i-search)`") - 1;
-			write(STDOUT_FILENO, "(failed reverse-i-search)`", 27);
+			if (write(STDOUT_FILENO, "(failed reverse-i-search)`", 27) == -1) {_fatal("write error", 1);}
 		}
 		else{
 			rl_state->prompt.size = sizeof("(reverse-i-search)`") - 1;
-			write(STDOUT_FILENO, "(reverse-i-search)`", 20);
+			if (write(STDOUT_FILENO, "(reverse-i-search)`", 20) == -1) {_fatal("write error", 1);}
 		}
-		write(STDOUT_FILENO, line->data, str_length(line));
-		write(STDOUT_FILENO, "':", 2);
+		if (write(STDOUT_FILENO, line->data, str_length(line)) == -1) {_fatal("write error", 1);}
+		if (write(STDOUT_FILENO, "':", 2) == -1) {_fatal("write error", 1);}
 		if (rl_state->search_mode.word_found){
 			int word_end = rl_state->search_mode.word_start + ft_strlen(line->data);
 			for (int i = 0; rl_state->search_mode.word_found[i]; i++){
 				if (i == rl_state->search_mode.word_start)
-					write(STDOUT_FILENO, "\033[7m", 4);
+					if (write(STDOUT_FILENO, "\033[7m", 4) == -1) {_fatal("write error", 1);}
 				if (i == word_end){
-					write(STDOUT_FILENO, "\033[0m", 4);
+					if (write(STDOUT_FILENO, "\033[0m", 4) == -1) {_fatal("write error", 1);}
 				}
-				write(STDOUT_FILENO, &rl_state->search_mode.word_found[i], 1);
+				if (write(STDOUT_FILENO, &rl_state->search_mode.word_found[i], 1) == -1) {_fatal("write error", 1);}
 			}
-			write(STDOUT_FILENO, "\033[0m", 4);
+			if (write(STDOUT_FILENO, "\033[0m", 4) == -1) {_fatal("write error", 1);}
 		}
 	}
 }
@@ -371,7 +371,7 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
         if (bytes_read == 0 || c == VEOF) {
             if (line->data[0] == '\0') {
                 if (rl_state->interactive) {
-                    write(STDOUT_FILENO, "\n", 1);
+                    if (write(STDOUT_FILENO, "\n", 1) == -1) {_fatal("write error", 1);}
                     pop_history();
                 }
                 // gc(GC_FREE, line->data, GC_READLINE);

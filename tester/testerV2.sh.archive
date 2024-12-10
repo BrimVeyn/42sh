@@ -187,14 +187,16 @@ test_lists=(
 	"src/command_sub"
 	"src/command_group"
 	"src/arithmetic_expansion"
+	"src/tilde_expansion"
 	"src/builtin_export"
 	"src/builtin_cd"
 	"src/builtin_exit"
+	"src/builtin_echo"
 	"src/mixed"
 )
 
 PS3="Enter a number to run associated tests, * for all: "
-select option in redirections syntax parameter_expansion quotes subshell command_sub command_group arithmetic_expansion builtin_export builtin_cd builtin_exit mixed
+select option in redirections syntax parameter_expansion quotes subshell command_sub command_group arithmetic_expansion tilde_expansion builtin_export builtin_cd builtin_exit builtin_echo mixed
 do
     case $option in
         redirections)
@@ -231,6 +233,10 @@ do
 			test_lists=("src/arithmetic_expansion");
 			start_tests;
             ;;
+        tilde_expansion)
+			test_lists=("src/tilde_expansion");
+			start_tests;
+            ;;
         builtin_export)
 			test_lists=("src/builtin_export");
 			start_tests;
@@ -244,6 +250,10 @@ do
             ;;
         builtin_exit)
 			test_lists=("src/builtin_exit");
+			start_tests;
+            ;;
+        builtin_echo)
+			test_lists=("src/builtin_echo");
 			start_tests;
             ;;
         mixed)
