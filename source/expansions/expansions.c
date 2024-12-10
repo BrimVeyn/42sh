@@ -6,12 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 15:18:50 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 11:12:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
-#include "parser.h"
 #include "libft.h"
 #include "signals.h"
 #include "utils.h"
@@ -29,7 +28,7 @@
 
 void exp_kind_list_print(ExpKindList *list);
 
-char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars){
+char *here_doc(const char *eof, const heredoc_mode mode, Vars * const shell_vars){
 	char *input = NULL;
 	const char *PS2 = string_list_get_value(shell_vars->set, "PS2");
 	static int line_number = 0;
@@ -45,7 +44,8 @@ char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars){
 
 	//FIX: crotte start heredoc and press ^D imediately --> leaks
 	//FIX: unlink heredoc
-	while(++line_number && (input = ft_readline(PS2, shell_vars)) && ft_strcmp(eof, input) && rl_done != 2){
+	while(++line_number && (input = ft_readline(PS2, shell_vars)) != NULL && ft_strcmp(eof, input) && rl_done != 2){
+		gc(GC_ADD, input, GC_SUBSHELL);
 		if (mode == HD_EXPAND){
 			//TODO: abberant en memoire
 			//FIX: readline leaks
@@ -57,7 +57,6 @@ char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars){
 		} else if (mode == HD_NO_EXPAND){
 			ft_dprintf(file_fd, "%s\n", input);
 		}
-		free(input);
 	}
 
 	signal_manager(SIG_PROMPT);
@@ -69,7 +68,7 @@ char *here_doc(char *eof, heredoc_mode mode, Vars *shell_vars){
 		return NULL;
 	}
 
-	free(input);
+	remove_fd_set(file_fd);
 	close(file_fd);
 	return gc(GC_ADD, ft_strdup(filename), GC_SUBSHELL);
 }

@@ -6,11 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 17:39:48 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 11:08:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
+#include "signals.h"
 #include "utils.h"
 #include "jobs.h"
 #include "signal.h"
@@ -22,34 +23,25 @@
 #include <sys/wait.h>
 #include <termios.h>
 
+#include "colors.h"
+
 int job_wait(AndOrP *job) {
 	int status;
 	pid_t pid;
 
 	do {
 		pid = waitpid(-job->pgid, &status, WUNTRACED);
+		if (pid != -1) {
+			// dprintf(2, C_BRIGHT_CYAN"WAIT "C_MAGENTA"waiting for pgid: %d | waited : %d | pgid of waited: %d | in process: %d"C_RESET"\n", job->pgid, pid, getpgid(pid), getpid());
+			} else {
+			// dprintf(2, C_BRIGHT_CYAN"WAIT "C_RED"waiting for pgid: %d | waited : %d | pgid of waited: %d | in process: %d"C_RESET"\n", job->pgid, pid, getpgid(pid), getpid());
+		}
 	} while (!mark_process_andor(job, pid, status, true)
 	&& !job_stopped(job)
 	&& !job_completed(job));
 
 	return 0;
 }
-
-void job_wait_background(AndOrP *job) {
-	int status;
-	pid_t pid;
-
-	do {
-		pid = waitpid(-job->pgid, &status, WUNTRACED);
-		// if (pid != -1) {
-		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_MAGENTA"%d | %d | %d"C_RESET"\n", job->pgid, pid, getpid());
-		// 	} else {
-		// 	dprintf(2, C_BRIGHT_CYAN"WAIT"C_RESET": waiting for | waited | in process: "C_RED"%d | %d | %d"C_RESET"\n", job->pgid, pid,  getpid());
-		// }
-	} while (!mark_process_andor(job, pid, status, true)
-	&& !job_completed(job));
-}
-
 
 void put_job_background(AndOrP *job) {
 	job->bg = true;

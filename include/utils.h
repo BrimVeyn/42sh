@@ -6,14 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 10:08:18 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 15:03:32 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 10:20:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "libft.h"
+#include "../libftprintf/header/libft.h"
 
 #include <stdint.h>
 #include <stddef.h>
