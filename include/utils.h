@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 14:58:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:22:43 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,7 +183,6 @@ char			*boolStr(bool rhs);
 //------------------------------------------//
 
 //----------------File Utils--------------------//
-char			*get_next_line(int fd);
 char			*read_whole_file(int fd);
 char			*get_line_x(char *in, const size_t n);
 //------------------------------------------//

@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/16 10:17:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:53:21 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/11 11:32:10 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/11 11:32:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,6 @@
 #include <unistd.h>
 #include <limits.h>
 
-//FIX:maybe we can use fc
-
 void get_history(Vars *shell_vars) {
 	const char * const home = getenv("HOME");
 	if (!home)
@@ -35,13 +33,13 @@ void get_history(Vars *shell_vars) {
 	ft_sprintf(history_filename, "%s/.42sh_history", home);
     const int fd = open(history_filename, O_RDWR | O_CREAT, 0644);
     if (fd == -1) {
-        perror("Can't open history file");
+		ft_dprintf(2, "Can't open history file\n");
         exit(EXIT_FAILURE);
     }
 
 	struct stat st;
 	if (fstat(fd, &st) == -1){
-        perror("Can't get history's file stats");
+		ft_dprintf(2, "Can't open history file\n");
         exit(EXIT_FAILURE);
 	}
     size_t file_size = st.st_size;
@@ -58,7 +56,7 @@ void get_history(Vars *shell_vars) {
 	while(*end){
 		if (*end == '\n'){
 			char *tmp = (char *)malloc(end - start + 1);
-			memcpy(tmp, start, end - start);
+			ft_memcpy(tmp, start, end - start);
 			tmp[end - start] = '\0';
 			add_history(tmp, shell_vars);
 			free(tmp);
@@ -75,7 +73,7 @@ void add_input_to_history(char *input, Vars *shell_vars){
 	// char *home = getenv("HOME");
 	// char history_filename[1024] = {0};
 	// ft_sprintf(history_filename, "%s/.42sh_history", home);
-	// dprintf(*history_fd, "%s\n", input);
+	// ft_dprintf(*history_fd, "%s\n", input);
 }
 
 char *get_value_wd(char *parameter, char *buffer, size_t history_length){
@@ -183,7 +181,7 @@ bool history_expansion (char **pstring){
 		buffer = stringify_history(history, 0, history->length - 1);
 		if (!buffer){
 			char *parameter = ft_substr(*pstring, result.re_start + 1, result.re_end);
-			dprintf(2, "event not found: !%s\n", parameter);
+			ft_dprintf(2, "event not found: !%s\n", parameter);
 			free(parameter);
 			return false;
 		}
@@ -215,7 +213,7 @@ bool history_expansion (char **pstring){
 				ft_sprintf(new_cmd, "%s%s%s", start, value, end);
 				*pstring = new_cmd;
 			} else {
-				dprintf(2, "event not found: !%s\n", parameter);
+				ft_dprintf(2, "event not found: !%s\n", parameter);
 				return false;
 			}
 			free(parameter);

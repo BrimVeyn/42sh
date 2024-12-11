@@ -5,13 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/01 11:16:37 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:55:44 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/11 11:33:01 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/11 11:33:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
-#include "lexer.h"
 #include "libft.h"
 #include "parser.h"
 #include "utils.h"
@@ -139,6 +138,9 @@ void hash_table_remove(Entry **table, char *entry) {
 
 	if (table[index] != NULL) {
 		hash_table_delete_entry(table, index);
+	} else {
+		ft_dprintf(2, "42sh: %s: not found\n", entry);
+		g_exitno = 1;
 	}
 }
 

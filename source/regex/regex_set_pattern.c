@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/24 14:45:26 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/04 10:52:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:14:12 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void set_range(regex_compiled_t *regexp, const char *pattern, int *index){
 	int i = 0;
 	int pattern_number = 0;
 	
-	memset(range_string_list, 0, sizeof(range_string_list));
+	ft_memset(range_string_list, 0, sizeof(range_string_list));
 	if (pattern[0] == '^')
 		i++;
 	while(pattern[i] && pattern[i] != ']'){
