@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:16:37 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:04:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:55:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,12 +119,12 @@ bool hash_table_add(Entry **table, char *entry, Vars *shell_vars, hash_mode mode
 void hash_table_print(Entry **table) {
 	char buffer[MAX_WORD_LEN] = {0};
 	bool hit = false;
-	size_t buffer_size = sprintf(buffer, "hits\tcommand\n");
+	ft_sprintf(buffer, "hits\tcommand\n");
 	for (int i = 0; i < TABLE_SIZE; i++) {
 		if (table[i] != NULL) {
 			Entry *current = table[i];
 			while (current) {
-				buffer_size += sprintf(buffer + buffer_size, "%4d\t%s\n", current->hits, current->bin);
+				ft_sprintf(buffer, "%d\t%s\n", current->hits, current->bin);
 				hit = true;
 				current = current->next;
 			}
@@ -178,7 +178,6 @@ void *hash_interface(hash_mode mode, char *arg, Vars *shell_vars) {
 	return NULL;
 }
 
-//FIX: error message when delete candidate not found
 void builtin_hash(const SimpleCommandP *command, Vars *shell_vars) {
 	size_t i = 1;
 	bool delete_mode = false;

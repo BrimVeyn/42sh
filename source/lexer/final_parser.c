@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:47:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 14:58:34 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:46:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,19 +92,20 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 	return WORD;
 }
 
-StackEntry *parse(Lex *lexer, Vars *shell_vars) {
+int parse(Lex *lexer, Vars *shell_vars) {
 
 	bool error = false;
+	int status = 0;
 	da_create(stack, TokenStack, sizeof(StackEntry), GC_SUBSHELL);
 
 	Tokenn token;
 	token.raw_value = lexer_get(lexer, &error);
 	if (error) 
-		return NULL;
+		return ERR;
 
 	token.type = identify_token(lexer, token.raw_value, 0, &error);
 	if (error) 
-		return NULL;
+		return ERR;
 
 	da_push(lexer->produced_tokens, token.type);
 	// dprintf(2, "Token produced: %s, type: %s\n", token.raw_value, tokenTypeStr(token.type));
@@ -125,12 +126,12 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 
 				token.raw_value = lexer_get(lexer, &error);
 				if (error) 
-					return NULL;
+					return ERR;
 
 				token.type = identify_token(lexer, token.raw_value, entry.value, &error);
 				da_push(lexer->produced_tokens, token.type);
 				if (error) 
-					return NULL;
+					return ERR;
 				// dprintf(2, "Token produced: %s, type: %s\n", token.raw_value, tokenTypeStr(token.type));
 				break;
 			}
@@ -159,7 +160,8 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
 						da_pop(stack); //newline_list
 						da_pop(stack); //complete_commands
-						execute_complete_command(complete_command, shell_vars, false);
+						if (execute_complete_command(complete_command, shell_vars, false) == ERR)
+							status = ERR;
 						reduced_entry->token.type = Complete_Commands;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Complete_Commands].value;
@@ -168,7 +170,8 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 					case 3: { /* complete_commands -> complete_command */
 						CompleteCommandP *complete_command = da_pop(stack)->token.complete_command;
 						// print_complete_command(complete_command);
-						execute_complete_command(complete_command, shell_vars, false);
+						if (execute_complete_command(complete_command, shell_vars, false) == ERR)
+							return ERR;
 						reduced_entry->token.type = Complete_Commands;
 						state = da_peak_back(stack)->state;
 						reduced_entry->state = parsingTable[state][Complete_Commands].value;
@@ -1106,7 +1109,7 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 							default: { break; };
 						}
 						//if any SIGINT is trigger or mkstemp fails
-						if (!heredoc_filename){ return NULL; }
+						if (!heredoc_filename){ return ERR; }
 
 						reduced_entry->token.type = Io_Redirect;
 						reduced_entry->token.redir = gc_unique(RedirectionP, GC_SUBSHELL);
@@ -1220,27 +1223,27 @@ StackEntry *parse(Lex *lexer, Vars *shell_vars) {
 				break;
 			}
 			case ACCEPT: {
-				return da_pop(stack);
+				return 0;
 				break;
 			}
 			case GOTO: 
 			case ERROR: {
 				for (size_t i = 0; i < lexer->produced_tokens->size; i++) {
 					if (lexer->produced_tokens->data[i] != NEWLINE && lexer->produced_tokens->data[i] != END)
-						return (pretty_error(lexer, token.raw_value), NULL);
+						return (pretty_error(lexer, token.raw_value), ERR);
 				}
-				return NULL;
+				return ERR;
 				break;
 			}
 		}
 	}
-	return NULL;
+	return status;
 }
 
 
-void parse_input(char *in, char *filename, Vars *shell_vars) {
+int parse_input(char *in, char *filename, Vars *shell_vars) {
 	if (!*in)
-		return ;
+		return ERR;
 
 	ShellInfos *self = shell(SHELL_GET);
 
@@ -1250,5 +1253,5 @@ void parse_input(char *in, char *filename, Vars *shell_vars) {
 
 	Lex *lexer = lex_init(in, filename, shell_vars);
 
-	parse(lexer, shell_vars);
+	return parse(lexer, shell_vars);
 }

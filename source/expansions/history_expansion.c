@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:17:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 13:42:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:53:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,7 +212,7 @@ bool history_expansion (char **pstring){
 				char *start = (result.re_start == 0) ? ft_strdup("") : ft_substr(*pstring, 0, result.re_start - 1);
 				char *end = (result.re_end == (int)ft_strlen(*pstring)) ? ft_strdup("") : ft_substr(*pstring, result.re_end, ft_strlen(*pstring) - result.re_end);
 				char *new_cmd = malloc(ft_strlen(start) + ft_strlen(value) + ft_strlen(end) + 1);
-				sprintf(new_cmd, "%s%s%s", start, value, end);
+				ft_sprintf(new_cmd, "%s%s%s", start, value, end);
 				*pstring = new_cmd;
 			} else {
 				dprintf(2, "event not found: !%s\n", parameter);
