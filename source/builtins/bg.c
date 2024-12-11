@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:15:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:15:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 14:22:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,8 @@ void builtin_bg(const SimpleCommandP *command, __attribute__((unused)) Vars * co
 		AndOrP *last_job = g_jobList->data[g_jobList->size - 1];
 		revive_job(last_job);
 	} else if (!has_arg) {
-		ERROR_NO_SUCH_JOB("fg", "current");
+		ERROR_NO_SUCH_JOB("bg", "current");
 	} else {
-		ERROR_NO_SUCH_JOB("fg", command->word_list->data[1]);
+		ERROR_NO_SUCH_JOB("bg", command->word_list->data[1]);
 	}
 }

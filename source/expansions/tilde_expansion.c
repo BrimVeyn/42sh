@@ -3,22 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   tilde_expansion.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/06 10:52:02 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/10 14:33:51 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/12/10 15:41:40 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/10 15:44:26 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "final_parser.h"
-#include "parser.h"
 #include "ft_regex.h"
 #include "libft.h"
 #include "utils.h"
 #include "utils.h"
-#include <pwd.h>
 
-//TODO:
+#include <pwd.h>
 
 const char *get_suffix(const char *name, const int len, Vars *shell_vars){
 	if (len > 0){

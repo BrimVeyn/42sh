@@ -23,12 +23,6 @@ for var in $(seq 0 20); do
 	fi
 done
 
-for var in $(seq 1 10); do
-	if [ $((var % 2)) -ne 0 ]; then
-		echo "${var} is odd"
-	fi
-done
-
 for i in $(seq 1 5); do
 	echo "Start outer loop: ${i}"
 	for j in $(seq 1 ${i}); do

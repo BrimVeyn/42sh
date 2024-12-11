@@ -5,17 +5,19 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/10 11:18:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 15:23:43 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/12/10 15:42:02 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/11 10:12:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
+#include "expansion.h"
 #include "final_parser.h"
 #include "signals.h"
 #include "utils.h"
 #include "libft.h"
 #include "jobs.h"
+#include "Arena.h"
 
 #include <fcntl.h>
 #include <stdbool.h>
@@ -27,22 +29,21 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "colors.h"
+static int execute_list(const ListP * const list, const bool background, Vars * const shell_vars);
+static void restore_std_fds(int *saved_fds);
+static int is_function(const char * const func_name);
 
-bool g_subshell = false;
-
-
-void dup_input(int fd) {
+static void dup_input(const int fd) {
 	if (dup2(fd, STDIN_FILENO) == -1)
 		_fatal("dup2 failed", 1);
 }
 
-void dup_output(int fd) {
+static void dup_output(const int fd) {
 	if (dup2(fd, STDOUT_FILENO) == -1)
 		_fatal("dup2 failed", 1);
 }
 
-char  *resolve_bine(SimpleCommandP * const command, Vars * const shell_vars) {
+static char  *resolve_bine(SimpleCommandP * const command, Vars * const shell_vars) {
 	if (!command || !command->word_list->data[0]) {
 		return NULL;
 	}
@@ -68,10 +69,10 @@ char  *resolve_bine(SimpleCommandP * const command, Vars * const shell_vars) {
 	}
 }
 
-void execute_simple_command(CommandP *command, char *bin, Vars *shell_vars) {
+static void execute_simple_command(CommandP *command, char *bin, Vars *shell_vars) {
 	SimpleCommandP *simple_command = command->simple_command;
 
-	if (!redirect_ios(simple_command->redir_list))
+	if (!redirect_ios(simple_command->redir_list, shell_vars))
 		return;
 	if (!bin)
 		return;
@@ -80,68 +81,115 @@ void execute_simple_command(CommandP *command, char *bin, Vars *shell_vars) {
 	execve(bin, simple_command->word_list->data, shell_vars->env->data);
 }
 
-void execute_list(ListP *list, const bool background, Vars * const shell_vars);
-
-CompleteCommandP *wrap_list(ListP * const list) {
+static CompleteCommandP *wrap_list(ListP * const list) {
 	CompleteCommandP * const complete_command = gc_unique(CompleteCommandP, GC_SUBSHELL);
 	complete_command->list = list;
 	return complete_command;
 }
 
-void execute_subshell(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static int execute_subshell(const CommandP * const command, const bool background, Vars * const shell_vars, const int flag) {
 	ListP * const subshell = command->subshell;
-	if (!redirect_ios(command->redir_list)) {
-		return ;
+
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
+
+	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return 0;
 	}
-	execute_complete_command(wrap_list(subshell), shell_vars, background);
+
+	if (execute_complete_command(wrap_list(subshell), shell_vars, background) == ERR) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return ERR;
+	}
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
+	return 0;
 }
 
-void restore_std_fds(int *saved_fds);
-
-void execute_brace_group(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static int execute_brace_group(const CommandP * const command, const bool background, Vars * const shell_vars, const int flag) {
 	ListP * const command_group = command->brace_group;
 
-	int *saved_fds = save_std_fds();
-	if (!redirect_ios(command->redir_list)) {
-		return ;
-	}
-	execute_complete_command(wrap_list(command_group), shell_vars, background);
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
 
-	restore_std_fds(saved_fds);
+	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return 0;
+	}
+
+	if (execute_complete_command(wrap_list(command_group), shell_vars, background) == ERR) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return ERR;
+	}
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
+	return 0;
 }
 
-void execute_if_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static int execute_if_clause(const CommandP * const command, const bool background, Vars * const shell_vars, const int flag) {
 	const IFClauseP * const if_clause = command->if_clause;
+
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
+
+	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return 0;
+	}
 
 	size_t i = 0;
 	for (; i < if_clause->conditions->size; i++) {
 		ListP * const condition = if_clause->conditions->data[i];
-		execute_complete_command(wrap_list(condition), shell_vars, background);
+		if (execute_complete_command(wrap_list(condition), shell_vars, background) == -1) {
+			if (SAVE_FD) restore_std_fds(saved_fds);
+			return ERR;
+		}
 		if (g_exitno == 0) {
 			ListP * const body = if_clause->bodies->data[i];
-			execute_complete_command(wrap_list(body), shell_vars, background);
-			return ;
+			if (execute_complete_command(wrap_list(body), shell_vars, background) == ERR) {
+				if (SAVE_FD) restore_std_fds(saved_fds);
+				return ERR;
+			}
+			if (SAVE_FD) restore_std_fds(saved_fds);
+			return 0;
 		}
 	}
 	if (i < if_clause->bodies->size) {
 		ListP *else_body = if_clause->bodies->data[i];
-		execute_complete_command(wrap_list(else_body), shell_vars, background);
+		if (execute_complete_command(wrap_list(else_body), shell_vars, background) == ERR) {
+			if (SAVE_FD) restore_std_fds(saved_fds);
+			return ERR;
+		}
 	}
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
+	return 0;
 }
 
-#include "Arena.h"
 
-void execute_while_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static int execute_while_clause(const CommandP * const command, const bool background, Vars * const shell_vars, const int flag) {
 	const WhileClauseP * const while_clause = command->while_clause;
 
 	ArenaAllocator *arena = arena_create(1e5, GC_SUBSHELL);
+
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
+
+	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return 0;
+	}
 
 	while (true) {
 		Garbage *GC = gc(GC_GET);
 		const size_t base_size = GC[GC_SUBSHELL].size;
 
 		ListP * const condition_save = arena_dup_list(arena, while_clause->condition);
-		execute_complete_command(wrap_list(condition_save), shell_vars, background);
+		if (execute_complete_command(wrap_list(condition_save), shell_vars, background) == ERR) {
+			if (SAVE_FD) restore_std_fds(saved_fds);
+			return ERR;
+		}
 
 		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
@@ -150,24 +198,41 @@ void execute_while_clause(const CommandP * const command, const bool background,
 			break ;
 
 		ListP * const body_save = arena_dup_list(arena, while_clause->body);
-		execute_complete_command(wrap_list(body_save), shell_vars, background);
+		if (execute_complete_command(wrap_list(body_save), shell_vars, background) == ERR) {
+			if (SAVE_FD) restore_std_fds(saved_fds);
+			return ERR;
+		}
 
 		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
 	}
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
+	return 0;
 }
 
-void execute_until_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static int execute_until_clause(const CommandP * const command, const bool background, Vars * const shell_vars, const int flag) {
 	const WhileClauseP * const while_clause = command->while_clause;
 
 	ArenaAllocator *arena = arena_create(1e5, GC_SUBSHELL);
+
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
+
+	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return 0;
+	}
 
 	while (true) {
 		Garbage *GC = gc(GC_GET);
 		const size_t base_size = GC[GC_SUBSHELL].size;
 
 		ListP * const condition_save = arena_dup_list(arena, while_clause->condition);
-		execute_complete_command(wrap_list(condition_save), shell_vars, background);
+		if (execute_complete_command(wrap_list(condition_save), shell_vars, background) == ERR) {
+			if (SAVE_FD) restore_std_fds(saved_fds);
+			return ERR;
+		}
 
 		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
@@ -175,20 +240,43 @@ void execute_until_clause(const CommandP * const command, const bool background,
 		if (g_exitno == 0)
 			break ;
 		ListP * const body_save = arena_dup_list(arena, while_clause->body);
-		execute_complete_command(wrap_list(body_save), shell_vars, background);
+		if (execute_complete_command(wrap_list(body_save), shell_vars, background) == ERR) {
+			if (SAVE_FD) restore_std_fds(saved_fds);
+			return ERR;
+		}
 
 		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
 	}
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
+	return 0;
 }
 
-void execute_case_clause(const CommandP * const command, const bool background, Vars * const shell_vars) {
+static int execute_case_clause(const CommandP * const command, const bool background, Vars * const shell_vars, const int flag) {
+
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
+
+	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return 0;
+	}
+
 	CaseClauseP * const case_clause = command->case_clause;
 	da_create(tmp, StringListL, sizeof(char *), GC_SUBSHELL);
 	da_push(tmp, case_clause->expression);
-	case_clause->expression = do_expansions(tmp, shell_vars, O_NONE)->data[0];
+
+	ExpReturn ret = do_expansions(tmp, shell_vars, O_NONE);
+	if (ret.error != 0)
+		return ERR;
+	case_clause->expression = ret.ret->data[0];
+
 	for (size_t i = 0; i < case_clause->patterns->size; i++) {
-		case_clause->patterns->data[i] = do_expansions(case_clause->patterns->data[i], shell_vars, O_NONE);
+		ExpReturn ret = do_expansions(case_clause->patterns->data[i], shell_vars, O_NONE);
+		if (ret.error != 0)
+			return ERR; 
+		case_clause->patterns->data[i] = ret.ret;
 	}
 
 	int default_index = -1;
@@ -197,18 +285,42 @@ void execute_case_clause(const CommandP * const command, const bool background, 
 		for (size_t inner_i = 0; inner_i < patterns->size; inner_i++) {
 			if (!ft_strcmp("*", patterns->data[inner_i]))
 				default_index = i;
-			if (!ft_strcmp(patterns->data[inner_i], case_clause->expression))
-				return execute_complete_command(wrap_list(case_clause->bodies->data[i]), shell_vars, background);
+			if (!ft_strcmp(patterns->data[inner_i], case_clause->expression)) {
+				if (execute_complete_command(wrap_list(case_clause->bodies->data[i]), shell_vars, background) == ERR) {
+					if (SAVE_FD) restore_std_fds(saved_fds);
+					return ERR;
+				}
+				if (SAVE_FD) restore_std_fds(saved_fds);
+				return 0;
+            }
 		}
 	}
-	if (default_index != -1)
-		return execute_complete_command(wrap_list(case_clause->bodies->data[default_index]), shell_vars, background);
-	return ;
+	if (default_index != -1) {
+		if (execute_complete_command(wrap_list(case_clause->bodies->data[default_index]), shell_vars, background) == ERR) {
+			if (SAVE_FD) restore_std_fds(saved_fds);
+			return ERR;
+		}
+    }
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
+	return 0;
 }
 
-void execute_for_clause(const CommandP * const command, const bool background, Vars *const shell_vars) {
+static int execute_for_clause(const CommandP * const command, const bool background, Vars *const shell_vars, const int flag) {
+
+	int *saved_fds;
+	if (SAVE_FD) saved_fds = save_std_fds();
+
+	if (!redirect_ios(command->redir_list, shell_vars)) {
+		if (SAVE_FD) restore_std_fds(saved_fds);
+		return 0;
+	}
+
 	const ForClauseP * const for_clause = command->for_clause;
-	const StringListL *expanded_words = do_expansions(for_clause->word_list, shell_vars, O_SPLIT);
+	ExpReturn ret = do_expansions(for_clause->word_list, shell_vars, O_SPLIT);
+	if (ret.error != 0)
+		return ERR;
+	const StringListL *expanded_words = ret.ret;
 	const StringListL * const word_list = (for_clause->in == true) ? expanded_words : shell_vars->positional;
 
 	ArenaAllocator *arena = arena_create(1e5, GC_SUBSHELL);
@@ -225,25 +337,30 @@ void execute_for_clause(const CommandP * const command, const bool background, V
 		const size_t base_size = GC[GC_SUBSHELL].size;
 
 		ListP * const body_save = arena_dup_list(arena, for_clause->body);
-		execute_complete_command(wrap_list(body_save), shell_vars, background);
+		if (execute_complete_command(wrap_list(body_save), shell_vars, background) == ERR) {
+			if (SAVE_FD) restore_std_fds(saved_fds);
+			return ERR;
+		}
 
 		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
 	}
+
+	if (SAVE_FD) restore_std_fds(saved_fds);
+	return 0;
 }
 
-void declare_positional(const StringListL * const positional_parameters, const Vars * const shell_vars) {
+static void declare_positional(const StringListL * const positional_parameters, const Vars * const shell_vars) {
 	for (size_t i = 1; i < positional_parameters->size; i++) {
 		char buffer[MAX_WORD_LEN] = {0};
 		const int ret = ft_snprintf(buffer, MAX_WORD_LEN, "%ld=%s", i, positional_parameters->data[i]);
 		if (ret == -1)
 			_fatal("snprintf: exceeded buffer capacity", 1);
-		// dprintf(2, "BUFFER: %s\n", buffer);
 		string_list_add_or_update(shell_vars->positional, buffer);
 	}
 }
 
-StringListL *save_positionals(const Vars * const shell_vars) {
+static StringListL *save_positionals(const Vars * const shell_vars) {
 	da_create(saved_positionals, StringListL, sizeof(char *), GC_ENV);
 	for (size_t i = 0; i < shell_vars->positional->size; i++) {
 		char * const copy = gc(GC_ADD, ft_strdup(shell_vars->positional->data[i]), GC_ENV);
@@ -252,7 +369,7 @@ StringListL *save_positionals(const Vars * const shell_vars) {
 	return saved_positionals;
 }
 
-void clear_positional(StringListL * const positional) {
+static void clear_positional(StringListL * const positional) {
   if (positional->size <= 1) return ;
 	for (size_t i = 1; i < positional->size; i++) {
 		gc(GC_FREE, positional->data[i], GC_ENV);
@@ -260,8 +377,7 @@ void clear_positional(StringListL * const positional) {
 	positional->size = 1;
 }
 
-//FIX segfault in recursive function calls
-void execute_function(const CommandP * const command, const int funcNo, const bool background, Vars * const shell_vars) {
+static int execute_function(const CommandP * const command, const int funcNo, const bool background, Vars * const shell_vars, const int flag) {
 	const SimpleCommandP * const simple_command = command->simple_command;
 	const StringListL * const positional_parameters = simple_command->word_list;
 	StringListL * const saved_positionals = save_positionals(shell_vars);
@@ -269,14 +385,16 @@ void execute_function(const CommandP * const command, const int funcNo, const bo
 
 	clear_positional(shell_vars->positional);
 	declare_positional(positional_parameters, shell_vars);
-	// string_list_print(shell_vars->positional);
-	execute_brace_group(function_copy->function_body, background, shell_vars);
+	if (execute_brace_group(function_copy->function_body, background, shell_vars, flag) == ERR) {
+		return ERR;
+	}
 	string_list_clear(shell_vars->positional);
 
 	shell_vars->positional = saved_positionals;
+	return 0;
 }
 
-int is_function(const char * const func_name) {
+static int is_function(const char * const func_name) {
 	for (size_t i = 0; i < g_funcList->size; i++) {
 		if (!ft_strcmp(g_funcList->data[i]->function_name, func_name))
 			return i;
@@ -284,7 +402,7 @@ int is_function(const char * const func_name) {
 	return -1;
 }
 
-void register_function(const CommandP * const command) {
+static void register_function(const CommandP * const command) {
 	FunctionP * const func = command->function_definition;
 	for (size_t i = 0; i < g_funcList->size; i++) {
 		if (!ft_strcmp(func->function_name, g_funcList->data[i]->function_name)) {
@@ -296,7 +414,7 @@ void register_function(const CommandP * const command) {
 }
 
 
-void set_group(AndOrP * const job, PipeLineP * const process, const pid_t pid) {
+static void set_group(AndOrP * const job, PipeLineP * const process, const pid_t pid) {
 	process->pid = pid;
 	if (!job->pgid && g_masterPgid != 0)
 		job->pgid = g_masterPgid;
@@ -306,25 +424,30 @@ void set_group(AndOrP * const job, PipeLineP * const process, const pid_t pid) {
 		_fatal("setpgid: failed", 1);
 }
 
-void process_simple_command(SimpleCommandP * const simple_command, Vars *shell_vars) {
-	StringListL *args = do_expansions(simple_command->word_list, shell_vars, O_SPLIT);
-	StringListL *vars = do_expansions(simple_command->assign_list, shell_vars, O_ASSIGN);
+static int process_simple_command(SimpleCommandP * const simple_command, Vars *shell_vars) {
+
+	ExpReturn ret = do_expansions(simple_command->word_list, shell_vars, O_SPLIT);
+	if (ret.error != 0)
+		return ERR;
+	StringListL *args = ret.ret;
+
+	ret = do_expansions(simple_command->assign_list, shell_vars, O_ASSIGN);
+	if (ret.error != 0)
+		return ERR;
+	StringListL *vars = ret.ret;
+
 	simple_command->word_list = args;
 	simple_command->assign_list = vars;
-	if (!args->data[0])
+
+	if (!args->data[0]) {
 		add_vars_to_set(shell_vars, vars);
-	else
+    } else {
 		add_vars_to_local(shell_vars->local, vars);
+    }
+	return 0;
 }
 
-void redirect_input_to_null() {
-	int devnull = open("/dev/null", O_RDONLY);
-	dup2(devnull, STDIN_FILENO);
-	close(devnull);
-}
-
-
-void restore_std_fds(int *saved_fds) {
+static void restore_std_fds(int *saved_fds) {
 	if (dup2(saved_fds[0], STDIN_FILENO) == -1)
 		_fatal("dup2 failed: restoring stdin", 1);
 	if (dup2(saved_fds[1], STDOUT_FILENO) == -1)
@@ -333,19 +456,38 @@ void restore_std_fds(int *saved_fds) {
 		_fatal("dup2 failed: restoring stderr", 1);
 }
 
-int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars) {
+static void setup_process(const bool background, AndOrP * const job, const ShellInfos * const shell_infos) {
+	if (shell_infos->interactive && !shell_infos->script)
+	{
+		pid_t pid = getpid();
+		if (job->pgid == 0) 
+			job->pgid = pid;
+		pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
+		if (setpgid(pid, pgid) == -1)
+			_fatal("setpgid: failed", 1);
+
+		if (!background) {
+			if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
+				_fatal("tcsetpgrp: failed", 1);
+		}
+		signal_manager(SIG_EXEC);
+	}
+}
+
+static int execute_single_command(AndOrP * const job, const bool background, Vars * const shell_vars) {
 	PipeLineP *process = job->pipeline;
 	CommandP *command = job->pipeline->command;
 	ShellInfos *shell_infos = shell(SHELL_GET);
 	switch (command->type) {
 
 		case Simple_Command: {
-			//FIX: move process simple command
-			process_simple_command(command->simple_command, shell_vars);
+			if (process_simple_command(command->simple_command, shell_vars) == ERR)
+				return ERR;
 			char *bin = resolve_bine(command->simple_command, shell_vars);
 			int funcNo = is_function(bin);
 			if (funcNo != -1) {
-				execute_function(command, funcNo, background, shell_vars);
+				if (execute_function(command, funcNo, background, shell_vars, O_NOFORK) == ERR)
+					return ERR;
 				return NO_WAIT;
             } else if (is_builtin(bin)) {
 				const bool hasRedir = (command->simple_command->redir_list->size != 0);
@@ -353,73 +495,59 @@ int execute_single_command(AndOrP *job, const bool background, Vars *shell_vars)
 
 				if (hasRedir) { saved_fds = save_std_fds(); }
 
-				if (!redirect_ios(command->simple_command->redir_list)) {
+				if (!redirect_ios(command->simple_command->redir_list, shell_vars)) {
 					return NO_WAIT;
 				}
 
 				execute_builtin(command->simple_command, shell_vars);
+				string_list_clear(shell_vars->local);
 
-				if (hasRedir) {
-					restore_std_fds(saved_fds);
-					close_saved_fds(saved_fds);
-				}
+				if (hasRedir) { restore_std_fds(saved_fds); close_saved_fds(saved_fds); }
 				return NO_WAIT;
 			} else {
-				pid_t pid = fork();
+				pid_t pid;
+				if ((pid = fork()) == -1)
+					_fatal("fork: failed", 1);
 				if (IS_CHILD(pid)) {
-
-					if (shell_infos->interactive && !shell_infos->script)
-					{
-						pid_t pid = getpid();
-						if (job->pgid == 0) 
-							job->pgid = pid;
-						pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
-						if (setpgid(pid, pgid) == -1)
-							_fatal("setpgid: failed", 1);
-
-						if (!background) {
-							if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
-								_fatal("tcsetpgrp: failed", 1);
-                        }
-						signal_manager(SIG_EXEC);
-					}
-
-					// dprintf(2, C_BRIGHT_YELLOW"[SLAVE] ANNOUNCE"C_RESET": "C_MAGENTA"{ PID = %d, PGID = %d }"C_RESET"\n", getpid(), getpgid(getpid()));
+					setup_process(background, job, shell_infos);
 					execute_simple_command(command, bin, shell_vars);
 					exit_clean();
-				} else { set_group(job, process, pid); }
+				} else { 
+					set_group(job, process, pid); 
+				}
 				return WAIT;
 			}
 		}
 		case Subshell: {
 			if (background) {
-				execute_subshell(command, background, shell_vars);
+				if (execute_subshell(command, background, shell_vars, O_NOFORK) == ERR)
+					return ERR;
 				return NO_WAIT;
 			}
-			pid_t pid = fork();
+			pid_t pid;
+			if ((pid = fork()) == -1)
+				_fatal("fork: failed", 1);
 			if (IS_CHILD(pid)) {
-				g_subshell = true;
-				g_masterPgid = pid;
-				if (setpgid(pid, pid) == -1)
-					_fatal("setpgid: failed", 1);
-				execute_subshell(command, background, shell_vars);
+				execute_subshell(command, background, shell_vars, O_FORKED);
 				exit_clean(); 
-			} else { set_group(job, process, pid); }
+			} else { 
+				set_group(job, process, pid); 
+			}
 			return WAIT;
 		}
-		case Brace_Group: { execute_brace_group(process->command, background, shell_vars); return NO_WAIT; }
-		case If_Clause: { execute_if_clause(process->command, background, shell_vars); return NO_WAIT; }
-		case While_Clause: { execute_while_clause(process->command, background, shell_vars); return NO_WAIT; }
-		case Until_Clause: { execute_until_clause(process->command, background, shell_vars); return NO_WAIT; }
-		case Case_Clause: { execute_case_clause(process->command, background, shell_vars); return NO_WAIT; }
-		case For_Clause: { execute_for_clause(process->command, background, shell_vars); return NO_WAIT; }
+		case Brace_Group: { if (execute_brace_group(process->command, background, shell_vars, O_NOFORK) == ERR) {return ERR;} return NO_WAIT; }
+		case If_Clause: { if (execute_if_clause(process->command, background, shell_vars, O_NOFORK) == ERR) {return ERR;} return NO_WAIT; }
+		case While_Clause: { if (execute_while_clause(process->command, background, shell_vars, O_NOFORK) == ERR) {return ERR;} return NO_WAIT; }
+		case Until_Clause: { if (execute_until_clause(process->command, background, shell_vars, O_NOFORK) == ERR) {return ERR;} return NO_WAIT; }
+		case Case_Clause: { if (execute_case_clause(process->command, background, shell_vars, O_NOFORK) == ERR) {return ERR;} return NO_WAIT; }
+		case For_Clause: { if (execute_for_clause(process->command, background, shell_vars, O_NOFORK) == ERR) {return ERR;} return NO_WAIT; }
 		case Function_Definition: { register_function(process->command); return NO_WAIT; }
 		default: { break; };
 	}
 	return ERROR;
 }
 
-int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
+static int execute_pipeline(AndOrP * const job, const bool background, Vars * const shell_vars) {
 	PipeLineP *process = job->pipeline;
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
@@ -430,8 +558,7 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 
 
 	if (!piped) {
-		int exit_info = execute_single_command(job, background, shell_vars);
-		return exit_info;
+		return execute_single_command(job, background, shell_vars);
 	}
 
 	while (process) {
@@ -440,25 +567,12 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 		if (hasNext && pipe(curr_pipe) == -1)
 			_fatal("failed to open pipe", 1);
 
-		pid_t pid = fork();
+		pid_t pid;
+		if ((pid = fork()) == -1)
+			_fatal("fork: failed", 1);
 		if (IS_CHILD(pid)) {
 
-			if (shell_infos->interactive && !shell_infos->script)
-			{
-				pid_t pid = getpid();
-				if (job->pgid == 0) 
-					job->pgid = pid;
-				pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
-				if (setpgid(pid, pgid) == -1)
-					_fatal("setpgid: failed", 1);
-
-				if (!background) {
-					if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
-						_fatal("tcsetpgrp: failed", 1);
-                }
-				signal_manager(SIG_EXEC);
-			}
-
+			setup_process(background, job, shell_infos);
 
             if (prev_pipe[0] != -1) { 
 				dup_input(prev_pipe[0]); 
@@ -477,13 +591,15 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 
 			switch (process->command->type) {
 				case Simple_Command: { 
-					process_simple_command(process->command->simple_command, shell_vars);
+					if (process_simple_command(process->command->simple_command, shell_vars) == ERR) {
+						exit_clean(); break;
+                    }
 					char *bin = resolve_bine(process->command->simple_command, shell_vars);
 					int funcNo = is_function(bin);
 					if (funcNo != -1) {
-						execute_function(process->command, funcNo, background, shell_vars);
+						execute_function(process->command, funcNo, background, shell_vars, O_FORKED);
 					} else if (is_builtin(bin)) {
-						if (!redirect_ios(process->command->simple_command->redir_list)) {
+						if (!redirect_ios(process->command->simple_command->redir_list, shell_vars)) {
 							exit_clean();
 						}
 						execute_builtin(process->command->simple_command, shell_vars);
@@ -493,13 +609,13 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 					exit_clean();
 					break;
 				}
-				case Subshell: { execute_subshell(process->command, background, shell_vars); exit_clean(); break; }
-				case Brace_Group: { execute_brace_group(process->command, background, shell_vars); exit_clean(); break; }
-				case If_Clause: { execute_if_clause(process->command, background, shell_vars); exit_clean(); break; }
-				case While_Clause: { execute_while_clause(process->command, background, shell_vars); exit_clean(); break; }
-				case Until_Clause: { execute_until_clause(process->command, background, shell_vars);  exit_clean(); break; }
-				case Case_Clause: { execute_case_clause(process->command, background, shell_vars); exit_clean(); break; }
-				case For_Clause: { execute_for_clause(process->command, background, shell_vars); exit_clean(); break; }
+				case Subshell: { execute_subshell(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
+				case Brace_Group: { execute_brace_group(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
+				case If_Clause: { execute_if_clause(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
+				case While_Clause: { execute_while_clause(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
+				case Until_Clause: { execute_until_clause(process->command, background, shell_vars, O_FORKED);  exit_clean(); break; }
+				case Case_Clause: { execute_case_clause(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
+				case For_Clause: { execute_for_clause(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
 				case Function_Definition: { register_function(process->command); exit_clean(); break; }
 				default: { break; }
 			}
@@ -522,7 +638,7 @@ int execute_pipeline(AndOrP *job, bool background, Vars *shell_vars) {
 	return WAIT;
 }
 
-void set_exit_number(const PipeLineP * const pipeline) {
+static void set_exit_number(const PipeLineP * const pipeline) {
 	const PipeLineP * head = pipeline;
 	while (head->next) {
 		head = head->next;
@@ -535,13 +651,15 @@ void set_exit_number(const PipeLineP * const pipeline) {
 	}
 }
 
-void execute_list(ListP *list, bool background, Vars *shell_vars) {
+static int execute_list(const ListP * const list, const bool background, Vars * const shell_vars) {
 	AndOrP *andor_head = list->and_or;
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
 	while (andor_head) {
 		TokenType separator = andor_head->separator; (void)separator;
 		const int wait_status = execute_pipeline(andor_head, background, shell_vars);
+		if (wait_status == ERR)
+			return ERR;
 
 		if (shell_infos->interactive) {
 			if (tcgetattr(shell_infos->shell_terminal, &andor_head->tmodes) == -1)
@@ -565,7 +683,7 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 		}
 
 		if (andor_head->sig == SIGINT)
-			return ;
+			return 0;
 
 		bool skip = (
 			(separator == AND_IF && g_exitno != 0) ||
@@ -581,17 +699,16 @@ void execute_list(ListP *list, bool background, Vars *shell_vars) {
 			andor_head = andor_head->next;
 		}
 	}
+	return 0;
 }
 
-void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_vars, bool bg) {
+int execute_complete_command(const CompleteCommandP * const complete_command, Vars *const shell_vars, const bool bg) {
 	ListP *list_head = complete_command->list;
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
-
 	while (list_head) {
 
-		if (!g_subshell)
-			g_masterPgid = 0;
+		g_masterPgid = 0;
 
 		const bool background = (
 			(shell_infos->interactive) && 
@@ -603,10 +720,11 @@ void execute_complete_command(CompleteCommandP *complete_command, Vars *shell_va
 			g_masterPgid = shell_infos->shell_pgid;
 		}
 
-		execute_list(list_head, background, shell_vars);
+		if (execute_list(list_head, background, shell_vars) == ERR)
+			return ERR;
 
 		list_head = list_head->next;
 	}
 
-	return ;
+	return 0;
 }

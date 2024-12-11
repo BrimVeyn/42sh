@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:16:37 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/26 13:41:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:04:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,6 +178,7 @@ void *hash_interface(hash_mode mode, char *arg, Vars *shell_vars) {
 	return NULL;
 }
 
+//FIX: error message when delete candidate not found
 void builtin_hash(const SimpleCommandP *command, Vars *shell_vars) {
 	size_t i = 1;
 	bool delete_mode = false;

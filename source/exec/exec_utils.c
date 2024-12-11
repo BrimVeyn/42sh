@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:17:11 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 16:21:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,10 +138,4 @@ void close_saved_fds(int *saved_fds) {
 		}
 		if (!hit) break;
 	}
-}
-
-void close_std_fds(void) {
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
 }

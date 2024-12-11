@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:16:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 14:58:08 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,7 @@ void	da_transfer(StringStream *in, StringStream *out, int number);
 #define da_erase_index(array, index) \
 	do { \
 		if (index < (array)->size)  { \
-			ft_memmove(&(array)->data[index], &(array)->data[index + 1], (array)->size_of_element * ((array)->size - index)); \
+			ft_memmove(&(array)->data[index], &(array)->data[index + 1], (array)->size_of_element * ((array)->size - index - 1)); \
 			(array)->data[--(array)->size] = 0; \
 		} \
 	} while (0); \
