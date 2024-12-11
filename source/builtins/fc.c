@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/25 11:40:48 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/11 12:07:32 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/11 13:45:52 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/11 13:45:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@
 #include <stdlib.h>
 
 //TODO: flag -R
-//FIX: remove fc from history when command is succesfully executed
 
 typedef enum {
 	FC_E = 0b00001,
@@ -133,7 +132,7 @@ static int max(const int n1, const int n2){
 }
 
 static char *fc_default(){
-	return ft_strdup(history->entries[history->length - CURRENT_LINE]->line.data);
+	return gc(GC_ADD, ft_strdup(history->entries[history->length - CURRENT_LINE]->line.data), GC_SUBSHELL);
 }
 
 int cmp_both(const char *const first, const char *const end, const char *const current_cmd) {
@@ -194,7 +193,6 @@ void get_history_value_nb(StringListL *command_list, int first, int last) {
     }
 
 	
-	//TODO: gerer si first > last
 	int inc = (first > last) ? -1 : 1;
     for (int i = first; (first > last) ? (i >= last ): (i <= last); i += inc) {
         char *line = history->entries[i - 1]->line.data;
@@ -308,14 +306,25 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 	}
 
 	if (options.flags & FC_S){
-		char *buffer = ft_strdup("");
-		for (size_t i = 0; i < command_list->size; i++){
-			char new_buffer[MAX_WORD_LEN] = {0};
-			ft_snprintf(new_buffer, MAX_WORD_LEN, "%s\n%s", buffer, command_list->data[i]);
-			buffer = gc(GC_ADD, ft_strdup(new_buffer), GC_SUBSHELL);
-			// char *tmp = ft_strjoin(buffer, command_list->data[i]);
-			// buffer = tmp;
-			// gc(GC_ADD, tmp, GC_SUBSHELL);
+		char *buffer = gc(GC_ADD, ft_strdup(""), GC_SUBSHELL);
+		if (options.flags & FC_R){
+			for (int i = command_list->size - 1; i > 0; i--){
+				char new_buffer[MAX_WORD_LEN] = {0};
+				ft_snprintf(new_buffer, MAX_WORD_LEN, "%s\n%s", buffer, command_list->data[i]);
+				buffer = gc(GC_ADD, ft_strdup(new_buffer), GC_SUBSHELL);
+				// char *tmp = ft_strjoin(buffer, command_list->data[i]);
+				// buffer = tmp;
+				// gc(GC_ADD, tmp, GC_SUBSHELL);
+			}
+		} else {
+			for (size_t i = 0; i < command_list->size; i++){
+				char new_buffer[MAX_WORD_LEN] = {0};
+				ft_snprintf(new_buffer, MAX_WORD_LEN, "%s\n%s", buffer, command_list->data[i]);
+				buffer = gc(GC_ADD, ft_strdup(new_buffer), GC_SUBSHELL);
+				// char *tmp = ft_strjoin(buffer, command_list->data[i]);
+				// buffer = tmp;
+				// gc(GC_ADD, tmp, GC_SUBSHELL);
+			}
 		}
 
 		if (options.old){
@@ -341,10 +350,20 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 
 		parse_input(buffer, NULL, shell_vars);
 	} else if (options.flags & FC_L){
-		for (size_t i = 0; i < command_list->size; i++){
-			if (!(options.flags & FC_N))
-				ft_dprintf(STDOUT_FILENO, "%d\t", i);
-			ft_dprintf(STDOUT_FILENO, "%s\n", command_list->data[i]);
+		if (options.flags & FC_R){
+			int j = 0;
+			for (int i = command_list->size - 1; i > 0; i--){
+				if (!(options.flags & FC_N))
+					ft_dprintf(STDOUT_FILENO, "%d\t", j);
+				ft_dprintf(STDOUT_FILENO, "%s\n", command_list->data[i]);
+				j++;
+			}
+		} else {
+			for (size_t i = 0; i < command_list->size; i++){
+				if (!(options.flags & FC_N))
+					ft_dprintf(STDOUT_FILENO, "%d\t", i);
+				ft_dprintf(STDOUT_FILENO, "%s\n", command_list->data[i]);
+			}
 		}
 		add_history(last_hist, shell_vars);
 	} else {
@@ -364,8 +383,17 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 			add_history(last_hist, shell_vars);
 			return;
 		}
-		for (size_t i = 0; i < command_list->size; i++){
-			ft_dprintf(fd, "%s\n", command_list->data[i]);
+
+		da_push(g_fdSet, fd);
+
+		if (options.flags & FC_R){
+			for (int i = command_list->size - 1; i > 0; i--){
+				ft_dprintf(fd, "%s\n", command_list->data[i]);
+			}
+		} else {
+			for (size_t i = 0; i < command_list->size; i++){
+				ft_dprintf(fd, "%s\n", command_list->data[i]);
+			}
 		}
 
 		char *input = NULL;
@@ -379,10 +407,20 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 		parse_input(input, NULL, shell_vars);
 		pop_history();
 		lseek(fd, 0, SEEK_SET);
-		char *buffer = read_whole_file(fd);
-		parse_input(buffer, NULL, shell_vars);
-		free(buffer);
-	}
 
+		char *buffer = gc(GC_ADD, read_whole_file(fd), GC_SUBSHELL);
+		char **buffer_splited = ft_split(buffer, '\n');
+		gc(GC_ADD, buffer_splited, GC_SUBSHELL);
+		for (int i = 0; buffer_splited[i]; i++){
+			gc(GC_ADD, buffer_splited[i], GC_SUBSHELL);
+		}
+
+		for (int i = 0; buffer_splited[i]; i++){
+			parse_input(buffer_splited[i], NULL, shell_vars);
+		}
+		// parse_input(buffer, NULL, shell_vars);
+		remove_fd_set(fd);
+		close(fd);
+	}
 	return ;
 }

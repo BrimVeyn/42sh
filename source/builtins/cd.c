@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:18:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:20:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 13:39:45 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,26 +96,27 @@ char *search_in_cdpath(char *operand, Vars *shell_vars) {
 			char *base_path = (cdpath[i][ft_strlen(cdpath[i]) - 1] != '/') ? 
 				ft_strjoin(cdpath[i], "/") :
 				ft_strdup(cdpath[i]);
-
+			gc(GC_ADD, base_path, GC_SUBSHELL);
 			char *curpath = ft_strjoin(base_path, operand);
+			gc(GC_ADD, curpath, GC_SUBSHELL);
 
-			free(base_path);
+			gc(GC_FREE, base_path, GC_SUBSHELL);
 			if (!is_valid_directory(curpath)){
 				return curpath;
 			}
 		}
 	}
-	return ft_strdup(operand);
+	return gc(GC_ADD, ft_strdup(operand), GC_SUBSHELL);
 }
 
 static char *build_path(StringListL *stack){
-	char *full_path = ft_strdup("");
+	char *full_path = gc(GC_ADD, ft_strdup(""), GC_SUBSHELL);
 
 	for (size_t i = 0; i < stack->size; i++){
 		char *next = stack->data[i];
 		char *tmp = ft_strjoin(full_path, next);
-		free(full_path);
-		full_path = tmp;
+		gc(GC_FREE, full_path, GC_SUBSHELL);
+		full_path = gc(GC_ADD, tmp, GC_SUBSHELL);
 	}
 	return full_path;
 }
@@ -177,14 +178,14 @@ void canonical_convertion(char **pcurpath){
 		char *full_path = build_path(stack);
 		// printf("full_path: %s\n", full_path);
 		cd_status = is_valid_directory(full_path);
-		free(full_path);
+		gc(GC_FREE, full_path, GC_SUBSHELL);
 		if (cd_status){
 			return;
 		}
 	}
 
 	if (stack->size)
-		curpath = gc(GC_ADD, build_path(stack), GC_SUBSHELL);
+		curpath = build_path(stack);
 
 	//removing trailing /
 	
@@ -290,7 +291,7 @@ void builtin_cd(const SimpleCommandP *command, Vars * const shell_vars) {
 		curpath = gc(GC_ADD, ft_strdup(operand), GC_SUBSHELL);
 	} else {
 		if (operand[0] != '.'){
-			curpath = gc(GC_ADD, search_in_cdpath(operand, shell_vars), GC_SUBSHELL);
+			curpath = search_in_cdpath(operand, shell_vars);
 		}
 		if (!curpath){
 			curpath = gc(GC_ADD, ft_strdup(operand), GC_SUBSHELL);
@@ -333,8 +334,8 @@ void builtin_cd(const SimpleCommandP *command, Vars * const shell_vars) {
 		return;
 	}
 	
-	char *new_pwd = ft_strjoin("PWD=", curpath);
-	char *new_oldpwd = ft_strjoin("OLDPWD=", pwd);
+	char *new_pwd = gc(GC_ADD, ft_strjoin("PWD=", curpath), GC_ENV);
+	char *new_oldpwd = gc(GC_ADD, ft_strjoin("OLDPWD=", pwd), GC_ENV);
 	if (ft_strlen(curpath) > PATH_MAX && ft_strlen(operand) < PATH_MAX){
 		curpath += (last_elem_is(pwd, '/')) ? ft_strlen(pwd) : ft_strlen(pwd) + 1;
 	}
