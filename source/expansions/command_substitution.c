@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:15:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 13:20:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:15:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,9 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-char *parser_command_substitution(char *str, Vars *shell_vars) {
+char *parser_command_substitution(char *const str, Vars *const shell_vars, int * const error) {
 
+	(void)error;
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
     char file_name[] = "/tmp/command_sub_XXXXXX";

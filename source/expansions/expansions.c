@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:41:56 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 17:26:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:17:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,9 +110,9 @@ void string_list_consume(StrList *str_list, Vars *shell_vars, int *error) {
 			remove_boundaries(curr);
 
 		switch (kind) {
-			case EXP_CMDSUB: { result = parser_command_substitution(curr->str, shell_vars); break;}
+			case EXP_CMDSUB: { result = parser_command_substitution(curr->str, shell_vars, error); break;}
 			case EXP_ARITHMETIC: {result = parser_arithmetic_expansion(curr->str, shell_vars, error); break;}
-			case EXP_VARIABLE: {result = parser_parameter_expansion(curr->str, shell_vars); break;}
+			case EXP_VARIABLE: {result = parser_parameter_expansion(curr->str, shell_vars, error); break;}
 			default: {}
 		}
 		
@@ -445,6 +445,9 @@ ExpReturn do_expansions(const StringListL * const word_list, Vars * const shell_
 	for (size_t it = 0; it < word_list->size; it++) {
 		StrList * const string_list = get_range_list(word_list->data[it], shell_vars, options);
 		string_list_consume(string_list, shell_vars, &ret_value.error);
+		if (ret_value.error != 0)
+			return ret_value;
+
 		if (options & O_SPLIT)
 			string_list_split(string_list, shell_vars);
 		string_erase_nulls(string_list);

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 14:29:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 09:56:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 
 #define NO_WAIT 0x0
 #define WAIT	0x1
+#define ERR   -1
 #define IS_CHILD(pid) ((pid == 0) ? true : false)
 
 extern pid_t g_masterPgid;
@@ -416,6 +417,6 @@ char *here_doc(const char *eof, const heredoc_mode mode, Vars * const shell_vars
 
 typedef enum { O_NONE = 0, O_SPLIT = 1, O_ALLOWNULLS = 2, O_ASSIGN = 4, } ExpansionsOpt;
 
-void execute_complete_command(const CompleteCommandP *const complete_command, Vars *const shell_vars, const bool bg);
+int execute_complete_command(const CompleteCommandP * const complete_command, Vars *const shell_vars, const bool bg);
 bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars);
 #endif // !FINAL_PARSER
