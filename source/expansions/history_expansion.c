@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 10:17:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/02 14:20:47 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/10 13:42:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,17 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <limits.h>
 
 //FIX:maybe we can use fc
 
 void get_history(Vars *shell_vars) {
-	char *home = getenv("HOME");
-	char history_filename[1024] = {0};
+	const char * const home = getenv("HOME");
+	if (!home)
+		_fatal("HOME variable undefined", 1);
+	char history_filename[PATH_MAX] = {0};
 	ft_sprintf(history_filename, "%s/.42sh_history", home);
-    int fd = open(history_filename, O_RDWR | O_CREAT, 0644);
+    const int fd = open(history_filename, O_RDWR | O_CREAT, 0644);
     if (fd == -1) {
         perror("Can't open history file");
         exit(EXIT_FAILURE);

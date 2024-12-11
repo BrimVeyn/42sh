@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:44 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/07 11:06:06 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 13:39:02 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,9 @@ void init_history(Vars *shell_vars) {
 	string_list_add_or_update(shell_vars->set, "HISTSIZE=500");
 	string_list_add_or_update(shell_vars->set, "HISTFILESIZE=500");
 
-	char *home = getenv("HOME");
+	const char * const home = getenv("HOME");
+	if (!home)
+		_fatal("HOME variable undefined", 1);
 	char history_filename[PATH_MAX] = {0};
 	ft_sprintf(history_filename, "HISTFILE=%s/.42sh_history", home);
 	string_list_add_or_update(shell_vars->set, history_filename);

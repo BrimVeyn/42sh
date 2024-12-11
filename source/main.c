@@ -6,18 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:00 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:14:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/10 17:03:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
-//TODO:HOME=/tmp cd
-//BRAKIS
 #include "ft_regex.h"
 #include "final_parser.h"
 #include "utils.h"
 #include "signals.h"
-#include "lexer.h"
 #include "exec.h"
 #include "libft.h"
 #include "jobs.h"
@@ -39,17 +35,14 @@
 #include <sys/mman.h>
 #include <signals.h>
 
-int g_debug = 0;
-int g_exitno = 0;
-int g_signal = 0;
-IntList *g_fdSet = NULL;
+int				g_debug = 0;
+int 			g_exitno = 0;
+IntList	*		g_fdSet = NULL;
+pid_t			g_masterPgid = 0;
+FunctionList *	g_funcList = NULL;
+JobList *		g_jobList = NULL;
 
-pid_t g_masterPgid = 0;
-
-FunctionList *g_funcList = NULL;
-JobList *g_jobList = NULL;
-
-void	*read_input_prompt(char *input, Vars *shell_vars) {
+static void	*read_input_prompt(char *input, Vars *const shell_vars) {
 	char *PS1 = string_list_get_value(shell_vars->set, "PS1");
 
 	if (PS1)
@@ -64,7 +57,7 @@ void	*read_input_prompt(char *input, Vars *shell_vars) {
 	return input;
 }
 
-void env_to_string_list(StringListL *env_list, const char **env){
+void env_to_string_list(StringListL *const env_list, const char **env){
 	for (size_t i = 0; env[i]; i++)
 		string_list_add_or_update(env_list, gc(GC_ADD, ft_strdup(env[i]), GC_ENV));
 }
@@ -80,60 +73,21 @@ Vars *shell_vars_init(const char **env) {
 	self->local = local_list;
 	da_create(positional_list, StringListL, sizeof(char *), GC_ENV);
 	self->positional = positional_list;
+
 	env_to_string_list(self->env, env);
 	env_to_string_list(self->set, env);
 	return self;
 }
 
-char *get_event_number(char *string){
-	char *number = ft_calloc(10, sizeof(char));
-	int i = 0;
-	while (string[i] && is_number(&string[i])){
-		number[i] = string[i];
-		i++;
-		if (i >= 10)
-			break;
-	}
-	if (i <= 0 || i >= 10){
-		return NULL;
-	}
-	return number;
-}
-
-char *get_history_index(char *string, int index){
-	int cpt = 0;
-	int old_end = 0;
-	if (index < 0){
-		return NULL;
-	}
-
-	for (int i = 0; string[i]; i++){
-		if (string[i] == '\n'){
-			cpt++;
-			old_end = i + 1;
-		}
-		if (cpt == index){
-			return ft_substr(string, old_end, i - old_end - 1);
-		}
-	}
-	return NULL;
-}
-
-
-char *read_input_file(const char *path){
-    int fd = open(path, O_RDWR | O_CREAT, 0644);
-    if (fd == -1) {
-        perror("Can't open file");
-		gc(GC_CLEANUP, GC_ALL);
-        exit(EXIT_FAILURE);
-    }
+static char *read_input_file(const char *path){
+    int fd = open(path, O_RDWR, 0644);
+    if (fd == -1)
+		_fatal("open: no such file", 1);
 
 	struct stat st;
-	if (fstat(fd, &st) == -1){
-        perror("Can't get file's stats");
-		gc(GC_CLEANUP, GC_ALL);
-        exit(EXIT_FAILURE);
-	}
+	if (fstat(fd, &st) == -1)
+		_fatal("fstat: failed", 1);
+
     size_t file_size = st.st_size;
 	if (file_size == 0) {
 		close(fd);
@@ -178,64 +132,56 @@ ShellInfos *shell(const int mode) {
 			self->shell_pgid = getpid();
 
 			if (setpgid(self->shell_pgid, self->shell_pgid) == -1)
-				fatal("setpgid: couldn't set the shell in its own pgid", __LINE__, __FILE_NAME__, 1);
+				_fatal("setpgid: couldn't set the shell in its own pgid", 1);
 
-			tcsetpgrp(self->shell_terminal, self->shell_pgid);
-			tcgetattr(self->shell_terminal, &self->shell_tmodes);
+			if (tcsetpgrp(self->shell_terminal, self->shell_pgid) == -1)
+				_fatal("tcsetpgrp: fatal", 1);
+			if (tcgetattr(self->shell_terminal, &self->shell_tmodes) == -1)
+				_fatal("tcgetattr: fatal", 1);
 		}
 	}
 
 	return self;
 }
 
-void update_last_executed_command(Vars *shell_vars, char *input) {
+static void update_last_executed_command(Vars *const shell_vars, const char *const input) {
 	char *last_executed = ft_strjoin("_=", input);
 	string_list_add_or_update(shell_vars->env, last_executed);
 	string_list_add_or_update(shell_vars->set, last_executed);
 	FREE_POINTERS(last_executed);
 }
 
-void update_history_file(HISTORY_STATE *history, Vars *shell_vars){
+static void update_history_file(const HISTORY_STATE *const history, Vars *const shell_vars){
 	char *histfile = get_variable_value(shell_vars, "HISTFILE");
 	char *c_histfilesize = get_variable_value(shell_vars, "HISTFILESIZE");
-	// printf("%s\n", c_histfilesize);
 	
 	int histfilesize = -1;
 	if (c_histfilesize && regex_match("[^0-9]", c_histfilesize).is_found == false){
 		histfilesize = ft_atoi(c_histfilesize);
 	}
-	
 	if (!histfile) 
 		return;
-	int history_fd = open(histfile, O_CREAT | O_TRUNC | O_WRONLY, 0644);
-	// char *home = getenv("HOME");
-	// char history_filename[1024] = {0};
-	// ft_sprintf(history_filename, "%s/.42sh_history", home);
-	// int history_fd = open(history_filename, O_TRUNC | O_RDWR | O_CREAT, 0644);
-	// printf("history_fd: %d\n", history_fd);
 
-	if (history_fd != -1){
-		for (int i = (history->length > histfilesize && histfilesize >= 0) ? history->length - histfilesize : 0; 
-		i < history->length; i++){
-			ft_dprintf(history_fd, "%s\n", history->entries[i]->line.data);
-		}
-		close(history_fd);
+	int history_fd = open(histfile, O_CREAT | O_TRUNC | O_WRONLY, 0644);
+	if (history_fd == -1)
+		_fatal("open: history", 1);
+
+	for (int i = (history->length > histfilesize && histfilesize >= 0) ? history->length - histfilesize : 0; 
+		i < history->length; i++)
+	{
+		ft_dprintf(history_fd, "%s\n", history->entries[i]->line.data);
 	}
+	close(history_fd);
 }
 
-#define SHELL_IS_RUNNING true
-#define SCRIPT_MODE ((ac == 1) ? false : true)
-#define HAS_POSITIONAL (ac > 2)
 
-
-//FIX: fix script mess
-void load_42shrc(Vars *shell_vars) {
+static void load_42shrc(Vars *const shell_vars) {
 	get_history(shell_vars);
 	shell(SHELL_GET)->script = true;
 	signal_manager(SIG_SCRIPT);
 
 	char * home = string_list_get_value(shell_vars->env, "HOME");
-	char config_filename[1024] = {0};
+	char config_filename[MAX_WORD_LEN] = {0};
 	ft_sprintf(config_filename, "%s/.42shrc", home);
 
 	char * const file_content = read_input_file(config_filename);
@@ -244,7 +190,7 @@ void load_42shrc(Vars *shell_vars) {
 	shell(SHELL_GET)->script = false;
 }
 
-void load_positional_parameters(const int ac, char **av, Vars * const shell_vars, ShellInfos * const shell_infos) {
+static void load_positional_parameters(const int ac, char ** const av, Vars * const shell_vars, ShellInfos * const shell_infos) {
 	if (!shell_infos->script) {
 		char buffer[] = "0=42sh";
 		string_list_add_or_update(shell_vars->positional, buffer);
@@ -253,14 +199,14 @@ void load_positional_parameters(const int ac, char **av, Vars * const shell_vars
 			char buffer[MAX_WORD_LEN] = {0};
 			char *positional_number = ft_itoa(i - 1);
 			if (ft_snprintf(buffer, MAX_WORD_LEN, "%s=%s", positional_number, av[i]) == -1)
-				_fatal("snprintf: MAX_WORD_LEN exceeded", 255);
+				_fatal("snprintf: MAX_WORD_LEN exceeded", 1);
 			free(positional_number);
 			string_list_add_or_update(shell_vars->positional, buffer);
 		}
 	}
 }
 
-void init_globals() {
+static void init_globals() {
 	da_create(jobListTmp, JobList, sizeof(AndOrP *), GC_ENV);
 	da_create(funcListTmp, FunctionList, sizeof(FunctionP *), GC_ENV);
 	da_create(fdSetTmp, IntList, sizeof(int), GC_ENV);
@@ -270,15 +216,22 @@ void init_globals() {
 	g_funcList = funcListTmp;
 }
 
+#define SHELL_IS_RUNNING true
+#define SCRIPT_MODE ((ac == 1) ? false : true)
+#define HAS_POSITIONAL (ac > 2)
+
 int main(const int ac, char *av[], const char *env[]) {
 
 	init_globals();
 	shell(SHELL_INIT);
 
+	if (!env || !*env)
+		_fatal("environ: environment not set", 1);
+
 	Vars *shell_vars = shell_vars_init(env);
 	ShellInfos *self = shell(SHELL_GET);
 
-	if (SCRIPT_MODE) { self->interactive = true; self->script = true; }
+	if (SCRIPT_MODE) { self->script = true; }
 	if (self->interactive && !self->script) { load_42shrc(shell_vars); }
 
 	char *input = NULL;

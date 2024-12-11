@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   io_redirect.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/05 14:24:27 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/10 15:08:25 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/12/10 15:41:47 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/10 17:24:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "exec.h"
+#include "expansion.h"
 #include "final_parser.h"
-#include "signals.h"
 #include "utils.h"
 #include "libft.h"
 #include "lexer.h"
@@ -78,11 +78,28 @@ int get_filepath_mode(TokenType type){
 	return 0;
 }
 
+static void expand_filenames(RedirectionL *const redir_list, Vars *const shell_vars) {
+	da_create(tmp_redirs, StringListL, sizeof(char *), GC_SUBSHELL);
+	for (size_t i =0; i < redir_list->size; i++) {
+		da_push(tmp_redirs, redir_list->data[i]->filename);
+	}
+	ExpReturn ret = do_expansions(tmp_redirs, shell_vars, O_NONE);
+	if (ret.error != 0)
+		return ;
+	StringListL *result = ret.ret;
+	for (size_t i = 0; i < redir_list->size; i++) {
+		redir_list->data[i]->filename = result->data[i];
+	}
+}
+
+
 //TODO:change redir->filename to redir->word
-bool redirect_ios(RedirectionL *redir_list) {
+bool redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars) {
 	if (!redir_list) {
 		return true;
 	}
+
+	expand_filenames(redir_list, shell_vars);
 	// print_redir_list(redir_list);
 
 	for (size_t i = 0; i < redir_list->size; i++) {
