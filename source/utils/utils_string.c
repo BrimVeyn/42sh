@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/09 11:13:24 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:53:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,9 +113,9 @@ char *replace_char_greedy(char *str, char c, char by){
 			char *end = ft_substr(str, i, ft_strlen(str));
 			char *newstr = ft_calloc(ft_strlen(start) + ft_strlen(end) + 2, sizeof(char));
 			if (str[i - j - 1] == ';') // if there is already semi
-				sprintf(newstr, "%s%s", start, end);
+				ft_sprintf(newstr, "%s%s", start, end);
 			else
-				sprintf(newstr, "%s;%s", start, end);
+				ft_sprintf(newstr, "%s;%s", start, end);
 			FREE_POINTERS(start, end);
 			return replace_char_greedy(gc(GC_ADD, newstr, GC_SUBSHELL), c, by);
 		}

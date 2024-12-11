@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:41:56 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:17:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:36:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include "expansion.h"
 
 #include <fcntl.h>
+#include <regex.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -162,7 +163,7 @@ void pos_list_print(IntList *list) {
 	}
 }
 
-StrList *get_range_list(const char * const candidate, Vars * const shell_vars, const int options) {
+StrList *get_range_list(const char * const candidate, Vars * const shell_vars, const int options, int *const error) {
 	
 	static const ContextMap map[] = {
 		[EXP_ARITHMETIC]	= { .begin = "$((", .end = "))" },
@@ -220,7 +221,9 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars, c
 					da_push(cache_stack, 0);
 					const size_t idx = da_peak_back(pos_stack);
 					char * const tmp = ft_substr(&cache_stack->data[idx], 1, ft_strlen(&cache_stack->data[idx]) - 1);
-					char * const result = parser_command_substitution(tmp, shell_vars);
+					char * const result = parser_command_substitution(tmp, shell_vars, error);
+					if ((*error) != 0) return NULL;
+
 					free(tmp);
 					ss_cut(cache_stack, idx);
 					ss_push_string(cache_stack, result);
@@ -229,7 +232,9 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars, c
 				if (var_expand && top_context == EXP_VARIABLE) {
 					da_push(cache_stack, 0);
 					const size_t idx = da_peak_back(pos_stack);
-					char * const result = parser_parameter_expansion(&cache_stack->data[idx], shell_vars);
+					char * const result = parser_parameter_expansion(&cache_stack->data[idx], shell_vars, error);
+					if ((*error) != 0) return NULL;
+
 					if (result) {
 						ss_cut(cache_stack, idx);
 						ss_push_string(cache_stack, result);
@@ -441,12 +446,13 @@ ExpReturn do_expansions(const StringListL * const word_list, Vars * const shell_
 	if (!word_list) return ret_value;
 
 	da_create(arg_list, StringListL, sizeof(char *), GC_SUBSHELL);
-	// str_list_print(string_list);
+
 	for (size_t it = 0; it < word_list->size; it++) {
-		StrList * const string_list = get_range_list(word_list->data[it], shell_vars, options);
+		StrList * const string_list = get_range_list(word_list->data[it], shell_vars, options, &ret_value.error);
+		if (ret_value.error != 0) return ret_value;
+
 		string_list_consume(string_list, shell_vars, &ret_value.error);
-		if (ret_value.error != 0)
-			return ret_value;
+		if (ret_value.error != 0) return ret_value;
 
 		if (options & O_SPLIT)
 			string_list_split(string_list, shell_vars);

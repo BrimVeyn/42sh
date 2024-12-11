@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 09:56:20 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:50:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -343,7 +343,7 @@ typedef struct {
 	StringListL *positional;
 } Vars;
 
-void			parse_input(char *in, char *filename, Vars * const shell_vars);
+int				parse_input(char *in, char *filename, Vars * const shell_vars);
 
 char			*get_positional_value(const StringListL * const sl, const size_t idx);
 char			*get_variable_value(Vars * const shell_vars, const char * const name);
