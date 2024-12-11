@@ -1,0 +1,1051 @@
+1) redirections		   6) command_sub	    11) builtin_cd
+2) syntax		   7) command_group	    12) builtin_exit
+3) parameter_expansion	   8) arithmetic_expansion  13) builtin_echo
+4) quotes		   9) tilde_expansion	    14) mixed
+5) subshell		  10) builtin_export
+Enter a number to run associated tests, * for all: ==2092139== FILE DESCRIPTORS: 1 open (1 std) at exit.
+==2092139== Open file descriptor 0: /dev/pts/0
+==2092139==    <inherited from parent>
+==2092139== 
+==2092139== 
+==2092140== FILE DESCRIPTORS: 1 open (1 std) at exit.
+==2092140== Open file descriptor 0: /dev/pts/0
+==2092140==    <inherited from parent>
+==2092140== 
+==2092140== 
+==2092142== FILE DESCRIPTORS: 1 open (1 std) at exit.
+==2092142== Open file descriptor 0: /dev/pts/0
+==2092142==    <inherited from parent>
+==2092142== 
+==2092142== 
+==2092143== FILE DESCRIPTORS: 1 open (1 std) at exit.
+==2092143== Open file descriptor 0: /dev/pts/0
+==2092143==    <inherited from parent>
+==2092143== 
+==2092143== 
+==2092144== FILE DESCRIPTORS: 1 open (1 std) at exit.
+==2092144== Open file descriptor 0: /dev/pts/0
+==2092144==    <inherited from parent>
+==2092144== 
+==2092144== 
+==2092145== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092145== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092145==    <inherited from parent>
+==2092145== 
+==2092145== Open file descriptor 1:
+==2092145==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092145==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092145==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092145==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092145==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092145==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092145==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092145==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092145==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092145==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092145==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092145==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092145== 
+==2092145== Open file descriptor 0: /dev/pts/0
+==2092145==    <inherited from parent>
+==2092145== 
+==2092145== 
+==2092150== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092150== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092150==    <inherited from parent>
+==2092150== 
+==2092150== Open file descriptor 1:
+==2092150==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092150==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092150==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092150==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092150==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092150==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092150==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092150==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092150==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092150==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092150==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092150==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092150== 
+==2092150== Open file descriptor 0: /dev/pts/0
+==2092150==    <inherited from parent>
+==2092150== 
+==2092150== 
+./tester/cmdline_tester.sh: line 94: src/test: No such file or directory
+==2092157== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092157== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092157==    <inherited from parent>
+==2092157== 
+==2092157== Open file descriptor 1:
+==2092157==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092157==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092157==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092157==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092157==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092157==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092157==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092157==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092157==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092157==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092157==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092157==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092157== 
+==2092157== Open file descriptor 0: /dev/pts/0
+==2092157==    <inherited from parent>
+==2092157== 
+==2092157== 
+==2092161== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092161== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092161==    <inherited from parent>
+==2092161== 
+==2092161== Open file descriptor 1:
+==2092161==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092161==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092161==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092161==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092161==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092161==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092161==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092161==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092161==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092161==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092161==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092161==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092161== 
+==2092161== Open file descriptor 0: /dev/pts/0
+==2092161==    <inherited from parent>
+==2092161== 
+==2092161== 
+==2092169== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092169== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092169==    <inherited from parent>
+==2092169== 
+==2092169== Open file descriptor 1:
+==2092169==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092169==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092169==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092169==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092169==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092169==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092169==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092169==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092169==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092169==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092169==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092169==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092169== 
+==2092169== Open file descriptor 0: /dev/pts/0
+==2092169==    <inherited from parent>
+==2092169== 
+==2092169== 
+./tester/cmdline_tester.sh: line 94: src/redirections: No such file or directory
+==2092253== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092253== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092253==    <inherited from parent>
+==2092253== 
+==2092253== Open file descriptor 1:
+==2092253==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092253==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092253==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092253==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092253==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092253==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092253==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092253==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092253==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092253==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092253==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092253==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092253== 
+==2092253== Open file descriptor 0: /dev/pts/0
+==2092253==    <inherited from parent>
+==2092253== 
+==2092253== 
+==2092255== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092255== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092255==    <inherited from parent>
+==2092255== 
+==2092255== Open file descriptor 1:
+==2092255==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092255==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092255==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092255==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092255==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092255==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092255==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092255==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092255==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092255==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092255==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092255==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092255== 
+==2092255== Open file descriptor 0: /dev/pts/0
+==2092255==    <inherited from parent>
+==2092255== 
+==2092255== 
+==2092257== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092257== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092257==    <inherited from parent>
+==2092257== 
+==2092257== Open file descriptor 1:
+==2092257==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092257==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092257==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092257==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092257==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092257==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092257==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092257==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092257==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092257==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092257==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092257==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092257== 
+==2092257== Open file descriptor 0: /dev/pts/0
+==2092257==    <inherited from parent>
+==2092257== 
+==2092257== 
+./tester/cmdline_tester.sh: line 94: src/syntax: No such file or directory
+==2092260== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092260== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092260==    <inherited from parent>
+==2092260== 
+==2092260== Open file descriptor 1:
+==2092260==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092260==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092260==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092260==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092260==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092260==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092260==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092260==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092260==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092260==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092260==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092260==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092260== 
+==2092260== Open file descriptor 0: /dev/pts/0
+==2092260==    <inherited from parent>
+==2092260== 
+==2092260== 
+==2092320== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092320== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092320==    <inherited from parent>
+==2092320== 
+==2092320== Open file descriptor 1:
+==2092320==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092320==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092320==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092320==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092320==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092320==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092320==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092320==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092320==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092320==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092320==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092320==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092320== 
+==2092320== Open file descriptor 0: /dev/pts/0
+==2092320==    <inherited from parent>
+==2092320== 
+==2092320== 
+==2092323== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092323== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092323==    <inherited from parent>
+==2092323== 
+==2092323== Open file descriptor 1:
+==2092323==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092323==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092323==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092323==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092323==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092323==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092323==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092323==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092323==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092323==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092323==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092323==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092323== 
+==2092323== Open file descriptor 0: /dev/pts/0
+==2092323==    <inherited from parent>
+==2092323== 
+==2092323== 
+./tester/cmdline_tester.sh: line 94: src/parameter_expansion: No such file or directory
+==2092334== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092334== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092334==    <inherited from parent>
+==2092334== 
+==2092334== Open file descriptor 1:
+==2092334==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092334==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092334==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092334==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092334==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092334==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092334==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092334==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092334==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092334==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092334==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092334==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092334== 
+==2092334== Open file descriptor 0: /dev/pts/0
+==2092334==    <inherited from parent>
+==2092334== 
+==2092334== 
+==2092343== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092343== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092343==    <inherited from parent>
+==2092343== 
+==2092343== Open file descriptor 1:
+==2092343==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092343==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092343==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092343==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092343==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092343==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092343==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092343==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092343==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092343==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092343==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092343==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092343== 
+==2092343== Open file descriptor 0: /dev/pts/0
+==2092343==    <inherited from parent>
+==2092343== 
+==2092343== 
+==2092352== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092352== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092352==    <inherited from parent>
+==2092352== 
+==2092352== Open file descriptor 1:
+==2092352==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092352==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092352==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092352==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092352==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092352==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092352==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092352==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092352==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092352==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092352==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092352==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092352== 
+==2092352== Open file descriptor 0: /dev/pts/0
+==2092352==    <inherited from parent>
+==2092352== 
+==2092352== 
+./tester/cmdline_tester.sh: line 94: src/quotes: No such file or directory
+==2092398== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092398== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092398==    <inherited from parent>
+==2092398== 
+==2092398== Open file descriptor 1:
+==2092398==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092398==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092398==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092398==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092398==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092398==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092398==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092398==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092398==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092398==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092398==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092398==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092398== 
+==2092398== Open file descriptor 0: /dev/pts/0
+==2092398==    <inherited from parent>
+==2092398== 
+==2092398== 
+==2092400== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092400== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092400==    <inherited from parent>
+==2092400== 
+==2092400== Open file descriptor 1:
+==2092400==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092400==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092400==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092400==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092400==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092400==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092400==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092400==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092400==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092400==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092400==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092400==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092400== 
+==2092400== Open file descriptor 0: /dev/pts/0
+==2092400==    <inherited from parent>
+==2092400== 
+==2092400== 
+==2092407== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092407== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092407==    <inherited from parent>
+==2092407== 
+==2092407== Open file descriptor 1:
+==2092407==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092407==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092407==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092407==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092407==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092407==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092407==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092407==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092407==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092407==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092407==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092407==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092407== 
+==2092407== Open file descriptor 0: /dev/pts/0
+==2092407==    <inherited from parent>
+==2092407== 
+==2092407== 
+./tester/cmdline_tester.sh: line 94: src/subshell: No such file or directory
+==2092410== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092410== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092410==    <inherited from parent>
+==2092410== 
+==2092410== Open file descriptor 1:
+==2092410==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092410==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092410==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092410==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092410==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092410==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092410==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092410==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092410==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092410==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092410==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092410==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092410== 
+==2092410== Open file descriptor 0: /dev/pts/0
+==2092410==    <inherited from parent>
+==2092410== 
+==2092410== 
+==2092413== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092413== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092413==    <inherited from parent>
+==2092413== 
+==2092413== Open file descriptor 1:
+==2092413==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092413==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092413==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092413==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092413==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092413==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092413==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092413==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092413==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092413==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092413==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092413==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092413== 
+==2092413== Open file descriptor 0: /dev/pts/0
+==2092413==    <inherited from parent>
+==2092413== 
+==2092413== 
+==2092415== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092415== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092415==    <inherited from parent>
+==2092415== 
+==2092415== Open file descriptor 1:
+==2092415==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092415==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092415==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092415==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092415==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092415==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092415==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092415==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092415==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092415==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092415==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092415==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092415== 
+==2092415== Open file descriptor 0: /dev/pts/0
+==2092415==    <inherited from parent>
+==2092415== 
+==2092415== 
+./tester/cmdline_tester.sh: line 94: src/command_sub: No such file or directory
+==2092420== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092420== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092420==    <inherited from parent>
+==2092420== 
+==2092420== Open file descriptor 1:
+==2092420==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092420==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092420==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092420==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092420==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092420==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092420==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092420==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092420==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092420==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092420==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092420==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092420== 
+==2092420== Open file descriptor 0: /dev/pts/0
+==2092420==    <inherited from parent>
+==2092420== 
+==2092420== 
+==2092424== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092424== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092424==    <inherited from parent>
+==2092424== 
+==2092424== Open file descriptor 1:
+==2092424==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092424==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092424==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092424==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092424==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092424==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092424==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092424==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092424==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092424==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092424==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092424==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092424== 
+==2092424== Open file descriptor 0: /dev/pts/0
+==2092424==    <inherited from parent>
+==2092424== 
+==2092424== 
+==2092519== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092519== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092519==    <inherited from parent>
+==2092519== 
+==2092519== Open file descriptor 1:
+==2092519==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092519==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092519==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092519==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092519==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092519==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092519==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092519==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092519==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092519==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092519==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092519==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092519== 
+==2092519== Open file descriptor 0: /dev/pts/0
+==2092519==    <inherited from parent>
+==2092519== 
+==2092519== 
+./tester/cmdline_tester.sh: line 94: src/command_group: No such file or directory
+==2092521== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092521== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092521==    <inherited from parent>
+==2092521== 
+==2092521== Open file descriptor 1:
+==2092521==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092521==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092521==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092521==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092521==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092521==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092521==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092521==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092521==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092521==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092521==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092521==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092521== 
+==2092521== Open file descriptor 0: /dev/pts/0
+==2092521==    <inherited from parent>
+==2092521== 
+==2092521== 
+==2092524== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092524== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092524==    <inherited from parent>
+==2092524== 
+==2092524== Open file descriptor 1:
+==2092524==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092524==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092524==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092524==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092524==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092524==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092524==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092524==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092524==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092524==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092524==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092524==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092524== 
+==2092524== Open file descriptor 0: /dev/pts/0
+==2092524==    <inherited from parent>
+==2092524== 
+==2092524== 
+==2092529== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092529== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092529==    <inherited from parent>
+==2092529== 
+==2092529== Open file descriptor 1:
+==2092529==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092529==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092529==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092529==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092529==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092529==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092529==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092529==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092529==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092529==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092529==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092529==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092529== 
+==2092529== Open file descriptor 0: /dev/pts/0
+==2092529==    <inherited from parent>
+==2092529== 
+==2092529== 
+./tester/cmdline_tester.sh: line 94: src/arithmetic_expansion: No such file or directory
+==2092531== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092531== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092531==    <inherited from parent>
+==2092531== 
+==2092531== Open file descriptor 1:
+==2092531==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092531==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092531==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092531==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092531==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092531==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092531==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092531==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092531==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092531==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092531==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092531==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092531== 
+==2092531== Open file descriptor 0: /dev/pts/0
+==2092531==    <inherited from parent>
+==2092531== 
+==2092531== 
+==2092533== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092533== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092533==    <inherited from parent>
+==2092533== 
+==2092533== Open file descriptor 1:
+==2092533==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092533==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092533==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092533==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092533==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092533==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092533==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092533==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092533==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092533==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092533==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092533==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092533== 
+==2092533== Open file descriptor 0: /dev/pts/0
+==2092533==    <inherited from parent>
+==2092533== 
+==2092533== 
+==2092535== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092535== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092535==    <inherited from parent>
+==2092535== 
+==2092535== Open file descriptor 1:
+==2092535==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092535==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092535==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092535==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092535==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092535==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092535==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092535==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092535==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092535==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092535==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092535==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092535== 
+==2092535== Open file descriptor 0: /dev/pts/0
+==2092535==    <inherited from parent>
+==2092535== 
+==2092535== 
+./tester/cmdline_tester.sh: line 94: src/tilde_expansion: No such file or directory
+==2092538== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092538== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092538==    <inherited from parent>
+==2092538== 
+==2092538== Open file descriptor 1:
+==2092538==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092538==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092538==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092538==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092538==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092538==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092538==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092538==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092538==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092538==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092538==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092538==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092538== 
+==2092538== Open file descriptor 0: /dev/pts/0
+==2092538==    <inherited from parent>
+==2092538== 
+==2092538== 
+==2092540== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092540== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092540==    <inherited from parent>
+==2092540== 
+==2092540== Open file descriptor 1:
+==2092540==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092540==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092540==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092540==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092540==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092540==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092540==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092540==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092540==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092540==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092540==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092540==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092540== 
+==2092540== Open file descriptor 0: /dev/pts/0
+==2092540==    <inherited from parent>
+==2092540== 
+==2092540== 
+==2092542== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092542== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092542==    <inherited from parent>
+==2092542== 
+==2092542== Open file descriptor 1:
+==2092542==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092542==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092542==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092542==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092542==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092542==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092542==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092542==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092542==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092542==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092542==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092542==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092542== 
+==2092542== Open file descriptor 0: /dev/pts/0
+==2092542==    <inherited from parent>
+==2092542== 
+==2092542== 
+./tester/cmdline_tester.sh: line 94: src/builtin_export: No such file or directory
+==2092544== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092544== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092544==    <inherited from parent>
+==2092544== 
+==2092544== Open file descriptor 1:
+==2092544==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092544==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092544==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092544==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092544==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092544==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092544==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092544==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092544==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092544==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092544==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092544==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092544== 
+==2092544== Open file descriptor 0: /dev/pts/0
+==2092544==    <inherited from parent>
+==2092544== 
+==2092544== 
+==2092546== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092546== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092546==    <inherited from parent>
+==2092546== 
+==2092546== Open file descriptor 1:
+==2092546==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092546==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092546==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092546==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092546==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092546==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092546==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092546==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092546==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092546==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092546==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092546==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092546== 
+==2092546== Open file descriptor 0: /dev/pts/0
+==2092546==    <inherited from parent>
+==2092546== 
+==2092546== 
+==2092548== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092548== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092548==    <inherited from parent>
+==2092548== 
+==2092548== Open file descriptor 1:
+==2092548==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092548==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092548==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092548==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092548==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092548==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092548==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092548==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092548==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092548==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092548==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092548==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092548== 
+==2092548== Open file descriptor 0: /dev/pts/0
+==2092548==    <inherited from parent>
+==2092548== 
+==2092548== 
+./tester/cmdline_tester.sh: line 94: src/builtin_cd: No such file or directory
+==2092550== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092550== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092550==    <inherited from parent>
+==2092550== 
+==2092550== Open file descriptor 1:
+==2092550==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092550==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092550==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092550==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092550==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092550==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092550==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092550==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092550==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092550==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092550==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092550==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092550== 
+==2092550== Open file descriptor 0: /dev/pts/0
+==2092550==    <inherited from parent>
+==2092550== 
+==2092550== 
+==2092552== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092552== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092552==    <inherited from parent>
+==2092552== 
+==2092552== Open file descriptor 1:
+==2092552==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092552==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092552==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092552==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092552==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092552==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092552==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092552==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092552==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092552==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092552==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092552==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092552== 
+==2092552== Open file descriptor 0: /dev/pts/0
+==2092552==    <inherited from parent>
+==2092552== 
+==2092552== 
+==2092554== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092554== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092554==    <inherited from parent>
+==2092554== 
+==2092554== Open file descriptor 1:
+==2092554==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092554==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092554==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092554==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092554==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092554==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092554==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092554==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092554==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092554==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092554==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092554==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092554== 
+==2092554== Open file descriptor 0: /dev/pts/0
+==2092554==    <inherited from parent>
+==2092554== 
+==2092554== 
+./tester/cmdline_tester.sh: line 94: src/builtin_exit: No such file or directory
+==2092558== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092558== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092558==    <inherited from parent>
+==2092558== 
+==2092558== Open file descriptor 1:
+==2092558==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092558==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092558==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092558==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092558==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092558==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092558==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092558==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092558==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092558==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092558==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092558==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092558== 
+==2092558== Open file descriptor 0: /dev/pts/0
+==2092558==    <inherited from parent>
+==2092558== 
+==2092558== 
+==2092560== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092560== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092560==    <inherited from parent>
+==2092560== 
+==2092560== Open file descriptor 1:
+==2092560==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092560==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092560==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092560==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092560==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092560==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092560==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092560==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092560==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092560==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092560==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092560==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092560== 
+==2092560== Open file descriptor 0: /dev/pts/0
+==2092560==    <inherited from parent>
+==2092560== 
+==2092560== 
+==2092562== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092562== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092562==    <inherited from parent>
+==2092562== 
+==2092562== Open file descriptor 1:
+==2092562==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092562==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092562==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092562==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092562==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092562==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092562==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092562==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092562==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092562==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092562==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092562==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092562== 
+==2092562== Open file descriptor 0: /dev/pts/0
+==2092562==    <inherited from parent>
+==2092562== 
+==2092562== 
+./tester/cmdline_tester.sh: line 94: src/builtin_echo: No such file or directory
+==2092564== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092564== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092564==    <inherited from parent>
+==2092564== 
+==2092564== Open file descriptor 1:
+==2092564==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092564==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092564==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092564==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092564==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092564==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092564==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092564==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092564==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092564==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092564==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092564==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092564== 
+==2092564== Open file descriptor 0: /dev/pts/0
+==2092564==    <inherited from parent>
+==2092564== 
+==2092564== 
+==2092566== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092566== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092566==    <inherited from parent>
+==2092566== 
+==2092566== Open file descriptor 1:
+==2092566==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092566==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092566==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092566==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092566==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092566==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092566==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092566==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092566==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092566==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092566==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092566==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092566== 
+==2092566== Open file descriptor 0: /dev/pts/0
+==2092566==    <inherited from parent>
+==2092566== 
+==2092566== 
+==2092568== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092568== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092568==    <inherited from parent>
+==2092568== 
+==2092568== Open file descriptor 1:
+==2092568==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092568==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092568==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092568==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092568==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092568==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092568==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092568==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092568==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092568==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092568==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092568==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092568== 
+==2092568== Open file descriptor 0: /dev/pts/0
+==2092568==    <inherited from parent>
+==2092568== 
+==2092568== 
+./tester/cmdline_tester.sh: line 94: src/mixed: No such file or directory
+==2092570== FILE DESCRIPTORS: 3 open (3 std) at exit.
+==2092570== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092570==    <inherited from parent>
+==2092570== 
+==2092570== Open file descriptor 1:
+==2092570==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092570==    by 0x15C907: ??? (in /usr/bin/bash)
+==2092570==    by 0x15333D: ??? (in /usr/bin/bash)
+==2092570==    by 0x155B5C: execute_command_internal (in /usr/bin/bash)
+==2092570==    by 0x1590A1: ??? (in /usr/bin/bash)
+==2092570==    by 0x157543: execute_command_internal (in /usr/bin/bash)
+==2092570==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092570==    by 0x15807A: execute_command_internal (in /usr/bin/bash)
+==2092570==    by 0x156A11: execute_command_internal (in /usr/bin/bash)
+==2092570==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092570==    by 0x1569CD: execute_command_internal (in /usr/bin/bash)
+==2092570==    by 0x1581B7: execute_command (in /usr/bin/bash)
+==2092570== 
+==2092570== Open file descriptor 0: /dev/pts/0
+==2092570==    <inherited from parent>
+==2092570== 
+==2092570== 
+Enter a number to run associated tests, * for all: ==2092136== FILE DESCRIPTORS: 4 open (3 std) at exit.
+==2092136== Open file descriptor 255: /home/nbardavi/Desktop/42sh/tester/cmdline_tester.sh
+==2092136==    at 0x49BC01B: dup2 (syscall-template.S:120)
+==2092136==    by 0x14B451: move_to_high_fd (in /usr/bin/bash)
+==2092136==    by 0x13A9EE: main (in /usr/bin/bash)
+==2092136== 
+==2092136== Open file descriptor 2: /home/nbardavi/Desktop/42sh/valgrind_output
+==2092136==    <inherited from parent>
+==2092136== 
+==2092136== Open file descriptor 1: /dev/pts/0
+==2092136==    <inherited from parent>
+==2092136== 
+==2092136== Open file descriptor 0: /dev/pts/0
+==2092136==    <inherited from parent>
+==2092136== 
+==2092136== 

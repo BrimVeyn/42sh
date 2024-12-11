@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:41:56 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:17:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:35:25 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,7 +220,7 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars, c
 					da_push(cache_stack, 0);
 					const size_t idx = da_peak_back(pos_stack);
 					char * const tmp = ft_substr(&cache_stack->data[idx], 1, ft_strlen(&cache_stack->data[idx]) - 1);
-					char * const result = parser_command_substitution(tmp, shell_vars);
+					char * const result = parser_command_substitution(tmp, shell_vars, NULL);
 					free(tmp);
 					ss_cut(cache_stack, idx);
 					ss_push_string(cache_stack, result);
@@ -229,7 +229,7 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars, c
 				if (var_expand && top_context == EXP_VARIABLE) {
 					da_push(cache_stack, 0);
 					const size_t idx = da_peak_back(pos_stack);
-					char * const result = parser_parameter_expansion(&cache_stack->data[idx], shell_vars);
+					char * const result = parser_parameter_expansion(&cache_stack->data[idx], shell_vars, NULL);
 					if (result) {
 						ss_cut(cache_stack, idx);
 						ss_push_string(cache_stack, result);
