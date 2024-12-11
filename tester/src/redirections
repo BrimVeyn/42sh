@@ -49,6 +49,10 @@ cat <> ./outfiles
 21<> ./outfiles/file1 22<&21 cat <&22
 21<> ./outfiles/file1 21<&-
 22<> ./outfiles/no_exec 22<&-
+"22"<> ./outfiles/file1 cat <&22
+"22"<> ./outfiles/file1 cat <&"22"
+nan<> ./outfiles/file1 cat <&nan
+22<> ./outfiles/file1 cat <&nan
 (cat < infiles/test | echo "output to file") > ./outfiles/paren_pipe
 (cat <> ./outfiles/file1 | cat) >> ./outfiles/combined_test
 21<> ./outfiles/complex_test (cat <&21 | echo "piped output") >> ./outfiles/final_test
@@ -62,4 +66,4 @@ cat <> ./outfiles
 { echo "reading input"; cat <&0; } <> ./outfiles/group_stdin
 { cat < infiles/test; echo "duplicated output"; } 21<> ./outfiles/group_fd_test
 { echo "closing fd"; 22<> ./outfiles/group_fd_close; echo "done with fd"; } > ./outfiles/group_close
-#(echo finished) > ./testfile 2>&1; cat testfile;
+var=10; while true $((--var)); ! (exit $((var >= 0))); do echo salut; done > ./outfiles/test5
