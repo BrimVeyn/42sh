@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:16:37 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:04:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:41:49 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,6 +139,9 @@ void hash_table_remove(Entry **table, char *entry) {
 
 	if (table[index] != NULL) {
 		hash_table_delete_entry(table, index);
+	} else {
+		ft_dprintf(2, "42sh: %s: not found\n", entry);
+		g_exitno = 1;
 	}
 }
 
