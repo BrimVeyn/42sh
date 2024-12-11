@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:40:48 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/07 11:05:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 12:07:32 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,7 +286,6 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 		print_fc_error(fc_status, (const void **)&options);
 	}
 
-	print_options(&options);
 	if (options.last == NULL){
 		options.last = options.first;
 	}

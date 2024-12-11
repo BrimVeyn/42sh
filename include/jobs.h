@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/09 13:33:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 16:22:36 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:46:36 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	update_job_status(void);
 int		job_wait(AndOrP *job);
 void	job_wait_background(AndOrP *job);
 void	job_notification(void);
-void	job_killall(void);
+void	job_killall(__attribute__((unused)) int code);
 int		job_stopped(AndOrP *j);
 int		job_completed(AndOrP *j);
 int		mark_process_andor(AndOrP *job, pid_t pid, int status, bool print);

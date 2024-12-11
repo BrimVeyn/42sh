@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:33 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 16:17:36 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:46:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "signals.h"
 #include "ft_readline.h"
+#include "jobs.h"
 
 #include <stdio.h>
 #include <signal.h>
@@ -53,7 +54,7 @@ void signal_prompt_mode(void) {
     sigaction(SIGINT, &sa, NULL);
 
 	signal(SIGTERM, signal_sigterm_exec);
-	signal(SIGQUIT, SIG_IGN);
+	signal(SIGQUIT, job_killall);
 	signal(SIGTSTP, SIG_IGN);
 	signal(SIGTTIN, SIG_IGN);
 	signal(SIGTTOU, SIG_IGN);
