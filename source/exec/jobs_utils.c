@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:53:12 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:57:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,12 @@ int job_stopped(AndOrP *j) {
 	return 1;
 }
 
-void job_killall(void) {
+void job_killall(__attribute__((unused)) int code) {
 	for (size_t i = 0; i < g_jobList->size; i++) {
 		killpg(g_jobList->data[i]->pgid, SIGTERM);
 	}
 	g_jobList->size = 0;
+	g_exitno = 128 + SIGQUIT;
 }
 
 int job_completed(AndOrP *j) {

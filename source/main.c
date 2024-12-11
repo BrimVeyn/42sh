@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:00 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 17:03:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:46:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,7 +256,7 @@ int main(const int ac, char *av[], const char *env[]) {
 		} else {
 			if (g_jobList->size) {
 				ft_dprintf(STDERR_FILENO, "There are alive background jobs. Killing them.\n");
-				job_killall();
+				job_killall(0);
 				continue;
 			} else if (self->interactive) {
 				ft_dprintf(STDERR_FILENO, "exit\n");
