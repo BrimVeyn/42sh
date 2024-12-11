@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 17:27:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:17:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,10 +161,10 @@ char *positionals_to_string(Vars * const shell_vars) {
 	return gc(GC_ADD, ft_strdup(buffer), GC_SUBSHELL);
 }
 
-char *parser_parameter_expansion(char *full_exp, Vars *shell_vars){
+char *parser_parameter_expansion(char * full_exp, Vars *const shell_vars, int *const error){
 	regex_match_t result;
 	char *value = NULL;
-
+	(void)error;
 	
 	if (is_bad_substitution(full_exp) == true){
 		return NULL;
@@ -179,8 +179,8 @@ char *parser_parameter_expansion(char *full_exp, Vars *shell_vars){
 		da_create(expansion_result, StringListL, sizeof(char *), GC_SUBSHELL);
 		da_push(expansion_result, trimmer_rhs);
 		ExpReturn ret = do_expansions(expansion_result, shell_vars, O_NONE);
-		//FIX: return 
-		// if (ret == -1)
+		if (ret.error != 0)
+			return (*error) = 1, NULL;
 		expansion_result = ret.ret;
 		const char *final_rhs = *expansion_result->data;
 		char buffer[MAX_WORD_LEN] = {0};
