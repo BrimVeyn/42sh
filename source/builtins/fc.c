@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:40:48 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/11 12:27:52 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/11 12:37:18 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -408,11 +408,20 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 		parse_input(input, NULL, shell_vars);
 		pop_history();
 		lseek(fd, 0, SEEK_SET);
+
 		char *buffer = gc(GC_ADD, read_whole_file(fd), GC_SUBSHELL);
-		parse_input(buffer, NULL, shell_vars);
+		char **buffer_splited = ft_split(buffer, '\n');
+		gc(GC_ADD, buffer_splited, GC_SUBSHELL);
+		for (int i = 0; buffer_splited[i]; i++){
+			gc(GC_ADD, buffer_splited[i], GC_SUBSHELL);
+		}
+
+		for (int i = 0; buffer_splited[i]; i++){
+			parse_input(buffer_splited[i], NULL, shell_vars);
+		}
+		// parse_input(buffer, NULL, shell_vars);
 		remove_fd_set(fd);
 		close(fd);
 	}
-
 	return ;
 }
