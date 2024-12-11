@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 14:44:19 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 11:32:26 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:37:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,11 @@ void ft_dprintf(int fd, const char *fmt, ...){
 			const int number = va_arg(args, int);
 			ft_putnbr_fd(number, fd);
 			i += 2;
+		}
+		if (!ft_strncmp(&fmt[i], "%ld", 3)) {
+			const int number = va_arg(args, int);
+			ft_putnbr_fd(number, fd);
+			i += 3;
 		}
 		if (!ft_strncmp(&fmt[i], "%c", 2)) {
 			const char c = va_arg(args, int);
