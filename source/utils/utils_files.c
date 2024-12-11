@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:19:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:19:21 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:23:09 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,29 +39,6 @@ char *get_line_x(char *in, const size_t n) {
     return ft_substr(in, (line_ptr - in), (end - line_ptr));
 }
 
-char *get_next_line(int fd) {
-	char buffer[2];
-	char *line = NULL;
-	size_t len = 0;
-
-	buffer[1] = '\0';
-
-	while (read(fd, buffer, 1) > 0 && buffer[0] != '\n') {
-		char *tmp = realloc(line, len + 2);
-		if (!tmp) {
-			free(line);
-			return NULL;
-		}
-		line = tmp;
-		line[len] = buffer[0];
-		len++;
-	}
-	if (line) {
-		line[len] = '\0';
-	}
-	return line;
-}
-
 char *read_whole_file(int fd) {
 	char buffer[BUFFER_SIZE] = {0};
 
@@ -74,7 +51,6 @@ char *read_whole_file(int fd) {
 	}
 
 	while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) != 0) {
-		// dprintf(2, "salut !\n");
 		buffer[bytes_read] = '\0';
 		if (result_size + bytes_read >= result_capacity) {
 			result_capacity *= 2;

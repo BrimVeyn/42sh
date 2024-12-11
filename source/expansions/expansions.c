@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:41:56 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:35:25 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:51:02 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,7 +158,7 @@ bool is_var_expand_context(ExpKindList *exp_stack) {
 
 void pos_list_print(IntList *list) {
 	for (size_t i = 0; i < list->size; i++) {
-		dprintf(2, "[%zu]: %d\n", i, list->data[i]);
+		ft_dprintf(2, "[%ld]: %d\n", i, list->data[i]);
 	}
 }
 
@@ -369,7 +369,7 @@ void string_erase_nulls(StrList *list) {
 
 void printStringList(StringListL *list) {
 	for (size_t i = 0; i < list->size; i++) {
-		dprintf(2, "[%zu]: %s\n", i, list->data[i]);
+		ft_dprintf(2, "[%ld]: %s\n", i, list->data[i]);
 	}
 }
 

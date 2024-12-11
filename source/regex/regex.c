@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/06 12:02:13 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:27:53 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -294,58 +294,58 @@ void print_regex_pattern(regex_compiled_t *regexp){
 	}
 }
 
-#include <ft_regex.h>
+// #include <ft_regex.h>
 
-void regex_test(char *pattern, char *text) {
-	// regex_compiled_t regexp;
-	// regex_compile_pattern(&regexp, pattern);
-    regex_match_t my_result = regex_match(pattern, text);
-
-    regex_t regex;
-    regmatch_t matches[1];
-    int result = regcomp(&regex, pattern, REG_EXTENDED);
-    if (result != 0) {
-        char errbuf[128];
-        regerror(result, &regex, errbuf, sizeof(errbuf));
-        printf("Erreur de compilation du regex POSIX: %s\n", errbuf);
-        return;
-    }
-
-    result = regexec(&regex, text, 1, matches, 0);
-    int posix_re_start = -1, posix_re_end = -1;
-    if (result == 0) {
-        posix_re_start = matches[0].rm_so;
-        posix_re_end = matches[0].rm_eo;
-    } else if (result == REG_NOMATCH) {
-        posix_re_start = posix_re_end = -1;
-    }
-	printf("My regex:    re_start = %d, re_end = %d\n", my_result.re_start, my_result.re_end);
-	for (int i = 0; text[i]; i++) {
-		if (i == my_result.re_start)
-			printf("\033[0;32m");
-		else if (i == my_result.re_end)
-			printf("\033[0m");
-		printf("%c", text[i]);
-	}
-	printf("\033[0m\n");
-	
-    if (my_result.re_start != posix_re_start || my_result.re_end != posix_re_end) {
-		printf("pattern: %s\n", pattern);
-        printf("POSIX regex: re_start = %d, re_end = %d\n", posix_re_start, posix_re_end);
-
-
-        printf("POSIX regex:\n");
-        for (int i = 0; text[i]; i++) {
-            if (i == posix_re_start)
-                printf("\033[0;31m");
-            else if (i == posix_re_end)
-                printf("\033[0m");
-            printf("%c", text[i]);
-        }
-        printf("\033[0m\n");
-    } else {
-        printf("✅  %s%s%s\n", C_LIGHT_GRAY, pattern, C_RESET);
-    }
-    regfree(&regex);
-    printf("==================\n");
-}
+// void regex_test(char *pattern, char *text) {
+// 	// regex_compiled_t regexp;
+// 	// regex_compile_pattern(&regexp, pattern);
+//     regex_match_t my_result = regex_match(pattern, text);
+//
+//     regex_t regex;
+//     regmatch_t matches[1];
+//     int result = regcomp(&regex, pattern, REG_EXTENDED);
+//     if (result != 0) {
+//         char errbuf[128];
+//         regerror(result, &regex, errbuf, sizeof(errbuf));
+//         printf("Erreur de compilation du regex POSIX: %s\n", errbuf);
+//         return;
+//     }
+//
+//     result = regexec(&regex, text, 1, matches, 0);
+//     int posix_re_start = -1, posix_re_end = -1;
+//     if (result == 0) {
+//         posix_re_start = matches[0].rm_so;
+//         posix_re_end = matches[0].rm_eo;
+//     } else if (result == REG_NOMATCH) {
+//         posix_re_start = posix_re_end = -1;
+//     }
+// 	printf("My regex:    re_start = %d, re_end = %d\n", my_result.re_start, my_result.re_end);
+// 	for (int i = 0; text[i]; i++) {
+// 		if (i == my_result.re_start)
+// 			printf("\033[0;32m");
+// 		else if (i == my_result.re_end)
+// 			printf("\033[0m");
+// 		printf("%c", text[i]);
+// 	}
+// 	printf("\033[0m\n");
+// 	
+//     if (my_result.re_start != posix_re_start || my_result.re_end != posix_re_end) {
+// 		printf("pattern: %s\n", pattern);
+//         printf("POSIX regex: re_start = %d, re_end = %d\n", posix_re_start, posix_re_end);
+//
+//
+//         printf("POSIX regex:\n");
+//         for (int i = 0; text[i]; i++) {
+//             if (i == posix_re_start)
+//                 printf("\033[0;31m");
+//             else if (i == posix_re_end)
+//                 printf("\033[0m");
+//             printf("%c", text[i]);
+//         }
+//         printf("\033[0m\n");
+//     } else {
+//         printf("✅  %s%s%s\n", C_LIGHT_GRAY, pattern, C_RESET);
+//     }
+//     regfree(&regex);
+//     printf("==================\n");
+// }

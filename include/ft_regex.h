@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 15:38:14 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/03 11:26:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:27:51 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ typedef struct {
 } regex_compiled_t;
 
 regex_match_t regex_match(const char *pattern, char *string);
-void regex_test(char *pattern, char *text);
+// void regex_test(char *pattern, char *text);
 void regex_append_node(regex_compiled_t *regexp, regex_node_t *node);
 void set_single_char(regex_compiled_t *regexp, char c);
 void set_quantifier(regex_compiled_t *regexp, regex_quantifier_type quantifier);
