@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 11:18:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/25 17:30:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:46:29 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,29 +64,29 @@ bool arithmetic_syntax_check(ATokenStack *list) {
 		}
 		if (is_incr_or_decr(current)) {
 			if (!((prev && !is_aoperator(prev)) || (next && !is_aoperator(next)))) {
-				dprintf(2, OPERAND_EXPECTED"\n");
+				ft_dprintf(2, OPERAND_EXPECTED"\n");
 				return false;
 			}
 		}
 		if (is_lparen(current) && is_rparen(next)) {
-			dprintf(2, OPERAND_EXPECTED"\n");
+			ft_dprintf(2, OPERAND_EXPECTED"\n");
 			return false;
 		}
 		if (is_abinary_op(current)) {
 			if (!next || !prev || (is_aoperator(prev) && is_abinary_op(prev)) || (is_aoperator(next) && is_abinary_op(next))) {
-				dprintf(2, OPERAND_EXPECTED"\n");
+				ft_dprintf(2, OPERAND_EXPECTED"\n");
 				return false;
 			}  
 		}
 		if (nextnext && is_incr_or_decr(current) && !is_aoperator(next) && is_incr_or_decr(nextnext)) {
-			dprintf(2, ASSIGNMENT_REQUIRES_LVALUE"++\")\n");
+			ft_dprintf(2, ASSIGNMENT_REQUIRES_LVALUE"++\")\n");
 			return false;
 		}
 		if (is_incr_or_decr(current)) {
 			if (prev && !is_aoperator(prev)) {
 				current->operator = (current->operator == O_PREF_DECR) ? O_POST_DECR : O_POST_INCR;
 			} else if (next && is_aoperator(next)) {
-				dprintf(2, OPERAND_EXPECTED"\n");
+				ft_dprintf(2, OPERAND_EXPECTED"\n");
 				return false;
 			}
 		}

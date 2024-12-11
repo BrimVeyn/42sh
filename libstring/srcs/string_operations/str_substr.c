@@ -6,19 +6,20 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 09:18:06 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/16 10:48:47 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:15:00 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <string.h>
 #include "c_string.h"
+#include "../.././libftprintf/header/libft.h"
 
 string str_substr(string *str, size_t pos, size_t len){
 	if (pos >= str->size || len == 0 || len - pos > str->size){
 		return string_init_str("");
 	}
 	string newStr = string_init_str("");
-	memcpy(newStr.data, str->data + pos, len);
+	ft_memcpy(newStr.data, str->data + pos, len);
 	newStr.data[len] = '\0';
 	return newStr;
 }

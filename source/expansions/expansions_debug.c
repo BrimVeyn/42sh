@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 12:50:32 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/05 14:17:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:50:03 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,13 @@ void exp_kind_list_print(ExpKindList *list) {
 	};
 
 	for (size_t i = 0; i < list->size; i++) {
-		dprintf(2, "[%zu]: %s\n", i, map[list->data[i]]);
+		ft_dprintf(2, "[%ld]: %s\n", i, map[list->data[i]]);
 	}
 }
 
 void printCharChar(char **tab) {
 	for (uint16_t it = 0; tab[it]; it++) {
-		dprintf(2,"arg[%d]: %s\n", it, tab[it]);
+		ft_dprintf(2,"arg[%d]: %s\n", it, tab[it]);
 	}
 }
 
@@ -62,27 +62,27 @@ void aTokenToString(AToken *token) {
 		case A_OPERAND: 
 			switch (token->operand_tag) {
 				case VALUE:
-					dprintf(2, "%ld ", token->litteral);
+					ft_dprintf(2, "%ld ", token->litteral);
 					break;
 				case VARIABLE:
-					dprintf(2, "%s ", token->variable);
+					ft_dprintf(2, "%s ", token->variable);
 					break;
 			}
 			break;
 		case A_OPERATOR:
-			dprintf(2, "%s ", aOpToSTring(token));
+			ft_dprintf(2, "%s ", aOpToSTring(token));
 			break;
 		default:
-			dprintf(2, "UNHANDLED FORMAT !\n");
+			ft_dprintf(2, "UNHANDLED FORMAT !\n");
 			break;
 	}
 }
 
 void aTokenListToString(ATokenStack *tokens) {
-	dprintf(2, "-------------Print start--------\n");
+	ft_dprintf(2, "-------------Print start--------\n");
 	for (int i = 0; i < tokens->size; i++) {
 		aTokenToString(tokens->data[i]);
 	}
-	dprintf(2, "\n");
-	dprintf(2, "-------------Print end--------\n");
+	ft_dprintf(2, "\n");
+	ft_dprintf(2, "-------------Print end--------\n");
 }

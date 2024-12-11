@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:43:08 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/04 10:36:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:56:18 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,78 +20,78 @@
 
 
 void print_redir_list(const RedirectionL *redir_list) {
-	dprintf(2, C_DARK_CYAN"  Redirs: "C_RESET C_SEA_GREEN"{"C_RESET);
+	ft_dprintf(2, C_DARK_CYAN"  Redirs: "C_RESET C_SEA_GREEN"{"C_RESET);
 	for (size_t i = 0; i < redir_list->size; i++) {
 		const RedirectionP *redir = redir_list->data[i];
 		if (redir->io_number) {
-			dprintf(2, C_MAGENTA"{"C_RESET"%s | %s | %s"C_MAGENTA"}"C_RESET, redir->io_number, tokenTypeStr(redir->type), redir->filename);
+			ft_dprintf(2, C_MAGENTA"{"C_RESET"%s | %s | %s"C_MAGENTA"}"C_RESET, redir->io_number, tokenTypeStr(redir->type), redir->filename);
 		} else {
-			dprintf(2, C_MAGENTA"{"C_RESET"%s | %s"C_MAGENTA"}"C_RESET, tokenTypeStr(redir->type), redir->filename);
+			ft_dprintf(2, C_MAGENTA"{"C_RESET"%s | %s"C_MAGENTA"}"C_RESET, tokenTypeStr(redir->type), redir->filename);
 		}
 		if (i < redir_list->size - 1) {
-			dprintf(2, ", ");
+			ft_dprintf(2, ", ");
 		}
 	}
-	dprintf(2, C_SEA_GREEN"}"C_RESET"\n");
+	ft_dprintf(2, C_SEA_GREEN"}"C_RESET"\n");
 }
 
 void print_word_list(const char *title, const StringListL *word_list) {
-	dprintf(2, C_DARK_CYAN"  %s: "C_RESET C_SEA_GREEN"{"C_RESET, title);
+	ft_dprintf(2, C_DARK_CYAN"  %s: "C_RESET C_SEA_GREEN"{"C_RESET, title);
 	if (!word_list) {
-		dprintf(2, "(null)");
+		ft_dprintf(2, "(null)");
 		goto close_print;
 	}
 	for (size_t i = 0; i < word_list->size; i++) {
 		if (!word_list->data[i])
 			continue;
-		dprintf(2, "%s", word_list->data[i]);
+		ft_dprintf(2, "%s", word_list->data[i]);
 		if (i < word_list->size - 1) {
-			dprintf(2, ", ");
+			ft_dprintf(2, ", ");
 		}
 	}
 close_print:
-	dprintf(2, C_SEA_GREEN"}"C_RESET"\n");
+	ft_dprintf(2, C_SEA_GREEN"}"C_RESET"\n");
 }
 
 void print_simple_command(const SimpleCommandP *self) {
-	dprintf(2, C_LIGHT_YELLOW"----------SC---------"C_RESET"\n");
+	ft_dprintf(2, C_LIGHT_YELLOW"----------SC---------"C_RESET"\n");
 	print_word_list("Vars", self->assign_list);
 	print_word_list("Words", self->word_list);
 	print_redir_list(self->redir_list);
-	dprintf(2, C_LIGHT_YELLOW"--------SC_end----------"C_RESET"\n");
+	ft_dprintf(2, C_LIGHT_YELLOW"--------SC_end----------"C_RESET"\n");
 }
 
 void print_subshell(const ListP *subshell) {
-	dprintf(2, C_CERULEAN"----------Subshell---------"C_RESET"\n");
+	ft_dprintf(2, C_CERULEAN"----------Subshell---------"C_RESET"\n");
 	print_list(subshell);
-	dprintf(2, C_CERULEAN"--------SubShellEnd----------"C_RESET"\n");
+	ft_dprintf(2, C_CERULEAN"--------SubShellEnd----------"C_RESET"\n");
 }
 
 void print_brace_group(const ListP *subshell) {
-	dprintf(2, C_CERULEAN"----------BraceGroup---------"C_RESET"\n");
+	ft_dprintf(2, C_CERULEAN"----------BraceGroup---------"C_RESET"\n");
 	print_list(subshell);
-	dprintf(2, C_CERULEAN"--------BraceGroupEnd----------"C_RESET"\n");
+	ft_dprintf(2, C_CERULEAN"--------BraceGroupEnd----------"C_RESET"\n");
 }
 
 void print_for_clause(const ForClauseP *for_clause) {
-	dprintf(2, C_CERULEAN"----------ForClause---------"C_RESET"\n");
-	dprintf(2, C_DARK_CYAN"  Iterator:"C_RESET" %s\n", for_clause->iterator);
+	ft_dprintf(3, C_CERULEAN"----------ForClause---------"C_RESET"\n");
+	ft_dprintf(2, C_DARK_CYAN"  Iterator:"C_RESET" %s\n", for_clause->iterator);
 	if (for_clause->word_list)
 		print_word_list("Enum", for_clause->word_list);
 	print_list(for_clause->body);
-	dprintf(2, C_CERULEAN"--------ForClauseEnd----------"C_RESET"\n");
+	ft_dprintf(2, C_CERULEAN"--------ForClauseEnd----------"C_RESET"\n");
 }
 
 void print_case_clause(const CaseClauseP *case_clause) {
-	dprintf(2, C_CERULEAN"----------CaseClause---------"C_RESET"\n");
-	dprintf(2, C_DARK_CYAN"  Expression:"C_RESET" %s\n", case_clause->expression);
+	ft_dprintf(2, C_CERULEAN"----------CaseClause---------"C_RESET"\n");
+	ft_dprintf(2, C_DARK_CYAN"  Expression:"C_RESET" %s\n", case_clause->expression);
 	for(size_t i = 0; i < case_clause->patterns->size; i++) {
 		print_word_list("Case", case_clause->patterns->data[i]);
 	}
 	for (size_t i = 0; i < case_clause->bodies->size; i++) {
 		print_list(case_clause->bodies->data[i]);
 	}
-	dprintf(2, C_CERULEAN"--------CaseClauseEnd----------"C_RESET"\n");
+	ft_dprintf(2, C_CERULEAN"--------CaseClauseEnd----------"C_RESET"\n");
 
 }
 
@@ -115,10 +115,10 @@ void print_command(const CommandP *command) {
 }
 
 void print_function(const FunctionP *function) {
-	dprintf(2, C_CERULEAN"----------FunctionDef---------"C_RESET"\n");
-	dprintf(2, C_DARK_PINK"  Fname:"C_RESET" %s\n", function->function_name);
+	ft_dprintf(2, C_CERULEAN"----------FunctionDef---------"C_RESET"\n");
+	ft_dprintf(2, C_DARK_PINK"  Fname:"C_RESET" %s\n", function->function_name);
 	print_command(function->function_body);
-	dprintf(2, C_CERULEAN"--------FunctionDefEnd----------"C_RESET"\n");
+	ft_dprintf(2, C_CERULEAN"--------FunctionDefEnd----------"C_RESET"\n");
 }
 
 void print_pipeline(const PipeLineP *pipeline) {
@@ -126,7 +126,7 @@ void print_pipeline(const PipeLineP *pipeline) {
 	while (head) {
 		print_command(head->command);
 		if (head->next)
-			dprintf(2, C_ORCHID"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(PIPE));
+			ft_dprintf(2, C_ORCHID"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(PIPE));
 		head = head->next;
 	}
 }
@@ -136,7 +136,7 @@ void print_andor(const AndOrP *and_or) {
 	while (head) {
 		print_pipeline(head->pipeline);
 		if (head->separator == AND_IF || head->separator == OR_IF) {
-			dprintf(2, C_CORAL"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(head->separator));
+			ft_dprintf(2, C_CORAL"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(head->separator));
 		}
 		head = head->next;
 	}
@@ -145,12 +145,12 @@ void print_andor(const AndOrP *and_or) {
 void print_list(const ListP *list) {
 	const ListP *head = list;
 	if (!head) {
-		dprintf(2, "  Body: (null)\n");
+		ft_dprintf(2, "  Body: (null)\n");
 	}
 	while (head) {
 		print_andor(head->and_or);
 		if (head->separator == SEMI || head->separator == AMPER || head->separator == NEWLINE) {
-			dprintf(2, C_CORAL"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(head->separator));
+			ft_dprintf(2, C_CORAL"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(head->separator));
 		}
 		head = head->next;
 	}
@@ -159,29 +159,29 @@ void print_list(const ListP *list) {
 void print_complete_command(const CompleteCommandP *complete_command) {
 	print_list(complete_command->list);
 	if (complete_command->separator != END)
-		dprintf(2, C_CORAL"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(complete_command->separator));
+		ft_dprintf(2, C_CORAL"  Sep: "C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", tokenTypeStr(complete_command->separator));
 }
 
 void print_if_clause(const IFClauseP *if_clause) {
-	dprintf(2, C_CERULEAN"Conditions: \n");
+	ft_dprintf(2, C_CERULEAN"Conditions: \n");
 	const ListPVect *conditions = if_clause->conditions;
 	for (size_t i = 0; i < conditions->size; i++) {
 		print_list(conditions->data[i]);
-		dprintf(2, C_CERULEAN"---------------------------"C_RESET"\n");
+		ft_dprintf(2, C_CERULEAN"---------------------------"C_RESET"\n");
 	}
-	dprintf(2, C_CERULEAN"Bodies: \n");
+	ft_dprintf(2, C_CERULEAN"Bodies: \n");
 	const ListPVect *bodies = if_clause->bodies;
 	for (size_t i = 0; i < bodies->size; i++) {
 		print_list(bodies->data[i]);
-		dprintf(2, C_CERULEAN"---------------------------"C_RESET"\n");
+		ft_dprintf(2, C_CERULEAN"---------------------------"C_RESET"\n");
 	}
 }
 
 void print_while_clause(const WhileClauseP *while_clause) {
-	dprintf(2, C_EMERALD"-------------While_clause-----------"C_RESET"\n");
+	ft_dprintf(2, C_EMERALD"-------------While_clause-----------"C_RESET"\n");
 	print_list(while_clause->condition);
 	print_list(while_clause->body);
-	dprintf(2, C_EMERALD"-----------While_clause_end---------"C_RESET"\n");
+	ft_dprintf(2, C_EMERALD"-----------While_clause_end---------"C_RESET"\n");
 }
 
 void print_token_stack(const TokenStack *stack) {
@@ -189,13 +189,13 @@ void print_token_stack(const TokenStack *stack) {
 		const StackEntry *entry = stack->data[i];
 
 		if (entry->token.type <= END || entry->token.type == Filename) {
-			dprintf(2, "["C_LIGHT_BLUE"%zu"C_RESET"] "C_MAGENTA"%s"C_LIGHT_YELLOW": "C_TURQUOISE"%s"C_RESET"\n", i, tokenTypeStr(entry->token.type), entry->token.raw_value);
+			ft_dprintf(2, "["C_LIGHT_BLUE"%ld"C_RESET"] "C_MAGENTA"%s"C_LIGHT_YELLOW": "C_TURQUOISE"%s"C_RESET"\n", i, tokenTypeStr(entry->token.type), entry->token.raw_value);
 		} else {
-			dprintf(2, "["C_LIGHT_BLUE"%zu"C_RESET"] "C_LIGHT_YELLOW"%s"C_RESET"\n", i, tokenTypeStr(entry->token.type));
+			ft_dprintf(2, "["C_LIGHT_BLUE"%ld"C_RESET"] "C_LIGHT_YELLOW"%s"C_RESET"\n", i, tokenTypeStr(entry->token.type));
 			switch (entry->token.type) {
 				case Io_Redirect:
 				case Io_File: {
-					dprintf(2, C_MAGENTA"{"C_LIGHT_ORANGE"%s "C_RESET"|"C_LIGHT_ORANGE" %s"C_MAGENTA"}"C_RESET"\n", tokenTypeStr(entry->token.redir->type), entry->token.redir->filename);
+					ft_dprintf(2, C_MAGENTA"{"C_LIGHT_ORANGE"%s "C_RESET"|"C_LIGHT_ORANGE" %s"C_MAGENTA"}"C_RESET"\n", tokenTypeStr(entry->token.redir->type), entry->token.redir->filename);
 					break;
 				}
 				case Cmd_Suffix:
@@ -206,7 +206,7 @@ void print_token_stack(const TokenStack *stack) {
 				}
 				case Cmd_Name:
 				case Cmd_Word: {
-					dprintf(2, C_DARK_CYAN"  Value: "C_RESET C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", entry->token.raw_value);
+					ft_dprintf(2, C_DARK_CYAN"  Value: "C_RESET C_MAGENTA"["C_LIGHT_ORANGE"%s"C_MAGENTA"]"C_RESET"\n", entry->token.raw_value);
 					break;
 				}
 				case Redirect_List: {

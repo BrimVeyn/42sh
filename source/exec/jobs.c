@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:19:35 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 12:42:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:52:30 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,7 @@ int job_wait(AndOrP *job) {
 	do {
 		pid = waitpid(-job->pgid, &status, WUNTRACED);
 		if (pid != -1) {
-			// dprintf(2, C_BRIGHT_CYAN"WAIT "C_MAGENTA"waiting for pgid: %d | waited : %d | pgid of waited: %d | in process: %d"C_RESET"\n", job->pgid, pid, getpgid(pid), getpid());
 			} else {
-			// dprintf(2, C_BRIGHT_CYAN"WAIT "C_RED"waiting for pgid: %d | waited : %d | pgid of waited: %d | in process: %d"C_RESET"\n", job->pgid, pid, getpgid(pid), getpid());
 		}
 	} while (!mark_process_andor(job, pid, status, true)
 	&& !job_stopped(job)
@@ -47,7 +45,7 @@ void put_job_background(AndOrP *job) {
 	gc_move_andor(job);
 	job->id = g_jobList->size;
 	da_push(g_jobList, job);
-	dprintf(2, "[%zu]\t%d\n", job->id, job->pgid);
+	ft_dprintf(2, "[%ld]\t%d\n", job->id, job->pgid);
 	job->notified = true;
 }
 
@@ -56,8 +54,6 @@ int put_job_foreground (AndOrP *job, int cont) {
 	/* Put the job into the foreground.  */
 	if (tcsetpgrp(self->shell_terminal, job->pgid) == -1)
 		_fatal("tcsetpgrp: failed", 1);
-	// dprintf(2, "shell->pgid: %d, job->pgid: %d\n", self->shell_pgid, job->pgid);
-	// dprintf(2, "JOB->PGID: %d\n", job->pgid);
 	/* Send the job a continue signal, if necessary.  */
 	if (cont) {
 		// job->notified = false;
@@ -86,7 +82,6 @@ void update_job_status(void) {
 	if (!g_jobList || !g_jobList->size) return ;
 	do {
 		pid = waitpid (WAIT_ANY, &status, WUNTRACED|WNOHANG);
-		// dprintf(2, "CAUGHT: %d | %d\n", pid, status);
 	} while (!mark_process_list(pid, status, false));
 }
 
@@ -119,7 +114,7 @@ int mark_process_andor(AndOrP *job, pid_t pid, int status, bool print) {
 				g_exitno = 128 + SIGTSTP;
 
 				if (print && !job->notified)
-					dprintf(STDERR_FILENO, "\n[%zu]\tStopped(%s)\t%s\n", job->id, sigStr(job->sig), job_print(job, false));
+					ft_dprintf(STDERR_FILENO, "\n[%ld]\tStopped(%s)\t%s\n", job->id, sigStr(job->sig), job_print(job, false));
 				job->notified = true;
 
 			} else if (WIFSIGNALED (status)) {
@@ -166,7 +161,7 @@ int mark_process_list(pid_t pid, int status, bool print) {
 					g_exitno = 128 + SIGTSTP;
 
 					if (print && !job->notified)
-						dprintf(STDERR_FILENO, "\n[%zu]\tStopped(%s)\t%s\n", job->id, sigStr(job->sig), job_print(job, false));
+						ft_dprintf(STDERR_FILENO, "\n[%ld]\tStopped(%s)\t%s\n", job->id, sigStr(job->sig), job_print(job, false));
 
 					job->notified = true;
 				} else if (WIFSIGNALED (status)) {

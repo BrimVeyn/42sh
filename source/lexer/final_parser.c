@@ -5,13 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/04 10:47:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:46:46 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/11 11:32:40 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/11 11:32:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "final_parser.h"
-#include "Arena.h"
 #include "expansion.h"
 #include "ft_readline.h"
 #include "ft_regex.h"
@@ -25,7 +24,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "colors.h"
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
@@ -58,7 +56,6 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 		[NEWLINE] = "\n", [AMPER] = "&", [SEMI] = ";",
 	};
 
-	// dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
 			( (table_row != 27 && table_row != 66 && table_row != 98 && table_row != 39) 
@@ -81,7 +78,6 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 			return ASSIGNMENT_WORD;
 	}
 
-	// dprintf(2, "value: %s, table_row: %d\n", raw_value, table_row);
 	if (regex_match("^[a-zA-Z_][a-zA-Z0-9_]*$", (char *)raw_value).is_found) {
 		if (table_row == 30 || 
 			((table_row == 48 || table_row == 0 || table_row == 3)
@@ -108,13 +104,11 @@ int parse(Lex *lexer, Vars *shell_vars) {
 		return ERR;
 
 	da_push(lexer->produced_tokens, token.type);
-	// dprintf(2, "Token produced: %s, type: %s\n", token.raw_value, tokenTypeStr(token.type));
 
 	while (true) {
 		int state = da_peak_back(stack)->state;
 		TableEntry entry = parsingTable[state][token.type];
 		// print_token_stack(stack);
-		// dprintf(2, C_DARK_GRAY_FG C_LIGHT_RED"[%zu] %s %d"C_RESET"\n", action_no, actionStr(entry.action), entry.value);
 
 		switch(entry.action) {
 			case SHIFT: {
@@ -132,7 +126,6 @@ int parse(Lex *lexer, Vars *shell_vars) {
 				da_push(lexer->produced_tokens, token.type);
 				if (error) 
 					return ERR;
-				// dprintf(2, "Token produced: %s, type: %s\n", token.raw_value, tokenTypeStr(token.type));
 				break;
 			}
 			case REDUCE: {

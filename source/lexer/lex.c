@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/03 18:20:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:53:16 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,6 @@ WordContext get_context(const StringStream *input, WordContextBounds *map, const
 
         if (BIT_IS_ON(byteptr, current_context) &&
             !ft_strncmp(input->data, map[current_context].start, length)) {
-			// dprintf(2, "new context: %s\n", map[current_context].start);
             return current_context;
         }
     }

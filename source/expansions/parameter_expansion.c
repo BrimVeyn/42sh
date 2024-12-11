@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:17:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:15:39 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 
 char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 	// printf("id: %s\nword: %s\nmetachar: %s\n", id, word, metachar);
-	// dprintf(2, "WORD: %s\n", word);
+	// ft_dprintf(2, "WORD: %s\n", word);
 	char *value = get_variable_value(shell_vars, id);
 	if (!value){
 		if (!ft_strcmp(metachar, ":-")){
@@ -85,7 +85,7 @@ char *parser_get_variable_value(char *to_expand, Vars *shell_vars){
 	regex_match_t find_format = regex_match("[:#%]", to_expand);
 	int lenght_meta = (regex_match("[:#%][=?#%\\-]", to_expand).re_start != -1) ? 2:1;
 	if (find_format.re_start != -1){
-		memcpy(name, to_expand, find_format.re_start);
+		ft_memcpy(name, to_expand, find_format.re_start);
 		word = ft_substr(to_expand, find_format.re_end + lenght_meta - 1, ft_strlen(to_expand) - find_format.re_end);
 		gc(GC_ADD, word, GC_SUBSHELL);
 		ft_memcpy(metachar, &to_expand[find_format.re_start], sizeof(char) * lenght_meta);
@@ -121,8 +121,6 @@ static bool is_bad_substitution(char *full_exp){
 		variable_name = ft_substr(full_exp, 2, format_pos - 2);
 	}
 
-	// dprintf(2, "full: |%s|, name: |%s|\n", full_exp, variable_name);
-
 	if (
 		( !regex_match("^[a-zA-Z_][a-zA-Z0-9_]*$", variable_name).is_found && //XBD NAME
 		!regex_match("^#[a-zA-Z_][a-zA-Z0-9_]*$", variable_name).is_found && // #XBD NAME
@@ -134,7 +132,7 @@ static bool is_bad_substitution(char *full_exp){
 		( regex_match("^\\$\\{.*:\\}$", full_exp).is_found || // !end_with(:)
 		  regex_match("^\\$\\{#.*:.*\\}$", full_exp).is_found ) ) // begin_with(#) and has (:)
 	{ 
-		dprintf(2, "%s: bad substitution\n", full_exp);
+		ft_dprintf(2, "%s: bad substitution\n", full_exp);
 		g_exitno = 1;
 		free(variable_name);
 		return true;
@@ -167,7 +165,7 @@ char *parser_parameter_expansion(char * full_exp, Vars *const shell_vars, int *c
 	(void)error;
 	
 	if (is_bad_substitution(full_exp) == true){
-		return NULL;
+		*error = 1; return NULL;
 	}
 
 	const char *rhs = ft_strchr(full_exp, ':');
@@ -179,8 +177,9 @@ char *parser_parameter_expansion(char * full_exp, Vars *const shell_vars, int *c
 		da_create(expansion_result, StringListL, sizeof(char *), GC_SUBSHELL);
 		da_push(expansion_result, trimmer_rhs);
 		ExpReturn ret = do_expansions(expansion_result, shell_vars, O_NONE);
-		if (ret.error != 0)
+		if (ret.error != 0){
 			return (*error) = 1, NULL;
+		}
 		expansion_result = ret.ret;
 		const char *final_rhs = *expansion_result->data;
 		char buffer[MAX_WORD_LEN] = {0};
