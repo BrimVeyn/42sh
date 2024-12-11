@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 11:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/02 17:18:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:48:04 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ AToken *lexer_get_next_atoken(Lexer * l) {
 			}
 			break;
 		default:
-			dprintf(2, "Fatal arithmetic expansion lexer\n");
+			ft_dprintf(2, "Fatal arithmetic expansion lexer\n");
 			exit(EXIT_FAILURE);
 	}
 	return self;

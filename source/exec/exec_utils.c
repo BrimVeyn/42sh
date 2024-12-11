@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 16:21:48 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:51:31 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ char *find_bin_location(char *bin, StringListL *env, bool *absolute){
 	if (stat(bin, &file_stat) != -1 && ft_strchr(bin, '/')) {
 
 		if (S_ISDIR(file_stat.st_mode)) {
-			dprintf(2, "%s: Is a directory\n", bin);
+			ft_dprintf(2, "%s: Is a directory\n", bin);
 			g_exitno = 126;
 			return (NULL);
 		}
@@ -32,13 +32,13 @@ char *find_bin_location(char *bin, StringListL *env, bool *absolute){
 			return bin;
 		}
 		else {
-			dprintf(2, "%s: Permission Denied\n", bin);
+			ft_dprintf(2, "%s: Permission Denied\n", bin);
 			g_exitno = 126;
 			return (NULL);
 		}
 	}
 	else if (stat(bin, &file_stat) == -1 && ft_strchr(bin, '/')) {
-		dprintf(2, "%s: No such file or directory\n", bin);
+		ft_dprintf(2, "%s: No such file or directory\n", bin);
 		g_exitno = 127;
 		return (NULL);
 	}
@@ -58,7 +58,7 @@ char *find_bin_location(char *bin, StringListL *env, bool *absolute){
 		bin_with_path = NULL;
 	}
 	free_charchar(path);
-	dprintf(2, "%s: command not found\n", bin);
+	ft_dprintf(2, "%s: command not found\n", bin);
 	g_exitno = 127;
 	return NULL;
 }
@@ -100,7 +100,6 @@ int *save_std_fds() {
 void close_fd_set() {
 	while (g_fdSet->size != 0) {
 		int fd = da_pop(g_fdSet);
-		// dprintf(2, "fd = %d\n", fd);
 		if (fd != -1) {
 			close(fd);
         }

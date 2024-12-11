@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:52:42 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/10 13:04:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:51:34 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ static int is_valid_fd(int fd) {
 }        
 
 static bool error_bad_file_descriptor(const int fd) {
-	dprintf(STDERR_FILENO, "42sh: %d: Bad file descriptor\n", fd);
+	ft_dprintf(STDERR_FILENO, "42sh: %d: Bad file descriptor\n", fd);
 	return false;
 }
 

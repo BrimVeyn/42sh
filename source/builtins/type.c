@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:02:12 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/15 15:54:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/11 10:50:44 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "parser.h"
 #include "utils.h"
 
-#define TYPE_BIN_NOT_FOUND(bin) dprintf(2, "42sh: type: %s: not found\n", bin);
+#define TYPE_BIN_NOT_FOUND(bin) ft_dprintf(2, "42sh: type: %s: not found\n", bin);
 
 static bool is_keyword(const char *arg) {
 	static const char *keywords[] = {

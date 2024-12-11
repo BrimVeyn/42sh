@@ -6,13 +6,14 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 17:32:31 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/10/24 11:38:06 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:14:53 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../.././libftprintf/header/libft.h"
 
 #include "../include/c_string.h"
 void str_info(const string *str);
@@ -27,7 +28,7 @@ void str_destroy(string *str){
 void str_assign(string *str, const char *content){
 	size_t len = strlen(content);
 	str_assign_right_size(str, len);
-	memcpy(str->data, content, len + 1);
+	ft_memcpy(str->data, content, len + 1);
 	str->size = len;
 }
 
@@ -51,7 +52,7 @@ string str_strdup(const string *str){
 	new_str.size = str->size;
 	new_str.capacity = str->capacity;
 	new_str.data = calloc(new_str.capacity, sizeof(char));
-	memcpy(new_str.data, str->data, new_str.size);
+	ft_memcpy(new_str.data, str->data, new_str.size);
 	new_str.data[new_str.size] = '\0';
 	return new_str;
 }
