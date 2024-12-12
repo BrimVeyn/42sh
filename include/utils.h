@@ -6,12 +6,15 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 11:22:43 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/12 16:59:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef UTILS_H
 #define UTILS_H
+
+#define _42SH_VERSION "0.5"
+#define _42SH_SHELL "42sh"
 
 #include "../libftprintf/header/libft.h"
 
@@ -29,9 +32,12 @@ extern int g_exitno;
 
 #endif
 
+#define __basename(path) (ft_strrchr(path, '/') ? ft_strrchr(path, '/') + 1 : path)
+
 #define BUFFER_SIZE 1024
 #define MAX_WORD_LEN 65536
 #define POSIX_MAX_ID_LEN 255
+#define DATE_SIZE 255
 
 #define FREE_POINTERS(...) \
     void *ptrs[] = { __VA_ARGS__ }; \
@@ -172,8 +178,9 @@ void			free_charchar(char **array);
 size_t			ft_strlenlen(const char **strstr);
 char			**ft_strdupdup(const char **env);
 char			*replace_char_greedy(char *str, char c, char by);
-int				ft_strstr(char *haystack, char *needle);
-int				ft_strrstr(char *haystack, char *needle);
+int				ft_strrstr(const char *const haystack, const char *const needle);
+int				ft_strstr(const char *const haystack, const char *const needle);
+char			*ft_strsed(char * src, const char *occ, const char *rep);
 int				ft_sprintf(char *buffer, const char *fmt, ...);
 int				ft_snprintf(char *buffer, const size_t size_of_buffer, const char *fmt, ...);
 void			ft_dprintf(int fd, const char *fmt, ...);
