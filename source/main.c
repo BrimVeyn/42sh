@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:00 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 13:56:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/12 10:37:32 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,11 +44,14 @@ JobList *		g_jobList = NULL;
 
 static void	*read_input_prompt(char *input, Vars *const shell_vars) {
 	char *PS1 = string_list_get_value(shell_vars->set, "PS1");
+	dprintf(STDERR_FILENO, "PS1 value: %s\n", PS1);
 
-	if (PS1)
+	if (PS1) {
+		PS1	= expand_prompt_special(PS1);
 		input = ft_readline(PS1, shell_vars);
-	else
+    } else {
 		input = ft_readline("42sh> ", shell_vars);
+    }
 
 	if (!input)
 		return NULL;

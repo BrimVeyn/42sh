@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/11 10:53:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/12 17:11:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,19 +54,41 @@ char *boolStr(bool bobo) {
 	return (bobo == true) ? "TRUE" : "FALSE";
 }
 
-// char **ft_strdupdup(const StringListL *env){
-// 	char **strstr = ft_calloc(ft_strlenlen(env) + 1, sizeof(char *));
-// 	if (!strstr){
-// 		return NULL;
-// 	}
-// 	for (int i = 0; env[i]; i++){
-// 		strstr[i] = ft_strdup(env[i]);
-// 	}
-// 	return strstr;
-// }
 
+char *ft_strsed(char * src, const char *occ, const char *rep) {
+	char buffer[MAX_WORD_LEN] = {0};
+	size_t len = 0;
 
-int ft_strstr(char *haystack, char *needle) {
+	char *ptr = src;
+	const size_t occ_len = ft_strlen(occ);
+	const size_t rep_len = ft_strlen(rep);
+
+	while (true) {
+		int match = ft_strstr(ptr, occ);
+		if (match != -1) {
+			if ((len + match + rep_len) > MAX_WORD_LEN)
+				return "1";
+			ft_memcpy(buffer + len, ptr, match);
+			len += match;
+			ft_memcpy(buffer + len, rep, rep_len);
+			dprintf(2, "buffer:|%s|\n", buffer);
+			len += rep_len;
+			ptr += (match + occ_len);
+			dprintf(2, "len: %zu\n", match + occ_len);
+		} else {
+			break;
+		}
+	}
+	if (ptr != NULL) {
+		size_t left_len = ft_strlen(ptr);
+		if ((len + left_len) > MAX_WORD_LEN) 
+			return "2";
+		ft_memcpy(buffer + len, ptr, left_len);
+	}
+	return gc(GC_ADD, ft_strdup(buffer), GC_SUBSHELL);
+}
+
+int ft_strstr(const char *const haystack, const char *const needle) {
 	if (!haystack || !needle) {
 		return -1;
 	}
@@ -83,7 +105,7 @@ int ft_strstr(char *haystack, char *needle) {
 	return -1;
 }
 
-int ft_strrstr(char *haystack, char *needle) {
+int ft_strrstr(const char *const haystack, const char *const needle) {
 	if (!haystack || !needle) {
 		return -1;
 	}
