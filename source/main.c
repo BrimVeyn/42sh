@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:00 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/12 10:37:32 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/13 16:07:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,17 +37,43 @@
 
 int				g_debug = 0;
 int 			g_exitno = 0;
+int				g_functionCtx = 0;
 IntList	*		g_fdSet = NULL;
 pid_t			g_masterPgid = 0;
 FunctionList *	g_funcList = NULL;
 JobList *		g_jobList = NULL;
 
+
+//FIX: quote bug in this case : echo "${staged:+$staged}" $ sign causes this bug surprinsigly
+//FIX: readline_redisplay || ^C should process the prompt like bellow
+
 static void	*read_input_prompt(char *input, Vars *const shell_vars) {
 	char *PS1 = string_list_get_value(shell_vars->set, "PS1");
-	dprintf(STDERR_FILENO, "PS1 value: %s\n", PS1);
+	// dprintf(STDERR_FILENO, "PS1 value: %s\n", PS1);
 
 	if (PS1) {
+		ShellInfos *shell_infos = shell(SHELL_GET);
+		int saved_exitno = g_exitno;
+		int error = 0;
+
+		char *maybe_prompt_command;
+		if ((maybe_prompt_command = get_variable_value(shell_vars, "PROMPT_COMMAND")) != NULL) {
+			int saved_shellstate = shell_infos->script;
+			shell_infos->script = true;
+
+			parse_input(maybe_prompt_command, "PROMPT_COMMAND", shell_vars);
+
+			shell_infos->script = saved_shellstate;
+		}
+
+		StringListL *maybe_prompt = do_expansions_word(PS1, &error, shell_vars, O_NONE);
+
+		if (!maybe_prompt) PS1 = "";
+		else PS1 = maybe_prompt->data[0];
+
 		PS1	= expand_prompt_special(PS1);
+		g_exitno = saved_exitno;
+
 		input = ft_readline(PS1, shell_vars);
     } else {
 		input = ft_readline("42sh> ", shell_vars);
@@ -270,5 +296,5 @@ int main(const int ac, char *av[], const char *env[]) {
 	if (self->interactive && !self->script) { update_history_file(history, shell_vars); }
 	close_fd_set();
 	gc(GC_CLEANUP, GC_ALL);
-	return (EXIT_SUCCESS);
+	exit(g_exitno);
 }

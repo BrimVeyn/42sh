@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 10:13:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/13 10:51:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/13 15:49:55 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,11 +52,11 @@
 \] End a sequence of non-printing characters. 
 ----------------------------------------------------------------------------------- */
 
-char *get_ascii(void) {
-	return "pffff";
-}
+// char *get_ascii(void) {
+// 	return "pffff";
+// }
 
-char *get_date_format(const char *restrict format) {
+static char *get_date_format(const char *restrict format) {
 	char date_str[DATE_SIZE] = {0};
 	time_t current_time;
 	struct tm *time_info;
@@ -70,7 +70,7 @@ char *get_date_format(const char *restrict format) {
 	return gc(GC_ADD, ft_strdup(date_str), GC_SUBSHELL);
 }
 
-char *get_pwd_basename(void) {
+static char *get_pwd_basename(void) {
 	char *pwd = getcwd(NULL, 0);
 	if (!pwd)
 		return "";
@@ -81,7 +81,7 @@ char *get_pwd_basename(void) {
 	return pwd_basename;
 }
 
-char *get_full_pwd(void) {
+static char *get_full_pwd(void) {
     struct passwd *pw;
     uid_t uid = getuid();
 
@@ -104,7 +104,7 @@ char *get_full_pwd(void) {
 	return gc(GC_ADD, pwd, GC_SUBSHELL);
 }
 
-char *get_username(void) {
+static char *get_username(void) {
     struct passwd *pwd;
     uid_t uid = getuid();
 
@@ -115,7 +115,7 @@ char *get_username(void) {
 	return pwd->pw_name;
 }
 
-char *get_cut_hostname(void) {
+static char *get_cut_hostname(void) {
 	char hostname[100] = {0};
 
 	if (gethostname(hostname, sizeof(hostname)) < 0)
@@ -129,7 +129,7 @@ char *get_cut_hostname(void) {
 	return gc(GC_ADD, ft_strdup(hostname), GC_SUBSHELL);
 }
 
-char *get_full_hostname(void) {
+static char *get_full_hostname(void) {
 	char hostname[100] = {0};
 
 	if (gethostname(hostname, sizeof(hostname)) < 0)
@@ -138,20 +138,20 @@ char *get_full_hostname(void) {
 	return gc(GC_ADD, ft_strdup(hostname), GC_SUBSHELL);
 }
 
-char *get_date_letter(void) { return get_date_format("%a %b %d"); }
-char *get_time_24hour_secondless(void) { return get_date_format("%H:%M"); }
-char *get_time_12hour_ampm(void) { return get_date_format("%I:%M %p"); }
-char *get_time_24hour(void) { return get_date_format("%H:%M:%S"); }
-char *get_time_12hour(void) { return get_date_format("%I:%M:%S"); }
-char *get_cr(void) { return "\r"; }
-char *get_newline(void) { return "\n"; }
-char *get_backslash(void) { return "\\"; }
-char *get_version(void) { return _42SH_VERSION; }
-char *get_shell_name(void) { return _42SH_SHELL; }
-char *get_basename(void) { return __basename(ttyname(shell(SHELL_GET)->shell_terminal)); }
-char *get_job_number(void) { return gc(GC_ADD, ft_itoa(g_jobList->size), GC_SUBSHELL); }
-char *get_uid(void) { return (getuid() == 0) ? "#" : "$"; }
-char *get_escape_sequence(void) { return "\033"; }
+static char *get_date_letter(void) { return get_date_format("%a %b %d"); }
+static char *get_time_24hour_secondless(void) { return get_date_format("%H:%M"); }
+static char *get_time_12hour_ampm(void) { return get_date_format("%I:%M %p"); }
+static char *get_time_24hour(void) { return get_date_format("%H:%M:%S"); }
+static char *get_time_12hour(void) { return get_date_format("%I:%M:%S"); }
+static char *get_cr(void) { return "\r"; }
+static char *get_newline(void) { return "\n"; }
+static char *get_backslash(void) { return "\\"; }
+static char *get_version(void) { return _42SH_VERSION; }
+static char *get_shell_name(void) { return _42SH_SHELL; }
+static char *get_basename(void) { return __basename(ttyname(shell(SHELL_GET)->shell_terminal)); }
+static char *get_job_number(void) { return gc(GC_ADD, ft_itoa(g_jobList->size), GC_SUBSHELL); }
+static char *get_uid(void) { return (getuid() == 0) ? "#" : "$"; }
+// static char *get_escape_sequence(void) { return "\033"; }
 
 //TODO: p'tit crack
 char *get_command_number(void) { return "1"; } //history file command number 
@@ -170,6 +170,7 @@ char *expand_prompt_special(const char *ps) {
 		['w'] = get_full_pwd, ['W'] = get_pwd_basename,
 		['!'] = get_history_number, ['#'] = get_command_number,
 		['$'] = get_uid, ['\\'] = get_backslash,
+		['l'] = get_basename,
 	};
 
 	//missing \D{format} | \e | \[...\]

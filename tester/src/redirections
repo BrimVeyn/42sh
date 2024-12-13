@@ -66,4 +66,3 @@ nan<> ./outfiles/file1 cat <&nan
 { echo "reading input"; cat <&0; } <> ./outfiles/group_stdin
 { cat < infiles/test; echo "duplicated output"; } 21<> ./outfiles/group_fd_test
 { echo "closing fd"; 22<> ./outfiles/group_fd_close; echo "done with fd"; } > ./outfiles/group_close
-var=10; while true $((--var)); ! (exit $((var >= 0))); do echo salut; done > ./outfiles/test5

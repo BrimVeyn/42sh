@@ -106,7 +106,7 @@ start_tests ()
 			rm -rf ./outfiles/*
 			rm -rf ./42sh_outfiles/*
 
-			EXEC_OUTPUT=$(echo -e "$line" | $EXEC_PATH 2>./42sh_error/e)
+			EXEC_OUTPUT=$(/usr/bin/echo -e "$line" | $EXEC_PATH 2>./42sh_error/e)
 			EXEC_EXITNO=${?}
 			EXEC_OUTPUT=${EXEC_OUTPUT:-"None"}
 			EXEC_ERROR=$(sed 's/.*://' ./42sh_error/e || echo "null")
@@ -115,11 +115,11 @@ start_tests ()
 			rm -rf ./outfiles/*
 			rm -rf ./bash_outfiles/*
 
-			BASH_OUTPUT=$(echo -e "$line" | bash 2>./bash_error/e)
+			BASH_OUTPUT=$(/usr/bin/echo -e "$line" | bash 2>./bash_error/e)
+			BASH_EXITNO=${?}
 			BASH_OUTPUT=${BASH_OUTPUT:-"None"}
 			BASH_COPY=$(cp ./outfiles/* ./bash_outfiles &>/dev/null || echo "There is no file to copy")
 			EXEC_ERROR=$(sed 's/.*://' ./bash_error/e || echo "null")
-			BASH_EXITNO=$(echo ${?})
 
 			FILE_DIFF=$(diff -q ./42sh_outfiles ./bash_outfiles)
 

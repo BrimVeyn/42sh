@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/13 10:41:54 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/13 11:29:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,14 +67,12 @@ char *ft_strsed(char * src, const char *occ, const char *rep) {
 		int match = ft_strstr(ptr, occ);
 		if (match != -1) {
 			if ((len + match + rep_len) > MAX_WORD_LEN)
-				return "1";
+				return NULL;
 			ft_memcpy(buffer + len, ptr, match);
 			len += match;
 			ft_memcpy(buffer + len, rep, rep_len);
-			dprintf(2, "buffer:|%s|\n", buffer);
 			len += rep_len;
 			ptr += (match + occ_len);
-			dprintf(2, "len: %zu\n", match + occ_len);
 		} else {
 			break;
 		}
@@ -82,7 +80,7 @@ char *ft_strsed(char * src, const char *occ, const char *rep) {
 	if (ptr != NULL) {
 		size_t left_len = ft_strlen(ptr);
 		if ((len + left_len) > MAX_WORD_LEN) 
-			return "2";
+			return NULL;
 		ft_memcpy(buffer + len, ptr, left_len);
 	}
 	return ft_strdup(buffer);
