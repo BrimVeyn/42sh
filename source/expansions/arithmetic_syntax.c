@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/27 11:18:31 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:46:29 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/13 16:16:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "arithmetic.h"
 #include "parser.h"
+#include "utils.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -52,34 +53,41 @@ bool arithmetic_syntax_check(ATokenStack *list) {
 
 		if (next && !is_aoperator(current) && !is_aoperator(next)) {
 			ARITHMETIC_SYNTAX_ERROR("a number");
+			g_exitno = 1;
 			return false;
 		}
 		if (prev && is_lparen(current) && (!is_lparen(prev) && !is_aoperator(prev))) {
 			ARITHMETIC_SYNTAX_ERROR("(");
+			g_exitno = 1;
 			return false;
 		}
 		if (next && is_rparen(current) && (!is_rparen(next) && !is_aoperator(next))) {
 			ARITHMETIC_SYNTAX_ERROR(")");
+			g_exitno = 1;
 			return false;
 		}
 		if (is_incr_or_decr(current)) {
 			if (!((prev && !is_aoperator(prev)) || (next && !is_aoperator(next)))) {
 				ft_dprintf(2, OPERAND_EXPECTED"\n");
+				g_exitno = 1;
 				return false;
 			}
 		}
 		if (is_lparen(current) && is_rparen(next)) {
 			ft_dprintf(2, OPERAND_EXPECTED"\n");
+			g_exitno = 1;
 			return false;
 		}
 		if (is_abinary_op(current)) {
 			if (!next || !prev || (is_aoperator(prev) && is_abinary_op(prev)) || (is_aoperator(next) && is_abinary_op(next))) {
 				ft_dprintf(2, OPERAND_EXPECTED"\n");
+				g_exitno = 1;
 				return false;
 			}  
 		}
 		if (nextnext && is_incr_or_decr(current) && !is_aoperator(next) && is_incr_or_decr(nextnext)) {
 			ft_dprintf(2, ASSIGNMENT_REQUIRES_LVALUE"++\")\n");
+			g_exitno = 1;
 			return false;
 		}
 		if (is_incr_or_decr(current)) {
@@ -96,6 +104,7 @@ bool arithmetic_syntax_check(ATokenStack *list) {
 			ARITHMETIC_UNCLOSED_PAREN(")");
 		if (parenthesis < 0)
 			ARITHMETIC_UNCLOSED_PAREN("(");
+		g_exitno = 2;
 		return false;
 	}
 	return true;

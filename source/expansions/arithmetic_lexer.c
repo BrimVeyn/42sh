@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 11:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:48:04 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/13 16:15:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,7 @@ AToken *lexer_get_next_atoken(Lexer * l) {
 			if (self->operator == O_ERROR) {
 				char buffer[2] = {l->ch, 0};
 				ARITHMETIC_SYNTAX_ERROR(buffer);
+				g_exitno = 1;
 				return NULL;
 			}
 			break;
@@ -115,6 +116,7 @@ AToken *lexer_get_next_atoken(Lexer * l) {
 			if (!fill_operand(self, l)) {
 				char buffer[2] = {l->ch, 0};
 				ARITHMETIC_SYNTAX_ERROR(buffer);
+				g_exitno = 1;
 				return NULL;
 			}
 			break;

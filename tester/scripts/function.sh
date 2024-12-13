@@ -65,8 +65,8 @@ print_all_args "arg1" "arg2" "arg3"
 global_var="I am global"
 scope_test () {
   local_var="I am local"
-  echo "${global_var}"
-  echo "${local_var}"
+  echo "G: ${global_var}"
+  echo "L: ${local_var}"
 }
 scope_test
 echo "${global_var}"
@@ -89,7 +89,32 @@ _valid_function_name
 valid_func () { echo "This is valid."; }
 valid_func () { echo "Redefined func."; }
 valid_func
-# valid-func () { echo "This should fail."; } # Not POSIX compliant
-# # Edge case: Empty function body
-# empty () { ; }
-# empty
+
+# Define a simple function that uses return
+simple_return_test() {
+    return 42
+}
+
+simple_return_test; echo ${?}
+
+# Test return value propagation
+propagation_test() {
+    return 5
+    echo "This should not be printed"
+}
+propagation_test; echo ${?}
+
+# Nested function calls with return
+nested_return_test() {
+    inner_function() {
+        return 99
+    }
+    inner_function
+    echo "Inner function returned ${?}" # Capture inner function's return value
+    return 88
+}
+nested_return_test; echo ${?}
+
+# Test invalid return outside a function
+return 
+echo ${?}

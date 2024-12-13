@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:17:58 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 11:55:30 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/13 16:09:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ void pretty_error(const Lex *const lexer, char *raw_token) {
 	ft_sprintf(buffer, C_BOLD C_BRIGHT_RED"^"C_RESET"\n");
 	ft_dprintf(STDERR_FILENO, buffer);
 	FREE_POINTERS(line);
-	g_exitno = 1;
+	g_exitno = 2;
 }
 
 void fatal(const char * const msg, const int line, const char *filename, const int exit_code) {

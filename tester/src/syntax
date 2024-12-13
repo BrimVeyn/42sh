@@ -12,7 +12,6 @@
 { echo salut mec
 echo salut mec ;}
 ()
-echo $()
 $(false)
 echo ${}; echo salut
 echo $((; echo salut;

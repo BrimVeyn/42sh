@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:42:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 13:39:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/13 14:49:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,15 +141,17 @@ static int execute_if_clause(const CommandP * const command, const bool backgrou
 	size_t i = 0;
 	for (; i < if_clause->conditions->size; i++) {
 		ListP * const condition = if_clause->conditions->data[i];
-		if (execute_complete_command(wrap_list(condition), shell_vars, background) == -1) {
+		int ret = execute_complete_command(wrap_list(condition), shell_vars, background);
+		if (ret != 0) {
 			if (SAVE_FD) restore_std_fds(saved_fds);
-			return ERR;
+			return ret;
 		}
 		if (g_exitno == 0) {
 			ListP * const body = if_clause->bodies->data[i];
-			if (execute_complete_command(wrap_list(body), shell_vars, background) == ERR) {
+			int ret = execute_complete_command(wrap_list(body), shell_vars, background);
+			if (ret != 0) {
 				if (SAVE_FD) restore_std_fds(saved_fds);
-				return ERR;
+				return ret;
 			}
 			if (SAVE_FD) restore_std_fds(saved_fds);
 			return 0;
@@ -385,12 +387,17 @@ static int execute_function(const CommandP * const command, const int funcNo, co
 
 	clear_positional(shell_vars->positional);
 	declare_positional(positional_parameters, shell_vars);
-	if (execute_brace_group(function_copy->function_body, background, shell_vars, flag) == ERR) {
-		return ERR;
-	}
-	string_list_clear(shell_vars->positional);
 
-	shell_vars->positional = saved_positionals;
+	g_functionCtx += 1; //add one nest
+	if (execute_brace_group(function_copy->function_body, background, shell_vars, flag) == ERR)
+		return ERR;
+	g_functionCtx -= 1; //remove one nest
+	
+	if ((g_functionCtx & E_RETURN) > 0) g_functionCtx ^= E_RETURN; //if return was called, reset its calling id
+
+	string_list_clear(shell_vars->positional); //restore positionals
+	shell_vars->positional = saved_positionals; // --       --
+
 	return 0;
 }
 
@@ -501,6 +508,9 @@ static int execute_single_command(AndOrP * const job, const bool background, Var
 
 				execute_builtin(command->simple_command, shell_vars);
 				string_list_clear(shell_vars->local);
+				if ((g_functionCtx & E_RETURN) > 0) {
+					return E_RETURN;
+				}
 
 				if (hasRedir) { restore_std_fds(saved_fds); close_saved_fds(saved_fds); }
 				return NO_WAIT;
@@ -535,12 +545,12 @@ static int execute_single_command(AndOrP * const job, const bool background, Var
 			}
 			return WAIT;
 		}
-		case Brace_Group: { if (execute_brace_group(process->command, background, shell_vars, O_NOFORK) == ERR) {return ERR;} return NO_WAIT; }
-		case If_Clause: { if (execute_if_clause(process->command, background, shell_vars, O_NOFORK) == ERR) {return ERR;} return NO_WAIT; }
-		case While_Clause: { if (execute_while_clause(process->command, background, shell_vars, O_NOFORK) == ERR) {return ERR;} return NO_WAIT; }
-		case Until_Clause: { if (execute_until_clause(process->command, background, shell_vars, O_NOFORK) == ERR) {return ERR;} return NO_WAIT; }
-		case Case_Clause: { if (execute_case_clause(process->command, background, shell_vars, O_NOFORK) == ERR) {return ERR;} return NO_WAIT; }
-		case For_Clause: { if (execute_for_clause(process->command, background, shell_vars, O_NOFORK) == ERR) {return ERR;} return NO_WAIT; }
+		case Brace_Group: { return execute_brace_group(process->command, background, shell_vars, O_NOFORK); }
+		case If_Clause: { return execute_if_clause(process->command, background, shell_vars, O_NOFORK); }
+		case While_Clause: { return execute_while_clause(process->command, background, shell_vars, O_NOFORK); }
+		case Until_Clause: { return execute_until_clause(process->command, background, shell_vars, O_NOFORK); }
+		case Case_Clause: { return execute_case_clause(process->command, background, shell_vars, O_NOFORK); }
+		case For_Clause: { return execute_for_clause(process->command, background, shell_vars, O_NOFORK); }
 		case Function_Definition: { register_function(process->command); return NO_WAIT; }
 		default: { break; };
 	}
@@ -638,8 +648,8 @@ static int execute_pipeline(AndOrP * const job, const bool background, Vars * co
 	return WAIT;
 }
 
-static void set_exit_number(const PipeLineP * const pipeline) {
-	const PipeLineP * head = pipeline;
+static void set_exit_number(const PipeLineP * const pipeline, const bool banged) {
+	const PipeLineP* head = pipeline;
 	while (head->next) {
 		head = head->next;
 	}
@@ -648,6 +658,11 @@ static void set_exit_number(const PipeLineP * const pipeline) {
 		g_exitno = WEXITSTATUS(status);
 	} else if (WIFSIGNALED(status)) {
 		g_exitno = 128 + WTERMSIG(status);
+	}
+
+	if (banged) {
+		if		(g_exitno == 0) g_exitno = 1;
+		else if (g_exitno != 0) g_exitno = 0;
 	}
 }
 
@@ -666,6 +681,8 @@ static int execute_list(const ListP * const list, const bool background, Vars * 
 				_fatal("tcgetattr: failed", 1);
 		}
 
+		if (wait_status == E_RETURN) return wait_status;
+
 		if (wait_status == WAIT) {
 			if (!shell_infos->interactive) {
 				job_wait(andor_head);
@@ -674,12 +691,7 @@ static int execute_list(const ListP * const list, const bool background, Vars * 
 			} else if (background) {
 				put_job_background(andor_head);
 			}
-			set_exit_number(andor_head->pipeline);
-		}
-
-		if (andor_head->pipeline->banged) {
-			if		(g_exitno == 0) g_exitno = 1;
-			else if (g_exitno != 0) g_exitno = 0;
+			set_exit_number(andor_head->pipeline, andor_head->pipeline->banged);
 		}
 
 		if (andor_head->sig == SIGINT)
@@ -720,8 +732,9 @@ int execute_complete_command(const CompleteCommandP * const complete_command, Va
 			g_masterPgid = shell_infos->shell_pgid;
 		}
 
-		if (execute_list(list_head, background, shell_vars) == ERR)
-			return ERR;
+		int ret = execute_list(list_head, background, shell_vars);
+		if (ret != 0)
+			return ret;
 
 		list_head = list_head->next;
 	}

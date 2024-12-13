@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:56 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 16:21:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/13 13:16:12 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,17 +19,31 @@
 #include <termios.h>
 #include <stdbool.h>
 
+//DA of fds to keep precisely keep track of fds in forks
 extern IntList *g_fdSet;
+
+//Needed for the return keyword to exit from a function at anytime
+extern int g_functionCtx;
+
+#define NO_WAIT 0x0
+#define WAIT	0x1
+#define IS_CHILD(pid) ((pid == 0) ? true : false)
+
+typedef enum {
+	E_RETURN = (1 << 9),
+	E_BREAK = (1 << 10),
+	E_CONTINUE = (1 << 11),
+} BuiltinExitStatus;
 
 //--------------Shell Infos------------------//
 typedef enum { SHELL_INIT, SHELL_GET } shell_interface_mode;
 
 typedef struct ShellInfos {
+	struct termios shell_tmodes;
+	int		shell_terminal;
+	pid_t	shell_pgid;
 	bool		interactive;
 	bool		script;
-	pid_t	shell_pgid;
-	int		shell_terminal;
-	struct termios shell_tmodes;
 } ShellInfos;
 
 ShellInfos *shell(int mode);
@@ -51,7 +65,7 @@ int		*save_std_fds();
 bool	secure_dup2(const int from, const int to);
 bool	is_builtin(const char *bin);
 char	*find_bin_location(char *bin, StringListL *env, bool *absolute);
-bool redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars);
+bool	redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars);
 
 char	*sigStr(const int sig);
 //-------------------------------------------------------------//
@@ -84,20 +98,21 @@ char *job_print(AndOrP * const andor, const bool newline);
 void add_vars_to_local(StringListL * const list, const StringListL * const vars);
 void add_vars_to_set(const Vars * const shell_vars, const StringListL * const vars);
 
-void builtin_hash(const SimpleCommandP *command, Vars * const shell_vars);
-void builtin_set(const SimpleCommandP *command, Vars * const shell_vars);
-void builtin_env(const SimpleCommandP *command, Vars * const shell_vars);
-void builtin_echo(const SimpleCommandP *command, Vars * const shell_vars);
-void builtin_exit(const SimpleCommandP *command, Vars * const shell_vars);
-void builtin_export(const SimpleCommandP *command, Vars * const shell_vars);
-void builtin_type(const SimpleCommandP *command, Vars * const shell_vars);
-void builtin_pwd(const SimpleCommandP *command, Vars * const shell_vars);
-void builtin_cd (const SimpleCommandP *command, Vars * const shell_vars);
-void builtin_unset (const SimpleCommandP *command, Vars * const shell_vars);
-void builtin_jobs (const SimpleCommandP *command, Vars * const shell_vars);
-void builtin_fg (const SimpleCommandP *command, Vars * const shell_vars);
-void builtin_bg (const SimpleCommandP *command, Vars * const shell_vars);
-void builtin_fc (const SimpleCommandP *command, Vars * const shell_vars);
+void builtin_hash(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_set(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_env(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_echo(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_exit(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_export(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_type(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_pwd(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_cd(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_unset(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_jobs(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_fg(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_bg(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_fc(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_return(const SimpleCommandP *command, Vars *const shell_vars);
 //---------------------------------------------------------------------//
 
 

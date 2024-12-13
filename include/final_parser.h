@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:50:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/13 12:58:27 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,8 @@
 #include <sys/types.h>
 #include <termios.h>
 
-#define NO_WAIT 0x0
-#define WAIT	0x1
+#define UNUSED __attribute__((unused))
 #define ERR   -1
-#define IS_CHILD(pid) ((pid == 0) ? true : false)
 
 extern pid_t g_masterPgid;
 

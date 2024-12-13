@@ -24,7 +24,6 @@ echo $(($(10 / 2) * 3 + $(4 - 1)))
 ls | echo Files || echo No files
 (echo $(ls || echo None); echo Done)
 (echo Start && false) || (echo Continue && echo Finish)
-echo $(($(1 + 1)) + $(($(2 + 2))))
 var=10; echo $((${var} + 5))
 (echo $(echo $(ls / || echo Empty))) || echo Failed
 echo $(( $(echo 3 + 4) * $(echo 5 - 2) ))

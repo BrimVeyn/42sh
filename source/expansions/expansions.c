@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 11:32:36 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/13 11:18:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -440,6 +440,20 @@ char *remove_quotes(char *word) {
 	return list->data[0]->str;
 }
 
+StringListL *do_expansions_word(char *word, int *error, Vars *const shell_vars, const int options) {
+	StrList * const string_list = get_range_list(word, shell_vars, options, error);
+	if (*error != 0) return NULL;
+
+	string_list_consume(string_list, shell_vars, error);
+	if (*error != 0) return NULL;
+
+	if (options & O_SPLIT)
+		string_list_split(string_list, shell_vars);
+	string_erase_nulls(string_list);
+	quote_removal(string_list);
+	return string_list_merge(string_list);
+}
+
 ExpReturn do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options) {
 	ExpReturn ret_value = { .ret = NULL, .error = 0 };
 
@@ -448,18 +462,10 @@ ExpReturn do_expansions(const StringListL * const word_list, Vars * const shell_
 	da_create(arg_list, StringListL, sizeof(char *), GC_SUBSHELL);
 
 	for (size_t it = 0; it < word_list->size; it++) {
-		StrList * const string_list = get_range_list(word_list->data[it], shell_vars, options, &ret_value.error);
-		if (ret_value.error != 0) return ret_value;
-
-		string_list_consume(string_list, shell_vars, &ret_value.error);
-		if (ret_value.error != 0) return ret_value;
-
-		if (options & O_SPLIT)
-			string_list_split(string_list, shell_vars);
-		string_erase_nulls(string_list);
-		quote_removal(string_list);
-		StringListL * const result = string_list_merge(string_list);
-		string_list_push_list(arg_list, result);
+		StringListL *const ret = do_expansions_word(word_list->data[it], &ret_value.error, shell_vars, options);
+		if (ret_value.error != 0)
+			return ret_value;
+		string_list_push_list(arg_list, ret);
 	}
 	ret_value.ret = arg_list;	
 	return ret_value;

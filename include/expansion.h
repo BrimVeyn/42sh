@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 14:13:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/12 10:37:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/13 11:18:27 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,7 @@ typedef struct {
 	int error;
 } ExpReturn;
 
+StringListL *do_expansions_word(char *word, int *error, Vars *const shell_vars, const int options);
 ExpReturn do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options);
 char	*remove_quotes(char *word);
 

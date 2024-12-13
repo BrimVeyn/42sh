@@ -6,22 +6,19 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 12:20:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 11:26:31 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/13 11:50:56 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <limits.h>
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "exec.h"
-#include "libft.h"
 #include "ft_regex.h"
 #include "utils.h"
 
-
-void builtin_echo(const SimpleCommandP *command, __attribute__((unused)) Vars * const shell_vars) {
+void builtin_echo(const SimpleCommandP *command, UNUSED Vars *const shell_vars) {
 	char buffer[MAX_WORD_LEN] = {0};
 	bool newline = true;
 	size_t i = 1;
@@ -41,7 +38,7 @@ void builtin_echo(const SimpleCommandP *command, __attribute__((unused)) Vars * 
 	if (newline)
 		buffer_size = ft_sprintf(buffer, "\n");
 	if (write(STDOUT_FILENO, buffer, buffer_size) == -1){
-		error("42sh: echo: write error: No space left on device", 1);
+		return error("42sh: echo: write error", 1);
 	}
 	g_exitno = 0;
 }

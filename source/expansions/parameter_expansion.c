@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 11:15:39 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/13 16:05:39 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 #include "expansion.h"
 
 #include <stdio.h>
+
+//FIX: no error when ${var:?var} ????
 
 char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 	// printf("id: %s\nword: %s\nmetachar: %s\n", id, word, metachar);
@@ -183,7 +185,7 @@ char *parser_parameter_expansion(char * full_exp, Vars *const shell_vars, int *c
 		expansion_result = ret.ret;
 		const char *final_rhs = *expansion_result->data;
 		char buffer[MAX_WORD_LEN] = {0};
-		const char *final_lhs = ft_substr(full_exp, 0, rhs - full_exp);
+		const char *final_lhs = gc(GC_ADD, ft_substr(full_exp, 0, rhs - full_exp), GC_SUBSHELL);
 		ft_snprintf(buffer, MAX_WORD_LEN, "%s%s}", final_lhs, final_rhs);
 		full_exp = gc(GC_ADD, ft_strdup(buffer), GC_SUBSHELL);
 	}
@@ -196,8 +198,7 @@ char *parser_parameter_expansion(char * full_exp, Vars *const shell_vars, int *c
 		value = get_variable_value(shell_vars, tmp);
 		free(tmp);
 		if (!value){
-			value = ft_strdup("");
-			gc(GC_ADD, value, GC_SUBSHELL);
+			value = gc(GC_ADD, ft_strdup(""), GC_SUBSHELL);
 		}
 	}
 	else if ((result = regex_match("\\$\\{\\?\\}", full_exp)).is_found){
