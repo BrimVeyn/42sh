@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 10:13:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/12 17:35:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/13 10:51:09 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,9 +89,17 @@ char *get_full_pwd(void) {
     if (!pw)
 		return "";
 
+
 	char *pwd = getcwd(NULL, 0);
 	if (!pwd)
 		return "";
+
+	int match = ft_strstr(pwd, pw->pw_dir);
+	if (match != -1) {
+		char *ret = ft_strsed(pwd, pw->pw_dir, "~");
+		free(pwd);
+		return gc(GC_ADD, ret, GC_SUBSHELL);
+    }
 
 	return gc(GC_ADD, pwd, GC_SUBSHELL);
 }
@@ -142,7 +150,7 @@ char *get_version(void) { return _42SH_VERSION; }
 char *get_shell_name(void) { return _42SH_SHELL; }
 char *get_basename(void) { return __basename(ttyname(shell(SHELL_GET)->shell_terminal)); }
 char *get_job_number(void) { return gc(GC_ADD, ft_itoa(g_jobList->size), GC_SUBSHELL); }
-char *get_uid(void) { return gc(GC_ADD, ft_itoa(getuid()), GC_SUBSHELL); }
+char *get_uid(void) { return (getuid() == 0) ? "#" : "$"; }
 char *get_escape_sequence(void) { return "\033"; }
 
 //TODO: p'tit crack
@@ -177,9 +185,10 @@ char *expand_prompt_special(const char *ps) {
 				if (regex_match("\\D{.*}", (char *)ps).is_found) {
 					ps += 3; // \ + D + {
 					const char *const fend = ft_strchr(ps, '}');
-					const char *const format = ft_substr(ps, 0, fend - ps);
+					char *const format = ft_substr(ps, 0, fend - ps);
 					ps = fend; // }|...
 					ss_push_string(ss, get_date_format(format));
+					free(format);
 				}
 			} else if (*(ps + 1) == '[') {
 				ps += 2; // \ + [;
@@ -191,6 +200,8 @@ char *expand_prompt_special(const char *ps) {
 				// dprintf(2, "res: %s\n", res);
 				ss_push_string(ss, res);
 				ps += (fend + 1);
+				free(sequence);
+				free(res);
 			}
 		} else { da_push(ss, *ps); }
 		ps++;
