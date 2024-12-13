@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 16:17:39 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/12 17:11:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/13 10:41:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ char *ft_strsed(char * src, const char *occ, const char *rep) {
 			return "2";
 		ft_memcpy(buffer + len, ptr, left_len);
 	}
-	return gc(GC_ADD, ft_strdup(buffer), GC_SUBSHELL);
+	return ft_strdup(buffer);
 }
 
 int ft_strstr(const char *const haystack, const char *const needle) {
