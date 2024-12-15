@@ -1,0 +1,1 @@
+echo $(ls /etc && ls /nonexistentdir || echo Dir not found)

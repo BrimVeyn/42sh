@@ -1,0 +1,1 @@
+(cat < ./infiles/test) <> ./outfiles/nested_complex2

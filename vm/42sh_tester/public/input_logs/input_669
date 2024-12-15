@@ -1,0 +1,1 @@
+MY_PATH=~/bin:~/scripts:~nbardavi:/etc; echo ${MY_PATH}

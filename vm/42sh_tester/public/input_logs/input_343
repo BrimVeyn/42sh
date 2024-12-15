@@ -1,0 +1,1 @@
+(cat | rev || echo failed to reverse) < ../Makefile > ./outfiles/test14

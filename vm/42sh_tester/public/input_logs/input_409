@@ -1,0 +1,1 @@
+echo $(ls | (echo first:$(head -n 1) && echo last:$(tail -n 1)))file list complete

@@ -1,0 +1,1 @@
+{ echo scriptStart ; { echo scriptStep1 ; { echo scriptStep2 && echo scriptStep3 ; } ; echo scriptEnd ; } && echo success ; } || echo scriptFail

@@ -1,0 +1,1 @@
+(echo salut mec && (echo inside nested shell && echo another line)) > ./outfiles/test2

@@ -1,0 +1,3 @@
+42sh:1:22: [1m[91merror[0m: syntax error near unexpected token: [1m[37m'}'[0m
+  1  |  echo { echo nested ; } && { echo check ;}
+     |                       [1m[91m^[0m

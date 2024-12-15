@@ -1,0 +1,1 @@
+{ { echo commandA ; } && { { echo commandB && echo commandC ; } ; echo commandD ; } ; } && echo done

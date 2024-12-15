@@ -1,0 +1,1 @@
+(echo salut mec | (echo mec salut | rev) || echo fallback) > ./outfiles/test20

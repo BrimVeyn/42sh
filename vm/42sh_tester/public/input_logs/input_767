@@ -1,0 +1,1 @@
+(echo $(ls / || echo Empty)) && echo Done

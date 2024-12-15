@@ -1,0 +1,1 @@
+(cat && (echo inside nested && echo still going) | rev) < ./infiles/file1 > ./outfiles/test18

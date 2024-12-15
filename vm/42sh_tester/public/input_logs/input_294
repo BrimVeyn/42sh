@@ -1,0 +1,1 @@
+((echo ComplexA || (echo ComplexB && echo ComplexC)) && echo ComplexEnd | (false && echo FailStep || echo SuccessStep))

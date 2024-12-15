@@ -1,0 +1,1 @@
+((echo Check && true) && echo Passed || echo Failed)

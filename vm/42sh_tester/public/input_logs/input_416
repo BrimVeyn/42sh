@@ -1,0 +1,1 @@
+echo $(echo $(echo $(mkdir testdir && echo created && (rmdir testdir && echo removed))))status

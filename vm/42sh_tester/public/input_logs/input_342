@@ -1,0 +1,1 @@
+(echo salut mec | (echo nested inside | rev && echo other output || echo alternate)) > ./outfiles/test13

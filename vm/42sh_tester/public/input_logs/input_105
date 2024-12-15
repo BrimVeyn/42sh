@@ -1,0 +1,1 @@
+echo ${:VAR:=default_value}

@@ -1,0 +1,1 @@
+echo nesting:$(echo $(echo $(echo inner level reached)))done

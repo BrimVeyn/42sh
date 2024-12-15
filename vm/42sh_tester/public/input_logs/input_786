@@ -1,0 +1,1 @@
+(echo $(echo $(ls / || echo None))) || echo Failed

@@ -1,0 +1,1 @@
+(echo $(ls / || echo Not there)) && echo Done

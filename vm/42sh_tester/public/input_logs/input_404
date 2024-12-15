@@ -1,0 +1,1 @@
+echo $(mkdir dirtest && echo Directory made && (rmdir dirtest && echo Directory removed))complete

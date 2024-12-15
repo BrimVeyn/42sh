@@ -1,0 +1,1 @@
+$(cd /nonexistent | echo Changed dir || echo Failed to change dir; echo Command complete)

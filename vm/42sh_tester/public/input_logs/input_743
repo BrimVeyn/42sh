@@ -1,0 +1,1 @@
+(echo One || (echo Two && echo Three)) && echo Four

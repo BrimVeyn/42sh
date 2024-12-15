@@ -1,0 +1,1 @@
+echo result:$(echo $(ls /usr | (grep bin && echo binaries found)))

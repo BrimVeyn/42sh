@@ -1,0 +1,1 @@
+(echo hello world | rev || echo failure) > ./outfiles/test11

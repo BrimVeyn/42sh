@@ -1,0 +1,1 @@
+echo $(echo Start && echo $(ls / || echo NotFound))
