@@ -1,0 +1,1 @@
+(cd /tmp && mkdir -p dir1 && ln -s dir1 link_to_dir1 && cd -P ./link_to_dir1 && pwd)

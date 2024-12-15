@@ -1,0 +1,1 @@
+(false || (echo Subshell ran && echo hey)) && echo This wont print

@@ -1,0 +1,1 @@
+((echo OuterStart && (echo MidOne | false || echo MidTwo)) || (echo OuterEnd && echo FinalCheck))

@@ -1,0 +1,1 @@
+(echo Start && ((echo InnerOne | echo InnerTwo) && false || echo Fallback) && echo End)

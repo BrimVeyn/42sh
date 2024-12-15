@@ -1,0 +1,1 @@
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##}

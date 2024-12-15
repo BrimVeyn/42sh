@@ -1,0 +1,1 @@
+(false || echo This ran because the first command failed)

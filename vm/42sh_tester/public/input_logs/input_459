@@ -1,0 +1,1 @@
+{ { echo redirectionTest ; echo moreTest ; } > ./outfiles/testRedirect && cat ./outfiles/testRedirect ; } && echo complete

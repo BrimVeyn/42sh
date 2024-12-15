@@ -1,0 +1,1 @@
+(cat; (echo inside nested shell)) < ../Makefile > ./outfiles/test9

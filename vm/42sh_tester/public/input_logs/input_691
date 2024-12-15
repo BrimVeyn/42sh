@@ -1,0 +1,1 @@
+(cd /tmp && ln -s /home link_to_home && cd -L ./link_to_home && pwd)

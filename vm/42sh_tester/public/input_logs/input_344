@@ -1,0 +1,1 @@
+(echo running first && echo next command || echo won’t run | rev && echo done) > ./outfiles/test15

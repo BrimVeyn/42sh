@@ -1,0 +1,1 @@
+echo $(echo Start; echo $(echo $(ls /etc | grep conf) | wc -l) && echo Finish)

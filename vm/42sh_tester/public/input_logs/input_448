@@ -1,0 +1,1 @@
+{ { echo redirecting ; echo toFile ; } > ./outfiles/testoutput ; } | ls && cat ./outfiles/testoutput

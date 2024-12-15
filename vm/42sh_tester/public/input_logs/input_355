@@ -1,0 +1,1 @@
+echo $(echo start; ls | grep .c; echo done)

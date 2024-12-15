@@ -1,0 +1,1 @@
+{ echo salut; echo mec ;} | ls; echo salut && echo cava

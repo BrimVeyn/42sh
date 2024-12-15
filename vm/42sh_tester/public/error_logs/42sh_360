@@ -1,0 +1,2 @@
+42sh: cd: /nonexistent: such file or directory
+Changed: command not found

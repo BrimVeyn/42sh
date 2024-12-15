@@ -1,0 +1,1 @@
+/usr/bin/bash: line 1: (1 + 2) + 3 * : syntax error: operand expected (error token is "* ")

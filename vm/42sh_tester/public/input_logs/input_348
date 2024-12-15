@@ -1,0 +1,1 @@
+(echo salut mec && (echo mec salut | rev) && echo success) > ./outfiles/test19

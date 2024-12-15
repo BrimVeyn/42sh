@@ -1,0 +1,1 @@
+echo dir test:$(echo $(mkdir newdir && echo dir created && (rmdir newdir && echo dir removed)))complete

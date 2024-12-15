@@ -1,0 +1,1 @@
+((echo Outer && (echo Inner || echo Fallback)) || echo Outer fallback)

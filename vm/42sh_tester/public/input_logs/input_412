@@ -1,0 +1,1 @@
+echo directories:$(echo $(echo $(ls / | (grep home && echo home found))))

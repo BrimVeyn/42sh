@@ -1,0 +1,3 @@
+42sh:1:58: [1m[91merror[0m: unexpected end of file
+  1  |  echo $(echo "$(echo "$(echo $(echo "$(echo nested)")")")")
+     |                                                           [1m[91m^[0m

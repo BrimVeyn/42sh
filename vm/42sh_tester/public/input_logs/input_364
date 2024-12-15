@@ -1,0 +1,1 @@
+echo $(echo $(ls | wc -l) | cat - $(echo Done))

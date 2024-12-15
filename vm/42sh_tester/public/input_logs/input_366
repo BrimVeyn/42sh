@@ -1,0 +1,1 @@
+echo $(echo Pipe test && ls /usr | grep bin | wc -l)

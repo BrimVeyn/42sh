@@ -1,0 +1,1 @@
+{ echo chain1 && echo chain2 ; } && { echo chain3 ; }

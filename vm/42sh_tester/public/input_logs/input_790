@@ -1,0 +1,1 @@
+(echo $(echo First && echo Second)) || echo End

@@ -1,0 +1,1 @@
+(echo $(ls nonexistent || echo Empty)) && echo All done

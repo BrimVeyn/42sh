@@ -1,0 +1,1 @@
+echo $(ls | grep txt && echo Text files found || echo No text files)

@@ -1,0 +1,1 @@
+echo file check:$(echo $(ls /etc | (grep conf && echo configuration files)))done

@@ -1,0 +1,1 @@
+{ { echo start1; echo start2; } && { echo blockA && echo blockB ; } ; } && { echo final ; }

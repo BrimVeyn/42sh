@@ -1,0 +1,1 @@
+false || true && echo correct || echo wrong

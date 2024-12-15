@@ -1,0 +1,3 @@
+/usr/bin/bash: line 1: 10: command not found
+/usr/bin/bash: line 1: 4: command not found
+/usr/bin/bash: line 1: * 3 + : syntax error: operand expected (error token is "* 3 + ")

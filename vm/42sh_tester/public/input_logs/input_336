@@ -1,0 +1,1 @@
+(echo starting process || echo this won’t run; ls; echo background complete) > ./outfiles/test7

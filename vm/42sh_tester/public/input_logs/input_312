@@ -1,0 +1,1 @@
+((false && echo FailOne || echo PassOne) && (echo PassTwo || (echo PassThree | echo PassFour)) && echo FinalCheck)
