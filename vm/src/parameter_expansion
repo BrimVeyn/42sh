@@ -1,0 +1,51 @@
+echo ${}
+echo ${VAR:-}
+echo ${VAR:}
+echo ${:VAR}
+echo ${DEFINED_VAR:-${NESTED_VARIABLE:-}
+echo ${:VAR:=default_value}
+echo ${VAR:-${NESTED_VAR}
+echo ${VARS#:salut};
+echo ${:-VAR}
+echo ${PATH}
+echo ${8PATH}
+echo ${PATH${salut}}
+echo ${?}
+echo ${PATH}d1${PATH}d2${PATH}
+echo ${UNDEFINED:-default_value} | rev
+echo ${PATH:-/default/path}
+echo ${UNDEFINED:-NoValue} | cat
+echo ${HOME:-/home/unknown}
+echo ${PATH:-/tmp} | rev
+echo ${HOME:=salut}; echo ${HOME}
+echo ${UNDEFINED:=salut}; echo ${UNDEFINED}
+echo ${HOME:?salut}; echo ${HOME}
+echo ${UNDEFINED:? variable is not set or has no value}; echo ${UNDEFINED}
+echo ${EMPTY:-default_value}
+echo ${DEFINED_VARIABLE:-fallback_value}
+echo ${UNSET_VARIABLE:=assigned_value}; echo ${UNSET_VARIABLE}
+echo ${MISSING_VARIABLE:?variable is not set or has no value}
+echo ${DEFINED_VAR:?variable is not set or has no value}
+echo ${DEFINED_VAR:-${NESTED_VARIABLE:-fallback}}
+echo ${UNDEFINED_VAR:=new_default}; echo ${UNDEFINED_VAR}
+echo ${NUMBER:-123}
+echo ${UNDEFINED_NUMBER:-999} | rev
+echo ${VARIABLE_WITH_SPACE:-default_value}
+echo ${UNDEFINED_VAR:-Empty_Value} | cat
+echo ${HOME_VAR:-/default/home}
+echo ${UNDEFINED_VAR:=temporary}; echo ${UNDEFINED_VAR}
+echo ${HOME_SET:?Home is not set}; echo ${HOME_SET}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##/home}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%/home}
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%/home}
+echo ${#PATH}
+echo ${PATH:}
+echo ${#PATH:-DSADAS}
+echo ${#DFPASDAS}
+echo ${#}
+var=1; var+='salut mec'; var+="salope"; var+='hey'; echo ${var}

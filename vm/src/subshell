@@ -1,0 +1,129 @@
+(echo Hello World)
+(echo Hello; echo World)
+(echo Start; (echo Nested; echo Subshell); echo End)
+(echo This && echo That)
+(false || echo This ran because the first command failed)
+(echo First && false || echo Fallback)
+(echo This will run && echo And then this)
+(false && echo Wont run || echo But this will)
+((echo Outer && (echo Inner || echo Fallback)) || echo Outer fallback)
+(echo Start && false || echo Continue; echo End)
+(echo Outer && (false || echo Inner) && echo Final)
+(false && (echo Wont run && echo Neither will this) || echo This will run)
+((echo A && echo B) || (echo C && echo D) && echo E)
+(echo Start && false || (echo Intermediate && echo End))
+(false || (echo Subshell ran && echo hey)) && echo This wont print
+((echo Check && true) && echo Passed || echo Failed)
+(echo A && (echo B && echo C) || (echo D && echo E))
+(false && (echo F && echo G) || (echo H && echo I) && (false || echo J))
+(echo Start && (false || (echo Mid && (echo End || false))))
+(echo A; (echo B && false) || (echo C && echo D); echo E)
+(false && (echo A && echo B) || (false || echo C && (echo D && echo E)))
+((echo A && (echo B || echo C)) || echo D; (echo E && false || echo F))
+(echo A && (false || (echo B && echo C) && echo D) || echo E)
+((false || (echo A && echo B) || (false && echo C)) && echo D)
+(echo A || (echo B && (false || echo C)) && echo D; echo E)
+((echo A && false) || (false && echo B) || (echo C && (echo D || echo E)))
+(echo A && (echo B; echo C && echo D || (false && echo E)); echo F)
+((false && echo A) || (echo B && echo C) && (echo D || false) && echo E)
+(echo A && echo B || (echo C && echo D) && (false || echo E))
+(echo A; (false || (echo B && false || echo C)); echo D)
+((echo A && (echo B || echo C)) && (false || echo D); echo E)
+(false || (echo A && (echo B && false || echo C)) && echo D)
+(echo A && echo B || (false && echo C) && (echo D && false) || echo E)
+((false || echo A) && echo B || (echo C && echo D); echo E)
+(echo A && false) || echo B
+(echo A | echo B)
+(echo First | (echo Second && echo Third) || echo Fourth)
+((echo PipeTest | echo TestSuccess) && echo Done || echo Failed)
+(echo Start && echo Proceed || echo Fallback | echo End)
+(echo A && (echo B | echo C) && echo D)
+((false || (echo PipeOne | echo PipeTwo)) && echo Continue)
+(echo First; echo Second | echo Third; echo Fourth)
+((false && echo FailOne) || (echo PassOne | echo PassTwo))
+(echo A && (echo B && (echo C | echo D)) || echo E)
+(echo Init && (false || echo Mid | echo End))
+(echo A | (echo B && (false || echo C)) && echo D)
+(echo A || (echo B && echo C) | (echo D || echo E); echo F)
+((echo A | echo B) || (false && echo Fail) || echo Continue)
+(echo Start | echo Mid && echo Next || (echo Fallback | echo Final))
+((echo StepOne && false) || (echo StepTwo | echo StepThree))
+(false || echo A | (echo B && echo C) || echo D)
+(echo Outer && (false || (echo InnerOne | echo InnerTwo)) && echo Final)
+(echo First; (echo Second | (echo Third && echo Fourth)); echo Last)
+(echo A && (echo B || echo C) && echo D | echo E)
+(echo First | false || (echo Second && echo Third))
+((false || (echo A | echo B)) && (echo C && echo D) || echo F)
+(echo A && echo B | (false && echo Fail || echo Success))
+((false || echo A | echo B) && (echo C || echo D) && echo E)
+(echo A || (echo B && false | echo C) && echo D)
+(echo A | (false || echo B) && echo C && echo D)
+((echo Init && false) || (echo Mid | (echo End && echo Done)))
+(false && (echo X | echo Y) || echo Z | echo Final)
+(echo TestOne | (false || echo TestTwo) && echo TestThree)
+(echo A; (false || echo B | echo C) && echo D)
+(echo A && (false || echo B) && echo C | echo D)
+(echo A | (echo B && false) || echo C && echo D)
+(echo X && (false || (echo Y && echo Z | echo W)))
+((echo A && echo B) || (echo C | (echo D && echo E)) && echo F)
+(echo Start && ((echo InnerOne | echo InnerTwo) && false || echo Fallback) && echo End)
+(((echo A | echo B) && (false || (echo C && echo D))) || echo E; echo FinalStep)
+(echo First | (false || (echo Second && (echo Third || echo Fourth))) && echo End)
+((echo OuterStart && (echo MidOne | false || echo MidTwo)) || (echo OuterEnd && echo FinalCheck))
+(echo TestOne && (false || (echo TestTwo | echo TestThree)) && (echo PassOne || echo FailOne) && echo Result)
+((echo ComplexA || (echo ComplexB && echo ComplexC)) && echo ComplexEnd | (false && echo FailStep || echo SuccessStep))
+(echo StartOne && echo StartTwo || ((echo PipeOne && false) || echo PipeTwo | echo PipeThree) && echo FinalTest)
+((echo Alpha | (false || echo Beta && echo Gamma)) && (echo Delta || echo Epsilon) && (echo FinalOne || echo FinalTwo))
+(((echo DeepA | echo DeepB) && echo DeepC) || (false || (echo DeepD && echo DeepE | echo DeepF)))
+(echo ChainOne && echo ChainTwo | (echo ChainThree && (false || echo ChainFour)) && echo ChainFinal)
+(echo A | (echo B && (false || (echo C | echo D) && echo E)) || (echo F && false) || echo G)
+((echo OuterLayer && (echo MidLayer || (echo InnerLayerOne | false && echo InnerLayerTwo))) && echo CompleteTest)
+(echo PreStep && (false || (echo MidStep | echo NextStep && echo FinalStep)) || echo AltStep)
+(((echo BaseOne | (false && echo BaseTwo) || echo BaseThree) && echo BaseFour) || (echo LastOne && echo LastTwo))
+((echo A || (false && (echo B | echo C)) && (echo D || echo E)) && echo F | echo G)
+(echo StartLevelOne && ((false || echo MidLevelTwo) && (echo FinalLevelThree | echo AltLevelFour)) || echo LastLevelFive)
+((echo Begin && echo Process) || (false && echo Error) || (echo Recover && echo Continue) | echo WrapUp)
+(((false || echo X && echo Y) | echo Z) && echo EndOne || echo EndTwo)
+((echo StepOne && false || echo StepTwo) && (echo StepThree || echo StepFour | (false && echo StepFive)) && echo StepFinal)
+(echo Init && (false || (echo ProcessOne && (echo ProcessTwo || echo ProcessThree)) || echo FallbackProcess))
+((echo AlphaStep | echo BetaStep) && (false || echo GammaStep && echo DeltaStep) || echo EpsilonStep)
+((false || echo EarlyExit) && echo MidProcess || (echo LateProcess && echo FinalOutcome))
+(echo OuterStart | (false && (echo InnerFail && echo InnerCheck)) || echo OuterSuccess && echo FinalCheck)
+((false && echo FailOne || echo PassOne) && (echo PassTwo || (echo PassThree | echo PassFour)) && echo FinalCheck)
+(((echo TestOne || false) && echo TestTwo) || (echo TestThree && (echo TestFour | echo TestFive)) && echo Result)
+(echo BeginSequence && (false || (echo SubStepOne && echo SubStepTwo || echo SubStepThree)) && echo FinalStep)
+((false && echo SkipOne || echo RunOne) && (echo RunTwo && (false || echo RunThree | echo RunFour)) && echo CompleteRun)
+((echo StartPath && (false || echo MidPathOne && echo MidPathTwo)) || (echo FailPath && echo AltPath) && echo EndPath)
+(echo FirstLayer | (false || (echo SecondLayer && echo ThirdLayer) && (echo FourthLayer || false) | echo FifthLayer))
+((echo EntryOne && false || echo EntryTwo) && (echo EntryThree || (echo EntryFour | false && echo EntryFive)) && echo EndEntry)
+(echo salut; ls) | echo hey
+((echo EntryOne && false | echo EntryTwo) | (echo EntryThree || (echo EntryFour | false && echo EntryFive)) && echo EndEntry)
+(echo salut mec; echo hey !) >./outfiles/test
+(echo salut mec; (echo inside nested shell; echo another line)) > ./outfiles/test2
+(echo $(echo inside substitution); echo outside) > ./outfiles/test3
+(echo salut mec; echo error >&2; echo finished) > ./outfiles/test4 2>&1
+(echo salut mec; (echo nested output | rev); echo finished) > ./outfiles/test5
+(echo first level; (echo second level; (echo third level))) > ./outfiles/test6
+(echo starting process; echo background complete) > ./outfiles/test7
+(echo salut mec | rev; echo other output) > ./outfiles/test8
+(cat; (echo inside nested shell)) < ../Makefile > ./outfiles/test9
+(echo salut mec || echo fallback; echo hey !) > ./outfiles/test1
+(echo salut mec && (echo inside nested shell && echo another line)) > ./outfiles/test2
+(echo $(echo inside substitution) | rev; echo outside) > ./outfiles/test3
+(echo salut mec || echo fallback; echo error >&2; echo finished) > ./outfiles/test4 2>&1
+(echo salut mec; (echo nested output | rev) | grep tuptuo; echo finished) > ./outfiles/test5
+(echo first level && (echo second level || (echo third level))) > ./outfiles/test6
+(echo starting process || echo this won’t run; ls; echo background complete) > ./outfiles/test7
+(echo salut mec | rev && echo other output) > ./outfiles/test8
+(cat && (echo inside nested shell && echo all done)) < ../Makefile > ./outfiles/test9
+(echo first output && (echo nested | rev) | grep detsen) > ./outfiles/test10
+(echo hello world | rev || echo failure) > ./outfiles/test11
+(echo outer shell && (echo nested shell | rev || echo fallback | tr a-z A-Z)) > ./outfiles/test12
+(echo salut mec | (echo nested inside | rev && echo other output || echo alternate)) > ./outfiles/test13
+(cat | rev || echo failed to reverse) < ../Makefile > ./outfiles/test14
+(echo running first && echo next command || echo won’t run | rev && echo done) > ./outfiles/test15
+(echo first command || (echo second command | rev) || echo fallback) > ./outfiles/test16
+(echo process start && ls || echo process failed; echo done) > ./outfiles/test17
+(cat && (echo inside nested && echo still going) | rev) < ./infiles/file1 > ./outfiles/test18
+(echo salut mec && (echo mec salut | rev) && echo success) > ./outfiles/test19
+(echo salut mec | (echo mec salut | rev) || echo fallback) > ./outfiles/test20
