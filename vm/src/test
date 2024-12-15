@@ -1,0 +1,12 @@
+echo Hello World
+ls | ls | ls
+ls > ./outfiles/ls
+4<../Makefile cat 5<&4 <&5 | rev | sort | >./outfiles/test >./outfiles/test >./outfiles/test >./outfiles/test2 cat
+echo 0 ; echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
+echo 1 | (echo 2 && echo 3) | echo 4 && echo 5
+echo 1 | (echo 2 && echo 3) | echo 4
+echo 1; echo 2 | echo 3
+(echo 1 && echo 2 && echo 3 || echo 4) | djeidj
+(cat ../Makefile | rev | sort | rev) && notfound 2>/dev/null || echo Yes
+10<../Makefile cat <&10 >./outfiles/test | rev && (echo salut);
+echo A || echo B; echo A || echo B

@@ -1,0 +1,133 @@
+echo $(($(($(echo 2 + 2)))))
+echo $(( $(echo 2 + 3) + $(echo 4 / 2) ))
+var1=5; var2=10; echo $((${var1} + ${var2} - 3))
+var=1; echo $((var + 1)); echo $((var++)); echo $((++var))
+echo $(echo $(echo $(echo $(echo nesting))))
+(echo Level1 && (echo Level2 || (echo Level3 && echo Level4))) || echo Final
+ls && echo success || echo failure
+false || true && echo correct || echo wrong
+echo $(echo $(echo $(echo A) && echo B || echo C))
+(echo Outer && echo $(echo Inner1 && echo Inner2)) || echo Fail
+echo $(($(echo 5 + 2) + $(echo 4 - 1))) && echo $((10 % 3))
+echo $(echo Start && echo $(ls / || echo NotFound))
+echo $(($(($(($(($(echo 1 + 1))))))))
+(echo $(echo $(echo $(echo Hello))))
+var1=3; var2=5; var3=7; echo $((${var1} * ${var2} + ${var3}))
+(echo $(($(1 + 2 * 3)))
+var=5; echo $((var * 2)); echo $((var + 3))
+(echo $(echo A && echo B) && echo C) || echo Fail
+echo $(($(1 + 1) + $(2 + 2)))
+echo $(echo Test && (echo Success || echo Failure))
+false && true || echo Correct
+(echo A || (echo B && echo C)) && echo Done
+echo $(($(10 / 2) * 3 + $(4 - 1)))
+ls | echo Files || echo No files
+(echo $(ls || echo None); echo Done)
+(echo Start && false) || (echo Continue && echo Finish)
+var=10; echo $((${var} + 5))
+(echo $(echo $(ls / || echo Empty))) || echo Failed
+echo $(( $(echo 3 + 4) * $(echo 5 - 2) ))
+echo $(echo $(echo Inside))
+(echo Begin && false) || echo End
+echo $(echo First && echo $(echo Second))
+var=8; echo $((var / 2)); echo $((${var} - 3))
+echo $(echo Outer && $(echo Inner))
+echo $(($(($(($(echo 1 + 1)))))))
+(echo One || (echo Two && echo Three)) && echo Four
+var1=2; var2=3; echo $((${var1} * ${var2} + 1))
+(echo A && echo B) || echo C
+echo $(echo Nesting $(echo Inside))
+echo $(echo Start && (echo Continue || echo Stop))
+var=3; echo $((${var} + $((${var} * 2))))
+(echo $(echo One) && echo Two) || echo Three
+echo $(($(5 * 2 + 1)))
+echo $(($(echo $(1 + 2)) * 3))
+echo $(echo $(echo $(echo $(echo Nested))))
+(echo $(echo Start && echo Continue)) || echo Done
+(echo $(ls || echo Not found)) && echo Success
+echo $(($(($(echo 1 + 2) + 3))))
+echo $((var=7; var * 2))
+(echo Outer || (echo Inner && echo Deep)) && echo Final
+(echo Level1 && (echo Level2 || echo Level3)) || echo End
+echo $(($(echo $(echo 2 + 3)) * 4))
+false || (echo $(echo $(echo Success)))
+var=2; echo $((${var} * 3 + 4))
+(echo $(echo $(echo A && B)) || echo C)
+(echo $(echo One && echo Two)) || echo Fail
+echo $(($(5 + 2) * $(echo 3)))
+echo $(($(1 + 2 + 3) * 4))
+(echo $(echo Nested && echo Inside)) || echo End
+(echo $(ls / || echo Empty)) && echo Done
+echo $(($(10 - 3) * $(echo 4 + 2)))
+echo $(echo Start $(echo End))
+(echo Outer && (false || echo Inner)) || echo Fallback
+var1=4; var2=5; echo $((${var1} + ${var2} * 2))
+echo $(($(3 + 5) * $(2 + 3)))
+(echo $(echo A && echo B)) || echo Fail
+echo $(echo $(echo Test Success))
+echo $(($(5 + $(2 * 3))))
+(echo $(echo $(echo Level1 && Level2))) || echo End
+echo $(($(5 * 3 + 2)))
+(echo $(ls / || echo Not found)) || echo Failed
+echo $(($(2 * $(3 + 4))))
+(echo $(echo One && echo Two)) && echo Three
+var1=7; var2=2; echo $((${var1} / ${var2}))
+(echo $(echo $(echo Nested Inside))) || echo End
+echo $(($(1 + 2 * 3)))
+(echo $(echo Outer && $(echo Inner))) || echo Fail
+echo $(($(10 / 2 + $(5 * 2))))
+(echo $(echo $(ls / || echo None))) || echo Failed
+var=6; echo $((var + 4)); echo $((var * 2))
+(echo $(echo $(echo Inside Nested))) || echo Finish
+echo $(($(5 + 3 * 2)))
+(echo $(echo First && echo Second)) || echo End
+(echo $(ls / || echo Not there)) && echo Done
+echo $(($(10 / 2 + $(4 * 3))))
+(echo $(echo $(echo $(echo A B)))) || echo Fail
+echo $(($(($(echo 3 + 2) * 4))))
+(echo $(ls / || echo Missing)) || echo End
+echo $(($(3 * 2 + 1)))
+(echo $(echo Outer && $(echo Inner))) || echo Error
+echo $(($(1 + 3 * 2)))
+(echo $(echo One $(echo Two))) || echo Failed
+echo $(($(echo 5 * $(2 + 3))))
+echo $(($(1 + 2 * 4)))
+(echo $(echo First && Second)) || echo End
+echo $(($(4 + 2 * 3)))
+echo $(echo $(ls / || echo Empty))
+(echo $(echo $(echo One && Two))) || echo Finished
+echo $(($(3 * $(2 + 4))))
+(echo $(ls || echo Missing)) && echo Done
+echo $(($(5 + $(2 * 3))))
+(echo $(echo One $(echo Two))) || echo Fail
+var=9; echo $((var + 1)); echo $((var * 2))echo Level1 && (false || echo Level2)) && (false || echo Final)
+echo $(($(($(($(echo 3 + 3)))))))
+echo $(( $(echo 4 + 4) * $(echo 2 + 2) ))
+varA=7; varB=14; echo $((${varA} / 2 + ${varB} / 7))
+var=3; echo $((var * 3)); echo $((var++)); echo $((++var))
+echo $(echo $(echo $(echo Deep $(echo Nesting))))
+(echo Stage1 || (echo Stage2 && echo Stage3)) && echo Finish
+(echo Outer1 && echo $(echo Inner1 || echo Inner2)) || echo Error
+echo $(($(echo 8 - 2) * $(echo 4 / 2)))
+echo $(echo First && echo $(ls invalid_dir || echo NotFound))
+echo $(($(echo 1 + 1) + $(($(echo 2 + 2)))))
+(echo $(echo $(echo Final nested test)))
+varX=9; varY=2; echo $((${varX} * ${varY} + 1))
+(echo $(($(2 + 2 * 5))))
+var=6; echo $((var + 3)); echo $((var--)); echo $((var))
+(echo $(echo Task1 && echo Task2) && echo Task3) || echo Failure
+echo $(($(3 + 5) * $(7 - 2)))
+false || (echo True path) && echo Finalize
+(echo $(ls nonexistent || echo Empty)) && echo All done
+(echo Begin && false) || echo Done with process
+echo $(($(2 * 2) + $(5 / 1)))
+var=8; echo $((${var} + 10))
+(echo $(ls invalid_dir || echo Empty again)) || echo All failed
+echo $(( $(echo 7 + 3) * $(echo 2 + 2) ))
+echo $(echo Multi-level $(echo Nesting test))
+(echo Success path && false) || echo End state
+echo $(($(echo 5 + 3 + 2) + $(echo 4 - 1)))
+(echo Success || (echo Failure && echo Recovery)) && echo Complete
+var=4; echo $((${var} + ${var} * 3))
+(echo $(echo $(echo All tasks passed))) || echo Errors found
+echo $(($(echo 3 + 7) + $(echo 1 + 4)))

@@ -1,0 +1,67 @@
+echo $(ls)
+echo $(echo Hello)
+echo $(echo First command; echo Second command)
+echo $(ls && echo Listing succeeded || echo Listing failed)
+echo Files in directory | cat - $(ls)
+echo $(echo start; ls | grep .c; echo done)
+echo $(mkdir test_dir && echo Directory created || echo Directory creation failed)
+echo $(rm non_existent_file || echo File not found)
+echo $(echo $(echo nested; ls) | echo Finished)
+echo $(echo $(echo salut; echo prout) | echo salut)
+$(cd /nonexistent | echo Changed dir || echo Failed to change dir; echo Command complete)
+echo $(echo salut; echo salut) | ls
+echo $(ls /etc | head -n 5)
+echo $(uname -a && echo Kernel info)
+echo $(echo $(ls | wc -l) | cat - $(echo Done))
+echo $(ls /etc && ls /nonexistentdir || echo Dir not found)
+echo $(echo Pipe test && ls /usr | grep bin | wc -l)
+echo $(cat /dev/null && echo Empty file || echo Fallback)
+echo $(mkdir newdir && ls && rmdir newdir && echo Dir test complete)
+echo $(find /usr -maxdepth 1 -type d | xargs ls | grep bin && echo Dir listing done)
+echo $(seq 1 10 | xargs -I {} echo {} | wc -l && echo Xargs done)
+echo $(ls /etc | grep conf | wc -l)
+echo $(find /etc | grep conf | head -n 3)
+echo $(echo Test done; echo $(ls /usr | head -n 5))
+echo $(false && echo Fail || echo Success)
+echo $(ls /bin | grep bash && echo Found bash || echo Not found)
+echo $(echo Begin test; ls /etc | grep conf | wc -l)
+echo $(ls | grep txt && echo Text files found || echo No text files)
+echo $(echo Start; echo $(echo $(ls /etc | grep conf) | wc -l) && echo Finish)
+echo $(mkdir tempdir && echo Dir created; rmdir tempdir && echo Dir removed)
+echo prefix$(echo salut)suffix
+echo count:$(ls | wc -l)files
+echo first file:$(ls | head -n 1)
+echo kernel:$(uname -r)version
+echo path:$(echo /usr/bin | grep bin)found
+echo current user:$(whoami)
+echo check:$(echo $(ls /etc | grep conf)config files)
+echo listing:$(echo $(ls /usr/home | grep sh))done
+echo last command:$(echo $(ls /etc | wc -l))files found
+echo $(echo $(echo $(uname)))suffix
+echo status:$(ls /etc | grep $(whoami) | wc -l)processes running
+echo result:$(mkdir testdir && echo created || echo failed)directory
+echo result:$(echo $(ls /usr | grep lib))libraries found
+echo FirstPrefix$(echo salut)FirstSuffix$(echo salut)EndSuffix
+echo $(echo FirstPrefix$(echo $(echo hey))FirstSuffix$(echo salut)EndSuffix)
+echo $(echo $(mkdir tempdir && echo Dir created && (rmdir tempdir && echo Dir removed)))
+echo prefix$(echo $(echo inside subshell))suffix
+echo files:$(ls | (wc -l))listed
+echo first file:$(ls | (head -n 1))found
+echo $(echo $(echo $(ls | wc -l)) files in current directory)
+echo username:$(whoami | (echo $(grep -o .)))
+echo current dir:$(pwd | (echo $(ls $(pwd) | grep $(basename $(pwd)))))
+echo file check:$(echo $(ls /etc | (grep conf && echo configuration files)))done
+echo full check:$(echo $(echo prefix$(uname)postfix))suffix
+echo $(mkdir dirtest && echo Directory made && (rmdir dirtest && echo Directory removed))complete
+echo result:$(echo $(ls /usr | (grep bin && echo binaries found)))
+echo nesting:$(echo $(echo $(echo inner level reached)))done
+echo dir test:$(echo $(mkdir newdir && echo dir created && (rmdir newdir && echo dir removed)))complete
+echo process count:$(ps aux | (grep $(whoami) | head -n 10 && echo $(ps aux | wc -l)))processes running
+echo $(ls | (echo first:$(head -n 1) && echo last:$(tail -n 1)))file list complete
+echo result:$(echo $(echo kernel:$(uname -r)))system details
+echo test case:$(echo $(echo $(mkdir $(echo tempdir) && echo dir created && (rmdir tempdir && echo dir removed))))nested
+echo directories:$(echo $(echo $(ls / | (grep home && echo home found))))
+echo deep nesting:$(echo $(echo $(echo $(echo $(uname)))))suffix
+echo match count:$(echo $(ls /usr | (grep bin && echo found))items located)
+echo path validation:$(echo $(echo $(echo $(echo /usr/bin | (grep usr))))valid)
+echo $(echo $(echo $(mkdir testdir && echo created && (rmdir testdir && echo removed))))status
