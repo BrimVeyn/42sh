@@ -1,0 +1,28 @@
+.resumeContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  width: 70vw; /* Adjust width */
+  height: 20vh; /* Adjust height */
+  overflow: auto;
+  background-color: #f9f9f9;
+}
+
+.resumeButton {
+  margin: 5px;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.resumeButton:hover {
+  background-color: #e0e0e0;
+}
