@@ -1,5 +1,4 @@
 import React, {useState} from 'react'
-import "./Resume.css"
 import UnitTest from './UnitTest'
 
 function Resume({ tests }) {
@@ -10,12 +9,13 @@ function Resume({ tests }) {
 		setShownIndex((prevIndex) => (prevIndex === index ? null : index));
 	}
 
+	console.log('Shown', shownIndex, tests[shownIndex]);
 	return (
 		<>
-			<div className="resumeContainer">
+			<div className="w-3/4 text-center resumeContainer">
 				{tests.map((test, index) => (
 					<button 
-						className="resumeButton" 
+						className="rounded border-2 border-green-700 p-1 m-1 resumeButton" 
 						key={index} 
 						onClick={() => toggleTest(index)}
 					>
@@ -23,7 +23,7 @@ function Resume({ tests }) {
 					</button>
 				))}
 			</div>
-			{shownIndex && (
+			{shownIndex !== null && (
 				<UnitTest unit={tests[shownIndex]} />
 			)}
 		</>
