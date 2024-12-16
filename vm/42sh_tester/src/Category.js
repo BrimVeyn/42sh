@@ -1,29 +1,15 @@
 import React, {useState} from 'react';
 import UnitTest from './UnitTest';
 import Resume from './Resume';
-import "./Category.css"
 
-function Category({name, tests}) {
-
-	const [showResume, setShowResume] = useState(false);
-
-	const toggleTests = () => {
-		setShowResume((prev) => !prev);
-	};
-
+function Category({ name, inject }) {
 	return (
 		<>
-			<div className="category">
-				<p>{name}</p>
-				<button className="categoryToggle" onClick={toggleTests}>
-					{showResume ? 'Hide' : 'Show'}
+			<div className="text-center border-2 border-zinc-300 py-3 category">
+				<button onClick={inject}>
+					<a>{name}</a>
 				</button>
 			</div>
-
-			{showResume && (
-				<Resume tests={tests} />
-			)}
-
 		</>
 	);
 }

@@ -123,15 +123,27 @@ start_tests ()
 				#output formatted json test recap
 				echo ${line} 1>input_logs/input_${testId}
 
-				echo -e "\t\t\t\t{";
-				echo -e "\t\t\t\t\t\"id\": \"${testId}\",";
-				echo -e "\t\t\t\t\t\"input\": \"input_logs/input_${testId}\",";
-				echo -e "\t\t\t\t\t\"42sh_output\": \"output_logs/42sh_${testId}\",";
-				echo -e "\t\t\t\t\t\"bash_output\": \"output_logs/bash_${testId}\",";
-				echo -e "\t\t\t\t\t\"42sh_error\": \"error_logs/42sh_${testId}\",";
-				echo -e "\t\t\t\t\t\"bash_error\": \"error_logs/bash_${testId}\",";
-				echo -e "\t\t\t\t\t\"42sh_exit_code\": \"${SH42_EXITNO}\",";
-				echo -e "\t\t\t\t\t\"bash_exit_code\": \"${BASH_EXITNO}\"";
+				echo -ne "\t\t\t\t{\n" \
+				"\t\t\t\t\t\"id\": \"${testId}\",\n" \
+				"\t\t\t\t\t\"input\": \"input_logs/input_${testId}\",\n" \
+				"\t\t\t\t\t\"42sh_output\": \"output_logs/42sh_${testId}\",\n" \
+				"\t\t\t\t\t\"bash_output\": \"output_logs/bash_${testId}\",\n" \
+				"\t\t\t\t\t\"42sh_error\": \"error_logs/42sh_${testId}\",\n" \
+				"\t\t\t\t\t\"bash_error\": \"error_logs/bash_${testId}\",\n" \
+				"\t\t\t\t\t\"42sh_exit_code\": \"${SH42_EXITNO}\",\n" \
+				"\t\t\t\t\t\"bash_exit_code\": \"${BASH_EXITNO}\",\n"
+
+				if [[ "$(cat output_logs/bash_${testId})" = "$(cat output_logs/42sh_${testId})" ]]; then
+					echo -e "\t\t\t\t\t\"output_ok\": \"true\","
+				else
+					echo -e "\t\t\t\t\t\"output_ok\": \"false\","
+				fi
+
+				if [[ "$(cat error_logs/bash_${testId})" = "$(cat error_logs/42sh_${testId})" ]]; then
+					echo -e "\t\t\t\t\t\"error_ok\": \"true\""
+				else
+					echo -e "\t\t\t\t\t\"error_ok\": \"false\""
+				fi
 
 				echo -ne "\t\t\t\t}";
 
