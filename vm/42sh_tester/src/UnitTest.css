@@ -1,0 +1,12 @@
+.buttonsContainer {
+	display:flex; 
+	justify-content: center;
+	align-items: center;
+	margin: 0px;
+}
+
+.buttonsContainer > button {
+	height: 50px;
+	background-color: #d1d1d1;
+	margin: 0px 10px 0px 10px;
+}
