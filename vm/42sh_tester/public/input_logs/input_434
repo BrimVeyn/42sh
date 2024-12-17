@@ -1,1 +1,1 @@
-{ echo block1 ; echo block2 ; echo block3 ; } && echo complete
+echo ${UNDEFINED:-NoValue} | cat

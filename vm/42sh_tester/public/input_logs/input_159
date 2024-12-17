@@ -1,1 +1,1 @@
-var=$(echo echo); ${var} salut
+21<> ./outfiles/complex_test (cat <&21 | echo "piped output") >> ./outfiles/final_test

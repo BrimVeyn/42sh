@@ -1,1 +1,1 @@
-echo '$(echo "$(echo "$(echo nested)")")'
+(echo Start && false || (echo Intermediate && echo End))

@@ -1,1 +1,1 @@
-{ echo chain1 && echo chain2 ; } && { echo chain3 ; }
+echo ${UNDEFINED:-default_value} | rev

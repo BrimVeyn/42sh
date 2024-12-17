@@ -1,1 +1,1 @@
-echo kernel:$(uname -r)version
+echo first file:$(ls | head -n 1)

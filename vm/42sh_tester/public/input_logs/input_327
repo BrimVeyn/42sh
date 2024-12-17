@@ -1,1 +1,1 @@
-(echo starting process; echo background complete) > ./outfiles/test7
+{ { echo pre1 && { echo pre2 || echo altPre ;} ; } && echo main ;} && echo final

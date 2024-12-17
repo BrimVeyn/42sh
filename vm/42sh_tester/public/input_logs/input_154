@@ -1,1 +1,1 @@
-echo "$(echo salut)"
+"22"<> ./outfiles/file1 cat <&"22"

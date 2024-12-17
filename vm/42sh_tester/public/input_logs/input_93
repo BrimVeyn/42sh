@@ -1,1 +1,1 @@
-echo salut mec ;}
+'$(echo $(echo $(echo "$(echo nested)")))' "$(echo $(echo nested))"

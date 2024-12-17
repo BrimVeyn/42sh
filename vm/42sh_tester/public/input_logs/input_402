@@ -1,1 +1,1 @@
-echo file check:$(echo $(ls /etc | (grep conf && echo configuration files)))done
+echo current dir:$(pwd | (echo $(ls $(pwd) | grep $(basename $(pwd)))))

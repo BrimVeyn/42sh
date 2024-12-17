@@ -1,1 +1,1 @@
-{ echo multi-level ; { echo level2 ; { echo level3 && echo level4 ; } ; echo end ; } ; } || echo fail
+echo ${UNSET_VARIABLE:=assigned_value}; echo ${UNSET_VARIABLE}

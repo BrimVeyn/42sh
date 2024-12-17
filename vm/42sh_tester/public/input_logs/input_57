@@ -1,1 +1,1 @@
-24<> ./outfiles/no_write cat <&24
+echo '"double quotes"'

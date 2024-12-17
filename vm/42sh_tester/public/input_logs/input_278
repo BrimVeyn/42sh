@@ -1,1 +1,1 @@
-((false || echo A | echo B) && (echo C || echo D) && echo E)
+(cat; (echo inside nested shell)) < ../Makefile > ./outfiles/test9

@@ -1,1 +1,1 @@
-var="$(echo "$(echo "$(echo "$(echo nested)")")")"; echo "${var}"
+(echo Start && echo Proceed || echo Fallback | echo End)

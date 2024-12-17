@@ -1,1 +1,1 @@
-{ echo first ; echo second ; } | tee ./outfiles/test1
+echo ${8PATH}

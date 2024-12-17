@@ -1,1 +1,1 @@
-echo "hello world"
+(echo This && echo That)

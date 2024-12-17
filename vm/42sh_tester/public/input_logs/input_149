@@ -1,1 +1,1 @@
-echo ${#}
+27<> ./outfiles cat <&27

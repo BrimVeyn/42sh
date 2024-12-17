@@ -1,1 +1,1 @@
-$(false)
+echo ""'$(echo '$(echo '$(echo "$(echo nested)")')')'""

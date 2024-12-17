@@ -1,1 +1,1 @@
-echo $(echo Start; echo $(echo $(ls /etc | grep conf) | wc -l) && echo Finish)
+echo $(ls | grep txt && echo Text files found || echo No text files)

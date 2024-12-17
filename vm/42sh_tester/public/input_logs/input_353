@@ -1,1 +1,1 @@
-echo $(ls && echo Listing succeeded || echo Listing failed)
+echo $(echo First command; echo Second command)

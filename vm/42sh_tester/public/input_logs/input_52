@@ -1,1 +1,1 @@
-cat <> ./outfiles/non_existing
+""""""""echo salut

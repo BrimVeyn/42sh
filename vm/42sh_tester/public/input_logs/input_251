@@ -1,1 +1,1 @@
-((echo A && (echo B || echo C)) && (false || echo D); echo E)
+(((echo BaseOne | (false && echo BaseTwo) || echo BaseThree) && echo BaseFour) || (echo LastOne && echo LastTwo))

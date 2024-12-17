@@ -1,1 +1,1 @@
-echo ${PATH:-/tmp} | rev
+echo test3 > ./outfiles/no_perms

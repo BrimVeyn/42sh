@@ -1,1 +1,1 @@
-echo $(mkdir test_dir && echo Directory created || echo Directory creation failed)
+echo $(echo start; ls | grep .c; echo done)

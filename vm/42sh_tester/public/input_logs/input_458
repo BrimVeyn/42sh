@@ -1,1 +1,1 @@
-{ echo check1 && { echo check2 ; { echo check3 || echo altCheck3 ; } ; } || echo fallback ; } && echo finalCheck
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%}

@@ -1,1 +1,1 @@
-(echo salut mec | rev; echo other output) > ./outfiles/test8
+{ { { echo doubleNested ; } && echo outer ; } || echo altOuter ; } && echo finish

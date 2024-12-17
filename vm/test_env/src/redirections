@@ -58,7 +58,7 @@ nan<> ./outfiles/file1 cat <&nan
 21<> ./outfiles/complex_test (cat <&21 | echo "piped output") >> ./outfiles/final_test
 21< infiles/test | 22<&21 echo "output" > ./outfiles/test_fd_combination
 (cat < ./infiles/test) <> ./outfiles/nested_complex2
-10<>infiles/test cat <&10 >1
+10<>infiles/test cat <&10 >&1
 { echo "start"; cat < infiles/test; echo "end"; } > ./outfiles/group_output
 { echo "write and append"; echo "new line" >> ./outfiles/group_append; } <> ./outfiles/group_combined
 { echo "nested redirection" >&2; cat < infiles/test; } > ./outfiles/group_nested_redirect

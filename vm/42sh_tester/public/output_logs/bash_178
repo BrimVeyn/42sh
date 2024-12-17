@@ -1,1 +1,2 @@
-$(echo "nested double quotes")
+Outer
+Inner

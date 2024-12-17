@@ -1,1 +1,1 @@
-(cat | rev || echo failed to reverse) < ../Makefile > ./outfiles/test14
+{ { { echo one && echo two ; } | { echo three && echo four ; } ; } || echo fallback1 ; } && echo sequenceComplete

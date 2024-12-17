@@ -1,1 +1,1 @@
-var='salope '; echo "${var}"
+(echo Start; (echo Nested; echo Subshell); echo End)

@@ -1,1 +1,1 @@
-echo ${HOME:-/home/unknown}
+echo test2 > ./outfiles/file1

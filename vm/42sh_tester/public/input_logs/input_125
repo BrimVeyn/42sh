@@ -1,1 +1,1 @@
-echo ${UNSET_VARIABLE:=assigned_value}; echo ${UNSET_VARIABLE}
+echo test3>> ./outfiles/no_write

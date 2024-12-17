@@ -1,1 +1,1 @@
-echo ""'$(echo '$(echo '$(echo "$(echo nested)")')')'""
+(echo Init && (false || echo Mid | echo End))

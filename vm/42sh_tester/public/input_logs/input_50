@@ -1,1 +1,1 @@
-cat <> ./outfiles/no_write
+echo "$(echo '"')"

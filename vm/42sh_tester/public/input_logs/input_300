@@ -1,1 +1,1 @@
-((echo OuterLayer && (echo MidLayer || (echo InnerLayerOne | false && echo InnerLayerTwo))) && echo CompleteTest)
+{ echo salut; } >./outfiles/test

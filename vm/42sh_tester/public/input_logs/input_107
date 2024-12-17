@@ -1,1 +1,1 @@
-echo ${VARS#:salut};
+cat < infiles

@@ -1,1 +1,1 @@
-echo ${EMPTY:-default_value}
+echo test3 >> ./outfiles/file2

@@ -1,1 +1,1 @@
-echo '$(echo hello)'""$(echo world)""
+((false || (echo A && echo B) || (false && echo C)) && echo D)

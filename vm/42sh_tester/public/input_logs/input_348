@@ -1,1 +1,1 @@
-(echo salut mec && (echo mec salut | rev) && echo success) > ./outfiles/test19
+{ { { echo layer1 && echo layer2 ; } && { echo layer3 || echo altLayer3 ; } ; } && echo allLayers ; } || echo someFailed

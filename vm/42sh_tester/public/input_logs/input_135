@@ -1,1 +1,1 @@
-echo ${UNDEFINED_VAR:=temporary}; echo ${UNDEFINED_VAR}
+21< infiles/test 21<&-

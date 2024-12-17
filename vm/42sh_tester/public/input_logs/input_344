@@ -1,1 +1,1 @@
-(echo running first && echo next command || echo won’t run | rev && echo done) > ./outfiles/test15
+{ echo startChain ; { echo chain1 && { echo chain2 && echo chain3 ; } ; echo chainEnd ; } ; } || echo failedChain

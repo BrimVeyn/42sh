@@ -1,1 +1,1 @@
-echo ${NUMBER:-123}
+24< infiles/no_write cat <&24

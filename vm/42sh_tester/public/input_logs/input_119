@@ -1,1 +1,1 @@
-echo ${HOME:=salut}; echo ${HOME}
+echo test4 > ./outfiles/no_write

@@ -1,1 +1,1 @@
-echo ${HOME_SET:?Home is not set}; echo ${HOME_SET}
+22< infiles/no_exec 22<&-

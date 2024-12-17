@@ -1,3 +1,0 @@
-42sh:1:27: [1m[91merror[0m: unexpected end of file
-  1  |  echo 'a'"b"'"c"'"d'"'"e'"f'
-     |                            [1m[91m^[0m

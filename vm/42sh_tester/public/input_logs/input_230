@@ -1,1 +1,1 @@
-(echo Start && false || echo Continue; echo End)
+((echo Init && false) || (echo Mid | (echo End && echo Done)))

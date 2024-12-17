@@ -1,1 +1,1 @@
-echo count:$(ls | wc -l)files
+echo prefix$(echo salut)suffix

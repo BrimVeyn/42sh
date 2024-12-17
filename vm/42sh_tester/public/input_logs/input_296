@@ -1,1 +1,1 @@
-((echo Alpha | (false || echo Beta && echo Gamma)) && (echo Delta || echo Epsilon) && (echo FinalOne || echo FinalTwo))
+(cat && (echo inside nested && echo still going) | rev) < ./infiles/file1 > ./outfiles/test18

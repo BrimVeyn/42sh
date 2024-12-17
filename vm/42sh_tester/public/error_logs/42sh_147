@@ -1,1 +1,1 @@
-${#PATH:-DSADAS}: bad substitution
+42sh: ./outfiles/no_read: Permission Denied

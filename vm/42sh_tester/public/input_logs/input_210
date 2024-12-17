@@ -1,1 +1,1 @@
-echo $(echo $(echo $(echo $(echo $(echo $(echo 'nested'))))))
+((false || (echo PipeOne | echo PipeTwo)) && echo Continue)

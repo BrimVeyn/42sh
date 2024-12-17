@@ -1,1 +1,1 @@
-echo FirstPrefix$(echo salut)FirstSuffix$(echo salut)EndSuffix
+echo result:$(echo $(ls /usr | grep lib))libraries found

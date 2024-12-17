@@ -1,1 +1,1 @@
-echo test3 >> ./outfiles/file2
+echo "'salut'"

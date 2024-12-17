@@ -1,1 +1,1 @@
-echo $(echo $(ls | wc -l) | cat - $(echo Done))
+echo $(uname -a && echo Kernel info)

@@ -1,1 +1,1 @@
-(echo This && echo That)
+(echo First | false || (echo Second && echo Third))

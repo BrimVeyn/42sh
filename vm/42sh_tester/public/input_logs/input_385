@@ -1,1 +1,1 @@
-echo current user:$(whoami)
+echo path:$(echo /usr/bin | grep bin)found

@@ -1,1 +1,1 @@
-echo $(ls /etc && ls /nonexistentdir || echo Dir not found)
+echo $(echo $(ls | wc -l) | cat - $(echo Done))

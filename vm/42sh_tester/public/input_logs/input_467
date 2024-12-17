@@ -1,1 +1,1 @@
-{ { echo fileWrite ; { echo fileWriteInner && echo toFile ; } > ./outfiles/complexOutput ; } && cat ./outfiles/complexOutput ; } || echo writeFailed
+echo ${#}

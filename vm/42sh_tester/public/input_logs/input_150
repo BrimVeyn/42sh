@@ -1,1 +1,1 @@
-var=1; var+='salut mec'; var+="salope"; var+='hey'; echo ${var}
+21<> ./outfiles/file1 22<&21 cat <&22

@@ -1,1 +1,1 @@
-(echo First | (false || (echo Second && (echo Third || echo Fourth))) && echo End)
+(echo salut mec | (echo nested inside | rev && echo other output || echo alternate)) > ./outfiles/test13

@@ -1,1 +1,1 @@
-{ echo salut; } >./outfiles/test
+echo ${}

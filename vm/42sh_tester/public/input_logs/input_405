@@ -1,1 +1,1 @@
-echo result:$(echo $(ls /usr | (grep bin && echo binaries found)))
+echo $(mkdir dirtest && echo Directory made && (rmdir dirtest && echo Directory removed))complete

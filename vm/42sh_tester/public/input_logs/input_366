@@ -1,1 +1,1 @@
-echo $(echo Pipe test && ls /usr | grep bin | wc -l)
+echo $(ls /etc && ls /nonexistentdir || echo Dir not found)

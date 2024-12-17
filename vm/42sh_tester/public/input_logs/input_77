@@ -1,1 +1,1 @@
-{ cat < infiles/no_write; echo "fallback message"; } > ./outfiles/group_fallback
+echo "'$(echo)'"

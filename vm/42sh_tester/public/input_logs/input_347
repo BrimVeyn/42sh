@@ -1,1 +1,1 @@
-(cat && (echo inside nested && echo still going) | rev) < ./infiles/file1 > ./outfiles/test18
+{ { echo innerStart && { { echo middleStart ; echo middleEnd ; } || echo middleAlt ; } ; } || echo failCase ; } && echo successCase

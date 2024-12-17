@@ -1,1 +1,1 @@
-(echo FirstLayer | (false || (echo SecondLayer && echo ThirdLayer) && (echo FourthLayer || false) | echo FifthLayer))
+{ { echo start1; echo start2; } && { echo blockA && echo blockB ; } ; } && { echo final ; }

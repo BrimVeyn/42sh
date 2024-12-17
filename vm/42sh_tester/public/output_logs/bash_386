@@ -1,1 +1,1 @@
-check:adduser.conf ca-certificates.conf debconf.conf deluser.conf e2scrub.conf gai.conf host.conf ld.so.conf ld.so.conf.d libaudit.conf logrotate.conf manpath.config mke2fs.conf netconfig nftables.conf nsswitch.conf pam.conf resolv.conf sensors3.conf sudo.conf sudo_logsrvd.conf sysctl.conf ucf.conf xattr.confconfig files
+current user:bvan-pae

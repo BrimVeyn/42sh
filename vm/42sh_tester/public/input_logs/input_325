@@ -1,1 +1,1 @@
-(echo salut mec; (echo nested output | rev); echo finished) > ./outfiles/test5
+{ echo multi-level ; { echo level2 ; { echo level3 && echo level4 ; } ; echo end ; } ; } || echo fail

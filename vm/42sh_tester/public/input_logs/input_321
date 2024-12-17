@@ -1,1 +1,1 @@
-(echo salut mec; echo hey !) >./outfiles/test
+{ echo begin ; { echo inner1 ; { echo inner2 && echo inner3 ; } ; echo outer ; } ; } && echo done

@@ -1,1 +1,1 @@
-{ { echo set1 && { echo set2 || echo altSet2 ; } ; } && echo doneSet ; } && echo finalSet
+echo ${#PATH}

@@ -1,1 +1,1 @@
-echo "'single quotes'"
+(echo First && false || echo Fallback)

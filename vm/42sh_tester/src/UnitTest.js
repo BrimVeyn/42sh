@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
+import ReactDiffViewer from 'react-diff-viewer';
 
 function UnitTest({unit}) {
-	const [showOutput, setShowOutput] = useState(false);
-	const [showError, setShowError] = useState(false);
-	const [showExitCode, setShowExitCode] = useState(false);
+
+	const [activeDiff, setActiveDiff] = useState(null);
 
 	const [output42sh, setOutput42sh] = useState(null);
 	const [outputBash, setOutputBash] = useState(null);
@@ -11,8 +11,6 @@ function UnitTest({unit}) {
 	const [errorBash, setErrorBash] = useState(null);
 	const [input, setInput] = useState(null);
 
-	//useState toggler (bool)
-	const toggle = (setShow) => setShow((prev) => !prev);
 	//Function to statically fetch from ./public
 	const fetchContent = async (filePath, setter) => {
 		try {
@@ -32,8 +30,43 @@ function UnitTest({unit}) {
 	fetchContent('/' + unit["bash_output"], setOutputBash);
 	fetchContent('/' + unit["42sh_error"], setError42sh);
 	fetchContent('/' + unit["bash_error"], setErrorBash);
+
 	//unitButton style
-	const unitButton = "py-1 px-2 m-2 text-center border-2 rounded";
+	const unitButton = (unit, type) => {
+		let buffer = "py-1 px-2 m-2 text-center border-2 rounded";
+		if (type === "output" && unit["output_ok"] === "false")
+			buffer += " bg-red-500";
+		else if (type === "error" && unit["error_ok"] === "false")
+			buffer += " bg-yellow-500";
+		else if (type === "exit" && unit["exit_ok"] === "false")
+			buffer += " bg-red-500";
+		if (type === activeDiff)
+			buffer += " border-green-700"
+		return buffer;
+	}
+
+	const newStyles = {
+		variables: {
+			dark: {
+				highlightBackground: '#fefed5',
+				highlightGutterBackground: '#ffcd3c',
+			},
+		},
+		line: {
+			padding: '10px 2px',
+			color: '#24292e',
+		},
+		titleBlock: {
+			textAlign: 'center',
+		},
+		lineNumber: {
+			textAlign: 'center',
+		}
+	}
+
+	const setShown = (setter, value) => {
+		setter((active) => (value === active) ? null : value);
+	}
 
 	return (
 		<>
@@ -47,36 +80,45 @@ function UnitTest({unit}) {
 			)}
 
 			<div className="flex-col buttonsContainer">
-				<button className={unitButton} onClick={() => toggle(setShowOutput)}>
+				<button className={unitButton(unit, "output")} onClick={() => setShown(setActiveDiff, "output")}>
 					Ouput (stdout)
 				</button>
-				<button className={unitButton} onClick={() => toggle(setShowError)}>
+				<button className={unitButton(unit, "error")} onClick={() => setShown(setActiveDiff, "error")}>
 					Error (stderr)
 				</button>
-				<button className={unitButton} onClick={() => toggle(setShowExitCode)}>
+				<button className={unitButton(unit, "exit")} onClick={() => setShown(setActiveDiff, "exit")}>
 					Exit code ($?)
 				</button>
 			</div>
-			{ (showOutput || showError || showExitCode) &&
+			{ activeDiff !== null &&
 				<>
-					<div className="p-4 m-4 rounded-md border">
-						{showOutput && 
-							<>
-								<p><strong>42sh Output:</strong> {output42sh || "None"}</p>
-								<p><strong>Bash Output:</strong> {outputBash || "None"}</p>
-							</>
+					<div className="rounded-md border">
+						{activeDiff === "output" && 
+							<ReactDiffViewer key={unit.id + "output"} 
+								styles={newStyles}
+								oldValue={outputBash || "None"} 
+								newValue={output42sh || "None"} 
+								splitView={true} showDiffOnly={false} 
+								leftTitle={"Bash"} rightTitle={"42sh"} 
+							/>
 						}
-						{showError && 
-							<>
-								<p><strong>42sh Error:</strong> {error42sh || "None"}</p>
-								<p><strong>Bash Error:</strong> {errorBash || "None"}</p>
-							</>
+						{activeDiff === "error" && 
+							<ReactDiffViewer key={unit.id + "error"} 
+								styles={newStyles}
+								oldValue={errorBash || "None"} 
+								newValue={error42sh || "None"} 
+								splitView={true} showDiffOnly={false} 
+								leftTitle={"Bash"} rightTitle={"42sh"} 
+							/>
 						}
-						{showExitCode &&
-							<>
-								<p><strong>42sh ExitCode:</strong> {unit["42sh_exit_code"] || "None"}</p>
-								<p><strong>Bash ExitCode:</strong> {unit["bash_exit_code"] || "None"}</p>
-							</>
+						{activeDiff === "exit" &&
+							<ReactDiffViewer key={unit.id + "output"} 
+								styles={newStyles}
+								oldValue={unit["42sh_exit_code"]} 
+								newValue={unit["bash_exit_code"]} 
+								splitView={true} showDiffOnly={false} 
+								leftTitle={"Bash"} rightTitle={"42sh"} 
+							/>
 						}
 					</div>
 				</>

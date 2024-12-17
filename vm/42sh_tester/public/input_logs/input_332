@@ -1,1 +1,1 @@
-(echo $(echo inside substitution) | rev; echo outside) > ./outfiles/test3
+{ { echo stage1 ; echo stage2 ; } | tee ./outfiles/stage && { echo log1 ; echo log2 ; } | grep log ; } && echo finished

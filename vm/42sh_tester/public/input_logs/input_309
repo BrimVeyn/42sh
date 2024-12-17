@@ -1,1 +1,1 @@
-((echo AlphaStep | echo BetaStep) && (false || echo GammaStep && echo DeltaStep) || echo EpsilonStep)
+{ { echo inner1; } ; echo inner2 ; } | grep inner

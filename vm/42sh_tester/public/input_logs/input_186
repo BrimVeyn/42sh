@@ -1,1 +1,1 @@
-var="nested"; echo "${var}"
+(echo A && (echo B && echo C) || (echo D && echo E))

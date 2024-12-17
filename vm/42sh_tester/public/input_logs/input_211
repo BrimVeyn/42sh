@@ -1,1 +1,1 @@
-echo "$(echo salut)"""""""""""""""""""""""""""""""
+(echo First; echo Second | echo Third; echo Fourth)

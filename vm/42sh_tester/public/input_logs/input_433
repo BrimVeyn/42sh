@@ -1,1 +1,1 @@
-echo salut && { echo braces ; }
+echo ${PATH:-/default/path}

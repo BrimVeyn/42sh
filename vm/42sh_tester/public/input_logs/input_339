@@ -1,1 +1,1 @@
-(echo first output && (echo nested | rev) | grep detsen) > ./outfiles/test10
+{ { { echo pipe1 && echo pipe2 ; } | grep pipe1 ; } && echo pipeDone ; } || echo pipeFail

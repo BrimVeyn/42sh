@@ -1,1 +1,1 @@
-{ { echo pre1 && { echo pre2 || echo altPre ;} ; } && echo main ;} && echo final
+echo ${DEFINED_VAR:?variable is not set or has no value}

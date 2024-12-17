@@ -1,1 +1,1 @@
-((false || (echo A && echo B) || (false && echo C)) && echo D)
+(echo StartOne && echo StartTwo || ((echo PipeOne && false) || echo PipeTwo | echo PipeThree) && echo FinalTest)

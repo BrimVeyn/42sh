@@ -1,1 +1,1 @@
-echo $(mkdir dirtest && echo Directory made && (rmdir dirtest && echo Directory removed))complete
+echo full check:$(echo $(echo prefix$(uname)postfix))suffix

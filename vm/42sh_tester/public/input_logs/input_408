@@ -1,1 +1,1 @@
-echo process count:$(ps aux | (grep $(whoami) | head -n 10 && echo $(ps aux | wc -l)))processes running
+echo dir test:$(echo $(mkdir newdir && echo dir created && (rmdir newdir && echo dir removed)))complete

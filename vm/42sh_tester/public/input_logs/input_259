@@ -1,1 +1,1 @@
-(echo Start && echo Proceed || echo Fallback | echo End)
+((false || echo EarlyExit) && echo MidProcess || (echo LateProcess && echo FinalOutcome))

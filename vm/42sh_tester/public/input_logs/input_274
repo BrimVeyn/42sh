@@ -1,1 +1,1 @@
-(echo A && (echo B || echo C) && echo D | echo E)
+(echo salut mec; (echo nested output | rev); echo finished) > ./outfiles/test5

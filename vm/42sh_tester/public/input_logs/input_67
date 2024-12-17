@@ -1,1 +1,1 @@
-22<> ./outfiles/file1 cat <&nan
+var="nested"; echo "${var}"

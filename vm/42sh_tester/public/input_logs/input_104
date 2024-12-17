@@ -1,1 +1,1 @@
-echo ${DEFINED_VAR:-${NESTED_VARIABLE:-}
+cat < infiles/no_write

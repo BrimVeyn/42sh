@@ -1,1 +1,1 @@
-{ { echo group1 ; } && echo group2 ; } || echo group3
+echo ${VARS#:salut};

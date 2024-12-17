@@ -1,1 +1,1 @@
-(echo Init && (false || echo Mid | echo End))
+((echo StartPath && (false || echo MidPathOne && echo MidPathTwo)) || (echo FailPath && echo AltPath) && echo EndPath)

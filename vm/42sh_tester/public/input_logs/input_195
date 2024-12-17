@@ -1,1 +1,1 @@
-echo '"""""""""""""""""""""""""""""""""""""""'
+((echo A && false) || (false && echo B) || (echo C && (echo D || echo E)))

@@ -1,1 +1,1 @@
-{ { echo innerStart && { { echo middleStart ; echo middleEnd ; } || echo middleAlt ; } ; } || echo failCase ; } && echo successCase
+echo ${#PATH:-DSADAS}

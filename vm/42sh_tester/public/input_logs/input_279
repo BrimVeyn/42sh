@@ -1,1 +1,1 @@
-(echo A || (echo B && false | echo C) && echo D)
+(echo salut mec || echo fallback; echo hey !) > ./outfiles/test1

@@ -1,1 +1,1 @@
-23< infiles/no_perms cat <&23
+var=$(echo echo); ${var} salut

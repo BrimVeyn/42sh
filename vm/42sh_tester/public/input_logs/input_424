@@ -1,1 +1,1 @@
-{ echo one ; echo two ; } && { echo three ; }
+echo ${VAR:-${NESTED_VAR}

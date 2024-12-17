@@ -1,1 +1,1 @@
-echo directories:$(echo $(echo $(ls / | (grep home && echo home found))))
+echo test case:$(echo $(echo $(mkdir $(echo tempdir) && echo dir created && (rmdir tempdir && echo dir removed))))nested

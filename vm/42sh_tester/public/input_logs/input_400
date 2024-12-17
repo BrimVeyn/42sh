@@ -1,1 +1,1 @@
-echo username:$(whoami | (echo $(grep -o .)))
+echo $(echo $(echo $(ls | wc -l)) files in current directory)

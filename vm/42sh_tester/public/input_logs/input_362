@@ -1,1 +1,1 @@
-echo $(ls /etc | head -n 5)
+echo $(echo salut; echo salut) | ls

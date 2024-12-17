@@ -1,1 +1,1 @@
-22< infiles/no_exec 22<&-
+var='$(echo ec)ho'; ${var} salut

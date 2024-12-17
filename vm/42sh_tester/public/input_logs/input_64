@@ -1,1 +1,1 @@
-"22"<> ./outfiles/file1 cat <&22
+echo '$(echo "$(echo "$(echo nested)")")'

@@ -1,1 +1,1 @@
-echo ${MISSING_VARIABLE:?variable is not set or has no value}
+echo test3>> ./outfiles/non_existing

@@ -1,1 +1,1 @@
-echo $(find /etc | grep conf | head -n 3)
+echo $(ls /etc | grep conf | wc -l)

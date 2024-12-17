@@ -1,1 +1,1 @@
-echo "$(echo "$(echo salut)")"
+{ cat < infiles/test; echo "duplicated output"; } 21<> ./outfiles/group_fd_test

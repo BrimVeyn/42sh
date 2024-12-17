@@ -1,1 +1,1 @@
-{ { echo redirectionTest ; echo moreTest ; } > ./outfiles/testRedirect && cat ./outfiles/testRedirect ; } && echo complete
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#}

@@ -1,1 +1,1 @@
-var1=4; var2=2; echo $(( (var1 + 1) 1 42sh 42sh_tester error_logs generate_html.py infiles input_logs log.json outfiles output_logs src test_cd test_dir testdir tester.sh (var2 + 3) / (var1 - 1) ))
+var1=4; var2=2; echo $(( (var1 + 1) 42sh error_logs infiles input_logs log.json outfiles output_logs src test_cd test_dir testdir tester.sh (var2 + 3) / (var1 - 1) ))

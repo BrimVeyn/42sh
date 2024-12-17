@@ -1,1 +1,1 @@
-{ { echo cmdA && echo cmdB ; } | { echo cmdC && echo cmdD ; } ; } && echo pipelineDone
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##/home}

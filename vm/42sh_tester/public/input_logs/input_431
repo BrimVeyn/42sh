@@ -1,1 +1,1 @@
-{ { echo one; echo two; } ; echo three; } | cat
+echo ${PATH}d1${PATH}d2${PATH}

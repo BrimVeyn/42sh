@@ -1,1 +1,1 @@
-{ echo test ; { { echo mid1 && echo mid2 ; } || echo alt ; } && echo after ; }
+echo ${UNDEFINED:? variable is not set or has no value}; echo ${UNDEFINED}

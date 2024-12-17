@@ -1,1 +1,1 @@
-(echo ChainOne && echo ChainTwo | (echo ChainThree && (false || echo ChainFour)) && echo ChainFinal)
+(echo salut mec | (echo mec salut | rev) || echo fallback) > ./outfiles/test20

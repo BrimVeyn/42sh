@@ -1,1 +1,1 @@
-echo files:$(ls | (wc -l))listed
+echo prefix$(echo $(echo inside subshell))suffix

@@ -1,1 +1,1 @@
-echo ${HOME_VAR:-/default/home}
+21< infiles/test 22<&21 cat <&22

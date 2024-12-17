@@ -1,1 +1,1 @@
-echo ${UNDEFINED_VAR:=new_default}; echo ${UNDEFINED_VAR}
+23< infiles/no_perms cat <&23

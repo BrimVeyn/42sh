@@ -1,1 +1,1 @@
-(echo Hello World)
+(echo Outer && (false || (echo InnerOne | echo InnerTwo)) && echo Final)

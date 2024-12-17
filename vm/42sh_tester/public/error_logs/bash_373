@@ -1,0 +1,6 @@
+find: ‘/etc/ppp/peers’: Permission denied
+find: ‘/etc/osquery’: Permission denied
+find: ‘/etc/crc’: Permission denied
+find: ‘/etc/libvirt/secrets’: Permission denied
+find: ‘/etc/multipath’: Permission denied
+find: ‘/etc/chatscripts’: Permission denied

@@ -1,1 +1,1 @@
-echo "$(echo 'nested')"
+(false && echo Wont run || echo But this will)

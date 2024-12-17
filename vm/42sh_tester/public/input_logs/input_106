@@ -1,1 +1,1 @@
-echo ${VAR:-${NESTED_VAR}
+cat < infiles/non_existing

@@ -1,1 +1,1 @@
-echo match count:$(echo $(ls /usr | (grep bin && echo found))items located)
+echo deep nesting:$(echo $(echo $(echo $(echo $(uname)))))suffix

@@ -1,1 +1,1 @@
-echo ${UNDEFINED:? variable is not set or has no value}; echo ${UNDEFINED}
+echo test3 >> ./outfiles/file2

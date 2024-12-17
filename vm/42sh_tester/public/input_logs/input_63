@@ -1,1 +1,1 @@
-22<> ./outfiles/no_exec 22<&-
+echo "$(echo "$(echo "$(echo nested)")")"

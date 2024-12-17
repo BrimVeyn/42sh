@@ -1,1 +1,1 @@
-echo $(mkdir newdir && ls && rmdir newdir && echo Dir test complete)
+echo $(cat /dev/null && echo Empty file || echo Fallback)

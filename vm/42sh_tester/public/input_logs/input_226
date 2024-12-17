@@ -1,1 +1,1 @@
-(echo First && false || echo Fallback)
+(echo A && echo B | (false && echo Fail || echo Success))

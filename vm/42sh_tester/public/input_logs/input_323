@@ -1,1 +1,1 @@
-(echo $(echo inside substitution); echo outside) > ./outfiles/test3
+{ { echo a && { echo b && echo c ; } ; } && echo d ; } || echo e
