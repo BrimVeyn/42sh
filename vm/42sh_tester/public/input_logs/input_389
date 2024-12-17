@@ -1,1 +1,0 @@
-echo last command:$(echo $(ls /etc | wc -l))files found

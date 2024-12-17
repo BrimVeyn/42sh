@@ -85,8 +85,9 @@ test_files=(
 SH42_PATH="./42sh"
 BASH_PATH="/usr/bin/bash"
 ECHO_PATH="/usr/bin/echo"
+OUTPUT_PATH="./data/"
 
-mkdir -p output_logs error_logs input_logs
+mkdir -p ${OUTPUT_PATH}{input_logs,output_logs,error_logs}
 
 start_tests ()
 {
@@ -104,7 +105,8 @@ start_tests ()
 
 			# get categorie name src/ex --> ex
 			category=$(basename ${file})
-			
+			passed="0"
+
 			#start category
 			echo -e "\t\t{"
 			echo -e "\t\t\t\"category_name\": \"${category}\","
@@ -117,34 +119,37 @@ start_tests ()
 
 				line=${lines[j]}
 
-				SH42_OUTPUT=$( ${ECHO_PATH} -e "${line}" | ${SH42_PATH} 1>output_logs/42sh_${testId} 2>error_logs/42sh_${testId})
+				SH42_OUTPUT=$( ${ECHO_PATH} -e "${line}" | ${SH42_PATH} 1>${OUTPUT_PATH}output_logs/42sh_${testId} 2>${OUTPUT_PATH}error_logs/42sh_${testId})
 				SH42_EXITNO=${?}
 				SH42_OUTPUT=${SH42_OUTPUT:-"None"}
 
-				BASH_OUTPUT=$( ${ECHO_PATH} -e "${line}" | ${BASH_PATH} 1>output_logs/bash_${testId} 2>error_logs/bash_${testId})
+				BASH_OUTPUT=$( ${ECHO_PATH} -e "${line}" | ${BASH_PATH} 1>${OUTPUT_PATH}output_logs/bash_${testId} 2>${OUTPUT_PATH}error_logs/bash_${testId})
 				BASH_EXITNO=${?}
 				BASH_OUTPUT=${BASH_OUTPUT:-"None"}
 
 				#output formatted json test recap
-				echo ${line} 1>input_logs/input_${testId}
+				echo ${line} 1>${OUTPUT_PATH}input_logs/input_${testId}
 
 				echo -ne "\t\t\t\t{\n" \
 				"\t\t\t\t\t\"id\": \"${testId}\",\n" \
-				"\t\t\t\t\t\"input\": \"input_logs/input_${testId}\",\n" \
-				"\t\t\t\t\t\"42sh_output\": \"output_logs/42sh_${testId}\",\n" \
-				"\t\t\t\t\t\"bash_output\": \"output_logs/bash_${testId}\",\n" \
-				"\t\t\t\t\t\"42sh_error\": \"error_logs/42sh_${testId}\",\n" \
-				"\t\t\t\t\t\"bash_error\": \"error_logs/bash_${testId}\",\n" \
+				"\t\t\t\t\t\"input\": \"${OUTPUT_PATH}input_logs/input_${testId}\",\n" \
+				"\t\t\t\t\t\"42sh_output\": \"${OUTPUT_PATH}output_logs/42sh_${testId}\",\n" \
+				"\t\t\t\t\t\"bash_output\": \"${OUTPUT_PATH}output_logs/bash_${testId}\",\n" \
+				"\t\t\t\t\t\"42sh_error\": \"${OUTPUT_PATH}error_logs/42sh_${testId}\",\n" \
+				"\t\t\t\t\t\"bash_error\": \"${OUTPUT_PATH}error_logs/bash_${testId}\",\n" \
 				"\t\t\t\t\t\"42sh_exit_code\": \"${SH42_EXITNO}\",\n" \
 				"\t\t\t\t\t\"bash_exit_code\": \"${BASH_EXITNO}\",\n"
 
-				if cmp -s "output_logs/bash_${testId}" "output_logs/42sh_${testId}"; then
+				validate="1"
+
+				if cmp -s "${OUTPUT_PATH}output_logs/bash_${testId}" "${OUTPUT_PATH}output_logs/42sh_${testId}"; then
 					echo -e "\t\t\t\t\t\"output_ok\": \"true\","
 				else
 					echo -e "\t\t\t\t\t\"output_ok\": \"false\","
+					validate="0"
 				fi
 
-				if cmp -s "error_logs/bash_${testId}" "error_logs/42sh_${testId}"; then
+				if cmp -s "${OUTPUT_PATH}error_logs/bash_${testId}" "${OUTPUT_PATH}error_logs/42sh_${testId}"; then
 					echo -e "\t\t\t\t\t\"error_ok\": \"true\","
 				else
 					echo -e "\t\t\t\t\t\"error_ok\": \"false\","
@@ -154,6 +159,11 @@ start_tests ()
 					echo -e "\t\t\t\t\t\"exit_ok\": \"true\""
 				else
 					echo -e "\t\t\t\t\t\"exit_ok\": \"false\""
+					validate="0"
+				fi
+
+				if [[ "${validate}" = "1" ]]; then
+					((passed++))
 				fi
 
 				echo -ne "\t\t\t\t}";
@@ -168,8 +178,10 @@ start_tests ()
 
 			done <${file}
 
+
 			#end of category
-			echo -e "\t\t\t]"
+			echo -e "\t\t\t],"
+			echo -e "\t\t\t\"passed_tests\": \"${passed}\""
 			echo -ne "\t\t}"
 
 			if ((i < ${#test_files[@]} - 1)); then
@@ -184,7 +196,7 @@ start_tests ()
 		echo -e "\t]"
 		echo -e "}"
 
-	} >log.json
+	} >${OUTPUT_PATH}log.json
 }
 
 setup_cd_test_environment

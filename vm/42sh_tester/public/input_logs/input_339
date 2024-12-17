@@ -1,1 +1,0 @@
-{ { { echo pipe1 && echo pipe2 ; } | grep pipe1 ; } && echo pipeDone ; } || echo pipeFail

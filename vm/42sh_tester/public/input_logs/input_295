@@ -1,1 +1,0 @@
-(echo process start && ls || echo process failed; echo done) > ./outfiles/test17

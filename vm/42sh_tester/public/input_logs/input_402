@@ -1,1 +1,0 @@
-echo current dir:$(pwd | (echo $(ls $(pwd) | grep $(basename $(pwd)))))

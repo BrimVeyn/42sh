@@ -1,1 +1,0 @@
-{ echo firstBlock ; { echo secondBlock && { echo thirdBlock ; echo fourthBlock ; } ; } ; echo fifthBlock ; } && echo endBlock

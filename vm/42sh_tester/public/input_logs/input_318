@@ -1,1 +1,0 @@
-{ echo chain1 ; { echo chain2 && { echo nested1 ; echo nested2 ; } ; } ; echo end ; }

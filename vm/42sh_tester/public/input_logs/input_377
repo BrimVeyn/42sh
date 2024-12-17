@@ -1,1 +1,0 @@
-echo $(echo Begin test; ls /etc | grep conf | wc -l)

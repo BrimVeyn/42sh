@@ -1,1 +1,0 @@
-ls | echo Files || echo No files

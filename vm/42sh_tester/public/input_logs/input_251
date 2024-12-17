@@ -1,1 +1,0 @@
-(((echo BaseOne | (false && echo BaseTwo) || echo BaseThree) && echo BaseFour) || (echo LastOne && echo LastTwo))

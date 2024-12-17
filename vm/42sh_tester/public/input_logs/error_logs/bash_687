@@ -1,2 +1,0 @@
-/usr/bin/bash: line 1: cd: -1: invalid option
-cd: usage: cd [-L|[-P [-e]] [-@]] [dir]

@@ -1,1 +1,0 @@
-((false && echo FailOne) || (echo PassOne | echo PassTwo))

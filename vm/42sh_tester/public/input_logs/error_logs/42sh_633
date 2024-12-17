@@ -1,3 +1,0 @@
-42sh:1:39: [1m[91merror[0m: unexpected end of file
-  1  |  echo $(( (3 * (4 + 1) ))               
-     |                                        [1m[91m^[0m

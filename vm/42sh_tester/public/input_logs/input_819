@@ -1,1 +1,0 @@
-echo $(echo First && echo $(ls invalid_dir || echo NotFound))

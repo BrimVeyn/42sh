@@ -1,1 +1,0 @@
-(false && echo Wont run || echo But this will)

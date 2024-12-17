@@ -1,1 +1,0 @@
-var=6; echo $((var + 3)); echo $((var--)); echo $((var))

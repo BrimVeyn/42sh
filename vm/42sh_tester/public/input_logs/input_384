@@ -1,1 +1,0 @@
-echo kernel:$(uname -r)version

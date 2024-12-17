@@ -1,1 +1,0 @@
-(echo Init && (false || echo Mid | echo End))

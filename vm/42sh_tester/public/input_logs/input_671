@@ -1,1 +1,0 @@
-unset HOME; MY_PATH=~/bin; echo ${MY_PATH}

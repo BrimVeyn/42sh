@@ -1,1 +1,0 @@
-echo $(echo Test done; echo $(ls /usr | head -n 5))

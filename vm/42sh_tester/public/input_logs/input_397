@@ -1,1 +1,0 @@
-echo prefix$(echo $(echo inside subshell))suffix

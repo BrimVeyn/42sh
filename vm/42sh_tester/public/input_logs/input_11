@@ -1,1 +1,0 @@
-10<../Makefile cat <&10 >./outfiles/test | rev && (echo salut);

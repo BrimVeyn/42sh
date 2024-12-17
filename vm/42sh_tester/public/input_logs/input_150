@@ -1,1 +1,0 @@
-21<> ./outfiles/file1 22<&21 cat <&22

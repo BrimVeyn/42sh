@@ -1,1 +1,0 @@
-{ echo test ; { { echo mid1 && echo mid2 ; } || echo alt ; } && echo after ; }

@@ -1,1 +1,0 @@
-{ echo startChain ; { echo chain1 && { echo chain2 && echo chain3 ; } ; echo chainEnd ; } ; } || echo failedChain

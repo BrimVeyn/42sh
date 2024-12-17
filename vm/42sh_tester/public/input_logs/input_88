@@ -1,1 +1,0 @@
-var='""$(echo nested)""'; echo "${var}"

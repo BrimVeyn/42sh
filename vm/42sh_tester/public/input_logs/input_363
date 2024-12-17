@@ -1,1 +1,0 @@
-echo $(ls /etc | head -n 5)

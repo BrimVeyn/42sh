@@ -1,1 +1,0 @@
-(echo $(ls || echo Not found)) && echo Success

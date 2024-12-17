@@ -1,1 +1,0 @@
-(cd /nonexistent_path/../ && pwd; echo ${OLDPWD})

@@ -1,1 +1,0 @@
-(echo salut mec; (echo nested output | rev) | grep tuptuo; echo finished) > ./outfiles/test5

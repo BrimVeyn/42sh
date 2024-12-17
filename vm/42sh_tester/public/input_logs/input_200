@@ -1,1 +1,0 @@
-((echo A && (echo B || echo C)) && (false || echo D); echo E)
