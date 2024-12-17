@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:56 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/13 13:16:12 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/17 14:47:57 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,7 @@ void builtin_fg(const SimpleCommandP *command, Vars *const shell_vars);
 void builtin_bg(const SimpleCommandP *command, Vars *const shell_vars);
 void builtin_fc(const SimpleCommandP *command, Vars *const shell_vars);
 void builtin_return(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_test(const SimpleCommandP *command, Vars * const shell_vars);
 //---------------------------------------------------------------------//
 
 

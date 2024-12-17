@@ -18,6 +18,40 @@ BITTERSWEET="\033[0;38;2;255;81;84m"
 SGBUS="\033[0;38;2;124;223;100m"
 SELECTIVE_YELLOW="\033[0;38;2;255;188;31m"
 
+TEST_DIR="test_env"
+
+setup_test_test_environment() {
+    mkdir -p "$TEST_DIR"
+    cd "$TEST_DIR"
+
+    touch file
+    echo "Fichier de test" > file
+    mkdir dir
+    ln -s file link
+    mkfifo fifo
+    touch empty_file
+    touch suid_file
+    chmod u+s suid_file
+    touch sgid_file
+    chmod g+s sgid_file
+    touch readable_file
+    chmod 644 readable_file
+    touch writable_file
+    chmod 222 writable_file
+    touch executable_file
+    chmod 755 executable_file
+
+    if command -v socat >/dev/null; then
+        socat -d -d UNIX-LISTEN:socket,unlink-early &> /dev/null &
+        sleep 1
+    else
+        echo "socat non trouvé, socket non créé."
+    fi
+
+    echo "Non-vide" > non_empty_string
+    touch empty_string
+}
+
 setup_cd_test_environment() {
     mkdir -p test_cd
     cd test_cd || exit
@@ -192,11 +226,12 @@ test_lists=(
 	"src/builtin_cd"
 	"src/builtin_exit"
 	"src/builtin_echo"
+	"src/builtin_test"
 	"src/mixed"
 )
 
 PS3="Enter a number to run associated tests, * for all: "
-select option in redirections syntax parameter_expansion quotes subshell command_sub command_group arithmetic_expansion tilde_expansion builtin_export builtin_cd builtin_exit builtin_echo mixed
+select option in redirections syntax parameter_expansion quotes subshell command_sub command_group arithmetic_expansion tilde_expansion builtin_export builtin_cd builtin_exit builtin_echo builtin_test mixed
 do
     case $option in
         redirections)
@@ -255,6 +290,12 @@ do
         builtin_echo)
 			test_lists=("src/builtin_echo");
 			start_tests;
+            ;;
+        builtin_test)
+			setup_test_test_environment
+			test_lists=("src/builtin_test");
+			start_tests;
+			rm -rf "$TEST_DIR"
             ;;
         mixed)
 			test_lists=("src/mixed");

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/13 16:05:39 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/17 10:35:39 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 		}
 		else if (!ft_strcmp(metachar, ":?")){
 			ft_dprintf(2, " %s\n", word);
+			g_exitno = 1;
 			// TODO: ajouter un return FALSE jusquau parser pour prevenir de l'execution des commandes suivantes voir posix
 			return "";
 			// gc(GC_CLEANUP, GC_ALL);

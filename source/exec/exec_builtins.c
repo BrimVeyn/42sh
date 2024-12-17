@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/13 11:45:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/17 15:00:27 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars) {
 		{"pwd", &builtin_pwd}, {"unset", &builtin_unset},
 		{"fg", &builtin_fg},  {"bg", &builtin_bg},
 		{"cd", &builtin_cd}, {"fc", &builtin_fc},
+		{"test", &builtin_test},
 		{"return", &builtin_return},
 	};
 
@@ -53,7 +54,7 @@ bool is_builtin(const char *bin) {
 	static const char *builtins[] = {
 		"echo", "cd", "pwd", "export", "type",
 		"unset", "env", "exit", "set", "return",
-		"hash", "jobs", "fg", "bg", "fc",
+		"hash", "jobs", "fg", "bg", "fc", "test",
 	};
 
 	for (size_t i = 0; i < sizeof(builtins) / sizeof(builtins[0]); i++) {

@@ -1,0 +1,16 @@
+Bonus:
+	- break && continue
+	- variable as arrays + eventually (declare builtin -A) associative arrays
+	- type handles functions and aliases
+
+
+Mandatory:
+	- test
+	- alias
+	- filename exp
+	- process substitution
+
+Rebuild:
+	- parameter exp
+	- readline
+	- Jobs
