@@ -1,1 +1,0 @@
-varA=7; varB=14; echo $((${varA} / 2 + ${varB} / 7))

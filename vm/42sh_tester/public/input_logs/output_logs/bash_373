@@ -1,1 +1,0 @@
-/etc/systemd/timesyncd.conf /etc/systemd/logind.conf /etc/systemd/user.conf

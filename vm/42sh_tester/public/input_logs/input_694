@@ -1,1 +1,0 @@
-(cd /tmp && mkdir -p chain && ln -s ../dir1 chain/step1 && ln -s ../dir2 chain/step2 && cd -P chain/step1 && cd ../step2 && pwd)

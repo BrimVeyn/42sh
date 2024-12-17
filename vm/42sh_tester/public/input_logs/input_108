@@ -1,1 +1,0 @@
-echo test1 >| ./outfiles/file1

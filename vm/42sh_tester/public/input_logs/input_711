@@ -1,1 +1,0 @@
-var=1; echo $((var + 1)); echo $((var++)); echo $((++var))

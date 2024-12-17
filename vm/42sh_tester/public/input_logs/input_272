@@ -1,1 +1,0 @@
-(echo $(echo inside substitution); echo outside) > ./outfiles/test3

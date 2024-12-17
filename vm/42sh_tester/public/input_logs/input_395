@@ -1,1 +1,0 @@
-echo $(echo FirstPrefix$(echo $(echo hey))FirstSuffix$(echo salut)EndSuffix)

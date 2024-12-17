@@ -1,1 +1,0 @@
-(echo BeginSequence && (false || (echo SubStepOne && echo SubStepTwo || echo SubStepThree)) && echo FinalStep)

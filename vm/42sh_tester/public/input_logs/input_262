@@ -1,1 +1,0 @@
-(((echo TestOne || false) && echo TestTwo) || (echo TestThree && (echo TestFour | echo TestFive)) && echo Result)

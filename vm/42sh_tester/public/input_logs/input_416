@@ -1,1 +1,0 @@
-echo path validation:$(echo $(echo $(echo $(echo /usr/bin | (grep usr))))valid)

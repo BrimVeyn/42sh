@@ -1,1 +1,0 @@
-(echo $(echo Task1 && echo Task2) && echo Task3) || echo Failure

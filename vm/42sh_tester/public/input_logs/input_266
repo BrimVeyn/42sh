@@ -1,1 +1,0 @@
-(echo FirstLayer | (false || (echo SecondLayer && echo ThirdLayer) && (echo FourthLayer || false) | echo FifthLayer))

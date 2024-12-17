@@ -1,1 +1,0 @@
-{ { echo a1 ; echo a2 ; } && { echo b1 ; { echo b2 && echo b3 ; } ; } ; } || { echo c1 ; echo c2 ; }

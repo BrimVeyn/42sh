@@ -1,1 +1,0 @@
-{ { echo level1 && { echo level2 ; echo level3 ; } ; } | { grep level ; echo passed ; } ; } || echo failed

@@ -1,3 +1,0 @@
-42sh:1:21: [1m[91merror[0m: unexpected end of file
-  1  |  echo $((; echo salut;
-     |                      [1m[91m^[0m

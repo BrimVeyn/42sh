@@ -1,1 +1,0 @@
-echo $(ls /bin | grep bash && echo Found bash || echo Not found)

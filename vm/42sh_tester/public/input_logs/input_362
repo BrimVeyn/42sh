@@ -1,1 +1,0 @@
-echo $(echo salut; echo salut) | ls

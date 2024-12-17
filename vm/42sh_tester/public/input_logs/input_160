@@ -1,1 +1,0 @@
-21< infiles/test | 22<&21 echo "output" > ./outfiles/test_fd_combination

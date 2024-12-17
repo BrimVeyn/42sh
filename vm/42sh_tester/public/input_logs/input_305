@@ -1,1 +1,0 @@
-{ echo hello && { echo world ;} ; } && { echo welcome ;}

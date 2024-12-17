@@ -1,1 +1,0 @@
-echo result:$(mkdir testdir && echo created || echo failed)directory

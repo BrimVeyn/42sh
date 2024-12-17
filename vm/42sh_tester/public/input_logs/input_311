@@ -1,1 +1,0 @@
-{ echo command1 ; } >./outfiles/test2 && { echo command2 ; } >./outfiles/test3

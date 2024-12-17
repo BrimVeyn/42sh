@@ -1,1 +1,0 @@
-var=9; echo $((var + 1)); echo $((var 42sh error_logs infiles input_logs log.json outfiles output_logs src test_cd test_dir testdir tester.sh 2))echo Level1 && (false || echo Level2)) && (false || echo Final)

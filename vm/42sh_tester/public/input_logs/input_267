@@ -1,1 +1,0 @@
-((echo EntryOne && false || echo EntryTwo) && (echo EntryThree || (echo EntryFour | false && echo EntryFive)) && echo EndEntry)

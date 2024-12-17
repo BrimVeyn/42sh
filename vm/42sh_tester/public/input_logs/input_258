@@ -1,1 +1,0 @@
-((echo AlphaStep | echo BetaStep) && (false || echo GammaStep && echo DeltaStep) || echo EpsilonStep)

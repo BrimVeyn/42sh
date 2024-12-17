@@ -1,1 +1,0 @@
-echo ${UNSET_VARIABLE:=assigned_value}; echo ${UNSET_VARIABLE}

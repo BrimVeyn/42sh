@@ -1,1 +1,0 @@
-(echo $(echo Outer && $(echo Inner))) || echo Fail

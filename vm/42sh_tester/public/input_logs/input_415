@@ -1,1 +1,0 @@
-echo match count:$(echo $(ls /usr | (grep bin && echo found))items located)

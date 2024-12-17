@@ -1,1 +1,0 @@
-echo $(($(echo $(echo 2 + 3)) 42sh error_logs infiles input_logs log.json outfiles output_logs src test_cd test_dir testdir tester.sh 4))

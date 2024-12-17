@@ -1,9 +1,10 @@
-import React, {useEffect, useState, useMemo} from 'react';
+import React, {useEffect, useState} from 'react';
 import ReactDiffViewer from 'react-diff-viewer';
 
 function UnitTest({unit}) {
 
 	const [activeDiff, setActiveDiff] = useState(null);
+	const [copied, setCopied] = useState(false)
 
 	const [output42sh, setOutput42sh] = useState(null);
 	const [outputBash, setOutputBash] = useState(null);
@@ -11,25 +12,31 @@ function UnitTest({unit}) {
 	const [errorBash, setErrorBash] = useState(null);
 	const [input, setInput] = useState(null);
 
-	//Function to statically fetch from ./public
+	// Function to fetch file content from the backend API
 	const fetchContent = async (filePath, setter) => {
 		try {
-			const response = await fetch(filePath);
+			const encodedPath = encodeURIComponent(filePath);
+			const url = `http://localhost:4000/api/files/${encodedPath}`
+			const response = await fetch(url);
+			console.log("Fetching from URL:", url);  // Log the full URL to debug
 			if (!response.ok) {
-				throw new Error(`Failed to fetch ${filePath}: ${response.statusText}`);
+				throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
 			}
-			const text = await response.text();
-			setter(text);
+			const fileContent = await response.json(); // Assuming the backend sends the file content as JSON
+			setter(fileContent); // Set the content into the state
 		} catch (err) {
 			setter(`Error fetching file: ${err.message}`);
 		}
 	};
-	//Fetch input inconditionnaly
-	fetchContent('/' + unit.input, setInput);
-	fetchContent('/' + unit["42sh_output"], setOutput42sh);
-	fetchContent('/' + unit["bash_output"], setOutputBash);
-	fetchContent('/' + unit["42sh_error"], setError42sh);
-	fetchContent('/' + unit["bash_error"], setErrorBash);
+
+	// Fetch the content for input, output, and error files using the new API
+	useEffect(() => {
+		fetchContent(unit.input, setInput);
+		fetchContent(unit["42sh_output"], setOutput42sh);
+		fetchContent(unit["bash_output"], setOutputBash);
+		fetchContent(unit["42sh_error"], setError42sh);
+		fetchContent(unit["bash_error"], setErrorBash);
+	}, [unit]);
 
 	//unitButton style
 	const unitButton = (unit, type) => {
@@ -68,13 +75,23 @@ function UnitTest({unit}) {
 		setter((active) => (value === active) ? null : value);
 	}
 
+	const copyToClipboard = (text) => {
+		navigator.clipboard.writeText(text)
+		setCopied(true)
+	}
+
 	return (
 		<>
 			{input ? (
-				<p className="p-2 m-3 bg-zinc-800 rounded-md border-2 text-center border-red-300"> 
-					<strong>Input: </strong>
-					{input} 
-				</p>
+				<>
+					<p 
+						className="p-2 m-3 bg-zinc-800 rounded-md border-2 text-center text-xl border-red-300 cursor-pointer"
+						onClick={() => copyToClipboard(input)}
+					>
+						{input} 
+					</p>
+					{copied && (<p>Copied !</p>)}
+				</>
 			) : (
 				<p> loading... </p>
 			)}

@@ -1,1 +1,0 @@
-(echo outer shell && (echo nested shell | rev || echo fallback | tr a-z A-Z)) > ./outfiles/test12

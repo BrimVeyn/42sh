@@ -1,1 +1,0 @@
-(echo StartLevelOne && ((false || echo MidLevelTwo) && (echo FinalLevelThree | echo AltLevelFour)) || echo LastLevelFive)

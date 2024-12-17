@@ -1,1 +1,0 @@
-(echo salut mec || echo fallback; echo hey !) > ./outfiles/test1

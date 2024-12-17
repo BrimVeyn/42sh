@@ -1,1 +1,0 @@
-echo $(echo $(mkdir tempdir && echo Dir created && (rmdir tempdir && echo Dir removed)))

@@ -1,1 +1,0 @@
-(echo ChainOne && echo ChainTwo | (echo ChainThree && (false || echo ChainFour)) && echo ChainFinal)

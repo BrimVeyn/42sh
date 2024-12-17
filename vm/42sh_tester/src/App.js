@@ -10,22 +10,20 @@ function App() {
 	const [data, setData] = useState(null);
 
 	useEffect(() => {
-		// Fetch the JSON file from the public folder
-		fetch('/log.json')
+		fetch('http://localhost:4000/api/logs')
 			.then((response) => {
 				if (!response.ok) {
 					throw new Error(`HTTP error! status: ${response.status}`);
 				}
-				return response.json(); // Parse JSON
+				return response.json(); // Parse the JSON response
 			})
 			.then((json) => {
-				setData(json); // Update state with parsed data
+				setData(json); // Update state with the fetched JSON data
 			})
 			.catch((error) => {
 				console.error('Error fetching the JSON file:', error);
 			});
-	}, []); // Empty dependency array to run only once on component mount
-
+	}, []);
 	// console.log(data);
 
 	const [resumeContent, setResumeContent] = useState(null);
@@ -33,6 +31,8 @@ function App() {
 	const injectButton = (tests) => {
 		setResumeContent(<Resume tests={tests} />);
 	};
+
+	console.log(data);
 
 	return (
 		<div>
@@ -52,7 +52,7 @@ function App() {
 				</div>
 
 				<div className="w-2/3 flex flex-col justify-start items-center">
-					{resumeContent && resumeContent }
+					{resumeContent}
 				</div>
 
 			</header>

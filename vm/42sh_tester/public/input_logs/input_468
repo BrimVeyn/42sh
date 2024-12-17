@@ -1,1 +1,0 @@
-var=1; var+='salut mec'; var+="salope"; var+='hey'; echo ${var}

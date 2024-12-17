@@ -1,1 +1,0 @@
-echo $(seq 1 10 | xargs -I {} echo {} | wc -l && echo Xargs done)

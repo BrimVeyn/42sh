@@ -1,1 +1,0 @@
-echo $(mkdir test_dir && echo Directory created || echo Directory creation failed)

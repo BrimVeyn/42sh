@@ -1,1 +1,0 @@
-{ { echo outer1 && { echo inner1 || echo altInner1 ; } ; } || { echo outerFallback ; echo outerEnd ; } ; } && echo finished

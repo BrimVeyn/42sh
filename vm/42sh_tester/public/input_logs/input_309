@@ -1,1 +1,0 @@
-{ { echo inner1; } ; echo inner2 ; } | grep inner
