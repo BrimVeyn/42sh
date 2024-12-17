@@ -1,1 +1,1 @@
-{ echo pipeline ; { echo pipeStart && echo pipeMid ; } | grep pipeStart && echo pipelineDone ; }
+echo ${UNDEFINED_VAR:=new_default}; echo ${UNDEFINED_VAR}

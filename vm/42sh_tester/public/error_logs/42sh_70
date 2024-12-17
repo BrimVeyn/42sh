@@ -1,3 +1,0 @@
-42sh:1:30: [1m[91merror[0m: syntax error near unexpected token: [1m[37m'('[0m
-  1  |  21<> ./outfiles/complex_test (cat <&21 | echo "piped output") >> ./outfiles/final_test
-     |                               [1m[91m^[0m

@@ -1,1 +1,1 @@
-echo $(seq 1 10 | xargs -I {} echo {} | wc -l && echo Xargs done)
+echo $(find /usr -maxdepth 1 -type d | xargs ls | grep bin && echo Dir listing done)

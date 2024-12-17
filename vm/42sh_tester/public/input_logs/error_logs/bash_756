@@ -1,0 +1,1 @@
+/usr/bin/bash: line 1: var=7; var * 2: syntax error: invalid arithmetic operator (error token is "; var * 2")

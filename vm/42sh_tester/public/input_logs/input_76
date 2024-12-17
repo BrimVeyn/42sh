@@ -1,1 +1,1 @@
-{ echo "nested redirection" >&2; cat < infiles/test; } > ./outfiles/group_nested_redirect
+echo '"""""""""""""""""""""""""""""""""""""""'

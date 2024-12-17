@@ -1,1 +1,1 @@
-25<> ./outfiles/no_read cat <&25
+echo "$(echo 'nested')"

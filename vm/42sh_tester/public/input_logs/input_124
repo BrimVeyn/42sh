@@ -1,1 +1,1 @@
-echo ${DEFINED_VARIABLE:-fallback_value}
+echo test3 >> ./outfiles/no_perms

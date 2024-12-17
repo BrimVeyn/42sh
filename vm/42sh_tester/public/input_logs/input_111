@@ -1,1 +1,1 @@
-echo ${PATH${salut}}
+echo test3 >| ./outfiles/no_perms

@@ -1,1 +1,1 @@
-echo Files in directory | cat - $(ls)
+echo $(ls && echo Listing succeeded || echo Listing failed)

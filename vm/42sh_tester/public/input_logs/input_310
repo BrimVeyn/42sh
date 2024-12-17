@@ -1,1 +1,1 @@
-((false || echo EarlyExit) && echo MidProcess || (echo LateProcess && echo FinalOutcome))
+{ echo first ; echo second ; } | tee ./outfiles/test1

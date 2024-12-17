@@ -1,2 +1,2 @@
-bin boot dev Docker etc home init lib lib32 lib64 lost+found media mnt opt proc root run sbin srv sys tmp usr var
+bin boot cdrom dev etc goinfre home lib lib32 lib64 libx32 lost+found media mnt opt osquery.flags proc root run sbin sgoinfre snap srv swap.img sys tmp usr var
 Done

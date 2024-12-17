@@ -1,1 +1,1 @@
-echo full check:$(echo $(echo prefix$(uname)postfix))suffix
+echo file check:$(echo $(ls /etc | (grep conf && echo configuration files)))done

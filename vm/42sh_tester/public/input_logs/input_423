@@ -1,1 +1,1 @@
-{ echo hello && { echo world ;} ; } && { echo welcome ;}
+echo ${:VAR:=default_value}

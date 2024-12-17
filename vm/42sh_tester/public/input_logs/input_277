@@ -1,1 +1,1 @@
-(echo A && echo B | (false && echo Fail || echo Success))
+(echo salut mec | rev; echo other output) > ./outfiles/test8

@@ -1,1 +1,1 @@
-echo test2 >| ./outfiles/file1
+<<<1>@>>>

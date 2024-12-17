@@ -1,1 +1,1 @@
-(echo Outer && (false || (echo InnerOne | echo InnerTwo)) && echo Final)
+(echo $(echo inside substitution); echo outside) > ./outfiles/test3

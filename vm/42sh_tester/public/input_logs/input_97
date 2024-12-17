@@ -1,1 +1,1 @@
-echo $((; echo salut;
+echo '$(echo $(echo '$(echo nested)'))'

@@ -1,1 +1,1 @@
-(echo salut mec | (echo mec salut | rev) || echo fallback) > ./outfiles/test20
+{ { echo fileWrite ; { echo fileWriteInner && echo toFile ; } > ./outfiles/complexOutput ; } && cat ./outfiles/complexOutput ; } || echo writeFailed

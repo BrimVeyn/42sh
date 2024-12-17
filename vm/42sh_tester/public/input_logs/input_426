@@ -1,1 +1,1 @@
-echo { echo nested ; } && { echo check ;}
+echo ${:-VAR}

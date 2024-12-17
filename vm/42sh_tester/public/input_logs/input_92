@@ -1,1 +1,1 @@
-{ echo salut mec
+echo "$(echo salut)"""""""""""""""""""""""""""""""

@@ -1,1 +1,1 @@
-(echo BeginSequence && (false || (echo SubStepOne && echo SubStepTwo || echo SubStepThree)) && echo FinalStep)
+{ echo chain1 && echo chain2 ; } && { echo chain3 ; }

@@ -1,1 +1,1 @@
-((echo EntryOne && false || echo EntryTwo) && (echo EntryThree || (echo EntryFour | false && echo EntryFive)) && echo EndEntry)
+{ echo chain1 ; { echo chain2 && { echo nested1 ; echo nested2 ; } ; } ; echo end ; }

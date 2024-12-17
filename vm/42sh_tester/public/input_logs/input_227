@@ -1,1 +1,1 @@
-(echo This will run && echo And then this)
+((false || echo A | echo B) && (echo C || echo D) && echo E)

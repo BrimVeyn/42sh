@@ -1,1 +1,1 @@
-mec
+$("echo" $(echo nested)))

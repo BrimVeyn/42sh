@@ -1,2 +1,1 @@
-salut voici un fichier test
-duplicated output
+$(echo nested)

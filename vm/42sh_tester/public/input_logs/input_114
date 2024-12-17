@@ -1,1 +1,1 @@
-echo ${UNDEFINED:-default_value} | rev
+echo test6 >| ./outfiles

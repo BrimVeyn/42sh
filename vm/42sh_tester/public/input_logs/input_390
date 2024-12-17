@@ -1,1 +1,1 @@
-echo status:$(ls /etc | grep $(whoami) | wc -l)processes running
+echo $(echo $(echo $(uname)))suffix

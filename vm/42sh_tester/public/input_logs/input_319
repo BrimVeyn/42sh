@@ -1,1 +1,1 @@
-(echo salut; ls) | echo hey
+{ { echo first && echo second ; } || echo fallback ; } && { echo success ; } || { echo fail ; }

@@ -1,1 +1,1 @@
-echo result:$(mkdir testdir && echo created || echo failed)directory
+echo status:$(ls /etc | grep $(whoami) | wc -l)processes running

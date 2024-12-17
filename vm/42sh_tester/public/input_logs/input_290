@@ -1,1 +1,1 @@
-(((echo A | echo B) && (false || (echo C && echo D))) || echo E; echo FinalStep)
+(echo outer shell && (echo nested shell | rev || echo fallback | tr a-z A-Z)) > ./outfiles/test12

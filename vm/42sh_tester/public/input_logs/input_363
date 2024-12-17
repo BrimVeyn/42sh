@@ -1,1 +1,1 @@
-echo $(uname -a && echo Kernel info)
+echo $(ls /etc | head -n 5)

@@ -1,1 +1,1 @@
-echo path:$(echo /usr/bin | grep bin)found
+echo kernel:$(uname -r)version

@@ -1,1 +1,1 @@
-{ echo part1 ; { echo part2 ; { echo sub1 && echo sub2 ; } || echo altSub ; } ; } && echo final
+echo ${UNDEFINED_VAR:=temporary}; echo ${UNDEFINED_VAR}

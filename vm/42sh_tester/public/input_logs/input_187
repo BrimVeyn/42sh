@@ -1,1 +1,1 @@
-var="hello"'world'; echo "${var}"
+(false && (echo F && echo G) || (echo H && echo I) && (false || echo J))

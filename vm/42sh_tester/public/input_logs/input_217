@@ -1,1 +1,1 @@
-echo '$('echo' $(echo nested)))'
+((echo A | echo B) || (false && echo Fail) || echo Continue)

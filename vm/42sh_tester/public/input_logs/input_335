@@ -1,1 +1,1 @@
-(echo first level && (echo second level || (echo third level))) > ./outfiles/test6
+{ echo part1 ; { echo part2 ; { echo sub1 && echo sub2 ; } || echo altSub ; } ; } && echo final

@@ -1,1 +1,1 @@
-(false && (echo X | echo Y) || echo Z | echo Final)
+(echo salut mec || echo fallback; echo error >&2; echo finished) > ./outfiles/test4 2>&1

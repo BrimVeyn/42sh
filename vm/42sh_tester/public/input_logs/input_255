@@ -1,1 +1,1 @@
-(echo A && false) || echo B
+(((false || echo X && echo Y) | echo Z) && echo EndOne || echo EndTwo)

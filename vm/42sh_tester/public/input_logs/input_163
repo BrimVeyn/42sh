@@ -1,1 +1,1 @@
-'ec'${var}ho salut
+{ echo "start"; cat < infiles/test; echo "end"; } > ./outfiles/group_output

@@ -1,1 +1,1 @@
-(echo Init && (false || (echo ProcessOne && (echo ProcessTwo || echo ProcessThree)) || echo FallbackProcess))
+echo { echo nested ; } && { echo check ;}

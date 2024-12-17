@@ -1,1 +1,1 @@
-{ { echo alpha && echo beta ; } ; echo gamma ; echo delta ; } && echo endchain
+echo ${MISSING_VARIABLE:?variable is not set or has no value}

@@ -1,1 +1,1 @@
-((echo Begin && echo Process) || (false && echo Error) || (echo Recover && echo Continue) | echo WrapUp)
+{ echo hello && { echo world ;} ; } && { echo welcome ;}

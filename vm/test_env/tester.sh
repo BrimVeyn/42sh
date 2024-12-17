@@ -59,15 +59,20 @@ clean_redirection() {
 	rm -rf infiles
 }
 
+clean_cd () {
+	chmod -R 777 test_cd test_dir testdir outfiles
+	rm -rf test_cd test_dir testdir outfiles
+}
+
 test_files=(
-	"src/test"
-	"src/redirections"
+	"src/basic"
 	"src/syntax"
-	"src/parameter_expansion"
 	"src/quotes"
+	"src/redirections"
 	"src/subshell"
-	"src/command_sub"
 	"src/command_group"
+	"src/command_sub"
+	"src/parameter_expansion"
 	"src/arithmetic_expansion"
 	"src/tilde_expansion"
 	"src/builtin_export"
@@ -133,16 +138,22 @@ start_tests ()
 				"\t\t\t\t\t\"42sh_exit_code\": \"${SH42_EXITNO}\",\n" \
 				"\t\t\t\t\t\"bash_exit_code\": \"${BASH_EXITNO}\",\n"
 
-				if [[ "$(cat output_logs/bash_${testId})" = "$(cat output_logs/42sh_${testId})" ]]; then
+				if cmp -s "output_logs/bash_${testId}" "output_logs/42sh_${testId}"; then
 					echo -e "\t\t\t\t\t\"output_ok\": \"true\","
 				else
 					echo -e "\t\t\t\t\t\"output_ok\": \"false\","
 				fi
 
-				if [[ "$(cat error_logs/bash_${testId})" = "$(cat error_logs/42sh_${testId})" ]]; then
-					echo -e "\t\t\t\t\t\"error_ok\": \"true\""
+				if cmp -s "error_logs/bash_${testId}" "error_logs/42sh_${testId}"; then
+					echo -e "\t\t\t\t\t\"error_ok\": \"true\","
 				else
-					echo -e "\t\t\t\t\t\"error_ok\": \"false\""
+					echo -e "\t\t\t\t\t\"error_ok\": \"false\","
+				fi
+
+				if [[ "${SH42_EXITNO}" = "${BASH_EXITNO}" ]]; then
+					echo -e "\t\t\t\t\t\"exit_ok\": \"true\""
+				else
+					echo -e "\t\t\t\t\t\"exit_ok\": \"false\""
 				fi
 
 				echo -ne "\t\t\t\t}";
@@ -182,3 +193,4 @@ setup_redirection_test_environment
 start_tests
 
 clean_redirection
+clean_cd

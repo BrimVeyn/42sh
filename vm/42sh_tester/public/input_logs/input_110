@@ -1,1 +1,1 @@
-echo ${8PATH}
+echo test2 >| ./outfiles/file1

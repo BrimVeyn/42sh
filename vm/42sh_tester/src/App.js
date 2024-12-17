@@ -41,6 +41,7 @@ function App() {
 					{data ? (
 						data.categories.map((category, index) => (
 							<Category 
+								key={index}
 								name={category.category_name} 
 								inject={() => injectButton(category.tests)}
 							/>
@@ -51,11 +52,7 @@ function App() {
 				</div>
 
 				<div className="w-2/3 flex flex-col justify-start items-center">
-					{resumeContent ? (
-						resumeContent
-					) : (
-						<p> Nothing </p>
-					)}
+					{resumeContent && resumeContent }
 				</div>
 
 			</header>

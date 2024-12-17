@@ -1,1 +1,1 @@
-(false && (echo F && echo G) || (echo H && echo I) && (false || echo J))
+(echo Start && ((echo InnerOne | echo InnerTwo) && false || echo Fallback) && echo End)

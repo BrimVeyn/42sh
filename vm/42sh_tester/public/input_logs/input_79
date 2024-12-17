@@ -1,1 +1,1 @@
-{ cat < infiles/test; echo "duplicated output"; } 21<> ./outfiles/group_fd_test
+echo "$(echo $(echo $(echo '$(echo nested)')))"

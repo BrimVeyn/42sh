@@ -1,1 +1,1 @@
-(echo Start; (echo Nested; echo Subshell); echo End)
+(echo A && (echo B || echo C) && echo D | echo E)

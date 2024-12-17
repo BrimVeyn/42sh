@@ -1,1 +1,11 @@
-adduser.conf alternatives apache2 apparmor.d apt
+42sh
+error_logs
+infiles
+input_logs
+log.json
+outfiles
+output_logs
+src
+test_cd
+test_dir
+tester.sh

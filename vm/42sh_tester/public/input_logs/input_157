@@ -1,1 +1,1 @@
-'e''c''h''o' salut
+(cat < infiles/test | echo "output to file") > ./outfiles/paren_pipe

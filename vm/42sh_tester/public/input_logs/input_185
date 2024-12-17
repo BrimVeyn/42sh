@@ -1,1 +1,1 @@
-echo "ab""cd""ef"
+((echo Check && true) && echo Passed || echo Failed)

@@ -1,1 +1,2 @@
-$(echo $(echo "$(echo nested)"))
+Init
+End

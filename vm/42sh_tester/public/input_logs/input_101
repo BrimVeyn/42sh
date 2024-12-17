@@ -1,1 +1,1 @@
-echo ${VAR:-}
+echo "${var:$var}"

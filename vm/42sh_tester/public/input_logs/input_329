@@ -1,1 +1,1 @@
-(cat; (echo inside nested shell)) < ../Makefile > ./outfiles/test9
+{ echo pipeline ; { echo pipeStart && echo pipeMid ; } | grep pipeStart && echo pipelineDone ; }

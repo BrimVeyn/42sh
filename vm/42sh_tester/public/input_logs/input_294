@@ -1,1 +1,1 @@
-((echo ComplexA || (echo ComplexB && echo ComplexC)) && echo ComplexEnd | (false && echo FailStep || echo SuccessStep))
+(echo first command || (echo second command | rev) || echo fallback) > ./outfiles/test16

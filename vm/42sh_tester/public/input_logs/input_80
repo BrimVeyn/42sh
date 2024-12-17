@@ -1,1 +1,1 @@
-{ echo "closing fd"; 22<> ./outfiles/group_fd_close; echo "done with fd"; } > ./outfiles/group_close
+echo '""""""""""""""""""""""""""""""""""""""'

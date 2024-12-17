@@ -1,1 +1,0 @@
-/usr/bin/bash: line 1: $(echo $(echo $(echo "$(echo nested)"))): command not found

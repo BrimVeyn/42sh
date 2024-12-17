@@ -1,1 +1,1 @@
-(((echo DeepA | echo DeepB) && echo DeepC) || (false || (echo DeepD && echo DeepE | echo DeepF)))
+(echo salut mec && (echo mec salut | rev) && echo success) > ./outfiles/test19

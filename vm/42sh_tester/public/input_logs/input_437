@@ -1,1 +1,1 @@
-{ { echo first && echo second ; } || echo fallback ; } && { echo success ; } || { echo fail ; }
+echo ${HOME:=salut}; echo ${HOME}

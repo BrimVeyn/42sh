@@ -1,1 +1,1 @@
-"${var}"'ho' salut
+{ echo "write and append"; echo "new line" >> ./outfiles/group_append; } <> ./outfiles/group_combined

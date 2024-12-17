@@ -1,1 +1,1 @@
-echo first file:$(ls | head -n 1)
+echo count:$(ls | wc -l)files

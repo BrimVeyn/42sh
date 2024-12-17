@@ -1,1 +1,1 @@
-(echo starting process || echo this won’t run; ls; echo background complete) > ./outfiles/test7
+{ echo first ; { { echo second && { echo third ; echo fourth ; } ; echo fifth ; } ; echo sixth ; } && echo seventh

@@ -1,1 +1,1 @@
-(echo salut mec && (echo inside nested shell && echo another line)) > ./outfiles/test2
+{ { { echo deep1 ; } && { echo deep2 ; echo deep3 ; } ; } || { echo fallback ; } ; } && echo completed

@@ -1,1 +1,1 @@
-echo '$(echo salut)'
+nan<> ./outfiles/file1 cat <&nan

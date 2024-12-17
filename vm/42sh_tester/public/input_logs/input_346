@@ -1,1 +1,1 @@
-(echo process start && ls || echo process failed; echo done) > ./outfiles/test17
+{ echo firstBlock ; { echo secondBlock && { echo thirdBlock ; echo fourthBlock ; } ; } ; echo fifthBlock ; } && echo endBlock

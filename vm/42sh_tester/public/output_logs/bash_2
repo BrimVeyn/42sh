@@ -1,7 +1,5 @@
 42sh
-42sh_tester
 error_logs
-generate_html.py
 infiles
 input_logs
 log.json

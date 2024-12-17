@@ -1,1 +1,1 @@
-echo $(echo $(echo salut; echo prout) | echo salut)
+echo $(echo $(echo nested; ls) | echo Finished)

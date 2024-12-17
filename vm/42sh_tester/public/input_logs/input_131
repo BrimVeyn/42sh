@@ -1,1 +1,1 @@
-echo ${UNDEFINED_NUMBER:-999} | rev
+25< infiles/no_read cat <&25

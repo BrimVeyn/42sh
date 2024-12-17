@@ -1,1 +1,1 @@
-((echo A && (echo B || echo C)) || echo D; (echo E && false || echo F))
+(echo TestOne && (false || (echo TestTwo | echo TestThree)) && (echo PassOne || echo FailOne) && echo Result)

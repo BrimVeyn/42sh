@@ -1,1 +1,1 @@
-echo "$("echo" $(echo nested)))"
+((echo StepOne && false) || (echo StepTwo | echo StepThree))

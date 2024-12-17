@@ -1,1 +1,1 @@
-echo salut"hello"
+(echo Start && (false || (echo Mid && (echo End || false))))

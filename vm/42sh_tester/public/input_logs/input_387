@@ -1,1 +1,1 @@
-echo listing:$(echo $(ls /usr/home | grep sh))done
+echo check:$(echo $(ls /etc | grep conf)config files)

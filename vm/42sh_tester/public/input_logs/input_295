@@ -1,1 +1,1 @@
-(echo StartOne && echo StartTwo || ((echo PipeOne && false) || echo PipeTwo | echo PipeThree) && echo FinalTest)
+(echo process start && ls || echo process failed; echo done) > ./outfiles/test17

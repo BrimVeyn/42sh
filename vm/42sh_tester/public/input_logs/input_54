@@ -1,1 +1,1 @@
-21<> ./outfiles/file1 cat <&21
+echo "hello world"

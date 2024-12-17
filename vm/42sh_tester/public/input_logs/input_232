@@ -1,1 +1,1 @@
-(false && (echo Wont run && echo Neither will this) || echo This will run)
+(echo TestOne | (false || echo TestTwo) && echo TestThree)

@@ -1,1 +1,1 @@
-(echo first level; (echo second level; (echo third level))) > ./outfiles/test6
+{ { echo alpha && echo beta ; } ; echo gamma ; echo delta ; } && echo endchain

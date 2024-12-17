@@ -1,1 +1,1 @@
-21<> ./outfiles/file1 21<&-
+echo "a"'b'"c"'d'

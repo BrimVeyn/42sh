@@ -1,1 +1,1 @@
-{ echo startChain ; { echo chain1 && { echo chain2 && echo chain3 ; } ; echo chainEnd ; } ; } || echo failedChain
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%/home}

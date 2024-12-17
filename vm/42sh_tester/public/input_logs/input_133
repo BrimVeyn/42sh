@@ -1,1 +1,1 @@
-echo ${UNDEFINED_VAR:-Empty_Value} | cat
+27< infiles cat <&27

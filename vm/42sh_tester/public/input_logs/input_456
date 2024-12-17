@@ -1,1 +1,1 @@
-{ { echo test1 | grep test1 ; echo test2 | grep test2 ; } && echo success ; } || echo failure
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##}

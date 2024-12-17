@@ -1,1 +1,1 @@
-echo ${#PATH:-DSADAS}
+25<> ./outfiles/no_read cat <&25

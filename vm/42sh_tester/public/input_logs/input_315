@@ -1,1 +1,1 @@
-((false && echo SkipOne || echo RunOne) && (echo RunTwo && (false || echo RunThree | echo RunFour)) && echo CompleteRun)
+echo salut && { echo braces ; }

@@ -1,1 +1,1 @@
-echo ${}
+echo "$("echo" $(echo nested)))"

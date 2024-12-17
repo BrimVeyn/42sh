@@ -1,1 +1,1 @@
-(echo A | (echo B && (false || (echo C | echo D) && echo E)) || (echo F && false) || echo G)
+{ echo salut && { echo mec ;} ; } && { echo salut ;}

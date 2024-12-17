@@ -1,1 +1,1 @@
-echo "'salut'"
+22<> ./outfiles/no_exec 22<&-

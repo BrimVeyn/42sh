@@ -1,1 +1,1 @@
-cat <> ./outfiles
+var='salope '; echo "${var}"

@@ -1,1 +1,1 @@
-echo test4 >| ./outfiles/no_write
+;}

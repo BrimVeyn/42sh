@@ -1,1 +1,1 @@
-echo ${PATH}d1${PATH}d2${PATH}
+echo test5 >| ./outfiles/non_existing

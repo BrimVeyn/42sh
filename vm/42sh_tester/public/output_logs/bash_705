@@ -1,8 +1,5 @@
-salut -n1
-42sh
-42sh_tester
+salut -n42sh
 error_logs
-generate_html.py
 infiles
 input_logs
 log.json

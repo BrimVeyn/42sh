@@ -1,8 +1,0 @@
-cat: 42sh_tester: Is a directory
-cat: error_logs: Is a directory
-cat: infiles: Is a directory
-cat: input_logs: Is a directory
-cat: outfiles: Is a directory
-cat: output_logs: Is a directory
-cat: src: Is a directory
-cat: test_cd: Is a directory

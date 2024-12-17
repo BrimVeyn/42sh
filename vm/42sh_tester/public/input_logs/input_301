@@ -1,1 +1,1 @@
-(echo PreStep && (false || (echo MidStep | echo NextStep && echo FinalStep)) || echo AltStep)
+echo {

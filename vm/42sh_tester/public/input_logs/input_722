@@ -1,1 +1,1 @@
-var1=3; var2=5; var3=7; echo $((${var1} 1 42sh 42sh_tester error_logs generate_html.py infiles input_logs log.json outfiles output_logs src test_cd test_dir testdir tester.sh ${var2} + ${var3}))
+var1=3; var2=5; var3=7; echo $((${var1} 42sh error_logs infiles input_logs log.json outfiles output_logs src test_cd test_dir testdir tester.sh ${var2} + ${var3}))

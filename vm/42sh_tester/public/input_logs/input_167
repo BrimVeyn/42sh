@@ -1,1 +1,1 @@
-echo '""'
+{ echo "reading input"; cat <&0; } <> ./outfiles/group_stdin

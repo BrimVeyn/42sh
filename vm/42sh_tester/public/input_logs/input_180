@@ -1,1 +1,1 @@
-echo "'$(echo nested)'"
+(echo Outer && (false || echo Inner) && echo Final)

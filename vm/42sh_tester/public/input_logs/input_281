@@ -1,1 +1,1 @@
-((echo Init && false) || (echo Mid | (echo End && echo Done)))
+(echo $(echo inside substitution) | rev; echo outside) > ./outfiles/test3

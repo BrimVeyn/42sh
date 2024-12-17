@@ -1,1 +1,1 @@
-nan<> ./outfiles/file1 cat <&nan
+echo "ab""cd""ef"

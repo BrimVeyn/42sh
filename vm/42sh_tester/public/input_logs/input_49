@@ -1,1 +1,1 @@
-cat <> ./outfiles/no_perms
+echo "$(echo "$(echo salut)")"

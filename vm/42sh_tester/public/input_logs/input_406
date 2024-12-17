@@ -1,1 +1,1 @@
-echo nesting:$(echo $(echo $(echo inner level reached)))done
+echo result:$(echo $(ls /usr | (grep bin && echo binaries found)))

@@ -1,1 +1,1 @@
-(echo First | false || (echo Second && echo Third))
+(echo first level; (echo second level; (echo third level))) > ./outfiles/test6

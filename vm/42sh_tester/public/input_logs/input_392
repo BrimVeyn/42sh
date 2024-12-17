@@ -1,1 +1,1 @@
-echo result:$(echo $(ls /usr | grep lib))libraries found
+echo result:$(mkdir testdir && echo created || echo failed)directory

@@ -1,1 +1,1 @@
-(echo A && (false || echo B) && echo C | echo D)
+(echo starting process || echo this won’t run; ls; echo background complete) > ./outfiles/test7
