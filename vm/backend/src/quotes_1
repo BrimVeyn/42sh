@@ -1,0 +1,49 @@
+'echo salut'
+echo "'salut'"
+echo '"salut"'
+echo "$(echo salut)"
+echo '$(echo salut)'
+echo ''""hey""''
+'e''c''h''o' salut
+var='ec'; "${var}ho" salut
+var=$(echo echo); ${var} salut
+echo 'a'"b"'c'
+echo ''"salut"''
+echo "he"'y'"!"
+'ec'${var}ho salut
+"${var}"'ho' salut
+var="ec"'ho'; ${var} salut
+var='$(echo ec)ho'; ${var} salut
+echo '""'
+echo "$(echo "$(echo salut)")"
+echo "$(echo '"')"
+echo '$(echo "$(echo "salut")")'
+""""""""echo salut
+var='salope    '; echo "${var}"
+echo "hello world"
+echo "''"
+echo "'single quotes'"
+echo '"double quotes"'
+echo "$(echo 'nested')"
+echo '$(echo "nested double quotes")'
+echo ""'"'"'""
+echo "'$(echo nested)'"
+echo "a"'b'"c"'d'
+echo "$(echo "$(echo "$(echo nested)")")"
+echo '$(echo "$(echo "$(echo nested)")")'
+echo ''"'"'"nested'"'"''
+echo "ab""cd""ef"
+var="nested"; echo "${var}"
+var="hello"'world'; echo "${var}"
+echo salut"hello"
+echo """"double""""quotes""""
+echo "simple" 'and' "complex" 'mix'
+echo $(echo echo); echo "$(echo hello)"
+echo ""$(echo 'nested')""
+echo '$(echo hello)'""$(echo world)""
+echo """"""""""""""""""""""""""""""""""""""""
+echo '"""""""""""""""""""""""""""""""""""""""'
+echo "'$(echo)'"
+echo '$(echo"$(echo "$(echo "$(echo nested)")")")'
+echo "$(echo $(echo $(echo '$(echo nested)')))"
+echo '""""""""""""""""""""""""""""""""""""""'

@@ -6,7 +6,7 @@
 #    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/06 10:05:24 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/12/10 13:06:35 by bvan-pae         ###   ########.fr        #
+#    Updated: 2024/12/18 14:45:44 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -43,29 +43,7 @@ SRC 			:= source/main.c $(LEXER_SRC) $(UTILS_SRC) \
 				   $(REGEX_SRC) $(BUILTINS_SRC) $(FT_READLINE_SRC) \
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
-
-SRC_NO_MAIN := $(filter-out source/main.c, $(SRC))
-OBJ_NO_MAIN := $(SRC_NO_MAIN:source/%.c=objects/%.o) 
-
 DEPS 			:= $(OBJ:%.o=%.d)
-
-
-BIN_TEST		:= $(wildcard tester/bin/*.c)
-
-AST_TEST		:= ast_test
-AST_MAIN		:= $(filter %/ast_main.c, $(BIN_TEST))
-
-LEXER_TEST	:= lexer_test
-LEXER_MAIN	:= $(filter %/lexer_main.c, $(BIN_TEST))
-
-REGEX_TEST	:= regex_test
-REGEX_MAIN	:= $(filter %/regex_main.c, $(BIN_TEST))
-
-EXEC_TEST		:= exec_test
-EXEC_MAIN	:= $(filter %/exec_main.c, $(BIN_TEST))
-
-FT_READLINE_TEST		:= ft_readline_test
-FT_READLINE_MAIN		:= $(filter %/ft_readline_main.c, $(BIN_TEST))
 
 SAN 			:= san
 
@@ -86,7 +64,8 @@ PASTEL_BLUE     := \033[0;38;2;130;135;206m
 PRUSSIAN_BLUE   := \033[0;38;2;28;49;68m
 JASPER   		:= \033[0;38;2;213;87;59m
 OLIVINE   		:= \033[0;38;2;154;184;122m
-
+HIDE_CURSOR		:= \033[?25l
+RESET_CURSOR	:= \033[?25h
 
 TOTAL_FILES := $(shell echo $(SRC) | wc -w)
 COMPILE_COUNT := 0
@@ -122,10 +101,18 @@ endef
 
 # Wrapper to exec command in order to handle the reset color if an error occured
 define cmd_wrapper
-	$1 || { printf "\033[?25h"; echo -n "$(DEF_COLOR)"; exit 1; }
+	$1 || { printf "\033[?25h"; echo -n "$(DEF_COLOR)$(RESET_CURSOR)"; exit 1; }
 endef
 
 all: compute_total $(NAME)
+
+test: $(NAME)
+	@echo "$(CYAN)Copying binary to test environment...$(DEF_COLOR)"
+	@{ cp $(NAME) ./vm/backend/; }
+	@echo "$(CYAN)Running tests in the test environment...$(DEF_COLOR)"
+	@{ cd vm/backend/ && ./tester; }
+	@echo "$(GREEN)Tests and results update complete!$(DEF_COLOR)"
+	@echo "$(BLUE)Open the test results at:$(DEF_COLOR) http://localhost:3000"
 
 compute_total:
 	$(eval TOTAL_FILES := $(shell var=$$(./progression_bar.sh); if [ $${var} -ne 0 ]; then echo $${var} ; else echo $(TOTAL_FILES); fi))
@@ -135,36 +122,6 @@ $(SAN): $(LIBFT) $(STRING) $(STRING) $(OBJDIR) $(OBJ)
 	@printf "$(MAGENTA)"
 	@$(call cmd_wrapper, $(CC) $(OBJ) $(LIBFT) $(STRING) $(CFLAGS) $(LDFLAGS) $(SANFLAGS) -o $(NAME))
 	@printf "Done with sanitizer !$(DEF_COLOR)\n"
-
-$(LEXER_TEST): $(LIBFT) $(STRING) $(OBJDIR) $(OBJ_NO_MAIN)
-	@echo "$(RED)Making test binary: $(LEXER_TEST)"
-	@printf "$(MAGENTA)"
-	@$(call cmd_wrapper, $(CC) $(OBJ_NO_MAIN) $(LEXER_MAIN) $(INC) $(LIBFT) $(STRING) $(CFLAGS) $(LDFLAGS) -o $(LEXER_TEST))	
-	@printf "$(LEXER_TEST) done !$(DEF_COLOR)\n"
-
-$(EXEC_TEST): $(LIBFT) $(STRING) $(OBJDIR) $(OBJ_NO_MAIN)
-	@echo "$(RED)Making test binary: $(EXEC_TEST)"
-	@printf "$(MAGENTA)"
-	@$(call cmd_wrapper, $(CC) $(OBJ_NO_MAIN) $(EXEC_MAIN) $(INC) $(LIBFT) $(STRING) $(CFLAGS) $(LDFLAGS) -o $(EXEC_TEST))
-	@printf "$(EXEC_TEST) done !$(DEF_COLOR)\n"
-
-$(AST_TEST): $(LIBFT) $(STRING) $(OBJDIR) $(OBJ_NO_MAIN)
-	@echo "$(RED)Making test binary: $(AST_TEST)"
-	@printf "$(MAGENTA)"
-	@$(call cmd_wrapper, $(CC) $(OBJ_NO_MAIN) $(AST_MAIN) $(INC) $(LIBFT) $(STRING) $(CFLAGS) $(LDFLAGS) -o $(AST_TEST))
-	@printf "$(AST_TEST) done !$(DEF_COLOR)\n"
-
-$(REGEX_TEST): $(LIBFT) $(STRING) $(OBJDIR) $(OBJ_NO_MAIN)
-	@echo "$(RED)Making test binary: $(REGEX_TEST)"
-	@printf "$(MAGENTA)"
-	@$(call cmd_wrapper, $(CC) $(OBJ_NO_MAIN) $(REGEX_MAIN) $(INC) $(LIBFT) $(STRING) $(CFLAGS) $(LDFLAGS) -o $(REGEX_TEST))
-	@printf "$(REGEX_TEST) done !$(DEF_COLOR)\n"
-
-$(FT_READLINE_TEST): $(LIBFT) $(STRING) $(OBJDIR) $(OBJ_NO_MAIN)
-	@echo "$(RED)Making test binary: $(FT_READLINE_TEST)"
-	@printf "$(MAGENTA)"
-	@$(call cmd_wrapper, $(CC) $(OBJ_NO_MAIN) $(FT_READLINE_MAIN) $(INC) $(LIBFT) $(STRING) $(CFLAGS) $(LDFLAGS) -o $(FT_READLINE_TEST))
-	@printf "$(FT_READLINE_TEST) done !$(DEF_COLOR)\n"
 
 $(NAME): $(LIBFT) $(STRING) $(OBJDIR) $(OBJ)
 	@echo "$(OLIVINE)Making binary: $(NAME)"

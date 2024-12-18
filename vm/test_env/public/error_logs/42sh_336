@@ -1,3 +1,0 @@
-42sh:1:114: [1m[91merror[0m: unexpected end of file
-  1  |  { echo first ; { { echo second && { echo third ; echo fourth ; } ; echo fifth ; } ; echo sixth ; } && echo seventh
-     |                                                                                                                   [1m[91m^[0m
