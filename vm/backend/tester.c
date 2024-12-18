@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 09:38:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/18 15:02:32 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/18 15:56:12 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,6 +211,7 @@ void *routine(void *cat) {
 		mapped_file = eol + 1;
 
 		passed_tests += (partial.passed);
+		free(partial.partial);
 		test_number++;
 	}
 	offset -= 2;
@@ -224,27 +225,47 @@ void *routine(void *cat) {
     return 0;
 }
 
-int count_dir(void) {
-	DIR *src_dir = opendir(SRC_PATH);
+int fill_dir(DIR *src_dir, struct dirent **dir_buffer) {
+    struct dirent *it;
+    int count = 0;
 
-	struct dirent *it;
-	int count = 0;
+    while ((it = readdir(src_dir)) != NULL) {
+        if (it->d_type != DT_DIR) {
+            dir_buffer[count] = malloc(sizeof(struct dirent));
+            memcpy(dir_buffer[count], it, sizeof(struct dirent));
+            count++;
+        }
+    }
 
-	while ((it = readdir(src_dir)) != NULL) {
-		if (it->d_type != DT_DIR)
-			count++;
-	}
-
-	closedir(src_dir);
-	return count;
+    return count;
 }
 
+void sort_dir(struct dirent **dir_buffer, int category_count) {
+    for (int i = 0; i < category_count - 1; i++) {
+        for (int j = i + 1; j < category_count; j++) {
+            if (strcmp(dir_buffer[i]->d_name, dir_buffer[j]->d_name) > 0) {
+                struct dirent *tmp = dir_buffer[i];
+                dir_buffer[i] = dir_buffer[j];
+                dir_buffer[j] = tmp;
+            }
+        }
+    }
+}
+
+void print_dir(struct dirent **dir_buffer){
+	for (int i = 0; dir_buffer[i]; i++){
+		printf("name: %s\n", dir_buffer[i]->d_name);
+	}
+}
 int main(void) {
 
 	//Count dir entries to allocate our structures
-	int category_count = count_dir();
-
 	DIR *src_dir = opendir(SRC_PATH);
+
+	struct dirent **dir_buffer = calloc(100, sizeof(struct dirent *));
+	int category_count = fill_dir(src_dir, dir_buffer); //return dir count
+	sort_dir(dir_buffer, category_count);
+
 	struct dirent *it;
 
 	Data data = {
@@ -254,7 +275,8 @@ int main(void) {
 	pthread_t *threads = calloc(category_count, sizeof(pthread_t));
 
 	int i = 0;
-	while (i < 1000 && (it = readdir(src_dir)) != NULL) {
+	while (i < 1000 && dir_buffer[i] != NULL) {
+		it = dir_buffer[i];
 		if (it->d_type != DT_DIR) {
 			//Create a threead for each category in src/
 			char buffer[PATH_MAX] = {0};
@@ -299,6 +321,10 @@ int main(void) {
 	}
 	free(final_result);
 
+	for (int i = 0; i < category_count; i++) {
+		free(dir_buffer[i]);
+	}
+	free(dir_buffer);
 	closedir(src_dir);
 	return 0;
 }
