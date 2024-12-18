@@ -71,8 +71,8 @@ function UnitTest({unit}) {
 		}
 	}
 
-	const setShown = (setter, value) => {
-		setter((active) => (value === active) ? null : value);
+	const setShown = (value) => {
+		setActiveDiff((active) => (value === active) ? null : value);
 	}
 
 	const copyToClipboard = (text) => {
@@ -97,13 +97,22 @@ function UnitTest({unit}) {
 			)}
 
 			<div className="flex-col buttonsContainer">
-				<button className={unitButton(unit, "output")} onClick={() => setShown(setActiveDiff, "output")}>
+				<button className={unitButton(unit, "output")} 
+					onMouseEnter={() => setShown("output")}
+					onMouseLeave={() => setShown(null)}
+				>
 					Ouput (stdout)
 				</button>
-				<button className={unitButton(unit, "error")} onClick={() => setShown(setActiveDiff, "error")}>
+				<button className={unitButton(unit, "error")} 
+					onMouseEnter={() => setShown("error")}
+					onMouseLeave={() => setShown(null)}
+				>
 					Error (stderr)
 				</button>
-				<button className={unitButton(unit, "exit")} onClick={() => setShown(setActiveDiff, "exit")}>
+				<button className={unitButton(unit, "exit")} 
+					onMouseEnter={() => setShown("exit")}
+					onMouseLeave={() => setShown(null)}
+				>
 					Exit code ($?)
 				</button>
 			</div>

@@ -1,0 +1,21 @@
+echo ""'""'""'""'""'""'""'""'""'""'""'""'""'""
+'"""""""""""""""""""""""""""""""""""""""""""' salut
+echo "$(echo "$(echo "$(echo "$(echo "$(echo nested)")")")")"
+echo "$(echo '$(echo "nested")')"
+'echo "$(echo salut)"'
+echo 'a'"b"'"c"'"d'"'"e'"f'
+echo $(echo "$(echo "$(echo $(echo "$(echo nested)")")")")
+var='""$(echo nested)""'; echo "${var}"
+var="$(echo "$(echo "$(echo "$(echo nested)")")")"; echo "${var}"
+echo ''"$(echo '')"''
+echo $(echo $(echo $(echo $(echo $(echo $(echo 'nested'))))))
+echo "$(echo salut)"""""""""""""""""""""""""""""""
+'$(echo $(echo $(echo "$(echo nested)")))' "$(echo $(echo nested))"
+var="''""'a'b'""c'd'e'f'"; echo "${var}"
+echo ""'$(echo '$(echo '$(echo "$(echo nested)")')')'""
+echo $(echo $(echo "$(echo "$(echo "$(echo nested)")")"))
+echo '$(echo $(echo '$(echo nested)'))'
+echo '$('echo' $(echo nested)))'
+echo '$("echo" $(echo nested)))'
+echo "$("echo" $(echo nested)))"
+echo "${var:$var}"

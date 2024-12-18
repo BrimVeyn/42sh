@@ -1,3 +1,0 @@
-42sh:1:40: [1m[91merror[0m: unexpected end of file
-  1  |  echo ${DEFINED_VAR:-${NESTED_VARIABLE:-}
-     |                                         [1m[91m^[0m

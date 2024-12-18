@@ -11,13 +11,15 @@ function Resume({ tests }) {
 	
 	// console.log("shownIndex: ", shownIndex, tests.length);
 
+
 	const computeBg = (test) => {
-		if (test["output_ok"] === "false" || test["exit_ok"] === "false") return "bg-red-500"
-		if (test["error_ok"] === "false") return "bg-yellow-500"
+		console.log("erorr :", test);
+		if (test["output_ok"] === "0" || test["exit_ok"] === "0") return "bg-red-500"
+		if (test["error_ok"] === "0") return "bg-yellow-500"
 		return "bg-green-500"
 	}
 	const computeBorder = (index) => {
-		if (index == shownIndex) return "border-4 border-blue-500";
+		if (index === shownIndex) return "border-4 border-blue-500";
 		return "";
 	}
 
