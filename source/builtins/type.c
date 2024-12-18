@@ -6,14 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:02:12 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:50:44 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/18 17:29:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <unistd.h>
 #include "exec.h"
 #include "libft.h"
-#include "parser.h"
 #include "utils.h"
 
 #define TYPE_BIN_NOT_FOUND(bin) ft_dprintf(2, "42sh: type: %s: not found\n", bin);
@@ -38,6 +37,8 @@ void builtin_type(const SimpleCommandP *command, Vars *shell_vars) {
 	char buffer[MAX_WORD_LEN] = {0};
 	size_t i = 1;
 
+	g_exitno = 0;
+
 	for (; command->word_list->data[i]; i++) {
 		bool isbuiltin = is_builtin(command->word_list->data[i]);
 		if (isbuiltin) {
@@ -54,6 +55,7 @@ void builtin_type(const SimpleCommandP *command, Vars *shell_vars) {
 		char *maybe_bin = hash_find_bin(command->word_list->data[i], shell_vars);
 		if (!maybe_bin && !isbuiltin) {
 			TYPE_BIN_NOT_FOUND(command->word_list->data[i]);
+			g_exitno = 1;
 			continue;
 		} else {
 			ft_sprintf(buffer, "%s is %s\n", command->word_list->data[i], maybe_bin);
@@ -61,5 +63,4 @@ void builtin_type(const SimpleCommandP *command, Vars *shell_vars) {
 	}
 
 	ft_putstr_fd(buffer, STDOUT_FILENO);
-	g_exitno = 0;
 }

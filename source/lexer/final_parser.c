@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:40 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 11:32:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/18 17:33:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@
 extern TableEntry parsingTable[182][86];
 
 bool is_keyword(const TokenType type) {
-	return (type == IF || type == FI || type == CASE || type == ESAC ||
+	return (type == IF || type == FI || type == CASE || type == ESAC || type == ELSE ||
 		 type == FOR || type == IN || type == WHILE || type == UNTIL || type == BANG ||
 		 type == DONE || type == DO || type == LBRACE || type == RBRACE || type == THEN);
 }
@@ -55,6 +55,8 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 		[LESSGREAT] = "<>", [CLOBBER] = ">|",
 		[NEWLINE] = "\n", [AMPER] = "&", [SEMI] = ";",
 	};
+
+	// dprintf(2, "token: %s | %d\n", raw_value, table_row);
 
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
@@ -123,6 +125,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 					return ERR;
 
 				token.type = identify_token(lexer, token.raw_value, entry.value, &error);
+				// dprintf(2, "token.type: %s\n", tokenTypeStr(token.type));
 				da_push(lexer->produced_tokens, token.type);
 				if (error) 
 					return ERR;
