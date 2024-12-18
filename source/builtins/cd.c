@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:18:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 13:39:45 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/17 10:42:08 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ static DirectoryStatus cd_status;
 
 void print_cd_error(DirectoryStatus n, void **arg){
 	ft_dprintf(2, "42sh: cd: ");
+	g_exitno = 1;
 	switch (n) {
 		case ERROR_NO_SUCH_FILE:
 			ft_dprintf(2, "%s: such file or directory\n", (char *)*arg);
@@ -56,6 +57,7 @@ void print_cd_error(DirectoryStatus n, void **arg){
 			break;
 		case ERROR_INVALID_OPTION: {
 			char option_str[2] = {(char)(*((int *)arg)), '\0'};
+			g_exitno = 2;
 			ft_dprintf(2, "-%s: Invalid option\n", option_str);
 			break;
 		}
@@ -253,20 +255,12 @@ void builtin_cd(const SimpleCommandP *command, Vars * const shell_vars) {
 	char *operand = NULL;
 	if (get_flags_and_operand(command->word_list->data, &options, &operand) == -1){
 		print_cd_error(cd_status, (void **)&options);
-		g_exitno = 1;
 		return;
 	}
 
-	if (options > 2){
-		ft_dprintf(2, "42sh: cd: -%s: Invalid option\n", (char*)&options);
-		g_exitno = 1;
-		return;
-	}
-	
 	if (!operand){
 		const char *home = get_variable_value(shell_vars, "HOME");
 		if (!home){
-			g_exitno = 1;
 			cd_status = ERROR_OLDPWD_NOT_SET;
 			print_cd_error(ERROR_OLDPWD_NOT_SET, NULL);
 			return;
@@ -277,7 +271,6 @@ void builtin_cd(const SimpleCommandP *command, Vars * const shell_vars) {
 	if (!ft_strcmp(operand, "-")){
 		const char *oldpwd = get_variable_value(shell_vars, "OLDPWD");
 		if (!oldpwd){
-			g_exitno = 1;
 			cd_status = ERROR_OLDPWD_NOT_SET;
 			print_cd_error(ERROR_OLDPWD_NOT_SET, NULL);
 			return;
@@ -322,7 +315,6 @@ void builtin_cd(const SimpleCommandP *command, Vars * const shell_vars) {
 		char resolved_path[PATH_MAX];
 		if (!realpath(curpath, resolved_path)) {
 			print_cd_error(ERROR_NO_SUCH_FILE, (void **)&curpath);
-			g_exitno = 1;
 			return;
 		}
 		curpath = gc(GC_ADD, ft_strdup(resolved_path), GC_SUBSHELL);
@@ -330,7 +322,6 @@ void builtin_cd(const SimpleCommandP *command, Vars * const shell_vars) {
 
 	if (cd_status){
 		print_cd_error(cd_status, (void **)&operand);
-		g_exitno = 1;
 		return;
 	}
 	
