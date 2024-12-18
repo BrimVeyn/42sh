@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:41:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 13:58:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/17 10:45:15 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,16 +107,15 @@ bool redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars) {
 		const bool has_io_number = (redir->io_number != NULL);
 		int io_number = (has_io_number) ? ft_atoi(redir->io_number) : -1;
 		if (io_number >= MAX_FD) {
+			g_exitno = 1;
 			error("42sh: %d: Bad file descriptor", 1);
 			return false;
 		}
 		//TODO: error managment when open fails
 		
 		int mode = get_filepath_mode(redir->type);
-		if (!check_filepath(redir->filename, mode)) {
-			g_exitno = 1;
-			return false;
-		}
+		if (!check_filepath(redir->filename, mode)) 
+			return (g_exitno = 1, false);
 
 		if (redir->type == GREAT || redir->type == CLOBBER){ //>
 			const int open_flags = (O_CREAT | O_TRUNC | O_WRONLY);
@@ -125,7 +124,7 @@ bool redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars) {
 			if (io_number != -1)
 				dup_to = io_number;
 			if (!secure_dup2(fd, dup_to))
-				return false;
+				return (g_exitno = 1, false);
 			close(fd);
 		}
 		else if (redir->type == DGREAT){ //>>
@@ -135,7 +134,7 @@ bool redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars) {
 			if (io_number != -1)
 				dup_to = io_number;
 			if (!secure_dup2(fd, dup_to))
-				return false;
+				return (g_exitno = 1, false);
 			close(fd);
 		}
 		else if (redir->type == LESSGREAT){ //<>
@@ -143,7 +142,7 @@ bool redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars) {
 			const int open_flags = (O_CREAT | O_RDWR);
 			const int fd = open(redir->filename, open_flags, 0664);
 			if (!secure_dup2(fd, n))
-				return false;
+				return (g_exitno = 1, false);
 			close(fd);
 		}
 		else if (redir->type == LESS){ // <
@@ -168,13 +167,14 @@ bool redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars) {
 			const int fd = ft_atoi(redir->filename);
 			if (fd < 0 || fcntl(fd, F_GETFD) == -1) {
 				ft_dprintf(STDERR_FILENO, "42sh: %d: Bad file descriptor\n", fd);
-				return false;
+				return (g_exitno = 1, false);
 			}
 
 			if (!ft_strcmp("-", redir->filename) || fd == n){
 				close(n);
 			} else {
-				if (!secure_dup2(fd, n)) return false;
+				if (!secure_dup2(fd, n)) 
+					return (g_exitno = 1, false);
 			}
 		}
 		else if (redir->type == GREATAND){ //>&
@@ -188,14 +188,15 @@ bool redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars) {
 			const int fd = (is_number(redir->filename)) ? ft_atoi(redir->filename) : open(redir->filename, open_flags, 0664);
 			if (fd < 0 || fcntl(fd, F_GETFL) == -1) {
 				ft_dprintf(STDERR_FILENO, "42sh: %d: Bad file descriptor\n", fd);
-				return false;
+				return (g_exitno = 1, false);
 			}
 			
 			// ft_dprintf(2, "n: %d\nfd: %d\n", n, fd);
 			if (!ft_strcmp("-", redir->filename) || fd == n){
 				close(n);
 			} else {
-				if (!secure_dup2(fd, n)) return false;
+				if (!secure_dup2(fd, n)) 
+					return (g_exitno = 1, false);
 			}
 		}
 	}
