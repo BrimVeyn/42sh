@@ -41,11 +41,11 @@ function UnitTest({unit}) {
 	//unitButton style
 	const unitButton = (unit, type) => {
 		let buffer = "py-1 px-2 m-2 text-center border-2 rounded";
-		if (type === "output" && unit["output_ok"] === "false")
+		if (type === "output" && unit["output_ok"] === "0")
 			buffer += " bg-red-500";
-		else if (type === "error" && unit["error_ok"] === "false")
+		else if (type === "error" && unit["error_ok"] === "0")
 			buffer += " bg-yellow-500";
-		else if (type === "exit" && unit["exit_ok"] === "false")
+		else if (type === "exit" && unit["exit_ok"] === "0")
 			buffer += " bg-red-500";
 		if (type === activeDiff)
 			buffer += " border-green-700"
@@ -85,7 +85,7 @@ function UnitTest({unit}) {
 			{input ? (
 				<>
 					<p 
-						className="p-2 m-3 bg-zinc-800 rounded-md border-2 text-center text-xl border-red-300 cursor-pointer"
+						className="p-2 m-3 bg-zinc-800 rounded-md border-2 text-center text-xl border-yellow-200 cursor-pointer"
 						onClick={() => copyToClipboard(input)}
 					>
 						{input} 
