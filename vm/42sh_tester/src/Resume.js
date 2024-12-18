@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import UnitTest from './UnitTest'
 
-function Resume({ tests }) {
+function Resume({ tests, title }) {
 
 	const [shownIndex, setShownIndex] = useState(null);
 
@@ -9,9 +9,6 @@ function Resume({ tests }) {
 		setShownIndex((prevIndex) => (prevIndex === index ? null : index));
 	}
 	
-	// console.log("shownIndex: ", shownIndex, tests.length);
-
-
 	const computeBg = (test) => {
 		if (test["output_ok"] === "0" || test["exit_ok"] === "0") return "bg-red-500"
 		if (test["error_ok"] === "0") return "bg-yellow-500"
@@ -24,6 +21,11 @@ function Resume({ tests }) {
 
 	return (
 		<>
+			<div id="resumeTitle" className="p-20 text-xl text-center text-gray-200" >
+				<p> 
+					{title.replace(/_/g, ' ').toUpperCase()} 
+				</p>
+			</div>
 			<div className="flex flex-wrap m-3 w-3/4 text-center resumeContainer">
 				{tests.map((test, index) => (
 					<button

@@ -28,8 +28,8 @@ function App() {
 
 	const [resumeContent, setResumeContent] = useState(null);
 
-	const injectButton = (tests) => {
-		setResumeContent(<Resume tests={tests} />);
+	const injectButton = (category) => {
+		setResumeContent(<Resume tests={category.tests} title={category.category_name} />);
 	};
 
 	return (
@@ -41,9 +41,8 @@ function App() {
 								<Category 
 									key={index}
 									name={category.category_name} 
-									passed={category.passed_tests}
-									total={category.tests.length}
-									inject={() => injectButton(category.tests)}
+									testsInfo={{ passed: category.passed_tests, total: category.tests.length}}
+									inject={() => injectButton(category)}
 								/>
 						))
 					) : (
