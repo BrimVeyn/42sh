@@ -32,19 +32,19 @@ function App() {
 		setResumeContent(<Resume tests={tests} />);
 	};
 
-	console.log(data);
-
 	return (
 		<div>
 			<header className="flex App-header">
-				<div className="w-1/3 categories">
+				<div className="flex flex-wrap w-1/3 m-2 p-2 categories">
 					{data ? (
 						data.categories.map((category, index) => (
-							<Category 
-								key={index}
-								name={category.category_name} 
-								inject={() => injectButton(category.tests)}
-							/>
+								<Category 
+									key={index}
+									name={category.category_name} 
+									passed={category.passed_tests}
+									total={category.tests.length}
+									inject={() => injectButton(category.tests)}
+								/>
 						))
 					) : (
 							<p> Loading test results </p>
