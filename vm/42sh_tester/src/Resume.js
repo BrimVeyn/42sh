@@ -13,7 +13,6 @@ function Resume({ tests }) {
 
 
 	const computeBg = (test) => {
-		console.log("erorr :", test);
 		if (test["output_ok"] === "0" || test["exit_ok"] === "0") return "bg-red-500"
 		if (test["error_ok"] === "0") return "bg-yellow-500"
 		return "bg-green-500"
@@ -25,7 +24,7 @@ function Resume({ tests }) {
 
 	return (
 		<>
-			<div className="m-3 w-3/4 text-center resumeContainer">
+			<div className="flex flex-wrap m-3 w-3/4 text-center resumeContainer">
 				{tests.map((test, index) => (
 					<button
 						key={index}
