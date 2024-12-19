@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:42:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/19 15:00:22 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/19 15:26:19 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,6 +234,8 @@ static int execute_until_clause(const CommandP * const command, const bool backg
 		Garbage *GC = gc(GC_GET);
 		const size_t base_size = GC[GC_SUBSHELL].size;
 
+		int saved_exitNo = g_exitno;
+
 		ListP * const condition_save = arena_dup_list(arena, while_clause->condition);
 		if (execute_complete_command(wrap_list(condition_save), shell_vars, background) == ERR) {
 			if (SAVE_FD) restore_std_fds(saved_fds);
@@ -243,8 +245,10 @@ static int execute_until_clause(const CommandP * const command, const bool backg
 		gc(GC_CLEAN_IDX, base_size, GC_SUBSHELL);
 		arena_reset(arena);
 
-		if (g_exitno == 0)
+		if (g_exitno == 0) {
+			g_exitno = saved_exitNo;
 			break ;
+        }
 		ListP * const body_save = arena_dup_list(arena, while_clause->body);
 		if (execute_complete_command(wrap_list(body_save), shell_vars, background) == ERR) {
 			if (SAVE_FD) restore_std_fds(saved_fds);
