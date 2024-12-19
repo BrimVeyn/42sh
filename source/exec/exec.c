@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:42:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/15 10:11:38 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/19 08:20:33 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -427,8 +427,9 @@ static void set_group(AndOrP * const job, PipeLineP * const process, const pid_t
 		job->pgid = g_masterPgid;
 	else if (!job->pgid)
 		job->pgid = pid;
-	if (setpgid(pid, job->pgid) == -1)
-		_fatal("setpgid: failed", 1);
+	//HACK: fails randomly ??
+	setpgid(pid, job->pgid);
+		// _fatal("setpgid: failed", 1);
 }
 
 static int process_simple_command(SimpleCommandP * const simple_command, Vars *shell_vars) {

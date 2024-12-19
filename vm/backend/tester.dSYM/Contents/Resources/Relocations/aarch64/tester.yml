@@ -1,0 +1,14 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     tester
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _compare_files, symObjAddr: 0x0, symBinAddr: 0x100002284, symSize: 0x210 }
+  - { offsetInCU: 0x87, offset: 0x87, size: 0x8, addend: 0x0, symName: _compare_files, symObjAddr: 0x0, symBinAddr: 0x100002284, symSize: 0x210 }
+  - { offsetInCU: 0x121, offset: 0x121, size: 0x8, addend: 0x0, symName: _execute_with, symObjAddr: 0x210, symBinAddr: 0x100002494, symSize: 0x320 }
+  - { offsetInCU: 0x238, offset: 0x238, size: 0x8, addend: 0x0, symName: _unit_test, symObjAddr: 0x530, symBinAddr: 0x1000027B4, symSize: 0x3A8 }
+  - { offsetInCU: 0x333, offset: 0x333, size: 0x8, addend: 0x0, symName: _routine, symObjAddr: 0x8D8, symBinAddr: 0x100002B5C, symSize: 0x4A0 }
+  - { offsetInCU: 0x42D, offset: 0x42D, size: 0x8, addend: 0x0, symName: _fill_dir, symObjAddr: 0xD78, symBinAddr: 0x100002FFC, symSize: 0x130 }
+  - { offsetInCU: 0x47F, offset: 0x47F, size: 0x8, addend: 0x0, symName: _sort_dir, symObjAddr: 0xEA8, symBinAddr: 0x10000312C, symSize: 0x1A0 }
+  - { offsetInCU: 0x506, offset: 0x506, size: 0x8, addend: 0x0, symName: _print_dir, symObjAddr: 0x1048, symBinAddr: 0x1000032CC, symSize: 0xB4 }
+  - { offsetInCU: 0x549, offset: 0x549, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x10FC, symBinAddr: 0x100003380, symSize: 0x504 }
+...

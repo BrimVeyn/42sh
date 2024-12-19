@@ -6,11 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 09:38:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/18 15:58:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/19 08:18:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <linux/limits.h>
+#include <limits.h>
 #include <sys/dir.h>
 #include <dirent.h>
 #include <sys/stat.h>
@@ -80,24 +80,35 @@ int compare_files(const char *file1, const char *file2) {
     return result == 0 ? 1 : 0; // 1 if files are equal, 0 if different
 }
 
+char *my_basename(const char *path) {
+    const char *slash = strrchr(path, '/'); // Find last '/'
+    return slash ? (char *)(slash + 1) : (char *)path; // Return after last '/' or whole string
+}
+
 int execute_with(char *bin, char *line, char *fileName, int test_number) {
-	pid_t pid = vfork();
+
+	pid_t pid = fork();
 
 	if (!pid) {
 		char input_file[PATH_MAX] = {0};
 		char output_file[PATH_MAX] = {0};
 		char error_file[PATH_MAX] = {0};
 
-		sprintf(input_file, "./data/i_%s_%d", fileName, test_number);
-		sprintf(output_file, "./data/%so_%s_%d", basename(bin), fileName, test_number);
-		sprintf(error_file, "./data/%se_%s_%d", basename(bin), fileName, test_number);
+		memset(input_file, 0, PATH_MAX);
+		memset(output_file, 0, PATH_MAX);
+		memset(error_file, 0, PATH_MAX);
+
+		snprintf(input_file, PATH_MAX, "./data/i_%s_%d", fileName, test_number);
+		snprintf(output_file, PATH_MAX, "./data/%so_%s_%d", my_basename(bin), fileName, test_number);
+		snprintf(error_file, PATH_MAX, "./data/%se_%s_%d", my_basename(bin), fileName, test_number);
+
 		int fd_in = open(input_file, O_CREAT | O_TRUNC | O_RDWR, 00644);
-		write(fd_in, line, strlen(line) + 1);
+		write(fd_in, line, strlen(line));
+		write(fd_in, "\n", 1);
 		lseek(fd_in, 0, 0);
 
 		int fd_out = open(output_file, O_CREAT | O_TRUNC | O_RDWR, 00644);
 		int fd_err = open(error_file, O_CREAT | O_TRUNC | O_RDWR, 00644);
-
 
 		dup2(fd_in, STDIN_FILENO);
 		dup2(fd_out, STDOUT_FILENO);
@@ -128,6 +139,7 @@ typedef struct {
 } UnitResult;
 
 UnitResult unit_test(char *fileName, char *line, int test_number) {
+
 	int exit_42sh = execute_with("./42sh", line, fileName, test_number);
 	int exit_bash = execute_with("/bin/bash", line, fileName, test_number);
 
@@ -137,11 +149,17 @@ UnitResult unit_test(char *fileName, char *line, int test_number) {
 	char err_42[PATH_MAX] = {0};
 	char err_bash[PATH_MAX] = {0};
 
-	sprintf(input, "./data/i_%s_%d", fileName, test_number);
-	sprintf(out_42, "./data/42sho_%s_%d", fileName, test_number);
-	sprintf(out_bash, "./data/basho_%s_%d", fileName, test_number);
-	sprintf(err_42, "./data/42she_%s_%d", fileName, test_number);
-	sprintf(err_bash, "./data/bashe_%s_%d", fileName, test_number);
+	memset(input, 0, PATH_MAX);
+	memset(out_42, 0, PATH_MAX);
+	memset(out_bash, 0, PATH_MAX);
+	memset(err_42, 0, PATH_MAX);
+	memset(err_bash, 0, PATH_MAX);
+
+	snprintf(input, PATH_MAX, "./data/i_%s_%d", fileName, test_number);
+	snprintf(out_42, PATH_MAX, "./data/42sho_%s_%d", fileName, test_number);
+	snprintf(out_bash, PATH_MAX, "./data/basho_%s_%d", fileName, test_number);
+	snprintf(err_42, PATH_MAX, "./data/42she_%s_%d", fileName, test_number);
+	snprintf(err_bash, PATH_MAX, "./data/bashe_%s_%d", fileName, test_number);
 
 	bool output_ok = compare_files(out_42, out_bash);
 	bool error_ok = compare_files(err_42, err_bash);
@@ -153,6 +171,10 @@ UnitResult unit_test(char *fileName, char *line, int test_number) {
 		"\t\t\t\t\t\"42sh_error\": \"%s\",\n\t\t\t\t\t\"bash_error\": \"%s\",\n\t\t\t\t\t\"42sh_exit_code\": \"%d\",\n\t\t\t\t\t\"bash_exit_code\": \"%d\",\n" \
 		"\t\t\t\t\t\"output_ok\": \"%d\",\n\t\t\t\t\t\"error_ok\": \"%d\",\n\t\t\t\t\t\"exit_ok\": \"%d\"\n\t\t\t\t},\n"
 		 , test_number, input, out_42, out_bash, err_42, err_bash, exit_42sh, exit_bash, output_ok, error_ok, exit_ok);
+	if (len == -1) {
+		perror("sprintf");
+		exit(1);
+	}
 
 	UnitResult ret = {
 		.partial = partial_result,
@@ -187,7 +209,7 @@ void *routine(void *cat) {
     }
     close(file_fd);
 
-	char *category_basename = basename(category->fileName);
+	char *category_basename = my_basename(category->fileName);
 
 	category->result = calloc(1e6, sizeof(char));
 	size_t offset = 0;
@@ -204,12 +226,13 @@ void *routine(void *cat) {
 		memcpy(line, mapped_file, line_size);
 		line[line_size] = '\0';
 
+		// dprintf(2, "line: %s\n", line);
 		UnitResult partial = unit_test(category_basename, line, test_number);
 		memcpy(category->result + offset, partial.partial, partial.partial_len);
 		offset += partial.partial_len;
-
+		//
 		mapped_file = eol + 1;
-
+		//
 		passed_tests += (partial.passed);
 		free(partial.partial);
 		test_number++;
