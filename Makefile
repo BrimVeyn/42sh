@@ -15,7 +15,7 @@ NAME			:= 42sh
 LIBFT			:= libftprintf/libftprintf.a
 STRING 			:= libstring/libstring.a
 CC 				:= gcc
-LDFLAGS			:= -lreadline -lncurses
+LDFLAGS			:= -lncurses
 
 WWFLAGS = $(WFLAGS) -Wpedantic -Wshadow -Wconversion -Wcast-align \
   -Wstrict-prototypes -Wmissing-prototypes -Wunreachable-code -Winit-self \
