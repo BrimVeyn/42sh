@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include "../libftprintf/header/libft.h"
 
 extern int g_exitno;
 
