@@ -6,7 +6,7 @@
 #    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/06 10:05:24 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/12/19 08:00:17 by bvan-pae         ###   ########.fr        #
+#    Updated: 2024/12/19 15:20:51 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -108,7 +108,7 @@ all: compute_total $(NAME)
 
 test: $(NAME)
 	@echo "$(CYAN)Copying binary to test environment...$(DEF_COLOR)"
-	@{ cp $(NAME) ./vm/backend/; }
+	@{ cp $(NAME) ./vm/backend/; [ -f "./vm/backend/tester" ] || make -C ./vm/backend; }
 	@echo "$(CYAN)Running tests in the test environment...$(DEF_COLOR)"
 	@{ cd vm/backend/ && ./tester; }
 	@echo "$(GREEN)Tests and results update complete!$(DEF_COLOR)"

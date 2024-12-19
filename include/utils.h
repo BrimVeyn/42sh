@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/12 16:59:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/19 09:37:13 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,6 @@
 
 #define _42SH_VERSION "0.5"
 #define _42SH_SHELL "42sh"
-
-#include "../libftprintf/header/libft.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -28,6 +26,7 @@ extern int g_exitno;
 
 #ifndef __FILE_NAME__
 
+#include "libft.h"
 #define __FILE_NAME__ (ft_strrchr(__FILE__, '/') ? ft_strrchr(__FILE__, '/') + 1 : __FILE__)
 
 #endif

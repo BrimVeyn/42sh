@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:40 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/18 17:33:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/19 09:46:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,25 @@
 extern TableEntry parsingTable[182][86];
 
 bool is_keyword(const TokenType type) {
-	return (type == IF || type == FI || type == CASE || type == ESAC || type == ELSE ||
-		 type == FOR || type == IN || type == WHILE || type == UNTIL || type == BANG ||
-		 type == DONE || type == DO || type == LBRACE || type == RBRACE || type == THEN);
+    static const char keyword_table[256] = {
+        [IF] = 1,
+        [FI] = 1,
+        [CASE] = 1,
+        [ESAC] = 1,
+        [ELSE] = 1,
+        [FOR] = 1,
+        [IN] = 1,
+        [WHILE] = 1,
+        [UNTIL] = 1,
+        [BANG] = 1,
+        [DONE] = 1,
+        [DO] = 1,
+        [LBRACE] = 1,
+        [RBRACE] = 1,
+        [THEN] = 1,
+    };
+
+    return keyword_table[type];
 }
 
 TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row, bool *error) {
@@ -58,9 +74,10 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 
 	// dprintf(2, "token: %s | %d\n", raw_value, table_row);
 
+	//TR 80 = 'echo >redir $$'
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
-			( (table_row != 27 && table_row != 66 && table_row != 98 && table_row != 39) 
+			( (table_row != 27 && table_row != 66 && table_row != 98 && table_row != 39 && table_row != 80) 
 			|| !is_keyword(i)) )
 		{
 			if (is_continuable(i)) { line_continuation(lexer); }

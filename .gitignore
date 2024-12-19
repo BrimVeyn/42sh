@@ -11,3 +11,4 @@ libftprintf/objets/
 libstring/objs/
 *.a
 vm/backend/data/*
+vm/backend/tester

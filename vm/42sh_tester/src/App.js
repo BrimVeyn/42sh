@@ -34,23 +34,28 @@ function App() {
 
 	return (
 		<div>
-			<header className="flex App-header">
+			<header className="h-screen flex App-header">
 				<div className="flex flex-wrap w-1/3 m-2 p-2 categories">
 					{data ? (
-						data.categories.map((category, index) => (
+						<>
+							<div className="flex flex-col w-full text-center justify-center"> 
+								<p> <strong> Total: </strong> {data.total_passed} / {data.total_tests} </p>
+							</div>
+							{data.categories.map((category, index) => (
 								<Category 
 									key={index}
 									name={category.category_name} 
 									testsInfo={{ passed: category.passed_tests, total: category.tests.length}}
 									inject={() => injectButton(category)}
 								/>
-						))
+							))}
+						</>
 					) : (
 							<p> Loading test results </p>
 						)}
 				</div>
 
-				<div className="w-2/3 flex flex-col justify-start items-center">
+				<div className="overflow-scroll w-2/3 flex flex-col justify-start items-center">
 					{resumeContent}
 				</div>
 
