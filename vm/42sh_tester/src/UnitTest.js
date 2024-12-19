@@ -84,12 +84,18 @@ function UnitTest({unit}) {
 		<>
 			{input ? (
 				<>
-					<p 
-						className="p-2 m-3 bg-zinc-800 rounded-md border-2 text-center text-xl border-yellow-200 cursor-pointer"
+					<div
+						className="w-3/4 50 p-2 m-3 bg-zinc-800 rounded-md border-2 border-yellow-200 cursor-pointer"
 						onClick={() => copyToClipboard(input)}
 					>
-						{input} 
-					</p>
+					<ReactDiffViewer key={unit.id + "output"} 
+						styles={newStyles}
+						oldValue={input || "None"} 
+						newValue={input || "None"} 
+						splitView={false} showDiffOnly={false} 
+						leftTitle={"Input"}
+					/>
+					</div>
 					{copied && (<p>Copied !</p>)}
 				</>
 			) : (
@@ -98,27 +104,24 @@ function UnitTest({unit}) {
 
 			<div className="flex-col buttonsContainer">
 				<button className={unitButton(unit, "output")} 
-					onMouseEnter={() => setShown("output")}
-					onMouseLeave={() => setShown(null)}
+					onClick={() => setShown("output")}
 				>
 					Ouput (stdout)
 				</button>
 				<button className={unitButton(unit, "error")} 
-					onMouseEnter={() => setShown("error")}
-					onMouseLeave={() => setShown(null)}
+					onClick={() => setShown("error")}
 				>
 					Error (stderr)
 				</button>
 				<button className={unitButton(unit, "exit")} 
-					onMouseEnter={() => setShown("exit")}
-					onMouseLeave={() => setShown(null)}
+					onClick={() => setShown("exit")}
 				>
 					Exit code ($?)
 				</button>
 			</div>
 			{ activeDiff !== null &&
 				<>
-					<div className="rounded-md border">
+					<div className="w-3/4 50 p-2 m-3 bg-zinc-800 rounded-md border-2 border-zinc-200 cursor-pointer">
 						{activeDiff === "output" && 
 							<ReactDiffViewer key={unit.id + "output"} 
 								styles={newStyles}

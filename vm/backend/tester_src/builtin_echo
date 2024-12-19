@@ -3,3 +3,4 @@ echo -n salut; ls
 echo -n salut -n; ls
 echo salut; ls
 echo salut > /dev/full
+echo -nnnnn salut

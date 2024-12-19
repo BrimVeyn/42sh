@@ -1,4 +1,4 @@
-echo $(($(($(echo 2 + 2)))))
+echo $(($(($(echo 2 + 2)))))mixed
 echo $(( $(echo 2 + 3) + $(echo 4 / 2) ))
 var1=5; var2=10; echo $((${var1} + ${var2} - 3))
 var=1; echo $((var + 1)); echo $((var++)); echo $((++var))
@@ -44,6 +44,6 @@ echo $(($(5 * 2 + 1)))
 echo $(($(echo $(1 + 2)) * 3))
 echo $(echo $(echo $(echo $(echo Nested))))
 (echo $(echo Start && echo Continue)) || echo Done
-(echo $(ls || echo Not found)) && echo Success
+(echo $(ls test || echo Not found)) && echo Success
 echo $(($(($(echo 1 + 2) + 3))))
 echo $((var=7; var * 2))

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:53:16 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/19 09:35:58 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#define BIT_IS_ON(mask, bit) (((mask) & (1U << (bit))) != 0)
+#define isBitOne(mask, bit) (((mask) & (1U << (bit))) != 0)
 
 void printBinary(int n) {
     unsigned int mask = 1 << (sizeof(int) * 8 - 1); // Mask for the most significant bit
@@ -55,8 +55,9 @@ WordContext get_context(const StringStream *input, WordContextBounds *map, const
         const WordContext current_context = contexts[i].type;
         const int length = contexts[i].check_length;
 
-        if (BIT_IS_ON(byteptr, current_context) &&
-            !ft_strncmp(input->data, map[current_context].start, length)) {
+        if (isBitOne(byteptr, current_context) &&
+            !ft_strncmp(input->data, map[current_context].start, length)) 
+		{
             return current_context;
         }
     }
