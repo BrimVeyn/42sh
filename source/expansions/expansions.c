@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/13 11:18:07 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/19 17:41:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -440,6 +440,38 @@ char *remove_quotes(char *word) {
 	return list->data[0]->str;
 }
 
+bool is_pattern(const char *lhs, const char *rhs) {
+	bool squote = false;
+	bool dquote = false;
+
+	for (size_t i = 0; lhs[i]; i++) {
+
+		if		(lhs[i] == '\"' && !squote) dquote = !dquote;
+		else if (lhs[i] == '\'' && !dquote) squote = !squote;
+
+		if (!squote && !dquote && ft_strchr(rhs, lhs[i])) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void filename_expansions(StrList * string_list) {
+	
+	// str_list_print(string_list);
+
+	for (size_t i = 0; i < string_list->size; i++) {
+		Str *head = string_list->data[i];
+		while (head) {
+			if (!head->dquote && !head->squote && is_pattern(head->str, "*?[")) {
+				// dprintf(2, "match on segment: %s\n", head->str);
+			}
+			head = head->next;
+		}
+	}
+	return ;
+}
+
 StringListL *do_expansions_word(char *word, int *error, Vars *const shell_vars, const int options) {
 	StrList * const string_list = get_range_list(word, shell_vars, options, error);
 	if (*error != 0) return NULL;
@@ -450,7 +482,12 @@ StringListL *do_expansions_word(char *word, int *error, Vars *const shell_vars, 
 	if (options & O_SPLIT)
 		string_list_split(string_list, shell_vars);
 	string_erase_nulls(string_list);
+
+	filename_expansions(string_list);
+
 	quote_removal(string_list);
+
+
 	return string_list_merge(string_list);
 }
 
