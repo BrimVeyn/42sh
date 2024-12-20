@@ -49,11 +49,18 @@ int execute_unit(char *bin, char *line, char *fileName, int test_number) {
 		close(fd_out);
 		close(fd_err);
 
-		char *args[2] = { bin, NULL };
+		if (*bin == 'b') {
+			char *args[3] = { bin, "--posix", NULL };
+			if (execv(bin, args) == -1) {
+				exit(1);
+			}
+		} else {
+			char *args[2] = { bin, NULL };
+			if (execv(bin, args) == -1) {
+				exit(1);
+			}
+		}
 
-		if (execv(bin, args) == -1) {
-			exit(1);
-        }
 	} else {
 		int status;
 		waitpid(pid, &status, 0);

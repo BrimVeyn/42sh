@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/20 10:00:54 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/20 17:29:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 void exp_kind_list_print(ExpKindList *list);
@@ -458,6 +459,7 @@ bool is_pattern(const char *lhs, const char *rhs) {
 typedef struct {
     char *name;
     int type;
+	bool match;
 } MatchEntry;
 
 typedef struct {
@@ -509,18 +511,13 @@ StringListL *cut_pattern(char *pattern) {
 
     return list;
 }
-    
-int match_pattern(int **dp, const char *str, const char *pattern, int i, int j) {
-    (void)dp;(void)str;(void)pattern;(void)i;(void)j;
-    return 1;
-}
 
 typedef enum { P_STAR, P_QMARK, P_RANGE, P_CHAR } PatternType;
 
 typedef struct {
     PatternType type;
     union {
-        char map[256];
+        char *map;
         char c;
     };
 } PatternNode;
@@ -532,56 +529,150 @@ typedef struct {
     size_t size_of_element;
     int gc_level;
 } PatternNodeL;
+    
 
-PatternNodeL *compile_pattern(const char *pattern) {
+
+char *compile_range(char **pattern) {
+	char *map = gc(GC_CALLOC, 256, sizeof(char), GC_SUBSHELL);
+
+	char *str = *pattern;
+	bool reverse = (*str == '^' || *str == '!');
+	str += (reverse);
+	// dprintf(2, "str: %s\n", str);
+	while(*str) {
+		if ((*str) == '-') { str++; continue; }
+		if ((*str) == ']')
+			break;
+		if ((*(str + 1)) != 0 && *(str + 1) == '-') {
+			unsigned char maybe_start = (*str);
+			str++;
+			while (*str == '-') str++;
+			if (*str) {
+				unsigned char maybe_end = (*str);
+				unsigned char start = (maybe_start <= maybe_end) ? maybe_start : maybe_end;
+				unsigned char end = (maybe_end > maybe_start) ? maybe_end : maybe_start;
+				// dprintf(2, "s: %c | e: %c\n", start, end);
+				ft_memset(&map[start], 1, end - start + 1);
+			}
+		} else {
+			map[(unsigned char)(*str)] = 1;
+		}
+		str++;
+	}
+	*pattern = str;
+	for (size_t i = 0; reverse && i < 256; i++)
+		map[i] = !map[i];
+	return map;
+}
+
+PatternNodeL *compile_pattern(char *pattern) {
     da_create(list, PatternNodeL, sizeof(PatternNode), GC_SUBSHELL);
 
     bool dquote = false, squote = false;
     const char *special = "*?[";
 
-    for (size_t i = 0; pattern[i] != 0; i++) {
+	while(*pattern) {
+		if		(*pattern == '\"' && !squote) { dquote = !dquote; pattern++; continue; }
+		else if (*pattern == '\'' && !dquote) { squote = !squote; pattern++; continue; }
 
-		if		(pattern[i] == '\"' && !squote) { dquote = !dquote; continue; }
-		else if (pattern[i] == '\'' && !dquote) { squote = !squote; continue; }
-
-        if (!ft_strchr(special, pattern[i]) || squote || dquote) {
-            PatternNode node = { .type = P_CHAR, .c = pattern[i] };
+        if (!ft_strchr(special, *pattern) || squote || dquote) {
+            PatternNode node = { .type = P_CHAR, .c = *pattern };
             da_push(list, node);
         } else {
-            if (pattern[i] == '*') {
+            if (*pattern == '*') {
                 PatternNode node = { .type = P_STAR, .c = 0 };
                 da_push(list, node);
-            } else if (pattern[i] == '?') {
-                PatternNode node = { .type = P_QMARK, .c = 0 };
+            } else if (*pattern == '?') {
+				PatternNode node = { .type = P_QMARK, .c = 0 };
                 da_push(list, node);
             } else { //pattern[i] == [
-                PatternNode node = { .type = P_RANGE, .c = 0};
-                // node.map = compile_range(&pattern[i]);
-                da_push(list, node);
+				if (ft_strchr(pattern, ']')) {
+					PatternNode node = { .type = P_RANGE, .c = 0};
+					pattern++; //skip [
+					// dprintf(2, "pattern: %s\n", pattern);
+					node.map = compile_range(&pattern);
+					// dprintf(2, "pattern: %s\n", pattern);
+					da_push(list, node);
+				} else {
+					PatternNode node = { .type = P_CHAR, .c = '[' };
+					da_push(list, node);
+				}
             }
         }
+		pattern++;
     }
     return list;
 }
 
+typedef struct {
+	const char *str;
+	size_t size;
+} String;
 
-bool match_string(const char *str, const char *pattern) {
-    size_t str_len = ft_strlen(str);
-    size_t pattern_len = ft_strlen(pattern);
-
-    int **dp = calloc(str_len, sizeof(int));
-    for (size_t i = 0; i < str_len; i++) {
-        dp[i] = calloc(pattern_len, sizeof(int));
+bool match_pattern(int **dp, const String str, const PatternNodeL *pattern, size_t i, size_t j) {
+	// dprintf(2, "INIT: i: %zu, j: %zu\n", i, j);
+	if (dp[i][j] != -1) {
+		// dprintf(2, "RETURN -1: i: %zu, j: %zu\n", i, j);
+		return dp[i][j];
     }
 
-    int match = match_pattern(dp, str, pattern, 0, 0);
+	if (i >= str.size && j >= pattern->size) {
+		// dprintf(2, "RETURN MATCH: i: %zu, j: %zu\n", i, j);
+		return true;
+    }
+	if (j >= pattern->size) {
+		// dprintf(2, "RETURN EOP: i: %zu, j: %zu\n", i, j);
+		return false;
+	}
 
-    for(size_t i = 0; i < str_len; i++) {
+	bool match = ( 
+		(i < str.size) &&
+		((pattern->data[j].type == P_RANGE && pattern->data[j].map[(unsigned int)str.str[i]] == true) ||
+		(pattern->data[j].type == P_CHAR && pattern->data[j].c == str.str[i]))
+	);
+
+	if (pattern->data[j].type == P_STAR) {
+		// dprintf(2, "STAR: i: %zu, j: %zu\n", i, j);
+		bool i_1 = (i < str.size && match_pattern(dp, str, pattern, i + 1, j));
+		bool j_1 = (match_pattern(dp, str, pattern, i, j + 1));
+		dp[i][j] = (i_1 || j_1);
+		return dp[i][j];
+	}
+
+	if (match) {
+		dp[i][j] = match_pattern(dp, str, pattern, i + 1, j + 1);
+		return dp[i][j];
+	}
+
+	dp[i][j] = false;
+    return dp[i][j];
+}
+
+bool match_string(const char *str, const PatternNodeL *pattern_nodes) {
+
+	String string = {
+		.str = str,
+		.size = ft_strlen(str),
+	};
+
+    int **dp = calloc(string.size + 1, sizeof(int *));
+    for (size_t i = 0; i < string.size + 1; i++) {
+        dp[i] = malloc((pattern_nodes->size + 1) * sizeof(int));
+		for (size_t j = 0; j < pattern_nodes->size + 1; j++) {
+			dp[i][j] = -1;
+		}
+    }
+
+	// dprintf(2, "------------------ str: %s ------------\n", str);
+    bool match = match_pattern(dp, string, pattern_nodes, 0, 0);
+	// dprintf(2, "---------------------------------------\n");
+
+    for(size_t i = 0; i < string.size; i++) {
         free(dp[i]);
     }
     free(dp);
 
-    return (match == 1);
+    return match;
 }
 
 void print_pattern_nodes(PatternNodeL *nodes) {
@@ -589,14 +680,58 @@ void print_pattern_nodes(PatternNodeL *nodes) {
         PatternNode node = nodes->data[i];
         dprintf(2, "N[%zu]: ", i);
         switch (node.type) {
-            case P_STAR: { dprintf(2, "*"); break; }
-            case P_QMARK: { dprintf(2, "?"); break; }
-            case P_CHAR: { dprintf(2, "%c", node.c); break; }
-            case P_RANGE: { dprintf(2, "a-z"); break; }
+            case P_STAR: { dprintf(2, "STAR"); break; }
+            case P_QMARK: { dprintf(2, "QMARK"); break; }
+			case P_CHAR: { dprintf(2, "C: %c", node.c); break; }
+            case P_RANGE: {
+				unsigned char buffer[256] = {0};
+				size_t len = 0;
+				for (size_t i =0; i < 256; i++) { 
+					if (node.map[i])
+						buffer[len++] = (ft_isprint(i) ? i : 'X');
+				}
+				buffer[len] = 0;
+				dprintf(2, "R: %s", buffer);
+			}
             default: break;
         }
         dprintf(2, "\n");
     }
+}
+
+void remove_dofiles(MatchEntryL *entries) {
+	for (size_t i = 0; i < entries->size;) {
+		if (*(entries->data[i].name) == '.') {
+			entries->data[i] = entries->data[entries->size - 1];
+			entries->size--;
+			continue;
+		}
+		i++;
+	}
+}
+
+char *join_entries(const MatchEntryL *entries) {
+	da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
+
+	for (size_t i = 0; i < entries->size; i++) {
+		ss_push_string(ss, entries->data[i].name);
+		if (i + 1 < entries->size)
+			da_push(ss, ' ');
+	}
+	da_push(ss, '\0');
+	return ss->data;
+}
+
+void sort_entries(MatchEntryL *entries) {
+	for (size_t i = entries->size - 1; i >= 1; i--) {
+		for (size_t j = 0; j <= i - 1; j++) {
+			if (ft_strcmp(entries->data[j + 1].name, entries->data[j].name) < 0) {
+				MatchEntry tmp = entries->data[j + 1];
+				entries->data[j + 1] = entries->data[j];
+				entries->data[j] = tmp;
+			}
+		}
+	}
 }
 
 void filename_expansions(StrList * string_list) {
@@ -609,17 +744,45 @@ void filename_expansions(StrList * string_list) {
 			if (!head->dquote && !head->squote && is_pattern(head->str, "*?[")) {
 
                 //Open current_directories and read all entries
-                // MatchEntryL *test = get_dir_entries(".");
-                // for (size_t i = 0; i < test->size; i++) {
-                //     dprintf(2, "e: %s\n", test->data[i].name);
-                // }
                 //Separate the whole string into smaller parts with FS='/'
+				bool keep_dotfiles;
+				da_create(entries, MatchEntryL, sizeof(MatchEntry), GC_SUBSHELL);
                 StringListL *pattern_parts = cut_pattern(head->str);
                 for (size_t i = 0; i < pattern_parts->size; i++) {
                     // dprintf(2, "PP: %s\n", pattern_parts->data[i]);
                     PatternNodeL *pattern_nodes = compile_pattern(pattern_parts->data[i]);
-					(void)pattern_nodes;
-                    // print_pattern_nodes(pattern_nodes);
+					// print_pattern_nodes(pattern_nodes);
+					if (i == 0) {
+						keep_dotfiles = (pattern_nodes->data[i].type == P_CHAR && pattern_nodes->data[i].c == '.');
+					}
+					// return ;
+					// FIX: add them directly to entries
+					MatchEntryL *tmp = get_dir_entries(".");
+					for (size_t i = 0; i < tmp->size; i++) {
+						da_push(entries, tmp->data[i]);
+					}
+
+					// for (size_t i = 0; i < entries->size; i++) {
+					// 	dprintf(2, "e: %s\n", entries->data[i].name);
+					// }
+
+					for (size_t i = 0; i < entries->size;) {
+						entries->data[i].match = match_string(entries->data[i].name, pattern_nodes);
+						if (!entries->data[i].match) {
+							//Swap with last element and decremnt size since we don't care about order yet (avoid memmove)
+							entries->data[i] = entries->data[entries->size - 1];
+							entries->size--;
+							continue;
+						} 
+						// dprintf(2, "match: %s\n", entries->data[i].name);
+						i++;
+					}
+                }
+				//if pattern matching found something, replace the original string by the joined entries
+				if (entries->size) {
+					if (!keep_dotfiles) remove_dofiles(entries);
+					sort_entries(entries);
+					head->str = join_entries(entries);
                 }
 			}
 			head = head->next;
