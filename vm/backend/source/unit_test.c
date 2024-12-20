@@ -51,12 +51,12 @@ int execute_unit(char *bin, char *line, char *fileName, int test_number) {
 
 		if (*bin == 'b') {
 			char *args[3] = { bin, "--posix", NULL };
-			if (execv(bin, args) == -1) {
+			if (execve(bin, args, my_env) == -1) {
 				exit(1);
 			}
 		} else {
 			char *args[2] = { bin, NULL };
-			if (execv(bin, args) == -1) {
+			if (execve(bin, args, my_env) == -1) {
 				exit(1);
 			}
 		}
