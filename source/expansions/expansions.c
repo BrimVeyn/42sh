@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/19 17:41:11 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/20 10:00:54 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -616,9 +616,10 @@ void filename_expansions(StrList * string_list) {
                 //Separate the whole string into smaller parts with FS='/'
                 StringListL *pattern_parts = cut_pattern(head->str);
                 for (size_t i = 0; i < pattern_parts->size; i++) {
-                    dprintf(2, "PP: %s\n", pattern_parts->data[i]);
+                    // dprintf(2, "PP: %s\n", pattern_parts->data[i]);
                     PatternNodeL *pattern_nodes = compile_pattern(pattern_parts->data[i]);
-                    print_pattern_nodes(pattern_nodes);
+					(void)pattern_nodes;
+                    // print_pattern_nodes(pattern_nodes);
                 }
 			}
 			head = head->next;

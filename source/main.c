@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:00 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/18 14:45:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/20 09:59:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,10 +109,9 @@ Vars *shell_vars_init(const char **env) {
 }
 
 static char *read_input_file(const char *path){
-    int fd = open(path, O_RDONLY);
+    int fd = open(path, O_RDWR, S_IRUSR | S_IWUSR);
     if (fd == -1)
-        return NULL;
-    //FIX: shouldn't return NULL
+		_fatal("open: no such file", 1);
 
 	struct stat st;
 	if (fstat(fd, &st) == -1)
