@@ -51,21 +51,21 @@ OBJDIR 			:= objects
 DIRS			:= $(patsubst source/%,objects/%,$(dir $(wildcard source/*/*)))
 
 BOLD			:= \e[1m
-DEF_COLOR		:= \033[0;39m
-GRAY			:= \033[0;90m
-RED				:= \033[0;91m
-GREEN			:= \033[0;92m
-YELLOW			:= \033[0;93m
-BLUE			:= \033[0;94m
-MAGENTA			:= \033[0;95m
-CYAN			:= \033[0;96m
-WHITE			:= \033[0;97m
-PASTEL_BLUE     := \033[0;38;2;130;135;206m
-PRUSSIAN_BLUE   := \033[0;38;2;28;49;68m
-JASPER   		:= \033[0;38;2;213;87;59m
-OLIVINE   		:= \033[0;38;2;154;184;122m
-HIDE_CURSOR		:= \033[?25l
-RESET_CURSOR	:= \033[?25h
+DEF_COLOR		:= \e[0;39m
+GRAY			:= \e[0;90m
+RED				:= \e[0;91m
+GREEN			:= \e[0;92m
+YELLOW			:= \e[0;93m
+BLUE			:= \e[0;94m
+MAGENTA			:= \e[0;95m
+CYAN			:= \e[0;96m
+WHITE			:= \e[0;97m
+PASTEL_BLUE     := \e[0;38;2;130;135;206m
+PRUSSIAN_BLUE   := \e[0;38;2;28;49;68m
+JASPER   		:= \e[0;38;2;213;87;59m
+OLIVINE   		:= \e[0;38;2;154;184;122m
+HIDE_CURSOR		:= \e[?25l
+RESET_CURSOR	:= \e[?25h
 
 TOTAL_FILES := $(shell echo $(SRC) | wc -w)
 COMPILE_COUNT := 0
@@ -107,12 +107,11 @@ endef
 all: compute_total $(NAME)
 
 test: $(NAME)
-	@echo "$(CYAN)Copying binary to test environment...$(DEF_COLOR)"
+	@printf "$(CYAN)Running tests in the test environment...$(DEF_COLOR)\n"
 	@{ cp $(NAME) ./vm/backend/; [ -f "./vm/backend/tester" ] || make -C ./vm/backend; }
-	@echo "$(CYAN)Running tests in the test environment...$(DEF_COLOR)"
 	@{ cd vm/backend/ && ./tester; }
-	@echo "$(GREEN)Tests and results update complete!$(DEF_COLOR)"
-	@echo "$(BLUE)Open the test results at:$(DEF_COLOR) http://localhost:3000"
+	@printf "$(GREEN)Tests and results update complete!$(DEF_COLOR)\n"
+	@printf "$(BLUE)Open the test results at:$(DEF_COLOR) http://localhost:3000\n"
 
 compute_total:
 	$(eval TOTAL_FILES := $(shell var=$$(./progression_bar.sh); if [ $${var} -ne 0 ]; then echo $${var} ; else echo $(TOTAL_FILES); fi))
@@ -148,7 +147,7 @@ fclean: clean
 	@printf "$(JASPER)Binary deleted !$(DEF_COLOR)\n"
 
 bear:
-	bear -- make re
+	@bear -- make re
 
 $(OBJDIR):
 	@mkdir -p $(DIRS)

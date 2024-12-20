@@ -28,6 +28,7 @@
 #include <stdbool.h>
 
 #include "tester.h"
+#include "colors.h"
 
 int total_tests = 0;
 int total_passed = 0;
@@ -183,7 +184,7 @@ void *routine_unit(void *cat) {
 	category->result_len = offset;
 	munmap(mapped_file, ret.mapped_size);
 
-	dprintf(2, "leavin thread: %s\n", category->fileName);
+	dprintf(STDERR_FILENO, C_AQUA"Thread:" C_LIGHT_BLUE"%-20.20s "C_LIGHT_GREEN"done"C_RESET"\n", my_basename(category->fileName));
     return 0;
 }
 
