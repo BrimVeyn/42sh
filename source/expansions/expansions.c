@@ -441,8 +441,7 @@ char *remove_quotes(char *word) {
 }
 
 bool is_pattern(const char *lhs, const char *rhs) {
-	bool squote = false;
-	bool dquote = false;
+	bool dquote = false, squote = false;
 
 	for (size_t i = 0; lhs[i]; i++) {
 
@@ -456,6 +455,150 @@ bool is_pattern(const char *lhs, const char *rhs) {
 	return false;
 }
 
+typedef struct {
+    char *name;
+    int type;
+} MatchEntry;
+
+typedef struct {
+    MatchEntry *data;
+    size_t size;
+    size_t capacity;
+    size_t size_of_element;
+    int gc_level;
+} MatchEntryL;
+
+#include <sys/dir.h>
+#include <dirent.h>
+
+MatchEntryL *get_dir_entries(const char *path) {
+    DIR *dir = opendir(path);
+    if (!dir) {return NULL;}
+
+    da_create(list, MatchEntryL, sizeof(MatchEntry), GC_SUBSHELL);
+    struct dirent *it;
+
+    while ((it = readdir(dir)) != NULL) {
+        MatchEntry elem = {
+            .name = it->d_name,
+            .type = it->d_type,
+        };
+        da_push(list, elem);
+    }
+    return list;
+}
+
+StringListL *cut_pattern(char *pattern) {
+
+    da_create(list, StringListL, sizeof(char *), GC_SUBSHELL);
+    char *base = pattern;
+    char *match = pattern;
+
+    while ((match = ft_strchr(base, '/')) != NULL) {
+        ptrdiff_t size = match - base;
+        char *part = gc(GC_ADD, ft_substr(base, 0, size), GC_SUBSHELL);
+
+        da_push(list, part);
+
+        base = match + 1;
+    }
+    if (base != NULL) {
+        char *part = gc(GC_ADD, ft_strdup(base), GC_SUBSHELL);
+        da_push(list, part);
+    }
+
+    return list;
+}
+    
+int match_pattern(int **dp, const char *str, const char *pattern, int i, int j) {
+    (void)dp;(void)str;(void)pattern;(void)i;(void)j;
+    return 1;
+}
+
+typedef enum { P_STAR, P_QMARK, P_RANGE, P_CHAR } PatternType;
+
+typedef struct {
+    PatternType type;
+    union {
+        char map[256];
+        char c;
+    };
+} PatternNode;
+
+typedef struct {
+    PatternNode *data;
+    size_t size;
+    size_t capacity;
+    size_t size_of_element;
+    int gc_level;
+} PatternNodeL;
+
+PatternNodeL *compile_pattern(const char *pattern) {
+    da_create(list, PatternNodeL, sizeof(PatternNode), GC_SUBSHELL);
+
+    bool dquote = false, squote = false;
+    const char *special = "*?[";
+
+    for (size_t i = 0; pattern[i] != 0; i++) {
+
+		if		(pattern[i] == '\"' && !squote) { dquote = !dquote; continue; }
+		else if (pattern[i] == '\'' && !dquote) { squote = !squote; continue; }
+
+        if (!ft_strchr(special, pattern[i]) || squote || dquote) {
+            PatternNode node = { .type = P_CHAR, .c = pattern[i] };
+            da_push(list, node);
+        } else {
+            if (pattern[i] == '*') {
+                PatternNode node = { .type = P_STAR, .c = 0 };
+                da_push(list, node);
+            } else if (pattern[i] == '?') {
+                PatternNode node = { .type = P_QMARK, .c = 0 };
+                da_push(list, node);
+            } else { //pattern[i] == [
+                PatternNode node = { .type = P_RANGE, .c = 0};
+                // node.map = compile_range(&pattern[i]);
+                da_push(list, node);
+            }
+        }
+    }
+    return list;
+}
+
+
+bool match_string(const char *str, const char *pattern) {
+    size_t str_len = ft_strlen(str);
+    size_t pattern_len = ft_strlen(pattern);
+
+    int **dp = calloc(str_len, sizeof(int));
+    for (size_t i = 0; i < str_len; i++) {
+        dp[i] = calloc(pattern_len, sizeof(int));
+    }
+
+    int match = match_pattern(dp, str, pattern, 0, 0);
+
+    for(size_t i = 0; i < str_len; i++) {
+        free(dp[i]);
+    }
+    free(dp);
+
+    return (match == 1);
+}
+
+void print_pattern_nodes(PatternNodeL *nodes) {
+    for (size_t i = 0; i < nodes->size; i++) {
+        PatternNode node = nodes->data[i];
+        dprintf(2, "N[%zu]: ", i);
+        switch (node.type) {
+            case P_STAR: { dprintf(2, "*"); break; }
+            case P_QMARK: { dprintf(2, "?"); break; }
+            case P_CHAR: { dprintf(2, "%c", node.c); break; }
+            case P_RANGE: { dprintf(2, "a-z"); break; }
+            default: break;
+        }
+        dprintf(2, "\n");
+    }
+}
+
 void filename_expansions(StrList * string_list) {
 	
 	// str_list_print(string_list);
@@ -464,7 +607,19 @@ void filename_expansions(StrList * string_list) {
 		Str *head = string_list->data[i];
 		while (head) {
 			if (!head->dquote && !head->squote && is_pattern(head->str, "*?[")) {
-				// dprintf(2, "match on segment: %s\n", head->str);
+
+                //Open current_directories and read all entries
+                // MatchEntryL *test = get_dir_entries(".");
+                // for (size_t i = 0; i < test->size; i++) {
+                //     dprintf(2, "e: %s\n", test->data[i].name);
+                // }
+                //Separate the whole string into smaller parts with FS='/'
+                StringListL *pattern_parts = cut_pattern(head->str);
+                for (size_t i = 0; i < pattern_parts->size; i++) {
+                    dprintf(2, "PP: %s\n", pattern_parts->data[i]);
+                    PatternNodeL *pattern_nodes = compile_pattern(pattern_parts->data[i]);
+                    print_pattern_nodes(pattern_nodes);
+                }
 			}
 			head = head->next;
 		}

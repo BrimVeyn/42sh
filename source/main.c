@@ -111,7 +111,8 @@ Vars *shell_vars_init(const char **env) {
 static char *read_input_file(const char *path){
     int fd = open(path, O_RDONLY);
     if (fd == -1)
-		_fatal("open: no such file", 1);
+        return NULL;
+    //FIX: shouldn't return NULL
 
 	struct stat st;
 	if (fstat(fd, &st) == -1)
