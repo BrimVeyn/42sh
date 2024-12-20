@@ -18,6 +18,8 @@
 
 #define SRC_PATH "./tester_src/"
 
+extern char **my_env;
+
 int compare_files(const char *file1, const char *file2);
 int execute_unit(char *bin, char *input, char *fileName, int test_number);
 int execute_script(char *bin, char *fileName, int test_number);

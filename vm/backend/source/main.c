@@ -31,6 +31,7 @@
 
 int total_tests = 0;
 int total_passed = 0;
+char **my_env = NULL;
 
 char *my_basename(const char *path) {
     const char *slash = strrchr(path, '/'); // Find last '/'
@@ -186,6 +187,22 @@ void *routine_unit(void *cat) {
     return 0;
 }
 
+void setup_env(void) {
+    char **base_env = __environ;
+    size_t env_size = 0;
+    for (size_t i = 0; base_env[i]; i++)
+        env_size++;
+
+    my_env = calloc(env_size + 2, sizeof(char *));
+
+    size_t i;
+    for (i = 0; base_env[i]; i++) {
+        my_env[i] = strdup(base_env[i]);
+    }
+    my_env[i++] = strdup("LC_COLLATE=C");
+    my_env[i] = 0;
+}
+
 int main(void) {
 
 	//Count dir entries to allocate our structures
@@ -205,6 +222,9 @@ int main(void) {
 	//Allocate N categories and N threads
 	Category *cat = calloc(category_count, sizeof(Category));
 	pthread_t *threads = calloc(category_count, sizeof(pthread_t));
+
+    //Set LC_COLLATE="C" <-- posix standard sorting for file expansions
+    setup_env();
 
 	int i = 0;
 	while (i < 1000 && dir_buffer[i] != NULL) {

@@ -703,11 +703,13 @@ void print_pattern_nodes(PatternNodeL *nodes) {
     }
 }
 
-void remove_dofiles(MatchEntryL *entries) {
+void remove_dofiles(MatchEntryL *entries, const bool keep_dotfiles) {
     if (!entries->size) return ;
 
 	for (size_t i = 0; i < entries->size;) {
-		if (*(entries->data[i].name) == '.') {
+		if ((*(entries->data[i].name) == '.' && !keep_dotfiles) ||
+            !ft_strcmp(entries->data[i].name, ".") || !ft_strcmp(entries->data[i].name, "..")) 
+        {
 			entries->data[i] = entries->data[entries->size - 1];
 			entries->size--;
 			continue;
@@ -789,7 +791,7 @@ void filename_expansions(StrList * string_list) {
                 }
 				//if pattern matching found something, replace the original string by the joined entries
 				if (entries->size) {
-					if (!keep_dotfiles) remove_dofiles(entries);
+					remove_dofiles(entries, keep_dotfiles);
                     if (entries->size) {
                         sort_entries(entries);
                         head->str = join_entries(entries);
