@@ -482,11 +482,14 @@ MatchEntryL *get_dir_entries(const char *path) {
 
     while ((it = readdir(dir)) != NULL) {
         MatchEntry elem = {
-            .name = it->d_name,
+            .name = gc(GC_ADD, ft_strdup(it->d_name), GC_SUBSHELL),
             .type = it->d_type,
         };
         da_push(list, elem);
     }
+
+    closedir(dir);
+
     return list;
 }
 
@@ -628,7 +631,8 @@ bool match_pattern(int **dp, const String str, const PatternNodeL *pattern, size
 	bool match = ( 
 		(i < str.size) &&
 		((pattern->data[j].type == P_RANGE && pattern->data[j].map[(unsigned int)str.str[i]] == true) ||
-		(pattern->data[j].type == P_CHAR && pattern->data[j].c == str.str[i]))
+		(pattern->data[j].type == P_CHAR && pattern->data[j].c == str.str[i]) ||
+        (pattern->data[j].type == P_QMARK))
 	);
 
 	if (pattern->data[j].type == P_STAR) {
@@ -700,6 +704,8 @@ void print_pattern_nodes(PatternNodeL *nodes) {
 }
 
 void remove_dofiles(MatchEntryL *entries) {
+    if (!entries->size) return ;
+
 	for (size_t i = 0; i < entries->size;) {
 		if (*(entries->data[i].name) == '.') {
 			entries->data[i] = entries->data[entries->size - 1];
@@ -723,6 +729,8 @@ char *join_entries(const MatchEntryL *entries) {
 }
 
 void sort_entries(MatchEntryL *entries) {
+    if (!entries->size) return ;
+
 	for (size_t i = entries->size - 1; i >= 1; i--) {
 		for (size_t j = 0; j <= i - 1; j++) {
 			if (ft_strcmp(entries->data[j + 1].name, entries->data[j].name) < 0) {
@@ -747,6 +755,7 @@ void filename_expansions(StrList * string_list) {
                 //Separate the whole string into smaller parts with FS='/'
 				bool keep_dotfiles;
 				da_create(entries, MatchEntryL, sizeof(MatchEntry), GC_SUBSHELL);
+
                 StringListL *pattern_parts = cut_pattern(head->str);
                 for (size_t i = 0; i < pattern_parts->size; i++) {
                     // dprintf(2, "PP: %s\n", pattern_parts->data[i]);
@@ -781,8 +790,10 @@ void filename_expansions(StrList * string_list) {
 				//if pattern matching found something, replace the original string by the joined entries
 				if (entries->size) {
 					if (!keep_dotfiles) remove_dofiles(entries);
-					sort_entries(entries);
-					head->str = join_entries(entries);
+                    if (entries->size) {
+                        sort_entries(entries);
+                        head->str = join_entries(entries);
+                    }
                 }
 			}
 			head = head->next;
