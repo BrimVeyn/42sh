@@ -3,11 +3,10 @@ Bonus:
 	- variable as arrays + eventually (declare builtin -A) associative arrays
 	- type handles functions and aliases
 
-
 Mandatory:
 	- test
 	- alias
-	- filename exp
+	- filename exp (WIP)
 	- process substitution
 
 Rebuild:
