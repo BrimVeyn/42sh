@@ -101,7 +101,7 @@ endef
 
 # Wrapper to exec command in order to handle the reset color if an error occured
 define cmd_wrapper
-	$1 || { printf "\033[?25h"; echo -n "$(DEF_COLOR)$(RESET_CURSOR)"; exit 1; }
+	$1 || { printf "\033[?25h"; printf "$(DEF_COLOR)$(RESET_CURSOR)"; exit 1; }
 endef
 
 all: compute_total $(NAME)
@@ -114,16 +114,16 @@ test: $(NAME)
 	@printf "$(BLUE)Open the test results at:$(DEF_COLOR) http://localhost:3000\n"
 
 compute_total:
-	$(eval TOTAL_FILES := $(shell var=$$(./progression_bar.sh); if [ $${var} -ne 0 ]; then echo $${var} ; else echo $(TOTAL_FILES); fi))
+	$(eval TOTAL_FILES := $(shell var=$$(./scripts/progression_bar.sh); if [ $${var} -ne 0 ]; then echo $${var} ; else echo $(TOTAL_FILES); fi))
 
 $(SAN): $(LIBFT) $(STRING) $(STRING) $(OBJDIR) $(OBJ)
-	@echo "$(GREEN)Making binary with sanitizer: $(NAME)"
+	@printf "$(GREEN)Making binary with sanitizer: $(NAME)"
 	@printf "$(MAGENTA)"
 	@$(call cmd_wrapper, $(CC) $(OBJ) $(LIBFT) $(STRING) $(CFLAGS) $(LDFLAGS) $(SANFLAGS) -o $(NAME))
 	@printf "Done with sanitizer !$(DEF_COLOR)\n"
 
 $(NAME): $(LIBFT) $(STRING) $(OBJDIR) $(OBJ)
-	@echo "$(OLIVINE)Making binary: $(NAME)"
+	@printf "$(OLIVINE)Making binary: $(NAME)"
 	@printf "$(JASPER)"
 	@$(call cmd_wrapper, $(CC) $(OBJ) $(CFLAGS) $(LDFLAGS) $(LIBFT) $(STRING) -o $(NAME))
 	@printf "Done !$(DEF_COLOR)\n"

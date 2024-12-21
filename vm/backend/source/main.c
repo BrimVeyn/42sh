@@ -204,7 +204,21 @@ void setup_env(void) {
     my_env[i] = 0;
 }
 
+void execute_shell_script(char *path) {
+    pid_t pid = vfork();
+    if (!pid) {
+        char *args[2] = { path, NULL };
+        execv(args[0], args);
+        exit(1);
+    } else {
+        waitpid(pid, NULL, 0);
+    }
+}
+
 int main(void) {
+
+    //init infiles, redir, cd env, etc
+    execute_shell_script(INIT_SCRIPT_PATH);
 
 	//Count dir entries to allocate our structures
 	DIR *src_dir = opendir(SRC_PATH);
@@ -291,5 +305,9 @@ int main(void) {
 	}
 	free(dir_buffer);
 	closedir(src_dir);
+
+    //clean cd test env, redir etc
+    execute_shell_script(DESTROY_SCRIPT_PATH);
+
 	return 0;
 }

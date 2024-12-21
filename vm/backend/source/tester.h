@@ -17,6 +17,8 @@
 #include <stdbool.h>
 
 #define SRC_PATH "./tester_src/"
+#define INIT_SCRIPT_PATH "./source/init_script.sh"
+#define DESTROY_SCRIPT_PATH "./source/destroy_script.sh"
 
 extern char **my_env;
 
