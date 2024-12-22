@@ -19,6 +19,7 @@
 #include "expansion.h"
 
 #include <fcntl.h>
+#include <linux/limits.h>
 #include <regex.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -458,6 +459,7 @@ bool is_pattern(const char *lhs, const char *rhs) {
 
 typedef struct {
     char *name;
+    char *full_path;
     int type;
 	bool match;
 } MatchEntry;
@@ -473,24 +475,28 @@ typedef struct {
 #include <sys/dir.h>
 #include <dirent.h>
 
-MatchEntryL *get_dir_entries(const char *path) {
+int get_dir_entries(MatchEntryL *list, const char *path, const bool join_path) {
     DIR *dir = opendir(path);
-    if (!dir) {return NULL;}
+    if (!dir) {return -1;}
 
-    da_create(list, MatchEntryL, sizeof(MatchEntry), GC_SUBSHELL);
     struct dirent *it;
 
     while ((it = readdir(dir)) != NULL) {
+        char buffer[PATH_MAX] = {0};
+        int ret = ft_snprintf(buffer, PATH_MAX, "%s/%s", path, it->d_name);
+        if (ret == -1)
+            _fatal("snprintf: buffer overflow", 1);
+
         MatchEntry elem = {
             .name = gc(GC_ADD, ft_strdup(it->d_name), GC_SUBSHELL),
             .type = it->d_type,
+            .full_path = gc(GC_ADD, ft_strdup((join_path) ? buffer : it->d_name), GC_SUBSHELL),
         };
         da_push(list, elem);
     }
 
     closedir(dir);
-
-    return list;
+    return 0;
 }
 
 StringListL *cut_pattern(char *pattern) {
@@ -532,7 +538,6 @@ typedef struct {
     size_t size_of_element;
     int gc_level;
 } PatternNodeL;
-    
 
 
 char *compile_range(char **pattern) {
@@ -722,7 +727,7 @@ char *join_entries(const MatchEntryL *entries) {
 	da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
 
 	for (size_t i = 0; i < entries->size; i++) {
-		ss_push_string(ss, entries->data[i].name);
+		ss_push_string(ss, entries->data[i].full_path);
 		if (i + 1 < entries->size)
 			da_push(ss, ' ');
 	}
@@ -758,25 +763,63 @@ void filename_expansions(StrList * string_list) {
 				bool keep_dotfiles;
 				da_create(entries, MatchEntryL, sizeof(MatchEntry), GC_SUBSHELL);
 
+                //Use this path variable to keep track of the fall path from origin
+
+                // for (size_t i = 0; i < entries->size; i++) {
+                //     dprintf(2, "full: %s\n", entries->data[i].full_path);
+                // }
+                // _fatal("caught", 1);
+
+                //Set starting entries at current directory.
+
                 StringListL *pattern_parts = cut_pattern(head->str);
+                // for (size_t i = 0; i < pattern_parts->size; i++) {
+                //     dprintf(2, "P[%zu]: %s\n", i, pattern_parts->data[i]);
+                //     dprintf(2, "size: %zu\n", ft_strlen(pattern_parts->data[i]));
+                // }
+                //Iterator over each pattern parts
                 for (size_t i = 0; i < pattern_parts->size; i++) {
-                    // dprintf(2, "PP: %s\n", pattern_parts->data[i]);
+
                     PatternNodeL *pattern_nodes = compile_pattern(pattern_parts->data[i]);
 					// print_pattern_nodes(pattern_nodes);
-					if (i == 0) {
-						keep_dotfiles = (pattern_nodes->data[i].type == P_CHAR && pattern_nodes->data[i].c == '.');
-					}
-					// return ;
-					// FIX: add them directly to entries
-					MatchEntryL *tmp = get_dir_entries(".");
-					for (size_t i = 0; i < tmp->size; i++) {
-						da_push(entries, tmp->data[i]);
-					}
+                    // TODO: check for it every time
+					if (i == 0) keep_dotfiles = (pattern_nodes->data[i].type == P_CHAR && pattern_nodes->data[i].c == '.');
 
+                    if (i == 0) {
+                        //TODO: error handling
+                        // dprintf(2, "size: %zu\n", pattern_nodes->size);
+                        //TODO: absolute
+                        if (!pattern_nodes->size) {
+                            get_dir_entries(entries, "/", false);
+                        } else {
+                            get_dir_entries(entries, ".", false);
+                        }
+                    }
+
+                    if (i != 0) {
+                        da_create(tmp, MatchEntryL, sizeof(MatchEntry), GC_SUBSHELL);
+                        for (size_t j = 0; j < entries->size;) {
+                            const MatchEntry elem = entries->data[j];
+                            // dprintf(2, "Remaining entry: %s\n", elem.name);
+                            if (!(elem.type == DT_DIR)) {
+                                entries->data[j] = entries->data[entries->size - 1];
+                                entries->size--;
+                                continue;
+                            } 
+                            // dprintf(2, "old_path: %s\n", elem.full_path);
+                            get_dir_entries(tmp, elem.full_path, true);       
+                            j++;
+                        }
+                        //Liberate entries
+                        entries = tmp;
+                    }
+
+					// FIX: add them directly to entries
 					// for (size_t i = 0; i < entries->size; i++) {
 					// 	dprintf(2, "e: %s\n", entries->data[i].name);
 					// }
 
+                    //Iterate over every entries and compute its matching state
 					for (size_t i = 0; i < entries->size;) {
 						entries->data[i].match = match_string(entries->data[i].name, pattern_nodes);
 						if (!entries->data[i].match) {
@@ -785,7 +828,6 @@ void filename_expansions(StrList * string_list) {
 							entries->size--;
 							continue;
 						} 
-						// dprintf(2, "match: %s\n", entries->data[i].name);
 						i++;
 					}
                 }

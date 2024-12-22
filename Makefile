@@ -117,16 +117,14 @@ compute_total:
 	$(eval TOTAL_FILES := $(shell var=$$(./scripts/progression_bar.sh); if [ $${var} -ne 0 ]; then echo $${var} ; else echo $(TOTAL_FILES); fi))
 
 $(SAN): $(LIBFT) $(STRING) $(STRING) $(OBJDIR) $(OBJ)
-	@printf "$(GREEN)Making binary with sanitizer: $(NAME)"
-	@printf "$(MAGENTA)"
+	@printf "$(GREEN)Making binary with sanitizer: $(NAME)\n"
 	@$(call cmd_wrapper, $(CC) $(OBJ) $(LIBFT) $(STRING) $(CFLAGS) $(LDFLAGS) $(SANFLAGS) -o $(NAME))
-	@printf "Done with sanitizer !$(DEF_COLOR)\n"
+	@printf "$(MAGENTA)Done with sanitizer !$(DEF_COLOR)\n"
 
 $(NAME): $(LIBFT) $(STRING) $(OBJDIR) $(OBJ)
-	@printf "$(OLIVINE)Making binary: $(NAME)"
-	@printf "$(JASPER)"
+	@printf "$(OLIVINE)Making binary: $(NAME)\n"
 	@$(call cmd_wrapper, $(CC) $(OBJ) $(CFLAGS) $(LDFLAGS) $(LIBFT) $(STRING) -o $(NAME))
-	@printf "Done !$(DEF_COLOR)\n"
+	@printf "$(JASPER)Done !$(DEF_COLOR)\n"
 
 -include $(DEPS)
 $(OBJDIR)/%.o: source/%.c
