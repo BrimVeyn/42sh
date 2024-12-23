@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/20 17:29:10 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/23 17:37:49 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,13 @@
 #include "libft.h"
 #include "signals.h"
 #include "utils.h"
+#include "ft_regex.h"
 #include "ft_readline.h"
 #include "final_parser.h"
 #include "expansion.h"
 
 #include <fcntl.h>
 #include <linux/limits.h>
-#include <regex.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -380,6 +380,19 @@ void printStringList(StringListL *list) {
 	}
 }
 
+void pos_insert_sorted(PosList *list, PosInfo elem) {
+	if (!list->size) {
+		da_push(list, elem); 
+		return;
+    }
+
+	size_t i;
+	for (i = 0; i < list->size && elem.list_index != list->data[i].list_index; i++);
+	for (; i < list->size && elem.index > list->data[i].index; i++);
+
+	da_insert(list, elem, i);
+}
+
 void quote_removal(const StrList * const list) {
 
 	PosInfo spair = { -1, -1 };
@@ -397,9 +410,9 @@ void quote_removal(const StrList * const list) {
 			if	(elem[j] == '\"' && !squote) {
 				dquote = !dquote;
 				if (dpair.index != -1) {
-					da_push(poses, dpair);
+					pos_insert_sorted(poses, dpair);
 					PosInfo current = { i, j };
-					da_push(poses, current);
+					pos_insert_sorted(poses, current);
 					dpair = (PosInfo) { -1, -1 }; continue;
 				} else { dpair = (PosInfo) { i, j }; }
 				continue;
@@ -407,30 +420,47 @@ void quote_removal(const StrList * const list) {
 			else if (elem[j] == '\'' && !dquote) {
 				squote = !squote;
 				if (spair.index != -1) {
-					da_push(poses, spair); 
+					pos_insert_sorted(poses, spair); 
 					PosInfo current = { i, j };
-					da_push(poses, current);
+					pos_insert_sorted(poses, current);
 					spair = (PosInfo) { -1, -1 }; 
 					continue;
 				} else { spair = (PosInfo) { i, j }; }
 				continue;
+			} else if (elem[j] == '\\') {
+				PosInfo current = { i, j };
+				pos_insert_sorted(poses, current);
+				j++; //skip '\'
+				continue; //skip the escaped character
 			}
 		}
 	}
+
 	for (size_t i = 0; i < poses->size;) {
 		da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
-		ss_push_string(ss, list->data[poses->data[i].list_index]->str);
 
-		int offset = 0;
-		int origin = poses->data[i].list_index;
-		while (i < poses->size && poses->data[i].list_index == origin) {
-			da_erase_index(ss, ((size_t) poses->data[i].index - offset));
-			offset++;
-			i++;
+		//Retain current index aswell as string
+		const int index = poses->data[i].list_index;
+		const char *const input = list->data[index]->str;
+
+		// for (size_t k = 0; k < poses->size; k++) {
+		// 	dprintf(2, "tab: %d, k: %d\n", poses->data[k].list_index, poses->data[k].index);
+		// }
+		// dprintf(2, "String: %s\n", input);
+
+		for (int j = 0; input[j]; j++) {
+			//if i == j we don't copy it
+			// dprintf(2, "pos: %d it: %d\n", poses->data[i].index, j);
+			if (poses->data[i].list_index == index && poses->data[i].index == j) {
+				i++;
+				continue;
+            }
+			da_push(ss, input[j]);
 		}
+		// dprintf(2, "ss: |%s| size: %zu\n", ss->data, ss->size);
 
-		gc(GC_FREE, list->data[poses->data[i - 1].list_index]->str, GC_SUBSHELL);
-		list->data[poses->data[i - 1].list_index]->str = (ss->size == 0) ? NULL : ss_get_owned_slice(ss);
+		gc(GC_FREE, list->data[index]->str, GC_SUBSHELL);
+		list->data[index]->str = (ss->size == 0) ? NULL : ss_get_owned_slice(ss);
 	}
 }
 
@@ -552,36 +582,81 @@ typedef struct {
 } PatternNodeL;
 
 
+int fill_map_with_character_class(char *character_class_name, char *map, const bool reverse) {
+	static const struct {
+		char *name;
+		char map[256];
+	} lookup[] = {
+		{ .name = "upper", .map = {['A'...'Z']= 1}, },
+		{ .name = "lower", .map = {['a'...'z']= 1}, },
+		{ .name = "digit", .map = {['0'...'9']= 1}, },
+		{ .name = "space", .map = {['\t'...'\r']= 1, [' ']= 1 }, },
+		{ .name = "cntrl", .map = {['\0'...31]= 1, [127]= 1}, },
+		{ .name = "punct", .map = {['!'...'/']= 1, [':'...'@']= 1, ['\['...'`']= 1, ['\{'...'~']= 1}, },
+		{ .name = "xdigit", .map = {['0'...'9']= 1, ['a'...'f']= 1, ['A'...'F']= 1,}, },
+		{ .name = "blank", .map = {[' '] = 1, ['\t'] = 1}, },
+		{ .name = "alpha", .map = {['A'...'Z']= 1, ['a'...'z']= 1,}, },
+		{ .name = "alnum", .map = {['A'...'Z']= 1, ['a'...'z']= 1, ['0'...'9']= 1,}, },
+		{ .name = "graph", .map = {['A'...'Z']= 1, ['a'...'z']= 1, ['0'...'9']= 1,
+								   ['!'...'/']= 1, [':'...'@']= 1, ['\['...'`']= 1, ['\{'...'~']= 1}, },
+		{ .name = "print", .map = {['A'...'Z']= 1, ['a'...'z']= 1, ['0'...'9']= 1,
+								   ['!'...'/']= 1, [':'...'@']= 1, ['\['...'`']= 1, ['\{'...'~']= 1,
+								   ['\t'...'\r']= 1, [' ']= 1 }, },
+	};
+
+	for (size_t i = 0; i < ARRAY_SIZE(lookup); i++) {
+		if (!ft_strcmp(character_class_name, lookup[i].name)) {
+			for (size_t j = 0; j < 256; j++) {
+				if (reverse) map[j] ^= lookup[i].map[j];
+				else map[j] |= lookup[i].map[j];
+			}
+			return 0;
+		}
+	}
+	return -1;
+}
+
+
 char *compile_range(char **pattern) {
-	char *map = gc(GC_CALLOC, 256, sizeof(char), GC_SUBSHELL);
 
 	char *str = *pattern;
 	bool reverse = (*str == '^' || *str == '!');
+	char *map = gc(GC_ALLOC, 256, sizeof(char), GC_SUBSHELL);
+
+	if (reverse) ft_memset(map, 1, 256);
+	else ft_memset(map, 0, 256);
 	str += (reverse);
 	// dprintf(2, "str: %s\n", str);
 	while(*str) {
+		regex_match_t match;
+		if ((match = regex_match("^\\[\\:[a-zA-Z0-9]*\\:\\]", str)).is_found) {
+			char *const character_class_name = ft_substr(str, 2, match.re_end - 2 - 2);
+			fill_map_with_character_class(character_class_name, map, reverse);
+			str += (match.re_end); //reposition pointer after the closing ]
+			free(character_class_name);
+			continue;
+		}
 		if ((*str) == '-') { str++; continue; }
 		if ((*str) == ']')
 			break;
 		if ((*(str + 1)) != 0 && *(str + 1) == '-') {
-			unsigned char maybe_start = (*str);
+			unsigned char start = (*str);
 			str++;
 			while (*str == '-') str++;
 			if (*str) {
-				unsigned char maybe_end = (*str);
-				unsigned char start = (maybe_start <= maybe_end) ? maybe_start : maybe_end;
-				unsigned char end = (maybe_end > maybe_start) ? maybe_end : maybe_start;
+				unsigned char end = (*str);
+				if (start < end)
+					ft_memset(&map[start], !(reverse), end - start + 1);
 				// dprintf(2, "s: %c | e: %c\n", start, end);
-				ft_memset(&map[start], 1, end - start + 1);
 			}
 		} else {
-			map[(unsigned char)(*str)] = 1;
+			map[(unsigned char)(*str)] = !(reverse);
 		}
 		str++;
 	}
 	*pattern = str;
-	for (size_t i = 0; reverse && i < 256; i++)
-		map[i] = !map[i];
+	// for (size_t i = 0; reverse && i < 256; i++)
+	// 	map[i] = !map[i];
 	return map;
 }
 
@@ -594,6 +669,14 @@ PatternNodeL *compile_pattern(char *pattern) {
 	while(*pattern) {
 		if		(*pattern == '\"' && !squote) { dquote = !dquote; pattern++; continue; }
 		else if (*pattern == '\'' && !dquote) { squote = !squote; pattern++; continue; }
+
+		if (!squote && *pattern == '\\') {
+			pattern++; //skip backslash
+			PatternNode node = { .type = P_CHAR, .c = *pattern };
+			da_push(list, node);
+			pattern++; //skip escaped char
+			continue;
+		}
 
         if (!ft_strchr(special, *pattern) || squote || dquote) {
             PatternNode node = { .type = P_CHAR, .c = *pattern };
@@ -708,7 +791,7 @@ void print_pattern_nodes(PatternNodeL *nodes) {
 				unsigned char buffer[256] = {0};
 				size_t len = 0;
 				for (size_t i =0; i < 256; i++) { 
-					if (node.map[i])
+					if (node.map[i] == 1)
 						buffer[len++] = (ft_isprint(i) ? i : 'X');
 				}
 				buffer[len] = 0;
@@ -721,11 +804,10 @@ void print_pattern_nodes(PatternNodeL *nodes) {
 }
 
 void remove_dofiles(MatchEntryL *entries, const bool keep_dotfiles) {
-    if (!entries->size) return ;
+    if (!entries->size || keep_dotfiles) return ;
 
 	for (size_t i = 0; i < entries->size;) {
-		if ((*(entries->data[i].name) == '.' && !keep_dotfiles) ||
-            !ft_strcmp(entries->data[i].name, ".") || !ft_strcmp(entries->data[i].name, "..")) 
+		if (*(entries->data[i].name) == '.' || !ft_strcmp(entries->data[i].name, ".") || !ft_strcmp(entries->data[i].name, "..")) 
         {
 			entries->data[i] = entries->data[entries->size - 1];
 			entries->size--;
@@ -748,19 +830,21 @@ char *join_entries(const MatchEntryL *entries) {
 }
 
 void sort_entries(MatchEntryL *entries) {
-    if (!entries->size) return ;
+    if (entries->size <= 1) return;
 
-	for (size_t i = entries->size - 1; i >= 1; i--) {
-		for (size_t j = 0; j <= i - 1; j++) {
-			if (ft_strcmp(entries->data[j + 1].name, entries->data[j].name) < 0) {
-				MatchEntry tmp = entries->data[j + 1];
-				entries->data[j + 1] = entries->data[j];
-				entries->data[j] = tmp;
-			}
-		}
-	}
+    for (size_t i = entries->size; i > 1; i--) {
+        bool swapped = false;
+        for (size_t j = 0; j < i - 1; j++) {
+            if (ft_strcmp(entries->data[j + 1].full_path, entries->data[j].full_path) < 0) {
+                MatchEntry tmp = entries->data[j + 1];
+                entries->data[j + 1] = entries->data[j];
+                entries->data[j] = tmp;
+                swapped = true;
+            }
+        }
+        if (!swapped) break; // Exit early if no swaps were made
+    }
 }
-
 
 void filename_expansions(StrList * string_list) {
 	
@@ -790,9 +874,7 @@ void filename_expansions(StrList * string_list) {
                 int flag;
                 for (size_t i = 0; i < pattern_parts->size; i++) {
 
-
                     PatternNodeL *pattern_nodes = compile_pattern(pattern_parts->data[i]);
-					keep_dotfiles = (pattern_nodes->data[0].type == P_CHAR && pattern_nodes->data[0].c == '.');
 					// print_pattern_nodes(pattern_nodes);
 
                     if (i == 0) {
@@ -806,6 +888,9 @@ void filename_expansions(StrList * string_list) {
                             flag = P_RELATIVE;
                         }
                     }
+
+					keep_dotfiles = (pattern_nodes->data[0].type == P_CHAR && pattern_nodes->data[0].c == '.');
+					// print_pattern_nodes(pattern_nodes);
 
                     if ((i > 0 && flag == P_RELATIVE) || (i > 1 && flag == P_ABSOLUTE)) {
                         da_create(tmp, MatchEntryL, sizeof(MatchEntry), GC_SUBSHELL);
@@ -826,13 +911,12 @@ void filename_expansions(StrList * string_list) {
                     }
 
                     // dprintf(2, "KEEP[%zu]: %s\n", i, boolStr(keep_dotfiles));
-
+					//
 					// for (size_t j = 0; j < entries->size; j++) {
 					// 	dprintf(2, "ENTRY[%zu]: %s\n", i, entries->data[j].name);
 					// }
 
-                    if (i != 0 && !keep_dotfiles) {
-                        // dprintf(2, "tour: %zu\n", i);
+                    if (!keep_dotfiles) {
                         for (size_t j = 0; j < entries->size;) {
                             MatchEntry elem = entries->data[j];
                             if (!ft_strcmp(elem.name, ".") || !ft_strcmp(elem.name, "..")) {
@@ -865,6 +949,7 @@ void filename_expansions(StrList * string_list) {
 					}
                 }
 				//If we still have entries, it means we matched with at least one file
+				// dprintf(2, "KEEP[%zu]: %s\n", i, boolStr(keep_dotfiles));
 				if (entries->size) {
 					remove_dofiles(entries, keep_dotfiles);
                     if (entries->size) {
@@ -892,8 +977,9 @@ StringListL *do_expansions_word(char *word, int *error, Vars *const shell_vars, 
 
 	filename_expansions(string_list);
 
+	// str_list_print(string_list);
 	quote_removal(string_list);
-
+	// str_list_print(string_list);
 
 	return string_list_merge(string_list);
 }

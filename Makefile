@@ -6,7 +6,7 @@
 #    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/06 10:05:24 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/12/19 15:20:51 by bvan-pae         ###   ########.fr        #
+#    Updated: 2024/12/23 13:10:28 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -124,7 +124,7 @@ $(SAN): $(LIBFT) $(STRING) $(STRING) $(OBJDIR) $(OBJ)
 $(NAME): $(LIBFT) $(STRING) $(OBJDIR) $(OBJ)
 	@printf "$(OLIVINE)Making binary: $(NAME)\n"
 	@$(call cmd_wrapper, $(CC) $(OBJ) $(CFLAGS) $(LDFLAGS) $(LIBFT) $(STRING) -o $(NAME))
-	@printf "$(JASPER)Done !$(DEF_COLOR)\n"
+	@printf "$(JASPER)Done !$(DEF_COLOR)$(RESET_CURSOR)\n"
 
 -include $(DEPS)
 $(OBJDIR)/%.o: source/%.c
