@@ -604,8 +604,8 @@ int parse(Lex *lexer, Vars *shell_vars) {
 						break;
 					}
 					case 44: { /* case_list -> case_list case_item */
-						CaseClauseP *case_list = da_pop(stack)->token.case_clause;
 						CaseClauseP *case_item = da_pop(stack)->token.case_clause;
+						CaseClauseP *case_list = da_pop(stack)->token.case_clause;
 						caseClauseMerge(case_list, case_item);
 						reduced_entry->token.type = Case_List;
 						reduced_entry->token.case_clause = case_list;

@@ -283,19 +283,20 @@ static int execute_case_clause(const CommandP * const command, const bool backgr
 	case_clause->expression = ret.ret->data[0];
 
 	for (size_t i = 0; i < case_clause->patterns->size; i++) {
-		ExpReturn ret = do_expansions(case_clause->patterns->data[i], shell_vars, O_NONE);
+		ExpReturn ret = do_expansions(case_clause->patterns->data[i], shell_vars, O_CASE_PATTERN);
 		if (ret.error != 0)
 			return ERR; 
 		case_clause->patterns->data[i] = ret.ret;
 	}
 
-	int default_index = -1;
 	for (size_t i = 0; i < case_clause->patterns->size; i++) {
 		const StringListL * const patterns = case_clause->patterns->data[i];
 		for (size_t inner_i = 0; inner_i < patterns->size; inner_i++) {
-			if (!ft_strcmp("*", patterns->data[inner_i]))
-				default_index = i;
-			if (!ft_strcmp(patterns->data[inner_i], case_clause->expression)) {
+            char *pattern = patterns->data[inner_i];
+            PatternNodeL *compiled_pattern = compile_pattern(pattern);
+            bool match = match_string(case_clause->expression, compiled_pattern);
+
+			if (match) {
 				if (execute_complete_command(wrap_list(case_clause->bodies->data[i]), shell_vars, background) == ERR) {
 					if (SAVE_FD) restore_std_fds(saved_fds);
 					return ERR;
@@ -305,12 +306,6 @@ static int execute_case_clause(const CommandP * const command, const bool backgr
             }
 		}
 	}
-	if (default_index != -1) {
-		if (execute_complete_command(wrap_list(case_clause->bodies->data[default_index]), shell_vars, background) == ERR) {
-			if (SAVE_FD) restore_std_fds(saved_fds);
-			return ERR;
-		}
-    }
 
 	if (SAVE_FD) restore_std_fds(saved_fds);
 	return 0;
