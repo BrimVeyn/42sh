@@ -472,10 +472,15 @@ typedef struct {
     int gc_level;
 } MatchEntryL;
 
+#define P_ABSOLUTE 0
+#define P_RELATIVE 1
+#define P_ABSOLUTE_INIT 2
+#define P_RELATIVE_INIT 4
+
 #include <sys/dir.h>
 #include <dirent.h>
 
-int get_dir_entries(MatchEntryL *list, const char *path, const bool join_path) {
+int get_dir_entries(MatchEntryL *list, const char *path, const int flag) {
     DIR *dir = opendir(path);
     if (!dir) {return -1;}
 
@@ -483,14 +488,21 @@ int get_dir_entries(MatchEntryL *list, const char *path, const bool join_path) {
 
     while ((it = readdir(dir)) != NULL) {
         char buffer[PATH_MAX] = {0};
-        int ret = ft_snprintf(buffer, PATH_MAX, "%s/%s", path, it->d_name);
+        int ret;
+        if (flag == P_ABSOLUTE_INIT)
+            ret = ft_snprintf(buffer, PATH_MAX, "/%s", it->d_name);
+        else
+            ret = ft_snprintf(buffer, PATH_MAX, "%s/%s", path, it->d_name);
+
         if (ret == -1)
             _fatal("snprintf: buffer overflow", 1);
+
+        const char *const full_path = (flag == P_RELATIVE_INIT) ? it->d_name : buffer;
 
         MatchEntry elem = {
             .name = gc(GC_ADD, ft_strdup(it->d_name), GC_SUBSHELL),
             .type = it->d_type,
-            .full_path = gc(GC_ADD, ft_strdup((join_path) ? buffer : it->d_name), GC_SUBSHELL),
+            .full_path = gc(GC_ADD, ft_strdup(full_path), GC_SUBSHELL),
         };
         da_push(list, elem);
     }
@@ -749,6 +761,7 @@ void sort_entries(MatchEntryL *entries) {
 	}
 }
 
+
 void filename_expansions(StrList * string_list) {
 	
 	// str_list_print(string_list);
@@ -760,17 +773,13 @@ void filename_expansions(StrList * string_list) {
 
                 //Open current_directories and read all entries
                 //Separate the whole string into smaller parts with FS='/'
-				bool keep_dotfiles;
+				bool keep_dotfiles = true;
 				da_create(entries, MatchEntryL, sizeof(MatchEntry), GC_SUBSHELL);
-
-                //Use this path variable to keep track of the fall path from origin
 
                 // for (size_t i = 0; i < entries->size; i++) {
                 //     dprintf(2, "full: %s\n", entries->data[i].full_path);
                 // }
                 // _fatal("caught", 1);
-
-                //Set starting entries at current directory.
 
                 StringListL *pattern_parts = cut_pattern(head->str);
                 // for (size_t i = 0; i < pattern_parts->size; i++) {
@@ -778,25 +787,27 @@ void filename_expansions(StrList * string_list) {
                 //     dprintf(2, "size: %zu\n", ft_strlen(pattern_parts->data[i]));
                 // }
                 //Iterator over each pattern parts
+                int flag;
                 for (size_t i = 0; i < pattern_parts->size; i++) {
 
+
                     PatternNodeL *pattern_nodes = compile_pattern(pattern_parts->data[i]);
+					keep_dotfiles = (pattern_nodes->data[0].type == P_CHAR && pattern_nodes->data[0].c == '.');
 					// print_pattern_nodes(pattern_nodes);
-                    // TODO: check for it every time
-					if (i == 0) keep_dotfiles = (pattern_nodes->data[i].type == P_CHAR && pattern_nodes->data[i].c == '.');
 
                     if (i == 0) {
                         //TODO: error handling
-                        // dprintf(2, "size: %zu\n", pattern_nodes->size);
-                        //TODO: absolute
                         if (!pattern_nodes->size) {
-                            get_dir_entries(entries, "/", false);
+                            get_dir_entries(entries, "/", P_ABSOLUTE_INIT);
+                            flag = P_ABSOLUTE;
+                            continue;
                         } else {
-                            get_dir_entries(entries, ".", false);
+                            get_dir_entries(entries, ".", P_RELATIVE_INIT);
+                            flag = P_RELATIVE;
                         }
                     }
 
-                    if (i != 0) {
+                    if ((i > 0 && flag == P_RELATIVE) || (i > 1 && flag == P_ABSOLUTE)) {
                         da_create(tmp, MatchEntryL, sizeof(MatchEntry), GC_SUBSHELL);
                         for (size_t j = 0; j < entries->size;) {
                             const MatchEntry elem = entries->data[j];
@@ -814,15 +825,37 @@ void filename_expansions(StrList * string_list) {
                         entries = tmp;
                     }
 
-					// FIX: add them directly to entries
-					// for (size_t i = 0; i < entries->size; i++) {
-					// 	dprintf(2, "e: %s\n", entries->data[i].name);
+                    // dprintf(2, "KEEP[%zu]: %s\n", i, boolStr(keep_dotfiles));
+
+					// for (size_t j = 0; j < entries->size; j++) {
+					// 	dprintf(2, "ENTRY[%zu]: %s\n", i, entries->data[j].name);
 					// }
+
+                    if (i != 0 && !keep_dotfiles) {
+                        // dprintf(2, "tour: %zu\n", i);
+                        for (size_t j = 0; j < entries->size;) {
+                            MatchEntry elem = entries->data[j];
+                            if (!ft_strcmp(elem.name, ".") || !ft_strcmp(elem.name, "..")) {
+                                entries->data[j] = entries->data[entries->size - 1];
+                                entries->size--;
+                                continue;
+                            }
+                            j++;
+                        }
+                    }
+
+					// for (size_t j = 0; j < entries->size; j++) {
+					// 	dprintf(2, "e[%zu]: %s\n", i, entries->data[j].full_path);
+					// }
+
+					// FIX: add them directly to entries
 
                     //Iterate over every entries and compute its matching state
 					for (size_t i = 0; i < entries->size;) {
-						entries->data[i].match = match_string(entries->data[i].name, pattern_nodes);
-						if (!entries->data[i].match) {
+                        MatchEntry elem = entries->data[i];
+						elem.match = match_string(elem.name, pattern_nodes);
+                        //If the entry didn't match the pattern, remove it.
+						if (!elem.match) {
 							//Swap with last element and decremnt size since we don't care about order yet (avoid memmove)
 							entries->data[i] = entries->data[entries->size - 1];
 							entries->size--;
@@ -831,7 +864,7 @@ void filename_expansions(StrList * string_list) {
 						i++;
 					}
                 }
-				//if pattern matching found something, replace the original string by the joined entries
+				//If we still have entries, it means we matched with at least one file
 				if (entries->size) {
 					remove_dofiles(entries, keep_dotfiles);
                     if (entries->size) {

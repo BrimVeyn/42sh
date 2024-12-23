@@ -11,10 +11,10 @@ echo ?
 echo ???
 echo *.*
 echo [aeiou]*
-echo [!aeiou]*
+echo [^aeiou]*
 echo [0-9]*
 echo [0-9]*[a-z]*
-echo [!a-z]*[A-Z]
+echo [^a-z]*[A-Z]
 echo *[0-9][0-9]
 echo \*
 echo \[a-z\]*
@@ -22,7 +22,7 @@ echo \\*
 echo .*
 echo .[a-z]*
 echo ..*
-echo *[!0-9]*
+echo *[^0-9]*
 echo ???[a-z]*???
 echo *[A-Z]*[a-z]
 echo ab*
@@ -38,3 +38,6 @@ echo file\ name*
 echo ""
 echo '*'
 echo *
+echo /etc/*
+echo /home/[a-zA-Z]*
+echo /*
