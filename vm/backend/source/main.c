@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 09:38:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/19 15:32:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/23 08:45:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,7 +205,7 @@ void setup_env(void) {
 }
 
 void execute_shell_script(char *path) {
-    pid_t pid = vfork();
+    pid_t pid = fork();
     if (!pid) {
         char *args[2] = { path, NULL };
         execv(args[0], args);

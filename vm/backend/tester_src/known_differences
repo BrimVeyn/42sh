@@ -1,4 +1,4 @@
 echo $(($(1 + 1)) + $(($(2 + 2)))) #bash doesn't set the exit code to 2 when there is a syntax error in a command substitution, why not ?
 echo $() #we consider this is an empty subshell which result in a syntax error. bash consider this as valid
 echo $(( (3 + 2 )) + ) #bash consider this as a command substitution, which its clearly not
-var=10; while true $((--var)); ! (exit $((var >= 0))); do echo salut; done #bash consider the last executed command as echo salut whilst we consider the last evaluation of the condition as the last executed command
+echo ./pm_test/[^[:ascii:]]* #bash consider that if we find a invalid character class, the range is empty, even if its reversed, we consider the invert of nothing is all ascii chars
