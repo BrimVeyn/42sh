@@ -413,7 +413,13 @@ typedef enum {
 char *here_doc(const char *eof, const heredoc_mode mode, Vars * const shell_vars);
 
 
-typedef enum { O_NONE = 0, O_SPLIT = 1, O_ALLOWNULLS = 2, O_ASSIGN = 4, } ExpansionsOpt;
+typedef enum { 
+    O_NONE = 0,
+    O_SPLIT = (1 << 0),
+    O_ALLOWNULLS = (1 << 1),
+    O_ASSIGN = (1 << 2),
+    O_CASE_PATTERN = (1 << 3),
+} ExpansionsOpt;
 
 int execute_complete_command(const CompleteCommandP * const complete_command, Vars *const shell_vars, const bool bg);
 bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars);
