@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/28 16:00:03 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/07 10:59:40 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/24 16:34:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,7 @@ void				ft_putchar_fd(char c, int fd);
 // Autres fonctions
 void				ft_bzero(void *s, size_t n);
 int					ft_atoi(const char *theString);
+int					ft_atoi_base(char *str, char *base);
 
 // Fonctions Customs
 

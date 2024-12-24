@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 12:20:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/24 15:59:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/24 16:39:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,28 +18,15 @@
 #include "ft_regex.h"
 #include "utils.h"
 
-static int slow_pow(const int n, const int pow) {
-	if (pow == 0) return 1;
-	if (pow == 1) return n;
+int read_x_base(const char *const input, char *buffer, const int x, const char *const base) {
+	int i = 0;
 
-	int res = n;
-	for (int i = 0; i < pow - 1; i++) {
-		res *= n;
+	while (i < x && ft_strchr(base, input[i])) {
+		buffer[i] = ft_tolower(input[i]);
+		i++;
 	}
-	return res;
-}
-
-int octal_to_decimal(const char *n) {
-	int n_len = ft_strlen(n);
-	int result = 0;
-
-	int pow = 0;
-	while (n_len) {
-		int add = (n[n_len - 1] - '0') * slow_pow(8, pow++);
-		result += add;
-		n_len--;
-	}
-	return result;
+	buffer[i] = '\0';
+	return i;
 }
 
 char *replace_escape_sequences(char *arg, bool *stop) {
@@ -63,21 +50,25 @@ char *replace_escape_sequences(char *arg, bool *stop) {
 
 			} else if (arg[i + 1] == '0') {
 				i += 2; // '\' + '0';
-
-				//Fill buffer with the octal represntation of the char
+				
 				char buffer[4] = {0};
-				int it = 0;
-				while (it < 3 && arg[i + it] >= '0' && arg[i + it] <= '7') {
-					buffer[it] = arg[i + it]; it++;
-				}
-				buffer[it] = '\0';
-				i += (it - 1);
+				//increment i of bytes read
+				i += (read_x_base(&arg[i], buffer, 3, "01234567") - 1);
 
-				//convert and push
-				if (it != 0) //there was at least a valid number
-					da_push(ss, octal_to_decimal(buffer));
+				da_push(ss, ft_atoi_base(buffer, "01234567"));
 
-			} else da_push(ss, arg[i]);
+			} else if (arg[i + 1] == 'u' || arg[i + 1] == 'U') {
+				//2 bytes utf if 'u' 4 bytes utf if 'U'
+				int read_size = (arg[i + 1] == 'u') ? 4 : 8;
+				i += 2; // '\' + 'u'
+
+				char buffer[5] = {0};
+				i += (read_x_base(&arg[i], buffer, read_size, "0123456789abcdefABCDEF") - 1);
+
+				int ret = ft_atoi_base(buffer, "0123456789abcdef");
+				dprintf(2, "value: %d\n", ret);
+
+			} else da_push(ss, arg[i])
 		} else {
 			da_push(ss, arg[i]);
 		}
