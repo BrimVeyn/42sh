@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 14:13:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/13 11:18:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/24 10:40:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@
 #include <unistd.h>
 
 typedef enum {
+	EXP_WORD,
 	EXP_ARITHMETIC,
 	EXP_VARIABLE,
 	EXP_CMDSUB,
 	EXP_SUB,
-	EXP_WORD,
 	EXP_SQUOTE,
 	EXP_DQUOTE,
 } ExpKind;

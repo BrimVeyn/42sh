@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:33:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 11:33:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/24 11:37:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "parser.h"
 #include "utils.h"
 #include "ft_regex.h"
+#include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -189,12 +190,14 @@ void builtin_hash(const SimpleCommandP *command, Vars *shell_vars) {
 		return ;
 	}
 
-	if (command->word_list->data[i] && regex_match("^-r+$", command->word_list->data[i]).is_found) {
-		hash_interface(HASH_CLEAR, NULL, shell_vars);
-		i += 1;
-	}
-	for (; command->word_list->data[i] && regex_match("^-d+$", command->word_list->data[i]).is_found; i++) {
-		delete_mode = true;
+	for (; command->word_list->data[i]; i++) {
+		if (regex_match("^-r+$", command->word_list->data[i]).is_found) {
+			hash_interface(HASH_CLEAR, NULL, shell_vars);
+			return ;
+		}
+		else if (regex_match("^-d+$", command->word_list->data[i]).is_found)
+			delete_mode = true;
+		else break;
 	}
 
 	if (delete_mode && !command->word_list->data[i]) {
