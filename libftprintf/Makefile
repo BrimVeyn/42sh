@@ -4,6 +4,7 @@ CFLAGS = -Wall -Wextra -Werror -g3 -fPIC
 SRCS = sources/custom_utils/ft_strcmp.c \
 sources/custom_utils/ft_strjoin_free.c \
 sources/libft/ft_atoi.c \
+sources/libft/ft_atoi_base.c \
 sources/libft/ft_bzero.c \
 sources/libft/ft_calloc.c \
 sources/libft/ft_isalnum.c \
