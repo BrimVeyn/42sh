@@ -180,16 +180,17 @@ bool match_string(const char *str, const PatternNodeL *pattern_nodes) {
     int **dp = calloc(string.size + 1, sizeof(int *));
     for (size_t i = 0; i < string.size + 1; i++) {
         dp[i] = malloc((pattern_nodes->size + 1) * sizeof(int));
-		for (size_t j = 0; j < pattern_nodes->size + 1; j++) {
-			dp[i][j] = -1;
-		}
+		ft_memset(dp[i], -1, (pattern_nodes->size + 1) * sizeof(int));
+		// for (size_t j = 0; j < pattern_nodes->size + 1; j++) {
+		// 	dp[i][j] = -1;
+		// }
     }
 
 	// dprintf(2, "------------------ str: %s ------------\n", str);
     bool match = match_pattern(dp, string, pattern_nodes, 0, 0);
 	// dprintf(2, "---------------------------------------\n");
 
-    for(size_t i = 0; i < string.size; i++) {
+    for(size_t i = 0; i < string.size + 1; i++) {
         free(dp[i]);
     }
     free(dp);

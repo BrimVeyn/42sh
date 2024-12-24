@@ -21,7 +21,7 @@ function Resume({ tests, title }) {
 
 	return (
 		<>
-			<div id="resumeTitle" className="p-20 text-xl text-center text-gray-200" >
+			<div id="resumeTitle" className="p-5 text-xl text-center text-gray-200" >
 				<p> 
 					{title.replace(/_/g, ' ').toUpperCase()} 
 				</p>
@@ -30,7 +30,7 @@ function Resume({ tests, title }) {
 				{tests.map((test, index) => (
 					<button
 						key={index}
-						className={`w-12 h-12 rounded border-2 p-1 m-1 resumeButton ${computeBg(test)} ${computeBorder(index)}`}
+						className={`w-10 h-10 rounded border-2 p-1 m-1 resumeButton ${computeBg(test)} ${computeBorder(index)}`}
 						onClick={() => toggleTest(index)}
 					>
 						{test.id}
