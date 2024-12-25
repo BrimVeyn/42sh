@@ -66,7 +66,7 @@ char *replace_escape_sequences(char *arg, bool *stop) {
 				i += (read_x_base(&arg[i], buffer, read_size, "0123456789abcdefABCDEF") - 1);
 
 				int ret = ft_atoi_base(buffer, "0123456789abcdef");
-				dprintf(2, "value: %d\n", ret);
+				/*dprintf(2, "value: %d\n", ret);*/
 
 			} else da_push(ss, arg[i])
 		} else {

@@ -27,7 +27,6 @@ extern int g_exitno;
 
 #ifndef __FILE_NAME__
 
-#include "libft.h"
 #define __FILE_NAME__ (ft_strrchr(__FILE__, '/') ? ft_strrchr(__FILE__, '/') + 1 : __FILE__)
 
 #endif
