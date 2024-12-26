@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 10:13:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/13 15:49:55 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/26 16:33:49 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,10 +51,6 @@
 \[ Begin a sequence of non-printing characters. This could be used to embed a terminal control sequence into the prompt. 
 \] End a sequence of non-printing characters. 
 ----------------------------------------------------------------------------------- */
-
-// char *get_ascii(void) {
-// 	return "pffff";
-// }
 
 static char *get_date_format(const char *restrict format) {
 	char date_str[DATE_SIZE] = {0};
