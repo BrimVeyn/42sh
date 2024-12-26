@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 12:20:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/26 16:27:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/26 16:37:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,6 @@ char *replace_escape_sequences(char *arg, bool *stop) {
 				i += (read_x_base(&arg[i], buffer, read_size, "0123456789abcdefABCDEF") - 1);
 				uint64_t ret = ft_atoi_base(buffer, "0123456789abcdef");
 				da_push(ss, ret);
-
 			} else da_push(ss, arg[i])
 
 		} else {
