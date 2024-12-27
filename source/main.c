@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:00 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/24 10:08:11 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/27 10:27:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,25 +54,17 @@ static void	*read_input_prompt(char *input, Vars *const shell_vars) {
 	if (PS1) {
 		ShellInfos *shell_infos = shell(SHELL_GET);
 		int saved_exitno = g_exitno;
-		int error = 0;
 
 		char *maybe_prompt_command;
 		if ((maybe_prompt_command = get_variable_value(shell_vars, "PROMPT_COMMAND")) != NULL) {
 			int saved_shellstate = shell_infos->script;
+
 			shell_infos->script = true;
-
 			parse_input(maybe_prompt_command, "PROMPT_COMMAND", shell_vars);
-
 			shell_infos->script = saved_shellstate;
 		}
-
-		StringListL *maybe_prompt = do_expansions_word(PS1, &error, shell_vars, O_NONE);
-
-		if (!maybe_prompt) PS1 = "";
-		else PS1 = maybe_prompt->data[0];
-
-		PS1	= expand_prompt_special(PS1);
 		g_exitno = saved_exitno;
+		PS1 = prompt_expansion(PS1, shell_vars);
 
 		input = ft_readline(PS1, shell_vars);
     } else {

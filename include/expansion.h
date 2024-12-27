@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 14:13:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/24 10:40:05 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/27 10:27:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 
+//------------------Expansion parser related----------------------//
 typedef enum {
 	EXP_WORD,
 	EXP_ARITHMETIC,
@@ -78,8 +79,11 @@ typedef struct ContextMap {
 	char *end;
 } ContextMap;
 
-//Patterm matching related structs
+Str					*str_init(const ExpKind kind, char *str, bool add_to_gc);
+void				str_list_print(const StrList *list);
+//----------------------------------------------------------------//
 
+//----------------------Pattern matching----------------//
 typedef struct {
     char *name;
     char *full_path;
@@ -118,27 +122,26 @@ typedef struct {
     int gc_level;
 } PatternNodeL;
 
-bool is_pattern(const char *lhs, const char *rhs);
-int get_dir_entries(MatchEntryL *list, const char *path, const int flag);
-void sort_entries(MatchEntryL *entries);
-char *join_entries(const MatchEntryL *entries);
-void remove_dofiles(MatchEntryL *entries, const bool keep_dotfiles);
-void print_pattern_nodes(PatternNodeL *nodes);
-bool match_string(const char *str, const PatternNodeL *pattern_nodes);
-PatternNodeL *compile_pattern(char *pattern);
-void filename_expansion(StrList * string_list);
+bool			is_pattern(const char *lhs, const char *rhs);
+int				get_dir_entries(MatchEntryL *list, const char *path, const int flag);
+void			sort_entries(MatchEntryL *entries);
+char			*join_entries(const MatchEntryL *entries);
+void			remove_dofiles(MatchEntryL *entries, const bool keep_dotfiles);
+void			print_pattern_nodes(PatternNodeL *nodes);
+bool			match_string(const char *str, const PatternNodeL *pattern_nodes);
+PatternNodeL	*compile_pattern(char *pattern);
+//------------------------------------------------------//
 
-
-Str					*str_init(const ExpKind kind, char *str, bool add_to_gc);
-void				str_list_print(const StrList *list);
 //---------------------------------------------------------------//
-char				*parser_parameter_expansion(char * str, Vars *const shell_vars, int * const error);
-char				*parser_command_substitution(char *const str, Vars *const shell_vars, int * const error);
-char				*parser_arithmetic_expansion(char *const str, Vars *const shell_vars, int *error);
-void				parser_tilde_expansion(StringStream *cache, StringStream *word, Vars *shell_vars, const int options);
-
-//-------------------history modules------------//
+char				*parameter_expansion(char * str, Vars *const shell_vars, int * const error);
+char				*command_substitution(char *const str, Vars *const shell_vars, int * const error);
+char				*arithmetic_expansion(char *const str, Vars *const shell_vars, int *error);
+void				tilde_expansion(StringStream *cache, StringStream *word, Vars *shell_vars, const int options);
+char				*prompt_expansion(char *prompt, Vars *shell_vars);
+void				filename_expansion(StrList * string_list);
 bool				history_expansion (char **pstring);
+char				*remove_quotes(char *word);
+
 void				add_input_to_history(char *input, int *history_fd, Vars *shell_vars);
 void				get_history(Vars *shell_vars);
 
@@ -147,11 +150,8 @@ typedef struct {
 	int error;
 } ExpReturn;
 
-StringListL *do_expansions_word(char *word, int *error, Vars *const shell_vars, const int options);
-ExpReturn do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options);
-char	*remove_quotes(char *word);
-
-char	*expand_prompt_special(const char *ps);
+StringListL		*do_expansions_word(char *word, int *error, Vars *const shell_vars, const int options);
+ExpReturn		do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options);
 
 
 #endif // !EXPANSION

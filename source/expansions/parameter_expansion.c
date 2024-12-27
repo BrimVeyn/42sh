@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/17 10:35:39 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/27 10:25:29 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,7 @@ char *positionals_to_string(Vars * const shell_vars) {
 	return gc(GC_ADD, ft_strdup(buffer), GC_SUBSHELL);
 }
 
-char *parser_parameter_expansion(char * full_exp, Vars *const shell_vars, int *const error){
+char *parameter_expansion(char * full_exp, Vars *const shell_vars, int *const error){
 	regex_match_t result;
 	char *value = NULL;
 	(void)error;

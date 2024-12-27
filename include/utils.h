@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/23 15:53:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/27 09:54:43 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,6 +201,7 @@ void			ft_dprintf(int fd, const char *fmt, ...);
 long			ft_atol(const char *str);
 char			*ft_ltoa(long n);
 char			*boolStr(bool rhs);
+int				read_x_base(const char *const input, char *buffer, const int x, const char *const base);
 //------------------------------------------//
 
 //----------------File Utils--------------------//

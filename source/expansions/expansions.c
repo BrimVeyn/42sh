@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/26 16:32:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/27 10:27:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,9 +114,9 @@ void string_list_consume(StrList *str_list, Vars *shell_vars, int *error) {
 			remove_boundaries(curr);
 
 		switch (kind) {
-			case EXP_CMDSUB: { result = parser_command_substitution(curr->str, shell_vars, error); break;}
-			case EXP_ARITHMETIC: {result = parser_arithmetic_expansion(curr->str, shell_vars, error); break;}
-			case EXP_VARIABLE: {result = parser_parameter_expansion(curr->str, shell_vars, error); break;}
+			case EXP_CMDSUB: { result = command_substitution(curr->str, shell_vars, error); break;}
+			case EXP_ARITHMETIC: {result = arithmetic_expansion(curr->str, shell_vars, error); break;}
+			case EXP_VARIABLE: {result = parameter_expansion(curr->str, shell_vars, error); break;}
 			default: {}
 		}
 		
@@ -184,7 +184,7 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars, c
 	da_create(cache_stack, StringStream, sizeof(char), GC_SUBSHELL);
 	ss_push_string(word, candidate);
 
-	parser_tilde_expansion(cache_stack, word, shell_vars, options);
+	tilde_expansion(cache_stack, word, shell_vars, options);
 
 	bool squote = false, dquote = false, can_push = (word->size == 0);
 
@@ -237,7 +237,7 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars, c
 					da_push(cache_stack, 0);
 					const size_t idx = da_peak_back(pos_stack);
 					char * const tmp = ft_substr(&cache_stack->data[idx], 1, ft_strlen(&cache_stack->data[idx]) - 1);
-					char * const result = parser_command_substitution(tmp, shell_vars, error);
+					char * const result = command_substitution(tmp, shell_vars, error);
 					if ((*error) != 0) return NULL;
 
 					free(tmp);
@@ -248,7 +248,7 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars, c
 				if (var_expand && top_context == EXP_VARIABLE) {
 					da_push(cache_stack, 0);
 					const size_t idx = da_peak_back(pos_stack);
-					char * const result = parser_parameter_expansion(&cache_stack->data[idx], shell_vars, error);
+					char * const result = parameter_expansion(&cache_stack->data[idx], shell_vars, error);
 					if ((*error) != 0) return NULL;
 
 					if (result) {
@@ -503,7 +503,7 @@ StringListL *do_expansions_word(char *word, int *error, Vars *const shell_vars, 
 
     filename_expansion(str_list);
 
-	str_list_print(str_list);
+	// str_list_print(str_list);
 	quote_removal(str_list);
 	// str_list_print(str_list);
 

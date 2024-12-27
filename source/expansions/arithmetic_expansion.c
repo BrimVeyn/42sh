@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:48:00 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/27 10:26:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,7 @@ static Lexer * lexer_init(char *input) {
 
 void aTokenListToString(ATokenStack *tokens);
 
-char *parser_arithmetic_expansion(char *const str, Vars *const shell_vars, int *error) {
+char *arithmetic_expansion(char *const str, Vars *const shell_vars, int *error) {
 
 	char *tmp = ft_strdup(str);
 	replace_nested_greedy(tmp, str);
