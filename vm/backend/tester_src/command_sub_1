@@ -1,47 +1,47 @@
-echo $(ls)
+echo $(ls /usr)
 echo $(echo Hello)
 echo $(echo First command; echo Second command)
-echo $(ls && echo Listing succeeded || echo Listing failed)
-echo Files in directory:$(ls | wc -l)
-echo $(echo start; ls | grep .c; echo done)
+echo $(ls /usr && echo Listing succeeded || echo Listing failed)
+echo Files in directory:$(ls /usr | wc -l)
+echo $(echo start; ls /usr | grep .c; echo done)
 echo $(rm non_existent_file || echo File not found)
-echo $(echo $(echo nested; ls) | echo Finished)
+echo $(echo $(echo nested; ls /usr) | echo Finished)
 echo $(echo $(echo salut; echo prout) | echo salut)
 $(cd /nonexistent | echo Changed dir || echo Failed to change dir; echo Command complete)
-echo $(echo salut; echo salut) | ls
-echo $(ls /etc | head -n 5)
+echo $(echo salut; echo salut) | ls /usr
+echo $(ls /usr /etc | head -n 5)
 echo $(uname -a && echo Kernel info)
-echo $(echo $(ls | wc -l) | cat - $(echo Done))
-echo $(ls /etc && ls /nonexistentdir || echo Dir not found)
-echo $(echo Pipe test && ls /usr | grep bin | wc -l)
+echo $(echo $(ls /usr | wc -l) | cat - $(echo Done))
+echo $(ls /usr /etc && ls /usr /nonexistentdir || echo Dir not found)
+echo $(echo Pipe test && ls /usr /usr | grep bin | wc -l)
 echo $(cat /dev/null && echo Empty file || echo Fallback)
-echo $(mkdir newdir && ls && rmdir newdir && echo Dir test complete)
-echo $(find /usr -maxdepth 1 -type d | xargs ls | grep bin && echo Dir listing done)
+echo $(mkdir newdir && ls /usr && rmdir newdir && echo Dir test complete)
+echo $(find /usr -maxdepth 1 -type d | xargs ls /usr | grep bin && echo Dir listing done)
 echo $(seq 1 10 | xargs -I {} echo {} | wc -l && echo Xargs done)
-echo $(ls /etc | grep conf | wc -l)
+echo $(ls /usr /etc | grep conf | wc -l)
 echo $(find /etc | grep conf | head -n 3)
-echo $(echo Test done; echo $(ls /usr | head -n 5))
+echo $(echo Test done; echo $(ls /usr /usr | head -n 5))
 echo $(false && echo Fail || echo Success)
-echo $(ls /bin | grep bash && echo Found bash || echo Not found)
-echo $(echo Begin test; ls /etc | grep conf | wc -l)
-echo $(ls | grep txt && echo Text files found || echo No text files)
-echo $(echo Start; echo $(echo $(ls /etc | grep conf) | wc -l) && echo Finish)
+echo $(ls /usr /bin | grep bash && echo Found bash || echo Not found)
+echo $(echo Begin test; ls /usr /etc | grep conf | wc -l)
+echo $(ls /usr | grep txt && echo Text files found || echo No text files)
+echo $(echo Start; echo $(echo $(ls /usr /etc | grep conf) | wc -l) && echo Finish)
 echo $(mkdir tempdir && echo Dir created; rmdir tempdir && echo Dir removed)
 echo prefix$(echo salut)suffix
-echo count:$(ls /home | wc -l)files
-echo first file:$(ls /home | head -n 1)
+echo count:$(ls /usr /home | wc -l)files
+echo first file:$(ls /usr /home | head -n 1)
 echo kernel:$(uname -r)version
 echo path:$(echo /usr/bin | grep bin)found
 echo current user:$(whoami)
-echo check:$(echo $(ls /etc | grep conf)config files)
-echo listing:$(echo $(ls /usr/home | grep sh))done
-echo last command:$(echo $(ls /etc | wc -l))files found
+echo check:$(echo $(ls /usr /etc | grep conf)config files)
+echo listing:$(echo $(ls /usr /usr/home | grep sh))done
+echo last command:$(echo $(ls /usr /etc | wc -l))files found
 echo $(echo $(echo $(uname)))suffix
-echo status:$(ls /etc | grep $(whoami) | wc -l)processes running
-echo result:$(echo $(ls /usr | grep lib))libraries found
+echo status:$(ls /usr /etc | grep $(whoami) | wc -l)processes running
+echo result:$(echo $(ls /usr /usr | grep lib))libraries found
 echo FirstPrefix$(echo salut)FirstSuffix$(echo salut)EndSuffix
 echo $(echo FirstPrefix$(echo $(echo hey))FirstSuffix$(echo salut)EndSuffix)
 echo $(echo $(mkdir tempdir && echo Dir created && (rmdir tempdir && echo Dir removed)))
 echo prefix$(echo $(echo inside subshell))suffix
-echo files:$(ls /home | (wc -l))listed
-echo first file:$(ls /env | (head -n 1))found
+echo files:$(ls /usr /home | (wc -l))listed
+echo first file:$(ls /usr /env | (head -n 1))found

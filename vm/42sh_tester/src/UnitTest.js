@@ -10,6 +10,8 @@ function UnitTest({unit}) {
 	const [outputBash, setOutputBash] = useState(null);
 	const [error42sh, setError42sh] = useState(null);
 	const [errorBash, setErrorBash] = useState(null);
+	const [outfiles42sh, setOutfiles42sh] = useState(null);
+	const [outfilesBash, setOutfilesBash] = useState(null);
 	const [input, setInput] = useState(null);
 
 	// Function to fetch file content from the backend API
@@ -36,6 +38,8 @@ function UnitTest({unit}) {
 		fetchContent(unit["bash_output"], setOutputBash);
 		fetchContent(unit["42sh_error"], setError42sh);
 		fetchContent(unit["bash_error"], setErrorBash);
+		fetchContent(unit["42sh_files"], setOutfiles42sh);
+		fetchContent(unit["bash_files"], setOutfilesBash);
 	}, [unit]);
 
 	//unitButton style
@@ -46,6 +50,8 @@ function UnitTest({unit}) {
 		else if (type === "error" && unit["error_ok"] === "0")
 			buffer += " bg-yellow-500";
 		else if (type === "exit" && unit["exit_ok"] === "0")
+			buffer += " bg-red-500";
+		else if (type === "oufiles" && unit["files_ok"] === "0")
 			buffer += " bg-red-500";
 		if (type === activeDiff)
 			buffer += " border-green-700"
@@ -109,6 +115,11 @@ function UnitTest({unit}) {
 				>
 					Ouput (stdout)
 				</button>
+				<button className={unitButton(unit, "oufiles")} 
+					onClick={() => setShown("outfiles")}
+				>
+					Outfiles (>)
+				</button>
 				<button className={unitButton(unit, "error")} 
 					onClick={() => setShown("error")}
 				>
@@ -137,6 +148,15 @@ function UnitTest({unit}) {
 								styles={newStyles}
 								oldValue={errorBash || "None"} 
 								newValue={error42sh || "None"} 
+								splitView={true} showDiffOnly={false} useDarkTheme={true}
+								leftTitle={"Bash"} rightTitle={"42sh"} 
+							/>
+						}
+						{activeDiff === "outfiles" && 
+							<ReactDiffViewer key={unit.id + "error"} 
+								styles={newStyles}
+								oldValue={outfiles42sh || "None"} 
+								newValue={outfilesBash || "None"} 
 								splitView={true} showDiffOnly={false} useDarkTheme={true}
 								leftTitle={"Bash"} rightTitle={"42sh"} 
 							/>

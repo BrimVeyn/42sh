@@ -2,7 +2,7 @@
 { echo salut; } >./outfiles/test
 echo {
 echo { echo salut ;}
-{ echo salut; echo mec ;} | ls; echo salut && echo cava
+{ echo salut; echo mec ;} | ls /usr; echo salut && echo cava
 { echo salut ;} && { echo salut;};
 { echo hello && { echo world ;} ; } && { echo welcome ;}
 { echo one ; echo two ; } && { echo three ; }
@@ -11,7 +11,7 @@ echo { echo nested ; } && { echo check ;}
 { { echo inner1; } ; echo inner2 ; } | grep inner
 { echo first ; echo second ; } | tee ./outfiles/test1
 { echo command1 ; } >./outfiles/test2 && { echo command2 ; } >./outfiles/test3
-{ echo start ; echo end ; } && ls
+{ echo start ; echo end ; } && ls /usr
 { { echo one; echo two; } ; echo three; } | cat
 { echo chain1 && echo chain2 ; } && { echo chain3 ; }
 echo  salut && { echo braces ; }
@@ -29,7 +29,7 @@ echo  salut && { echo braces ; }
 { { echo pre1 && { echo pre2 || echo altPre ;} ;      } && echo main ;} && echo final
 { { { echo doubleNested ; } && echo outer ; } || echo altOuter ; } && echo finish
 { echo pipeline ; { echo pipeStart && echo pipeMid ; } | grep pipeStart && echo pipelineDone ; }
-{ { echo redirecting ; echo toFile ; } > ./outfiles/testoutput ; } | ls && cat ./outfiles/testoutput
+{ { echo redirecting ; echo toFile ; } > ./outfiles/testoutput ; } | ls /usr && cat ./outfiles/testoutput
 { { { echo deep1 ; } && { echo deep2 ; echo deep3 ; } ; } || { echo fallback ; } ; } && echo completed
 { { echo stage1 ; echo stage2 ; } | tee ./outfiles/stage && { echo log1 ; echo log2 ; } | grep log ; } && echo finished
 { { echo level1 && { echo level2 ; echo level3 ; } ; } | { grep level ; echo passed ; } ; } || echo failed

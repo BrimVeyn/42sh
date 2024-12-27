@@ -6,13 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:19:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 11:23:09 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/27 10:55:31 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
 #include "libft.h"
-#include "exec.h"
 
 #include <stdlib.h>
 #include <unistd.h>

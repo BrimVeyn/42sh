@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/27 10:27:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/27 10:44:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,9 @@ void exp_kind_list_print(ExpKindList *list);
 
 char *here_doc(const char *eof, const heredoc_mode mode, Vars * const shell_vars){
 	char *input = NULL;
-	const char *PS2 = string_list_get_value(shell_vars->set, "PS2");
+	char *PS2 = string_list_get_value(shell_vars->set, "PS2");
+	PS2 = prompt_expansion(PS2, shell_vars);
+
 	static int line_number = 0;
 
 	char filename[] = "/tmp/here_doc_XXXXXX";
