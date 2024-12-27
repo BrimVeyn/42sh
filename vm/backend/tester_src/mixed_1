@@ -4,12 +4,12 @@ var1=5; var2=10; echo $((${var1} + ${var2} - 3))
 var=1; echo $((var + 1)); echo $((var++)); echo $((++var))
 echo $(echo $(echo $(echo $(echo nesting))))
 (echo Level1 && (echo Level2 || (echo Level3 && echo Level4))) || echo Final
-ls && echo success || echo failure
+ls /usr && echo success || echo failure
 false || true && echo correct || echo wrong
 echo $(echo $(echo $(echo A) && echo B || echo C))
 (echo Outer && echo $(echo Inner1 && echo Inner2)) || echo Fail
 echo $(($(echo 5 + 2) + $(echo 4 - 1))) && echo $((10 % 3))
-echo $(echo Start && echo $(ls / || echo NotFound))
+echo $(echo Start && echo $(ls /usr / || echo NotFound))
 echo $(($(($(($(($(echo 1 + 1))))))))
 (echo $(echo $(echo $(echo Hello))))
 var1=3; var2=5; var3=7; echo $((${var1} * ${var2} + ${var3}))
@@ -21,11 +21,11 @@ echo $(echo Test && (echo Success || echo Failure))
 false && true || echo Correct
 (echo A || (echo B && echo C)) && echo Done
 echo $(($(10 / 2) * 3 + $(4 - 1)))
-ls | echo Files || echo No files
-(echo $(ls || echo None); echo Done)
+ls /usr | echo Files || echo No files
+(echo $(ls /usr || echo None); echo Done)
 (echo Start && false) || (echo Continue && echo Finish)
 var=10; echo $((${var} + 5))
-(echo $(echo $(ls / || echo Empty))) || echo Failed
+(echo $(echo $(ls /usr / || echo Empty))) || echo Failed
 echo $(( $(echo 3 + 4) * $(echo 5 - 2) ))
 echo $(echo $(echo Inside))
 (echo Begin && false) || echo End
@@ -44,6 +44,6 @@ echo $(($(5 * 2 + 1)))
 echo $(($(echo $(1 + 2)) * 3))
 echo $(echo $(echo $(echo $(echo Nested))))
 (echo $(echo Start && echo Continue)) || echo Done
-(echo $(ls test || echo Not found)) && echo Success
+(echo $(ls /usr test || echo Not found)) && echo Success
 echo $(($(($(echo 1 + 2) + 3))))
 echo $((var=7; var * 2))

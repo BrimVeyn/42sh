@@ -3,13 +3,23 @@
 mkdir -p infiles outfiles
 
 #---------redirection setup---------------
-touch infiles/no_perms infiles/no_write infiles/no_read infiles/test
-echo 'This is a test file !' >infiles/test
-chmod 000 infiles/*
-chmod +rx ./infiles/no_write
-chmod +wx ./infiles/no_read
-#-----------------------------------------
 
+redir_files=(
+	"infiles/no_perms"
+	"infiles/no_write" 
+	"infiles/no_read" 
+	"infiles/no_exec"
+	"infiles/test" 
+)
+
+touch ${redir_files[@]}
+
+echo 'This is a test file !' >infiles/test
+
+chmod -w ./infiles/no_write
+chmod -r ./infiles/no_read
+chmod -x ./infiles/no_exec
+#-----------------------------------------
 
 #---------pattern matching setup----------
 #Sample files for patterm matching

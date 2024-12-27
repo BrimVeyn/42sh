@@ -1,28 +1,28 @@
-echo test1 > ./outfiles/file1
+echo test1 > ./XXXOUTXXX/file1
 cat < infiles/no_perms
 cat < infiles/no_write
 cat < infiles/no_read
 cat < infiles/non_existing
 cat < infiles
-echo test1 >| ./outfiles/file1
-echo test1 >| ./outfiles/file1
-echo test2 >| ./outfiles/file1
-echo test3 >| ./outfiles/no_perms
-echo test4 >| ./outfiles/no_write
-echo test5 >| ./outfiles/non_existing
-echo test6 >| ./outfiles
-echo test1 > ./outfiles/file1
-echo test1 > ./outfiles/file1
-echo test2 > ./outfiles/file1
-echo test3 > ./outfiles/no_perms
-echo test4 > ./outfiles/no_write
-echo test5 > ./outfiles/non_existing
-echo test6 > ./outfiles
-echo test3 >> ./outfiles/file2
-echo test3 >> ./outfiles/file2
-echo test3 >> ./outfiles/no_perms
-echo test3>> ./outfiles/no_write
-echo test3>> ./outfiles/non_existing
+echo test1 >| ./XXXOUTXXX/file1
+echo test1 >| ./XXXOUTXXX/file1
+echo test2 >| ./XXXOUTXXX/file1
+echo test3 >| ./XXXOUTXXX/no_perms
+echo test4 >| ./XXXOUTXXX/no_write
+echo test5 >| ./XXXOUTXXX/non_existing
+echo test6 >| ./XXXOUTXXX
+echo test1 > ./XXXOUTXXX/file1
+echo test1 > ./XXXOUTXXX/file1
+echo test2 > ./XXXOUTXXX/file1
+echo test3 > ./XXXOUTXXX/no_perms
+echo test4 > ./XXXOUTXXX/no_write
+echo test5 > ./XXXOUTXXX/non_existing
+echo test6 > ./XXXOUTXXX
+echo test3 >> ./XXXOUTXXX/file2
+echo test3 >> ./XXXOUTXXX/file2
+echo test3 >> ./XXXOUTXXX/no_perms
+echo test3>> ./XXXOUTXXX/no_write
+echo test3>> ./XXXOUTXXX/non_existing
 21< infiles/test cat <&21
 22< infiles/no_exec cat <&22
 23< infiles/no_perms cat <&23
@@ -33,36 +33,36 @@ echo test3>> ./outfiles/non_existing
 21< infiles/test 22<&21 cat <&22
 21< infiles/test 21<&-
 22< infiles/no_exec 22<&-
-cat <> ./outfiles/file1
-cat <> ./outfiles/no_perms
-cat <> ./outfiles/no_write
-cat <> ./outfiles/no_read
-cat <> ./outfiles/non_existing
-cat <> ./outfiles
-21<> ./outfiles/file1 cat <&21
-22<> ./outfiles/no_exec cat <&22
-23<> ./outfiles/no_perms cat <&23
-24<> ./outfiles/no_write cat <&24
-25<> ./outfiles/no_read cat <&25
-26<> ./outfiles/non_existing cat <&26
-27<> ./outfiles cat <&27
-21<> ./outfiles/file1 22<&21 cat <&22
-21<> ./outfiles/file1 21<&-
-22<> ./outfiles/no_exec 22<&-
-"22"<> ./outfiles/file1 cat <&22
-"22"<> ./outfiles/file1 cat <&"22"
-nan<> ./outfiles/file1 cat <&nan
-22<> ./outfiles/file1 cat <&nan
-(cat < infiles/test | echo "output to file") > ./outfiles/paren_pipe
-(cat <> ./outfiles/file1 | cat) >> ./outfiles/combined_test
-21<> ./outfiles/complex_test (cat <&21 | echo "piped output") >> ./outfiles/final_test
-21< infiles/test | 22<&21 echo "output" > ./outfiles/test_fd_combination
-(cat < ./infiles/test) <> ./outfiles/nested_complex2
+cat <> ./XXXOUTXXX/file1
+cat <> ./XXXOUTXXX/no_perms
+cat <> ./XXXOUTXXX/no_write
+cat <> ./XXXOUTXXX/no_read
+cat <> ./XXXOUTXXX/non_existing
+cat <> ./XXXOUTXXX
+21<> ./XXXOUTXXX/file1 cat <&21
+22<> ./XXXOUTXXX/no_exec cat <&22
+23<> ./XXXOUTXXX/no_perms cat <&23
+24<> ./XXXOUTXXX/no_write cat <&24
+25<> ./XXXOUTXXX/no_read cat <&25
+26<> ./XXXOUTXXX/non_existing cat <&26
+27<> ./XXXOUTXXX cat <&27
+21<> ./XXXOUTXXX/file1 22<&21 cat <&22
+21<> ./XXXOUTXXX/file1 21<&-
+22<> ./XXXOUTXXX/no_exec 22<&-
+"22"<> ./XXXOUTXXX/file1 cat <&22
+"22"<> ./XXXOUTXXX/file1 cat <&"22"
+nan<> ./XXXOUTXXX/file1 cat <&nan
+22<> ./XXXOUTXXX/file1 cat <&nan
+(cat < infiles/test | echo "output to file") > ./XXXOUTXXX/paren_pipe
+(cat <> ./XXXOUTXXX/file1 | cat) >> ./XXXOUTXXX/combined_test
+21<> ./XXXOUTXXX/complex_test (cat <&21 | echo "piped output") >> ./XXXOUTXXX/final_test
+21< infiles/test | 22<&21 echo "output" > ./XXXOUTXXX/test_fd_combination
+(cat < ./infiles/test) <> ./XXXOUTXXX/nested_complex2
 10<>infiles/test cat <&10 >&1
-{ echo "start"; cat < infiles/test; echo "end"; } > ./outfiles/group_output
-{ echo "write and append"; echo "new line" >> ./outfiles/group_append; } <> ./outfiles/group_combined
-{ echo "nested redirection" >&2; cat < infiles/test; } > ./outfiles/group_nested_redirect
-{ cat < infiles/no_write; echo "fallback message"; } > ./outfiles/group_fallback
-{ echo "reading input"; cat <&0; } <> ./outfiles/group_stdin
-{ cat < infiles/test; echo "duplicated output"; } 21<> ./outfiles/group_fd_test
-{ echo "closing fd"; 22<> ./outfiles/group_fd_close; echo "done with fd"; } > ./outfiles/group_close
+{ echo "start"; cat < infiles/test; echo "end"; } > ./XXXOUTXXX/group_output
+{ echo "write and append"; echo "new line" >> ./XXXOUTXXX/group_append; } <> ./XXXOUTXXX/group_combined
+{ echo "nested redirection" >&2; cat < infiles/test; } > ./XXXOUTXXX/group_nested_redirect
+{ cat < infiles/no_write; echo "fallback message"; } > ./XXXOUTXXX/group_fallback
+{ echo "reading input"; cat <&0; } <> ./XXXOUTXXX/group_stdin
+{ cat < infiles/test; echo "duplicated output"; } 21<> ./XXXOUTXXX/group_fd_test
+{ echo "closing fd"; 22<> ./XXXOUTXXX/group_fd_close; echo "done with fd"; } > ./XXXOUTXXX/group_close

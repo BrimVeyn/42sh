@@ -1,8 +1,13 @@
 #!/bin/bash
 
-chmod -R 777 ./pm_test
-chmod -R 777 ./infiles
+test_files=(
+	"./pm_test"
+	"./test_dir"
+	"./testdir"
+	"./outfiles"
+	"./infiles"
+)
 
-rm -rf ./pm_test 
-rm -rf ./test_dir ./testdir
-rm -rf ./outfiles ./infiles
+chmod -R 777 ${test_files[@]} 2>/dev/null
+
+rm -rf ${test_files[@]} 2>/dev/null

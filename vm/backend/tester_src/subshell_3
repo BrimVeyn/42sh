@@ -13,7 +13,7 @@
 (echo salut mec || echo fallback; echo error >&2; echo finished) > ./outfiles/test4 2>&1
 (echo salut mec; (echo nested output | rev) | grep tuptuo; echo finished) > ./outfiles/test5
 (echo first level && (echo second level || (echo third level))) > ./outfiles/test6
-(echo starting process || echo this won’t run; ls; echo background complete) > ./outfiles/test7
+(echo starting process || echo this won’t run; ls /usr; echo background complete) > ./outfiles/test7
 (echo salut mec | rev && echo other output) > ./outfiles/test8
 (cat && (echo inside nested shell && echo all done)) < ../Makefile > ./outfiles/test9
 (echo first output && (echo nested | rev) | grep detsen) > ./outfiles/test10
@@ -23,7 +23,7 @@
 (cat | rev || echo failed to reverse) < ../Makefile > ./outfiles/test14
 (echo running first && echo next command || echo won’t run | rev && echo done) > ./outfiles/test15
 (echo first command || (echo second command | rev) || echo fallback) > ./outfiles/test16
-(echo process start && ls || echo process failed; echo done) > ./outfiles/test17
+(echo process start && ls /usr || echo process failed; echo done) > ./outfiles/test17
 (cat && (echo inside nested && echo still going) | rev) < ./infiles/file1 > ./outfiles/test18
 (echo salut mec && (echo mec salut | rev) && echo success) > ./outfiles/test19
 (echo salut mec | (echo mec salut | rev) || echo fallback) > ./outfiles/test20

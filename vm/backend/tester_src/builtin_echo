@@ -1,7 +1,7 @@
 echo Hello World
-echo -n salut; ls
-echo -n salut -n; ls
-echo salut; ls
+echo -n salut; ls /usr
+echo -n salut -n; ls /usr
+echo salut; ls /usr
 echo salut > /dev/full
 echo -e '\n\n'
 echo -e '\a\a'
