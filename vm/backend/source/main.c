@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 09:38:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/19 15:32:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/20 13:28:16 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,6 +206,10 @@ int main(void) {
 	Category *cat = calloc(category_count, sizeof(Category));
 	pthread_t *threads = calloc(category_count, sizeof(pthread_t));
 
+	// Setting up the testing environment. Any existing files or directories from previous runs will be removed to ensure a clean state.
+	remove_directory_recursively("/tmp/42sh_testing");
+	setup_testing_environment("/tmp/42sh_testing");
+
 	int i = 0;
 	while (i < 1000 && dir_buffer[i] != NULL) {
 		it = dir_buffer[i];
@@ -244,7 +248,7 @@ int main(void) {
 		offset += cat[i].result_len;
 	}
 	//-----------------------------------------------------
-	
+
 	//Remove trainling comma (again)
 	offset -= 6;
 
@@ -270,5 +274,7 @@ int main(void) {
 	}
 	free(dir_buffer);
 	closedir(src_dir);
+
+	remove_directory_recursively("/tmp/42sh_testing");
 	return 0;
 }

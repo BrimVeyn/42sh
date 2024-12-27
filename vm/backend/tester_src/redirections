@@ -1,68 +1,68 @@
-echo test1 > ./outfiles/file1
-cat < infiles/no_perms
-cat < infiles/no_write
-cat < infiles/no_read
-cat < infiles/non_existing
-cat < infiles
-echo test1 >| ./outfiles/file1
-echo test1 >| ./outfiles/file1
-echo test2 >| ./outfiles/file1
-echo test3 >| ./outfiles/no_perms
-echo test4 >| ./outfiles/no_write
-echo test5 >| ./outfiles/non_existing
-echo test6 >| ./outfiles
-echo test1 > ./outfiles/file1
-echo test1 > ./outfiles/file1
-echo test2 > ./outfiles/file1
-echo test3 > ./outfiles/no_perms
-echo test4 > ./outfiles/no_write
-echo test5 > ./outfiles/non_existing
-echo test6 > ./outfiles
-echo test3 >> ./outfiles/file2
-echo test3 >> ./outfiles/file2
-echo test3 >> ./outfiles/no_perms
-echo test3>> ./outfiles/no_write
-echo test3>> ./outfiles/non_existing
-21< infiles/test cat <&21
-22< infiles/no_exec cat <&22
-23< infiles/no_perms cat <&23
-24< infiles/no_write cat <&24
-25< infiles/no_read cat <&25
-26< infiles/non_existing cat <&26
-27< infiles cat <&27
-21< infiles/test 22<&21 cat <&22
-21< infiles/test 21<&-
-22< infiles/no_exec 22<&-
-cat <> ./outfiles/file1
-cat <> ./outfiles/no_perms
-cat <> ./outfiles/no_write
-cat <> ./outfiles/no_read
-cat <> ./outfiles/non_existing
-cat <> ./outfiles
-21<> ./outfiles/file1 cat <&21
-22<> ./outfiles/no_exec cat <&22
-23<> ./outfiles/no_perms cat <&23
-24<> ./outfiles/no_write cat <&24
-25<> ./outfiles/no_read cat <&25
-26<> ./outfiles/non_existing cat <&26
-27<> ./outfiles cat <&27
-21<> ./outfiles/file1 22<&21 cat <&22
-21<> ./outfiles/file1 21<&-
-22<> ./outfiles/no_exec 22<&-
-"22"<> ./outfiles/file1 cat <&22
-"22"<> ./outfiles/file1 cat <&"22"
-nan<> ./outfiles/file1 cat <&nan
-22<> ./outfiles/file1 cat <&nan
-(cat < infiles/test | echo "output to file") > ./outfiles/paren_pipe
-(cat <> ./outfiles/file1 | cat) >> ./outfiles/combined_test
-21<> ./outfiles/complex_test (cat <&21 | echo "piped output") >> ./outfiles/final_test
-21< infiles/test | 22<&21 echo "output" > ./outfiles/test_fd_combination
-(cat < ./infiles/test) <> ./outfiles/nested_complex2
-10<>infiles/test cat <&10 >&1
-{ echo "start"; cat < infiles/test; echo "end"; } > ./outfiles/group_output
-{ echo "write and append"; echo "new line" >> ./outfiles/group_append; } <> ./outfiles/group_combined
-{ echo "nested redirection" >&2; cat < infiles/test; } > ./outfiles/group_nested_redirect
-{ cat < infiles/no_write; echo "fallback message"; } > ./outfiles/group_fallback
-{ echo "reading input"; cat <&0; } <> ./outfiles/group_stdin
-{ cat < infiles/test; echo "duplicated output"; } 21<> ./outfiles/group_fd_test
-{ echo "closing fd"; 22<> ./outfiles/group_fd_close; echo "done with fd"; } > ./outfiles/group_close
+echo test1 > ${OUTFILES}/file1
+cat < ${INFILES}/no_perms
+cat < ${INFILES}/no_write
+cat < ${INFILES}/no_read
+cat < ${INFILES}/non_existing
+cat < ${INFILES}
+echo test1 >| ${OUTFILES}/file1
+echo test1 >| ${OUTFILES}/file1
+echo test2 >| ${OUTFILES}/file1
+echo test3 >| ${OUTFILES}/no_perms
+echo test4 >| ${OUTFILES}/no_write
+echo test5 >| ${OUTFILES}/non_existing
+echo test6 >| ${OUTFILES}
+echo test1 > ${OUTFILES}/file1
+echo test1 > ${OUTFILES}/file1
+echo test2 > ${OUTFILES}/file1
+echo test3 > ${OUTFILES}/no_perms
+echo test4 > ${OUTFILES}/no_write
+echo test5 > ${OUTFILES}/non_existing
+echo test6 > ${OUTFILES}
+echo test3 >> ${OUTFILES}/file2
+echo test3 >> ${OUTFILES}/file2
+echo test3 >> ${OUTFILES}/no_perms
+echo test3>> ${OUTFILES}/no_write
+echo test3>> ${OUTFILES}/non_existing
+21< ${INFILES}/test cat <&21
+22< ${INFILES}/no_exec cat <&22
+23< ${INFILES}/no_perms cat <&23
+24< ${INFILES}/no_write cat <&24
+25< ${INFILES}/no_read cat <&25
+26< ${INFILES}/non_existing cat <&26
+27< ${INFILES} cat <&27
+21< ${INFILES}/test 22<&21 cat <&22
+21< ${INFILES}/test 21<&-
+22< ${INFILES}/no_exec 22<&-
+cat <> ${OUTFILES}/file1
+cat <> ${OUTFILES}/no_perms
+cat <> ${OUTFILES}/no_write
+cat <> ${OUTFILES}/no_read
+cat <> ${OUTFILES}/non_existing
+cat <> ${OUTFILES}
+21<> ${OUTFILES}/file1 cat <&21
+22<> ${OUTFILES}/no_exec cat <&22
+23<> ${OUTFILES}/no_perms cat <&23
+24<> ${OUTFILES}/no_write cat <&24
+25<> ${OUTFILES}/no_read cat <&25
+26<> ${OUTFILES}/non_existing cat <&26
+27<> ${OUTFILES} cat <&27
+21<> ${OUTFILES}/file1 22<&21 cat <&22
+21<> ${OUTFILES}/file1 21<&-
+22<> ${OUTFILES}/no_exec 22<&-
+"22"<> ${OUTFILES}/file1 cat <&22
+"22"<> ${OUTFILES}/file1 cat <&"22"
+nan<> ${OUTFILES}/file1 cat <&nan
+22<> ${OUTFILES}/file1 cat <&nan
+(cat < ${INFILES}/test | echo "output to file") > ${OUTFILES}/paren_pipe
+(cat <> ${OUTFILES}/file1 | cat) >> ${OUTFILES}/combined_test
+21<> ${OUTFILES}/complex_test (cat <&21 | echo "piped output") >> ${OUTFILES}/final_test
+21< ${INFILES}/test | 22<&21 echo "output" > ${OUTFILES}/test_fd_combination
+(cat < ./${INFILES}/test) <> ${OUTFILES}/nested_complex2
+10<>${INFILES}/test cat <&10 >&1
+{ echo "start"; cat < ${INFILES}/test; echo "end"; } > ${OUTFILES}/group_output
+{ echo "write and append"; echo "new line" >> ${OUTFILES}/group_append; } <> ${OUTFILES}/group_combined
+{ echo "nested redirection" >&2; cat < ${INFILES}/test; } > ${OUTFILES}/group_nested_redirect
+{ cat < ${INFILES}/no_write; echo "fallback message"; } > ${OUTFILES}/group_fallback
+{ echo "reading input"; cat <&0; } <> ${OUTFILES}/group_stdin
+{ cat < ${INFILES}/test; echo "duplicated output"; } 21<> ${OUTFILES}/group_fd_test
+{ echo "closing fd"; 22<> ${OUTFILES}/group_fd_close; echo "done with fd"; } > ${OUTFILES}/group_close
