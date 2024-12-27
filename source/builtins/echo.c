@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 12:20:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/26 16:37:23 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/27 09:54:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "utils.h"
 #include "libft.h"
 
-static int read_x_base(const char *const input, char *buffer, const int x, const char *const base) {
+int read_x_base(const char *const input, char *buffer, const int x, const char *const base) {
 	int i = 0;
 
 	while (i < x && ft_strchr(base, input[i])) {

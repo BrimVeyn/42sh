@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 10:13:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/26 16:33:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/27 10:29:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 
 #include <pwd.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
@@ -147,13 +148,12 @@ static char *get_shell_name(void) { return _42SH_SHELL; }
 static char *get_basename(void) { return __basename(ttyname(shell(SHELL_GET)->shell_terminal)); }
 static char *get_job_number(void) { return gc(GC_ADD, ft_itoa(g_jobList->size), GC_SUBSHELL); }
 static char *get_uid(void) { return (getuid() == 0) ? "#" : "$"; }
-// static char *get_escape_sequence(void) { return "\033"; }
 
 //TODO: p'tit crack
 char *get_command_number(void) { return "1"; } //history file command number 
 char *get_history_number(void) { return "12"; } //from invocation command get_history_number
 
-char *expand_prompt_special(const char *ps) {
+static char *expand_prompt_special(const char *ps) {
 
 	char *(*special[255])(void) = {
 		['d'] = get_date_letter, ['j'] = get_job_number,
@@ -181,28 +181,46 @@ char *expand_prompt_special(const char *ps) {
             } else if (*(ps + 1) == 'D') {
 				if (regex_match("\\D{.*}", (char *)ps).is_found) {
 					ps += 3; // \ + D + {
-					const char *const fend = ft_strchr(ps, '}');
-					char *const format = ft_substr(ps, 0, fend - ps);
-					ps = fend; // }|...
+					const char *const format_end = ft_strchr(ps, '}');
+					char *const format = ft_substr(ps, 0, format_end - ps);
+					ps = format_end; // }|...
 					ss_push_string(ss, get_date_format(format));
 					free(format);
 				}
 			} else if (*(ps + 1) == '[') {
 				ps += 2; // \ + [;
-				const size_t fend = ft_strstr(ps, "\\]");
-				char *const sequence = ft_substr(ps, 0, fend);
-
-				// dprintf(2, "sequence: {%s}\n", sequence);
+				const size_t format_end = ft_strstr(ps, "\\]");
+				char *const sequence = ft_substr(ps, 0, format_end);
 				char *const res = ft_strsed(sequence, "\\e", "\033");
-				// dprintf(2, "res: %s\n", res);
+
 				ss_push_string(ss, res);
-				ps += (fend + 1);
-				free(sequence);
-				free(res);
+				ps += (format_end + 1);
+				FREE_POINTERS(sequence, res);
+			} else if (*(ps + 1) >= '0' && *(ps + 1) <= '7') {
+				ps++; //skip '\'
+				char buffer[4] = {0};
+				int bytes_read = read_x_base(ps, buffer, 3, "01234567");
+				ps += (bytes_read - 1);
+				uint64_t ret = ft_atoi_base(buffer, "01234567");
+				da_push(ss, ret);
 			}
 		} else { da_push(ss, *ps); }
 		ps++;
 	}
 
 	return ss_get_owned_slice(ss);
+}
+
+char *prompt_expansion(char *prompt, Vars *shell_vars) {
+	//put prompt in double quotes so it doesn't remove '\'
+	char buffer[MAX_WORD_LEN] = {0};
+	ft_sprintf(buffer, "\"%s\"", prompt);
+
+	int error = 0;
+	StringListL *maybe_prompt = do_expansions_word(buffer, &error, shell_vars, O_NONE);
+	if (!maybe_prompt) prompt = "";
+	else prompt = maybe_prompt->data[0];
+
+	prompt	= expand_prompt_special(prompt);
+	return prompt;
 }
