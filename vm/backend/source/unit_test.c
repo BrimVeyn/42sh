@@ -63,10 +63,50 @@ int execute_unit(char *bin, char *line, char *fileName, int test_number) {
 
 }
 
+void move_files(const char * const from, const char * const to) {
+	if (!from || !to) {
+		return;
+	}
+
+	DIR *src_dir = opendir(from);
+	if (!src_dir) {
+		return;
+	}
+
+	struct stat st;
+	if (stat(to, &st) == -1) {
+		if (mkdir(to, 0755) == -1) {
+			closedir(src_dir);
+			return;
+		}
+	} else if (!S_ISDIR(st.st_mode)) {
+		closedir(src_dir);
+		return;
+	}
+
+	struct dirent *entry;
+	while ((entry = readdir(src_dir)) != NULL) {
+		if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+			continue;
+		}
+
+		char src_path[PATH_MAX];
+		char dest_path[PATH_MAX];
+		snprintf(src_path, PATH_MAX, "%s/%s", from, entry->d_name);
+		snprintf(dest_path, PATH_MAX, "%s/%s", to, entry->d_name);
+
+		rename(src_path, dest_path);
+	}
+
+	closedir(src_dir);
+}
+
 UnitResult unit_test(char *fileName, char *line, int test_number) {
 
 	int exit_42sh = execute_unit("./42sh", line, fileName, test_number);
+	move_files("/tmp/42sh_testing/output_files", "/tmp/42sh_testing/42sh_output_files");
 	int exit_bash = execute_unit("/bin/bash", line, fileName, test_number);
+	move_files("/tmp/42sh_testing/output_files", "/tmp/42sh_testing/bash_output_files");
 
 	char input[PATH_MAX] = {0};
 	char out_42[PATH_MAX] = {0};
@@ -88,6 +128,9 @@ UnitResult unit_test(char *fileName, char *line, int test_number) {
 
 	bool output_ok = compare_files(out_42, out_bash);
 	bool error_ok = compare_files(err_42, err_bash);
+
+	//compare output fileS and delete them
+	bool file_ok = compare_output_files
 	bool exit_ok = (exit_42sh == exit_bash);
 
 	char *partial_result = calloc(2048, sizeof(char));

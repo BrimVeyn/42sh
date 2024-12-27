@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/17 11:17:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/17 14:37:06 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/20 10:38:03 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ int apply_unary_ope(char *ope_string, char *word){
 			return !(stat_success && S_ISLNK(file_stat.st_mode));
 		case 'n' : 
 			return !(ft_strlen(word));
-		// case 'p'
+		// case 'p' :
 		default:
 
 			return 0;

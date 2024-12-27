@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 13:24:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/19 14:02:08 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/20 11:01:49 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,5 +44,8 @@ int compare_files(const char *file1, const char *file2);
 int fill_dir(DIR *src_dir, struct dirent **dir_buffer);
 void sort_dir(struct dirent **dir_buffer, int category_count);
 void print_dir(struct dirent **dir_buffer);
+
+void setup_testing_environment(const char * const base_path);
+void remove_directory_recursively(const char *path);
 
 #endif // !TESTER_H

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:00 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/20 09:59:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/20 14:00:13 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ JobList *		g_jobList = NULL;
 
 //FIX: quote bug in this case : echo "${staged:+$staged}" $ sign causes this bug surprinsigly
 //FIX: readline_redisplay || ^C should process the prompt like bellow
+//FIX: max 16 heredoc
 
 static void	*read_input_prompt(char *input, Vars *const shell_vars) {
 	char *PS1 = string_list_get_value(shell_vars->set, "PS1");
@@ -105,6 +106,10 @@ Vars *shell_vars_init(const char **env) {
 
 	env_to_string_list(self->env, env);
 	env_to_string_list(self->set, env);
+
+	string_list_add_or_update(env_list, "OUTFILES='/tmp/42sh_testing/output_files");
+	string_list_add_or_update(env_list, "INFILES='/tmp/42sh_testing/input_files");
+
 	return self;
 }
 
