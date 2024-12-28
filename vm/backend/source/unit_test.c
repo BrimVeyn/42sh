@@ -174,6 +174,7 @@ UnitResult unit_test(char *fileName, char *line, int test_number) {
 		line_bash = create_out_dir(line, outDirName);
 	}
 
+	// dprintf(2, "executing: %s\n", line_42sh);
 	int exit_42sh = execute_unit("./42sh", line_42sh, fileName, test_number);
 	int exit_bash = execute_unit("/bin/bash", line_bash, fileName, test_number);
 
