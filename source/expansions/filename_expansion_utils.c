@@ -28,13 +28,11 @@ void print_pattern_nodes(PatternNodeL *nodes) {
     }
 }
 
-void remove_dofiles(MatchEntryL *entries, const bool keep_dotfiles) {
+void remove_dotfiles(MatchEntryL *entries, const bool keep_dotfiles) {
     if (!entries->size || keep_dotfiles) return ;
 
 	for (size_t i = 0; i < entries->size;) {
-		if (*(entries->data[i].name) == '.' ||
-			!ft_strcmp(entries->data[i].name, ".") ||
-			!ft_strcmp(entries->data[i].name, ".."))
+		if (*(entries->data[i].name) == '.')
         {
 			entries->data[i] = entries->data[entries->size - 1];
 			entries->size--;
