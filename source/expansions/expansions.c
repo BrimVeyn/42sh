@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/27 10:44:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/28 17:12:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -504,7 +504,6 @@ StringListL *do_expansions_word(char *word, int *error, Vars *const shell_vars, 
         return string_list_merge(str_list);
 
     filename_expansion(str_list);
-
 	// str_list_print(str_list);
 	quote_removal(str_list);
 	// str_list_print(str_list);

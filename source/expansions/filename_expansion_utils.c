@@ -1,4 +1,6 @@
 #include "expansion.h"
+#include "utils.h"
+#include <stdio.h>
 #include <sys/dir.h>
 #include <dirent.h>
 
@@ -30,7 +32,9 @@ void remove_dofiles(MatchEntryL *entries, const bool keep_dotfiles) {
     if (!entries->size || keep_dotfiles) return ;
 
 	for (size_t i = 0; i < entries->size;) {
-		if (*(entries->data[i].name) == '.' || !ft_strcmp(entries->data[i].name, ".") || !ft_strcmp(entries->data[i].name, "..")) 
+		if (*(entries->data[i].name) == '.' ||
+			!ft_strcmp(entries->data[i].name, ".") ||
+			!ft_strcmp(entries->data[i].name, ".."))
         {
 			entries->data[i] = entries->data[entries->size - 1];
 			entries->size--;
@@ -40,16 +44,19 @@ void remove_dofiles(MatchEntryL *entries, const bool keep_dotfiles) {
 	}
 }
 
-char *join_entries(const MatchEntryL *entries) {
-	da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
+void join_entries(Str **head, const MatchEntryL *entries) {
+	// Str *old_next = (*head)->next;
+	Str *old_head = (*head);
+	old_head->str = entries->data[0].full_path;
+	old_head->kind = EXP_CMDSUB;
+	old_head->next = NULL;
 
-	for (size_t i = 0; i < entries->size; i++) {
-		ss_push_string(ss, entries->data[i].full_path);
-		if (i + 1 < entries->size)
-			da_push(ss, ' ');
+	for (size_t i = 1; i < entries->size; i++) {
+		// dprintf(2, "matche: %s\n", entries->data[i].full_path);
+		str_add_back(&old_head, str_init(EXP_CMDSUB, entries->data[i].full_path, false));
 	}
-	da_push(ss, '\0');
-	return ss->data;
+	// str_print(old_head, 0);
+	// str_add_back(&old_head, old_next);
 }
 
 void sort_entries(MatchEntryL *entries) {
@@ -102,6 +109,7 @@ int get_dir_entries(MatchEntryL *list, const char *path, const int flag) {
 
 bool is_pattern(const char *lhs, const char *rhs) {
 	bool dquote = false, squote = false;
+	//FIX: //Maybe check if espaced
 
 	for (size_t i = 0; lhs[i]; i++) {
 

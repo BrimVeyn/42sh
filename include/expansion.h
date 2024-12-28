@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 14:13:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/27 10:27:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/28 17:38:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,8 @@ typedef struct ContextMap {
 
 Str					*str_init(const ExpKind kind, char *str, bool add_to_gc);
 void				str_list_print(const StrList *list);
+void				str_print(Str *node, size_t i);
+void				str_add_back(Str **lst, Str *new_value);
 //----------------------------------------------------------------//
 
 //----------------------Pattern matching----------------//
@@ -99,10 +101,10 @@ typedef struct {
     int gc_level;
 } MatchEntryL;
 
-#define P_ABSOLUTE 0
-#define P_RELATIVE 1
-#define P_ABSOLUTE_INIT 2
-#define P_RELATIVE_INIT 4
+#define P_ABSOLUTE 1
+#define P_RELATIVE 2
+#define P_ABSOLUTE_INIT 4
+#define P_RELATIVE_INIT 8
 
 typedef enum { P_STAR, P_QMARK, P_RANGE, P_CHAR } PatternType;
 
@@ -125,7 +127,7 @@ typedef struct {
 bool			is_pattern(const char *lhs, const char *rhs);
 int				get_dir_entries(MatchEntryL *list, const char *path, const int flag);
 void			sort_entries(MatchEntryL *entries);
-char			*join_entries(const MatchEntryL *entries);
+void			join_entries(Str **head, const MatchEntryL *entries);
 void			remove_dofiles(MatchEntryL *entries, const bool keep_dotfiles);
 void			print_pattern_nodes(PatternNodeL *nodes);
 bool			match_string(const char *str, const PatternNodeL *pattern_nodes);
