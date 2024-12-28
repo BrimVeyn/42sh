@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 14:13:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/28 17:38:18 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/28 18:50:04 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,7 +128,7 @@ bool			is_pattern(const char *lhs, const char *rhs);
 int				get_dir_entries(MatchEntryL *list, const char *path, const int flag);
 void			sort_entries(MatchEntryL *entries);
 void			join_entries(Str **head, const MatchEntryL *entries);
-void			remove_dofiles(MatchEntryL *entries, const bool keep_dotfiles);
+void			remove_dotfiles(MatchEntryL *entries, const bool keep_dotfiles);
 void			print_pattern_nodes(PatternNodeL *nodes);
 bool			match_string(const char *str, const PatternNodeL *pattern_nodes);
 PatternNodeL	*compile_pattern(char *pattern);
