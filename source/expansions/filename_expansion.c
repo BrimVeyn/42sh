@@ -6,12 +6,15 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/27 20:26:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/28 19:02:00 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 00:47:18 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "c_string.h"
 #include "expansion.h"
+#include "libft.h"
 #include "utils.h"
+#include <stdio.h>
 #include <sys/dir.h>
 
 static StringListL *cut_pattern(char *pattern) {
@@ -57,16 +60,16 @@ static void open_matched_dirs(MatchEntryL **entries) {
 
 #define IS_FIRST_PATTERN (i == 0)
 
-static int open_first_entries(MatchEntryL *const entries, int *const flag, const size_t pattern_nodes_size) {
+static bool open_first_entries(MatchEntryL *const entries, int *const flag, const size_t pattern_nodes_size) {
 	if (!pattern_nodes_size) {
 		get_dir_entries(entries, "/", P_ABSOLUTE_INIT);
 		(*flag) = P_ABSOLUTE;
-		return 1;
+		return true;
 	} else {
 		get_dir_entries(entries, ".", P_RELATIVE_INIT);
 		(*flag) = P_RELATIVE;
 	}
-	return 0;
+	return false;
 }
 
 
@@ -111,11 +114,25 @@ static bool is_first_dot(const PatternNodeL *const nodes) {
 	return (nodes->size && nodes->data[0].type == P_CHAR && nodes->data[0].c == '.');
 }
 
+static char *try_join_head_next(Str *head, const StrList *const string_list, const size_t i) {
+	if 
+	(
+		( i + 1 < string_list->size )
+		&&
+		(( head->kind == EXP_WORD )
+		||
+		( head->kind != EXP_WORD
+		&& head->next == NULL))
+	)
+		return gc(GC_ADD, ft_strjoin(head->str, string_list->data[i + 1]->str), GC_SUBSHELL);
+	return NULL;
+}
+
 void filename_expansion(StrList * string_list) {
 
 	for (size_t i = 0; i < string_list->size; i++) {
 		Str *head = string_list->data[i];
-		while (head) {
+		while (head != NULL) {
 			//If we're in quotes or none of the pattern matching chars are found, skip
 			if (head->dquote || head->squote || !is_pattern(head->str, "*?[")) {
 				head = head->next;
@@ -125,6 +142,11 @@ void filename_expansion(StrList * string_list) {
 			da_create(entries, MatchEntryL, sizeof(MatchEntry), GC_SUBSHELL);
 
 			//Separate the whole string into smaller parts with FS='/'
+			char *maybe_pattern = try_join_head_next(head, string_list, i);
+			if (maybe_pattern) {
+				head->str = maybe_pattern;
+			}
+
 			StringListL *pattern_parts = cut_pattern(head->str);
 			int flag = 0;
 
@@ -159,8 +181,12 @@ void filename_expansion(StrList * string_list) {
 				if (entries->size) {
 					sort_entries(entries);
 					join_entries(&head, entries);
-					//FIX: why continue doesn't work
-					break;
+					if (maybe_pattern) {
+						string_list->data[i + 1] = string_list->data[i + 1]->next;
+						if (string_list->data[i + 1] == NULL)
+							da_erase_index(string_list, i + 1);
+					}
+					continue;
 				}
 			}
 			head = head->next;

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/28 17:12:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 11:27:40 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -500,11 +500,16 @@ StringListL *do_expansions_word(char *word, int *error, Vars *const shell_vars, 
 
 	string_erase_nulls(str_list);
 
-    if (options & O_CASE_PATTERN)
-        return string_list_merge(str_list);
+	if (options & O_CASE_PATTERN)
+		return string_list_merge(str_list);
 
-    filename_expansion(str_list);
 	// str_list_print(str_list);
+	// StringListL *merged_list = string_list_merge(str_list);
+	// for (size_t i =0; i< merged_list->size;++i) {
+	// 	dprintf(2, "M[%zu]: %s\n", i, merged_list->data[i]);
+	// }
+	filename_expansion(str_list);
+
 	quote_removal(str_list);
 	// str_list_print(str_list);
 
