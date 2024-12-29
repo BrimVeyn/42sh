@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:40 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/23 15:53:36 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -491,7 +491,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 					case 34: { /* for_clause -> FOR name linebreak in wordlist sequential_sep do_group */
 						ListP *do_group = da_pop(stack)->token.list;
 						da_pop(stack); //sequential_sep
-						StringListL *word_list = da_pop(stack)->token.word_list;
+						StringList *word_list = da_pop(stack)->token.word_list;
 						da_pop(stack); //in
 						da_pop(stack); //linebreak
 						char *iterator = da_pop(stack)->token.raw_value;
@@ -523,7 +523,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 					}
 					case 37: { /* wordlist -> wordlist WORD */
 						char *word = da_pop(stack)->token.raw_value;
-						StringListL *word_list = da_pop(stack)->token.word_list;
+						StringList *word_list = da_pop(stack)->token.word_list;
 						da_push(word_list, word);
 						reduced_entry->token.type = Wordlist;
 						reduced_entry->token.word_list = word_list;
@@ -534,7 +534,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 					case 38: { /* wordlist -> WORD */
 						char *word = da_pop(stack)->token.raw_value;
 						reduced_entry->token.type = Wordlist;
-						da_create(word_list, StringListL, sizeof(char *), GC_SUBSHELL);
+						da_create(word_list, StringList, sizeof(char *), GC_SUBSHELL);
 						da_push(word_list, word);
 						reduced_entry->token.word_list = word_list;
 						state = da_peak_back(stack)->state;
@@ -624,7 +624,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 					case 46: { /* case_item_ns -> pattern RPAREN linebreak */
 						da_pop(stack); //linebreak
 						da_pop(stack); //RPAREN
-						StringListL *pattern = da_pop(stack)->token.word_list;
+						StringList *pattern = da_pop(stack)->token.word_list;
 						reduced_entry->token.type = Case_Item_Ns;
 						reduced_entry->token.case_clause = caseClauseNew(pattern, NULL);
 						state = da_peak_back(stack)->state;
@@ -634,7 +634,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 					case 47: { /* case_item_ns -> pattern RPAREN compound_list */
 						ListP *body = da_pop(stack)->token.list;
 						da_pop(stack); //RPAREN
-						StringListL *pattern = da_pop(stack)->token.word_list;
+						StringList *pattern = da_pop(stack)->token.word_list;
 						reduced_entry->token.type = Case_Item_Ns;
 						reduced_entry->token.case_clause = caseClauseNew(pattern, body);
 						state = da_peak_back(stack)->state;
@@ -644,7 +644,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 					case 48: { /* case_item_ns -> LPAREN pattern RPAREN linebreak */
 						da_pop(stack); //linebreak
 						da_pop(stack); //RPAREN
-						StringListL *pattern = da_pop(stack)->token.word_list;
+						StringList *pattern = da_pop(stack)->token.word_list;
 						da_pop(stack); //LPAREN
 						reduced_entry->token.type = Case_Item_Ns;
 						reduced_entry->token.case_clause = caseClauseNew(pattern, NULL);
@@ -655,7 +655,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 					case 49: { /* case_item_ns -> LPAREN pattern RPAREN linebreak */
 						da_pop(stack); //linebreak
 						da_pop(stack); //RPAREN
-						StringListL *pattern = da_pop(stack)->token.word_list;
+						StringList *pattern = da_pop(stack)->token.word_list;
 						da_pop(stack); //LPAREN
 						reduced_entry->token.type = Case_Item_Ns;
 						reduced_entry->token.case_clause = caseClauseNew(pattern, NULL);
@@ -666,7 +666,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 					case 50: { /* case_item_ns -> LPAREN pattern RPAREN compound_list */
 						ListP *body = da_pop(stack)->token.list;
 						da_pop(stack); //RPAREN
-						StringListL *pattern = da_pop(stack)->token.word_list;
+						StringList *pattern = da_pop(stack)->token.word_list;
 						da_pop(stack); //LPAREN
 						reduced_entry->token.type = Case_Item_Ns;
 						reduced_entry->token.case_clause = caseClauseNew(pattern, body);
@@ -679,7 +679,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 						da_pop(stack); //DSEMI
 						da_pop(stack); //linebreak
 						da_pop(stack); //RPAREN
-						StringListL *pattern = da_pop(stack)->token.word_list;
+						StringList *pattern = da_pop(stack)->token.word_list;
 						reduced_entry->token.type = Case_Item;
 						reduced_entry->token.case_clause = caseClauseNew(pattern, NULL);
 						state = da_peak_back(stack)->state;
@@ -691,7 +691,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 						da_pop(stack); //DSEMI
 						ListP *body = da_pop(stack)->token.list;
 						da_pop(stack); //PAREN
-						StringListL *pattern = da_pop(stack)->token.word_list;
+						StringList *pattern = da_pop(stack)->token.word_list;
 						reduced_entry->token.type = Case_Item;
 						reduced_entry->token.case_clause = caseClauseNew(pattern, body);
 						state = da_peak_back(stack)->state;
@@ -703,7 +703,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 						da_pop(stack); //DSEMI
 						da_pop(stack); //linebreak
 						da_pop(stack); //RPAREN
-						StringListL *pattern = da_pop(stack)->token.word_list;
+						StringList *pattern = da_pop(stack)->token.word_list;
 						da_pop(stack); //LPAREN
 						reduced_entry->token.type = Case_Item;
 						reduced_entry->token.case_clause = caseClauseNew(pattern, NULL);
@@ -716,7 +716,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 						da_pop(stack); //DSEMI
 						ListP *body = da_pop(stack)->token.list;
 						da_pop(stack); //PAREN
-						StringListL *pattern = da_pop(stack)->token.word_list;
+						StringList *pattern = da_pop(stack)->token.word_list;
 						da_pop(stack);
 						reduced_entry->token.type = Case_Item;
 						reduced_entry->token.case_clause = caseClauseNew(pattern, body);
@@ -727,7 +727,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 					case 55: { /* pattern -> WORD */
 						char *word = da_pop(stack)->token.raw_value;
 						reduced_entry->token.type = Pattern;
-						da_create(word_list, StringListL, sizeof(char *), GC_SUBSHELL);
+						da_create(word_list, StringList, sizeof(char *), GC_SUBSHELL);
 						da_push(word_list, word);
 						reduced_entry->token.word_list = word_list;
 						state = da_peak_back(stack)->state;
@@ -737,7 +737,7 @@ int parse(Lex *lexer, Vars *shell_vars) {
 					case 56: { /* pattern -> pattern PIPE WORD */
 						char *word = da_pop(stack)->token.raw_value;
 						da_pop(stack); //PIPE
-						StringListL *pattern = da_pop(stack)->token.word_list;
+						StringList *pattern = da_pop(stack)->token.word_list;
 						da_push(pattern, word);
 						reduced_entry->token.type = Pattern;
 						reduced_entry->token.word_list = pattern;

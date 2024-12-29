@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:45:12 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/07 16:13:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,9 +86,9 @@ IFClauseP *ifClauseNew(ListP *condition, ListP *body) {
 	return self;
 }
 
-CaseClauseP *caseClauseNew(StringListL *pattern, ListP *body) {
+CaseClauseP *caseClauseNew(StringList *pattern, ListP *body) {
 	CaseClauseP *self = gc_unique(CaseClauseP, GC_SUBSHELL);
-	da_create(pattern_list, StringListVect, sizeof(StringListL *), GC_SUBSHELL);
+	da_create(pattern_list, StringListVect, sizeof(StringList *), GC_SUBSHELL);
 	da_push(pattern_list, pattern);
 	da_create(bodies, ListPVect, sizeof(ListP *), GC_SUBSHELL);
 	da_push(bodies, body);
@@ -107,8 +107,8 @@ void caseClauseMerge(CaseClauseP *parent, const CaseClauseP *child) {
 SimpleCommandP *simpleCommandNew(void) {
 	SimpleCommandP *command = gc_unique(SimpleCommandP, GC_SUBSHELL);
 	da_create(redir_list, RedirectionL, sizeof(RedirectionP *), GC_SUBSHELL);
-	da_create(word_list, StringListL, sizeof(char *), GC_SUBSHELL);
-	da_create(assignment_list, StringListL, sizeof(char *), GC_SUBSHELL);
+	da_create(word_list, StringList, sizeof(char *), GC_SUBSHELL);
+	da_create(assignment_list, StringList, sizeof(char *), GC_SUBSHELL);
 	command->assign_list = assignment_list;
 	command->word_list = word_list;
 	command->redir_list = redir_list;

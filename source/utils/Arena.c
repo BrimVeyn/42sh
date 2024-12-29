@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 16:34:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 12:37:09 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 12:26:03 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ void *arena_alloc(ArenaAllocator * const arena, size_t const size, size_t const 
 
 	size_t next_offset = aligned_offset + size;
 	if (next_offset > (size_t)arena->memory + arena->capacity) {
+		//TODO: make it a linked list
 		_fatal("arena: max capacity exceeded", 1);
 	}
 

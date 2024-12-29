@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:12:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/28 17:16:20 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 19:19:47 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,13 +38,11 @@ void str_print(Str *node, size_t i) {
 	};
 
 	while (node) {
-		if (node->str) {
-			dprintf(STDERR_FILENO, "{ [%zu]: %s%s"C_RESET" } %s%c%s%c"C_RESET", ", i, colors[node->kind], node->str,
-		   colors[EXP_DQUOTE], node->dquote ? 'T' : 'F', 
-		   colors[EXP_SQUOTE], node->squote ? 'T' : 'F');
-		} else {
-			dprintf(STDERR_FILENO, "{ "C_LIGHT_YELLOW"NULL"C_RESET" }");
-		}
+		dprintf(STDERR_FILENO, "{ [%zu]: %s|%s|"C_RESET" } %s%c%s%c%s%c"C_RESET", ", i, 
+		  colors[node->kind], node->str ? node->str : "NULL",
+		  colors[EXP_DQUOTE], node->dquote ? 'T' : 'F', 
+		  colors[EXP_SQUOTE], node->squote ? 'T' : 'F',
+		  colors[EXP_ARITHMETIC], node->file_exp ? 'T' : 'F');
 		node = node->next;
 	}
 }

@@ -25,6 +25,9 @@ chmod -x ./infiles/no_exec
 #Sample files for patterm matching
 mkdir -p ./data ./pm_test
 
+touch ./pm_test/pattern{5..9}test
+touch ./pm_test/{0..5}{0..5}1234num
+touch ./pm_test/"50vee"
 touch ./pm_test/"[a-z]fakeRange"
 touch ./pm_test/"file*test"
 touch ./pm_test/"*FakeStar"

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:42:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/19 15:26:19 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -274,7 +274,7 @@ static int execute_case_clause(const CommandP * const command, const bool backgr
 	}
 
 	CaseClauseP * const case_clause = command->case_clause;
-	da_create(tmp, StringListL, sizeof(char *), GC_SUBSHELL);
+	da_create(tmp, StringList, sizeof(char *), GC_SUBSHELL);
 	da_push(tmp, case_clause->expression);
 
 	ExpReturn ret = do_expansions(tmp, shell_vars, O_NONE);
@@ -283,14 +283,14 @@ static int execute_case_clause(const CommandP * const command, const bool backgr
 	case_clause->expression = ret.ret->data[0];
 
 	for (size_t i = 0; i < case_clause->patterns->size; i++) {
-		ExpReturn ret = do_expansions(case_clause->patterns->data[i], shell_vars, O_CASE_PATTERN);
+		ExpReturn ret = do_expansions(case_clause->patterns->data[i], shell_vars, O_PATTERN);
 		if (ret.error != 0)
 			return ERR; 
 		case_clause->patterns->data[i] = ret.ret;
 	}
 
 	for (size_t i = 0; i < case_clause->patterns->size; i++) {
-		const StringListL * const patterns = case_clause->patterns->data[i];
+		const StringList * const patterns = case_clause->patterns->data[i];
 		for (size_t inner_i = 0; inner_i < patterns->size; inner_i++) {
             char *pattern = patterns->data[inner_i];
             PatternNodeL *compiled_pattern = compile_pattern(pattern);
@@ -325,8 +325,8 @@ static int execute_for_clause(const CommandP * const command, const bool backgro
 	ExpReturn ret = do_expansions(for_clause->word_list, shell_vars, O_SPLIT);
 	if (ret.error != 0)
 		return ERR;
-	const StringListL *expanded_words = ret.ret;
-	const StringListL * const word_list = (for_clause->in == true) ? expanded_words : shell_vars->positional;
+	const StringList *expanded_words = ret.ret;
+	const StringList * const word_list = (for_clause->in == true) ? expanded_words : shell_vars->positional;
 
 	ArenaAllocator *arena = arena_create(1e5, GC_SUBSHELL);
 
@@ -355,7 +355,7 @@ static int execute_for_clause(const CommandP * const command, const bool backgro
 	return 0;
 }
 
-static void declare_positional(const StringListL * const positional_parameters, const Vars * const shell_vars) {
+static void declare_positional(const StringList * const positional_parameters, const Vars * const shell_vars) {
 	for (size_t i = 1; i < positional_parameters->size; i++) {
 		char buffer[MAX_WORD_LEN] = {0};
 		const int ret = ft_snprintf(buffer, MAX_WORD_LEN, "%ld=%s", i, positional_parameters->data[i]);
@@ -365,8 +365,8 @@ static void declare_positional(const StringListL * const positional_parameters, 
 	}
 }
 
-static StringListL *save_positionals(const Vars * const shell_vars) {
-	da_create(saved_positionals, StringListL, sizeof(char *), GC_ENV);
+static StringList *save_positionals(const Vars * const shell_vars) {
+	da_create(saved_positionals, StringList, sizeof(char *), GC_ENV);
 	for (size_t i = 0; i < shell_vars->positional->size; i++) {
 		char * const copy = gc(GC_ADD, ft_strdup(shell_vars->positional->data[i]), GC_ENV);
 		da_push(saved_positionals, copy);
@@ -374,7 +374,7 @@ static StringListL *save_positionals(const Vars * const shell_vars) {
 	return saved_positionals;
 }
 
-static void clear_positional(StringListL * const positional) {
+static void clear_positional(StringList * const positional) {
   if (positional->size <= 1) return ;
 	for (size_t i = 1; i < positional->size; i++) {
 		gc(GC_FREE, positional->data[i], GC_ENV);
@@ -384,8 +384,8 @@ static void clear_positional(StringListL * const positional) {
 
 static int execute_function(const CommandP * const command, const int funcNo, const bool background, Vars * const shell_vars, const int flag) {
 	const SimpleCommandP * const simple_command = command->simple_command;
-	const StringListL * const positional_parameters = simple_command->word_list;
-	StringListL * const saved_positionals = save_positionals(shell_vars);
+	const StringList * const positional_parameters = simple_command->word_list;
+	StringList * const saved_positionals = save_positionals(shell_vars);
 	const FunctionP * const function_copy = gc_duplicate_function(g_funcList->data[funcNo]);
 
 	clear_positional(shell_vars->positional);
@@ -440,12 +440,12 @@ static int process_simple_command(SimpleCommandP * const simple_command, Vars *s
 	ExpReturn ret = do_expansions(simple_command->word_list, shell_vars, O_SPLIT);
 	if (ret.error != 0)
 		return ERR;
-	StringListL *args = ret.ret;
+	StringList *args = ret.ret;
 
 	ret = do_expansions(simple_command->assign_list, shell_vars, O_ASSIGN);
 	if (ret.error != 0)
 		return ERR;
-	StringListL *vars = ret.ret;
+	StringList *vars = ret.ret;
 
 	simple_command->word_list = args;
 	simple_command->assign_list = vars;

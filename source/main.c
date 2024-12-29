@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:00 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/27 10:27:20 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ static void	*read_input_prompt(char *input, Vars *const shell_vars) {
 	return input;
 }
 
-void env_to_string_list(StringListL *const env_list, const char **env){
+void env_to_string_list(StringList *const env_list, const char **env){
 	for (size_t i = 0; env[i]; i++)
 		string_list_add_or_update(env_list, gc(GC_ADD, ft_strdup(env[i]), GC_ENV));
 }
@@ -86,13 +86,13 @@ void env_to_string_list(StringListL *const env_list, const char **env){
 Vars *shell_vars_init(const char **env) {
 	Vars *self = gc(GC_ADD, ft_calloc(1, sizeof(Vars)), GC_ENV);
 
-	da_create(env_list, StringListL, sizeof(char *), GC_ENV);
+	da_create(env_list, StringList, sizeof(char *), GC_ENV);
 	self->env = env_list;
-	da_create(set_list, StringListL, sizeof(char *), GC_ENV);
+	da_create(set_list, StringList, sizeof(char *), GC_ENV);
 	self->set = set_list;
-	da_create(local_list, StringListL, sizeof(char *), GC_ENV);
+	da_create(local_list, StringList, sizeof(char *), GC_ENV);
 	self->local = local_list;
-	da_create(positional_list, StringListL, sizeof(char *), GC_ENV);
+	da_create(positional_list, StringList, sizeof(char *), GC_ENV);
 	self->positional = positional_list;
 
 	env_to_string_list(self->env, env);

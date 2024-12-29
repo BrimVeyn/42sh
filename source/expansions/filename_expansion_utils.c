@@ -107,7 +107,8 @@ int get_dir_entries(MatchEntryL *list, const char *path, const int flag) {
 }
 
 bool is_pattern(const char *lhs, const char *rhs) {
-	bool dquote = false, squote = false;
+	if (!lhs) return false;
+	static bool dquote = false, squote = false;
 	//FIX: //Maybe check if espaced
 
 	for (size_t i = 0; lhs[i]; i++) {

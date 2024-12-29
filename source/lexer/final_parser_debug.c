@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:43:08 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:56:18 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void print_redir_list(const RedirectionL *redir_list) {
 	ft_dprintf(2, C_SEA_GREEN"}"C_RESET"\n");
 }
 
-void print_word_list(const char *title, const StringListL *word_list) {
+void print_word_list(const char *title, const StringList *word_list) {
 	ft_dprintf(2, C_DARK_CYAN"  %s: "C_RESET C_SEA_GREEN"{"C_RESET, title);
 	if (!word_list) {
 		ft_dprintf(2, "(null)");

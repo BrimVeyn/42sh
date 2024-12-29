@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:56 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/17 14:47:57 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ int		*save_std_fds();
 
 bool	secure_dup2(const int from, const int to);
 bool	is_builtin(const char *bin);
-char	*find_bin_location(char *bin, StringListL *env, bool *absolute);
+char	*find_bin_location(char *bin, StringList *env, bool *absolute);
 bool	redirect_ios(RedirectionL * const redir_list, Vars * const shell_vars);
 
 char	*sigStr(const int sig);
@@ -95,8 +95,8 @@ char *hash_find_bin(char *bin, Vars *shell_vars);
 
 char *job_print(AndOrP * const andor, const bool newline);
 
-void add_vars_to_local(StringListL * const list, const StringListL * const vars);
-void add_vars_to_set(const Vars * const shell_vars, const StringListL * const vars);
+void add_vars_to_local(StringList * const list, const StringList * const vars);
+void add_vars_to_set(const Vars * const shell_vars, const StringList * const vars);
 
 void builtin_hash(const SimpleCommandP *command, Vars *const shell_vars);
 void builtin_set(const SimpleCommandP *command, Vars *const shell_vars);

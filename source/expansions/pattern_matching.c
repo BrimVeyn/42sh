@@ -1,5 +1,7 @@
 #include "expansion.h"
 #include "ft_regex.h"
+#include "utils.h"
+#include <stdio.h>
 
 static int fill_map_with_character_class(char *character_class_name, char *map, const bool reverse) {
 	static const struct {
@@ -81,7 +83,7 @@ static char *compile_range(char **pattern) {
 PatternNodeL *compile_pattern(char *pattern) {
     da_create(list, PatternNodeL, sizeof(PatternNode), GC_SUBSHELL);
 
-    bool dquote = false, squote = false;
+    static bool dquote = false, squote = false;
     const char *special = "*?[";
 
 	while(*pattern) {

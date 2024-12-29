@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   duplicate_function.c                               :+:      :+:    :+:   */
+/*   gc_duplicate_function.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 17:27:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,8 @@
 ListP *gc_duplicate_list(ListP *list);
 FunctionP *gc_duplicate_function(FunctionP *func);
 
-StringListL *gc_duplicate_stringlist(StringListL *stringList) {
-	StringListL *self = gc_unique(StringListVect, GC_SUBSHELL);
+StringList *gc_duplicate_stringlist(StringList *stringList) {
+	StringList *self = gc_unique(StringListVect, GC_SUBSHELL);
 	self->data = gc(GC_CALLOC, stringList->capacity, stringList->size_of_element, GC_SUBSHELL);
 	self->size = stringList->size;
 	self->capacity = stringList->capacity;

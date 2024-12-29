@@ -155,8 +155,8 @@ function UnitTest({unit}) {
 						{activeDiff === "outfiles" && 
 							<ReactDiffViewer key={unit.id + "error"} 
 								styles={newStyles}
-								oldValue={outfiles42sh || "None"} 
-								newValue={outfilesBash || "None"} 
+								oldValue={outfilesBash || "None"} 
+								newValue={outfiles42sh || "None"} 
 								splitView={true} showDiffOnly={false} useDarkTheme={true}
 								leftTitle={"Bash"} rightTitle={"42sh"} 
 							/>
@@ -164,8 +164,8 @@ function UnitTest({unit}) {
 						{activeDiff === "exit" &&
 							<ReactDiffViewer key={unit.id + "output"} 
 								styles={newStyles}
-								oldValue={unit["42sh_exit_code"]} 
-								newValue={unit["bash_exit_code"]} 
+								oldValue={unit["bash_exit_code"]} 
+								newValue={unit["42sh_exit_code"]} 
 								splitView={true} showDiffOnly={false} useDarkTheme={true}
 								leftTitle={"Bash"} rightTitle={"42sh"} 
 							/>
