@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 12:20:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 19:25:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:40:28 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include "ft_regex.h"
 #include "utils.h"
 #include "libft.h"
+#include "dynamic_arrays.h"
 
 int read_x_base(const char *const input, char *buffer, const int x, const char *const base) {
 	int i = 0;

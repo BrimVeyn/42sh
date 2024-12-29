@@ -5,20 +5,16 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/10 11:18:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
+/*   Created: 2024/12/30 00:03:10 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/30 00:03:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-/* ************************************************************************** */
-
 #include "ft_regex.h"
-#include "lexer.h"
-#include "parser.h"
 #include "libft.h"
 #include "utils.h"
 #include "exec.h"
-#include "regex.h"
+#include "dynamic_arrays.h"
 
 #include <limits.h>
 #include <stdio.h>

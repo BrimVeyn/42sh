@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 15:46:07 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/27 10:26:44 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/30 00:06:57 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,15 @@
 #include "parser.h"
 #include "utils.h"
 #include "assert.h"
+#include "dynamic_arrays.h"
+
 #include <stdio.h>
 
 static operator_precedence get_precedence(const AToken *token) {
 	static const struct {
 		arithmetic_operators OP;
 		operator_precedence P;
-	} pre[] = {
+	} precedence_table[] = {
 		{O_POST_DECR, P6}, {O_POST_INCR, P6},
 		{O_PREF_DECR, P5}, {O_PREF_INCR, P5},
 		{O_MULT, P4}, {O_DIVIDE, P4}, {O_MODULO, P4},
@@ -33,9 +35,9 @@ static operator_precedence get_precedence(const AToken *token) {
 		{O_PCLOSE, PP}, {O_POPEN, PP},
 	};
 
-	for (size_t i = 0; i < sizeof(pre) / sizeof(pre[0]); i++) {
-		if (token->operator == pre[i].OP)
-			return pre[i].P;
+	for (size_t i = 0; i < ARRAY_SIZE(precedence_table); i++) {
+		if (token->operator == precedence_table[i].OP)
+			return precedence_table[i].P;
 	}
 	return P0;
 }
@@ -113,8 +115,6 @@ static void replace_nested_greedy(const char *ref, char *buffer) {
 	buffer[j] = '\0';
 }
 
-#include "colors.h"
-
 static Lexer * lexer_init(char *input) {
 	Lexer * lexer = gc(GC_ADD, ft_calloc(1, sizeof(Lexer)), GC_SUBSHELL);
 
@@ -139,10 +139,6 @@ char *arithmetic_expansion(char *const str, Vars *const shell_vars, int *error) 
 	char *tmp = ft_strdup(str);
 	replace_nested_greedy(tmp, str);
 	FREE_POINTERS(tmp);
-
-	// printf(C_RED"------"C_RESET"\n");
-	// printf("%s\n", str);
-	// printf(C_RED"------"C_RESET"\n");
 
 	long result = 0;
 	Lexer * lexer = lexer_init(str);

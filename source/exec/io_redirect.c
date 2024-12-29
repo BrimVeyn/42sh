@@ -6,9 +6,17 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:41:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:39:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "exec.h"
+#include "dynamic_arrays.h"
+#include "expansion.h"
+#include "final_parser.h"
+#include "utils.h"
+#include "libft.h"
+#include "lexer.h"
 
 #include <fcntl.h>
 #include <stdbool.h>
@@ -18,12 +26,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "exec.h"
-#include "expansion.h"
-#include "final_parser.h"
-#include "utils.h"
-#include "libft.h"
-#include "lexer.h"
 
 #define MAX_FD 1024
 #include <sys/stat.h>

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/24 10:29:25 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:35:40 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "utils.h"
 #include "libft.h"
 #include "ft_readline.h"
+#include "dynamic_arrays.h"
 
 #include <stdio.h>
 #include <time.h>

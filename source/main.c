@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:00 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 14:54:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/30 00:35:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include "jobs.h"
 #include "ft_readline.h"
 #include "expansion.h"
+#include "dynamic_arrays.h"
 
 #include <limits.h>
 #include <signal.h>
@@ -84,7 +85,7 @@ void env_to_string_list(StringList *const env_list, const char **env){
 }
 
 Vars *shell_vars_init(const char **env) {
-	Vars *self = gc(GC_ADD, ft_calloc(1, sizeof(Vars)), GC_ENV);
+	Vars *self = gc_unique(Vars, GC_ENV);
 
 	da_create(env_list, StringList, sizeof(char *), GC_ENV);
 	self->env = env_list;
@@ -94,6 +95,8 @@ Vars *shell_vars_init(const char **env) {
 	self->local = local_list;
 	da_create(positional_list, StringList, sizeof(char *), GC_ENV);
 	self->positional = positional_list;
+	da_create(alias_list, StringList, sizeof(char *), GC_ENV);
+	self->alias = alias_list;
 
 	env_to_string_list(self->env, env);
 	env_to_string_list(self->set, env);

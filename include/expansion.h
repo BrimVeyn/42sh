@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 14:13:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 14:54:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:19:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,7 @@ typedef struct {
 #define P_RELATIVE 2
 #define P_ABSOLUTE_INIT 4
 #define P_RELATIVE_INIT 8
+#define IS_FIRST_PATTERN (i == 0)
 
 typedef enum { P_STAR, P_QMARK, P_RANGE, P_CHAR } PatternType;
 
@@ -125,11 +126,12 @@ typedef struct {
     int gc_level;
 } PatternNodeL;
 
+
 bool			is_pattern(const char *lhs, const char *rhs);
 int				get_dir_entries(MatchEntryL *list, const char *path, const int flag);
 void			sort_entries(MatchEntryL *entries);
 void			join_entries(Str **head, const MatchEntryL *entries);
-void			remove_dotfiles(MatchEntryL *entries, const bool keep_dotfiles);
+void			remove_hidden_files(MatchEntryL *entries, const bool keep_dotfiles);
 void			print_pattern_nodes(PatternNodeL *nodes);
 bool			match_string(const char *str, const PatternNodeL *pattern_nodes);
 PatternNodeL	*compile_pattern(char *pattern);
