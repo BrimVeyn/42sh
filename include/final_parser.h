@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/20 12:04:50 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 19:27:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,10 +140,10 @@ typedef struct {
 	size_t capacity;
 	size_t size_of_element;
 	int	gc_level;
-} StringListL;
+} StringList;
 
 typedef struct {
-	StringListL **data;
+	StringList **data;
 	size_t size;
 	size_t capacity;
 	size_t size_of_element;
@@ -152,8 +152,8 @@ typedef struct {
 
 typedef struct {
 	RedirectionL *redir_list;
-	StringListL	*word_list;
-	StringListL *assign_list;
+	StringList	*word_list;
+	StringList *assign_list;
 } SimpleCommandP;
 
 typedef struct {
@@ -250,7 +250,7 @@ struct WhileClauseP {
 struct ForClauseP {
 	char *iterator;
 	bool in;
-	StringListL *word_list;
+	StringList *word_list;
 	ListP *body;
 };
 
@@ -264,7 +264,7 @@ typedef struct {
 	TokenType type;
 	union {
 		CaseClauseP *case_clause;
-		StringListL *word_list;
+		StringList *word_list;
 		WhileClauseP *while_clause;
 		ForClauseP *for_clause;
 		IFClauseP *if_clause;
@@ -309,7 +309,7 @@ ListP		*listNew(AndOrP *and_or, TokenType separator);
 
 IFClauseP	*ifClauseNew(ListP *condition, ListP *body);
 
-CaseClauseP *caseClauseNew(StringListL *pattern, ListP *body);
+CaseClauseP *caseClauseNew(StringList *pattern, ListP *body);
 void		caseClauseMerge(CaseClauseP *parent, const CaseClauseP *child);
 
 SimpleCommandP *simpleCommandNew(void);
@@ -317,7 +317,7 @@ SimpleCommandP *simpleCommandNew(void);
 
 /*------------------------------DEBUG-----------------------*/
 void print_redir_list(const RedirectionL *redir_list);
-void print_word_list(const char *title, const StringListL *word_list);
+void print_word_list(const char *title, const StringList *word_list);
 void print_simple_command(const SimpleCommandP *self);
 void print_subshell(const ListP *subshell);
 void print_brace_group(const ListP *subshell);
@@ -335,24 +335,24 @@ void print_token_stack(const TokenStack *stack);
 /*----------------------------------------------------------*/
 
 typedef struct {
-	StringListL *env;
-	StringListL *set;
-	StringListL *local;
-	StringListL *positional;
+	StringList *env;
+	StringList *set;
+	StringList *local;
+	StringList *positional;
 } Vars;
 
 int				parse_input(char *in, char *filename, Vars * const shell_vars);
 
-char			*get_positional_value(const StringListL * const sl, const size_t idx);
+char			*get_positional_value(const StringList * const sl, const size_t idx);
 char			*get_variable_value(Vars * const shell_vars, const char * const name);
-void			string_list_add_or_update(StringListL * const sl, const char * const var);
-bool			string_list_update(StringListL *sl, const char *var);
-void			string_list_append(const StringListL * const sl, char * const var);
-void			string_list_clear(StringListL *list);
-bool			string_list_remove(StringListL *sl, char *id);
-char			*string_list_get_value(const StringListL * const sl, const char * const id);
+void			string_list_add_or_update(StringList * const sl, const char * const var);
+bool			string_list_update(StringList *sl, const char *var);
+void			string_list_append(const StringList * const sl, char * const var);
+void			string_list_clear(StringList *list);
+bool			string_list_remove(StringList *sl, char *id);
+char			*string_list_get_value(const StringList * const sl, const char * const id);
 char			*shell_vars_get_value(const Vars * const shell_vars, char * const id);
-void			string_list_print(const StringListL *list);
+void			string_list_print(const StringList *list);
 
 typedef struct {
 	size_t line, column, absolute;
@@ -418,7 +418,8 @@ typedef enum {
     O_SPLIT = (1 << 0),
     O_ALLOWNULLS = (1 << 1),
     O_ASSIGN = (1 << 2),
-    O_CASE_PATTERN = (1 << 3),
+    O_PATTERN = (1 << 3),
+	O_PARAMETER = (1 << 4),
 } ExpansionsOpt;
 
 int execute_complete_command(const CompleteCommandP * const complete_command, Vars *const shell_vars, const bool bg);

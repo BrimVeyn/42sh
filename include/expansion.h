@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 14:13:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/28 18:50:04 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ typedef struct Str {
 	ExpKind kind;
 	bool	dquote;
 	bool	squote;
+	bool    file_exp;
 } Str;
 
 typedef struct {
@@ -148,12 +149,12 @@ void				add_input_to_history(char *input, int *history_fd, Vars *shell_vars);
 void				get_history(Vars *shell_vars);
 
 typedef struct {
-	StringListL *ret;
+	StringList *ret;
 	int error;
 } ExpReturn;
 
-StringListL		*do_expansions_word(char *word, int *error, Vars *const shell_vars, const int options);
-ExpReturn		do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options);
+StringList		*do_expansions_word(char *word, int *error, Vars *const shell_vars, const int options);
+ExpReturn		do_expansions(const StringList * const word_list, Vars * const shell_vars, const int options);
 
 
 #endif // !EXPANSION

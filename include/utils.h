@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/27 09:54:43 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,7 +173,7 @@ void	da_transfer(StringStream *in, StringStream *out, int number);
 #define da_print(array) \
 	_Generic((array), \
 		StrList *: str_list_print, \
-		StringListL *: string_list_print, \
+		StringList *: string_list_print, \
 		TokenList *: tokenListToString, \
 		ExpKindList *: exp_kind_list_print, \
 		ExprArray *: expr_array_print \

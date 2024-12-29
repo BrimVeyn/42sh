@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/30 12:20:06 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/27 09:54:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 19:25:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,7 +128,7 @@ void builtin_echo(const SimpleCommandP *command, UNUSED Vars *const shell_vars) 
 
 	int buffer_size = 0;
 
-	for (; command->word_list->data[i]; i++) {
+	for (; i < command->word_list->size; i++) {
 		char *arg = command->word_list->data[i];
 
 		if (regex_match("^-n+$", arg).is_found) {
@@ -144,7 +144,7 @@ void builtin_echo(const SimpleCommandP *command, UNUSED Vars *const shell_vars) 
 		char *arg = command->word_list->data[i];
 		char *output = (options & ESCAPE_SEQ) ? replace_escape_sequences(arg, &stop) : arg;
 
-		if (!stop && command->word_list->data[i + 1]) {
+		if (!stop && (i + 1) < command->word_list->size) {
 			buffer_size = ft_snprintf(buffer, MAX_WORD_LEN, "%s ", output);
 			if (buffer_size == -1)
 				_fatal("snprintf: buffer overflow", 1);

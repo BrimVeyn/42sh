@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 13:45:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 13:45:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,7 @@ int cmp_both(const char *const first, const char *const end, const char *const c
 	return -1;
 }
 
-StringListL *get_history_value_wd(StringListL *command_list, char *first, char *end){
+StringList *get_history_value_wd(StringList *command_list, char *first, char *end){
 	int first_len = ft_strlen(first);
 	int end_len = ft_strlen(end);
 	for (int i = history->length - 1; i >= 0; i--) {
@@ -173,7 +173,7 @@ StringListL *get_history_value_wd(StringListL *command_list, char *first, char *
 	return command_list;
 }
 
-void get_history_value_nb(StringListL *command_list, int first, int last) {
+void get_history_value_nb(StringList *command_list, int first, int last) {
 	if (first < 0){
 		first = history->length + first;
 		if (first < 0) first = 1;
@@ -288,7 +288,7 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 		options.last = options.first;
 	}
 	
-	da_create(command_list, StringListL, sizeof(char *), GC_SUBSHELL);
+	da_create(command_list, StringList, sizeof(char *), GC_SUBSHELL);
 	if (options.first == NULL){
 		da_push(command_list, fc_default());
 	} else if (*options.first == '-' || ft_isdigit((int)*options.first)){

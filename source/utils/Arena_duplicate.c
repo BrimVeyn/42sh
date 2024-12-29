@@ -6,20 +6,19 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 13:20:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Arena.h"
 #include "final_parser.h"
-#include "utils.h"
 
 #include <stddef.h>
 #include <stdint.h>
 #include <stdalign.h>
 
-StringListL *arena_dup_stringlist(ArenaAllocator *arena, StringListL *stringList) {
-    StringListL *self = arena_unique(arena, StringListL);
+StringList *arena_dup_stringlist(ArenaAllocator *arena, StringList *stringList) {
+    StringList *self = arena_unique(arena, StringList);
     self->data = _arena_alloc(arena, stringList->size, char *);
     self->size = stringList->size;
     self->capacity = stringList->capacity;
@@ -63,7 +62,7 @@ ListPVect *arena_dup_listvect(ArenaAllocator *arena, ListPVect *vect) {
 
 StringListVect *arena_dup_stringlistvect(ArenaAllocator *arena, StringListVect *vect) {
 	StringListVect *self = arena_unique(arena, StringListVect);
-	self->data = _arena_alloc(arena , vect->size, StringListL *);
+	self->data = _arena_alloc(arena , vect->size, StringList *);
 	self->size = vect->size;
 	self->capacity = vect->capacity;
 	self->gc_level = vect->gc_level;

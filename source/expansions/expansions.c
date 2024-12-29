@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 11:27:40 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 19:27:20 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,13 +54,13 @@ char *here_doc(const char *eof, const heredoc_mode mode, Vars * const shell_vars
 		}
 		if (mode == HD_EXPAND){
 
-			da_create(tmp, StringListL, sizeof(char *), GC_SUBSHELL);
+			da_create(tmp, StringList, sizeof(char *), GC_SUBSHELL);
 			da_push(tmp, input);
 			ExpReturn ret = do_expansions(tmp, shell_vars, O_NONE);
 			if (ret.error != 0)
 				return NULL;
 
-			StringListL *expanded_word = ret.ret;
+			StringList *expanded_word = ret.ret;
 			ft_dprintf(file_fd, "%s\n", expanded_word->data[0]);
 		} else if (mode == HD_NO_EXPAND){
 			ft_dprintf(file_fd, "%s\n", input);
@@ -345,8 +345,8 @@ void string_list_split(StrList *list, Vars *shell_vars) {
 }
 
 
-StringListL *string_list_merge(StrList *list) {
-	da_create(new, StringListL, sizeof(char *), GC_SUBSHELL);
+StringList *string_list_merge(StrList *list) {
+	da_create(new, StringList, sizeof(char *), GC_SUBSHELL);
 	da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
 	for (size_t i = 0; i < list->size; i++) {
 		Str *curr = list->data[i];
@@ -370,7 +370,7 @@ StringListL *string_list_merge(StrList *list) {
 	return new;
 }
 
-void string_list_push_list(StringListL *lhs, StringListL *rhs) {
+void string_list_push_list(StringList *lhs, StringList *rhs) {
 	for (size_t i = 0; i < rhs->size; i++) {
 		da_push(lhs, rhs->data[i]);
 	}
@@ -390,7 +390,7 @@ void string_erase_nulls(StrList *list) {
 	}
 }
 
-void printStringList(StringListL *list) {
+void printStringList(StringList *list) {
 	for (size_t i = 0; i < list->size; i++) {
 		ft_dprintf(2, "[%ld]: %s\n", i, list->data[i]);
 	}
@@ -486,7 +486,7 @@ char *remove_quotes(char *word) {
 	return list->data[0]->str;
 }
 
-StringListL *do_expansions_word(char *word, int *error, Vars *const shell_vars, const int options) {
+StringList *do_expansions_word(char *word, int *error, Vars *const shell_vars, const int options) {
 	StrList * const str_list = get_range_list(word, shell_vars, options, error);
 	// str_list_print(str_list);
 
@@ -500,15 +500,17 @@ StringListL *do_expansions_word(char *word, int *error, Vars *const shell_vars, 
 
 	string_erase_nulls(str_list);
 
-	if (options & O_CASE_PATTERN)
+	if (options & O_PATTERN)
 		return string_list_merge(str_list);
 
 	// str_list_print(str_list);
-	// StringListL *merged_list = string_list_merge(str_list);
+	// StringList *merged_list = string_list_merge(str_list);
 	// for (size_t i =0; i< merged_list->size;++i) {
 	// 	dprintf(2, "M[%zu]: %s\n", i, merged_list->data[i]);
 	// }
-	filename_expansion(str_list);
+	if (!(options & O_PARAMETER))
+		filename_expansion(str_list);
+	// str_list_print(str_list);
 
 	quote_removal(str_list);
 	// str_list_print(str_list);
@@ -516,7 +518,7 @@ StringListL *do_expansions_word(char *word, int *error, Vars *const shell_vars, 
 	return string_list_merge(str_list);
 }
 
-ExpReturn do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options) {
+ExpReturn do_expansions(const StringList * const word_list, Vars * const shell_vars, const int options) {
 	ExpReturn ret_struct = { 
 		.ret = NULL,
 		.error = 0 
@@ -524,10 +526,10 @@ ExpReturn do_expansions(const StringListL * const word_list, Vars * const shell_
 
 	if (!word_list) return ret_struct;
 
-	da_create(ret_list, StringListL, sizeof(char *), GC_SUBSHELL);
+	da_create(ret_list, StringList, sizeof(char *), GC_SUBSHELL);
 
 	for (size_t it = 0; it < word_list->size; it++) {
-		StringListL *const ret = do_expansions_word(word_list->data[it], &ret_struct.error, shell_vars, options);
+		StringList *const ret = do_expansions_word(word_list->data[it], &ret_struct.error, shell_vars, options);
 		if (ret_struct.error != 0)
 			return ret_struct;
 

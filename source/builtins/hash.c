@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:33:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/24 11:37:20 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ void hash_table_clear(Entry **table) {
 }
 
 char *hash_find_bin(char *bin, Vars *shell_vars) {
-	StringListL *env = shell_vars->env;
+	StringList *env = shell_vars->env;
 	char **path = ft_split(string_list_get_value(env, "PATH"), ':');
 	for (int i = 0; path[i]; i++) {
 		char *bin_with_path = ft_strjoin(path[i], (char *)gc(GC_ADD, ft_strjoin("/",bin), GC_ENV));

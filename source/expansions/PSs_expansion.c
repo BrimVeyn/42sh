@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 10:13:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/27 10:29:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -217,7 +217,7 @@ char *prompt_expansion(char *prompt, Vars *shell_vars) {
 	ft_sprintf(buffer, "\"%s\"", prompt);
 
 	int error = 0;
-	StringListL *maybe_prompt = do_expansions_word(buffer, &error, shell_vars, O_NONE);
+	StringList *maybe_prompt = do_expansions_word(buffer, &error, shell_vars, O_NONE);
 	if (!maybe_prompt) prompt = "";
 	else prompt = maybe_prompt->data[0];
 

@@ -1,0 +1,45 @@
+echo $(echo "")./pm_test/$(echo $(echo "b"))*
+echo ./pm_test/$(echo "*")$(echo "?")*
+var="pm_test"; echo ./${var}/$(echo "*")
+echo ./pm_test/$(echo "$(echo "?")")$(echo "*")e
+echo ./pm_test/$(($(echo "2+3")))?*
+echo ./pm_test/${empty:-$(echo "*")}$(echo "?")
+echo $(echo "./pm_test/")$(($(echo 5) + $(echo 3)))?*
+echo "./pm_test/"$(echo "?")$(echo "*")
+dir="pm_test" file="*"; echo ./${dir}/${file}$(echo "?")
+echo ./$(echo "pm")_test/$(echo "?")$(echo "*")
+echo "./pm_test/$(echo "$(echo "*")")"
+echo ./pm_test/$(echo "?")$(echo "*")$(($(echo "5" + "3")))
+echo ./pm_test/$(echo "\\*")$(echo "?")*
+fallback="?*"; echo ./pm_test/${unset:-${fallback}}
+echo $(echo "./pm_test/")$(($(echo 2) + $(echo 3)))$(echo "?")$(echo "*")e
+echo "./""pm_test""/"$(echo "b*")
+echo ./pm_test/$(echo "$(echo "$(echo "\*")")")?*
+fallback="?*" echo ./pm_test/$(($(echo "$(echo "3") + $(echo "2")") * 2))${unset:-${fallback}}
+level1="level2" level2="pm_test"; echo ./${level1}/$(($(echo "10 / 2") * $(echo "3")))?*
+echo "./pm_test/"$(echo '"$(echo "*")"')$(echo "?")*
+echo ./pm_test/$(echo "*$(echo "?")")$(echo "$(echo "e")")
+dir="pm_test" pattern="?*"; echo ./${dir}/$(echo "$(echo "${pattern}")")$(echo "$(($(echo "2+2") - 1))")e
+echo ./pm_test/$(($(echo 3) * $(echo 2 + 1)))?$(echo "*")
+echo ./$(echo "$(echo pm)_test")/$(echo "$(echo "?")")$(echo "$(echo "*")")
+echo ./pm_test/$(echo "?")$(echo "$(printf "\x2a")")$(($(echo 41) - 1))
+echo $(echo "$(echo "./pm_test/")")$(($(echo 3 + 2)))$(echo "*")$(echo "?")
+echo ./pm_test/$(echo "*")$(echo "$(echo "$(echo "?")")")*
+echo "./pm_test/$(($(echo 10) + $(echo 20)))?$(echo "*")"
+star="*" question="?"; echo ./pm_test/$(echo "${star}")$(echo "${question}")$(echo "e")
+nested="pm_test";  echo ./${nested}/$(($(echo "$(($(echo "3 * 3")))") + 1))?*
+echo ./pm_test/$(echo "\*")$(($(echo 7) + $(echo 8)))$(echo "?")
+echo $(echo "a ./pm_test/")$(echo "a* b c d")e
+echo $(echo ./pm_test/$(echo "$(echo "$(echo "??*")")")$(($(echo "5") + $(echo "4"))))
+unset var; fallback1="??"; fallback2="*"; echo ./pm_test/${var:-${fallback1:-${fallback2}}}$(echo "$(echo "?")")$(($(echo 3) + 2))
+dir="pm_test"; echo ./${dir}/$(($(($(echo "5 * 2") + 3)) * 2))$(echo "?")$(echo "*")
+echo './pm_test/$(echo "$(echo "$(echo "\\*")")")$(($(echo "10 / 2") + 1))?*'
+echo ./pm_test/$(echo "\*$(echo "$(printf "\x3f")")")$(($(echo 7) * $(($(echo 4) + 1))))*
+unset nested; echo ./${nested:-$(echo "$(echo "pm_test")")}/$(echo "*")$(($(echo 2 + $(echo 3)) * 2))?
+echo $(echo "$(echo './pm_test/')")$(($(echo "5") + $(($(echo "2 * 3")))))$(echo "$(echo "$(echo "*")")")?
+question="?"; star="*"; level1="level2"; level2="pm_test"; echo ./${level1}/${star}${question}$(($(echo "6") * $(echo 2)))
+echo ./pm_test/$(echo "$(echo "$(echo "$(echo "\\?*")")")")$(($(echo 5 + 5)))e
+echo "./""pm_test""/$(echo "$(($(echo 2) + $(echo 3)))")$(echo "$(echo "$(echo '\*')")")$(echo "$(echo "?")")"
+unset missing; fallback="pattern"; echo ./pm_test/${missing:-$(echo "$(echo "$(echo "${fallback}")")")}$(($(echo 6 + 2)))*
+dir="pm_test"; echo ./${dir}/$(echo "$(echo "$(echo "$(echo "$(echo "*")")")")")$(($(echo 4) + $(echo 6)))$(echo "?")
+echo ./pm_test/$(echo "$(printf '\x2a')")$(echo "$(printf '\x3f')")$(($(echo "$(echo "$(echo 8)")") + 1))

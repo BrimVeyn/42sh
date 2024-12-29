@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/28 11:13:02 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 void job_print_list(ListP *list, StringStream *ss);
 void job_print_function(FunctionP *func, StringStream *ss);
 
-void job_print_stringlist(StringListL *stringList, StringStream *ss) {
+void job_print_stringlist(StringList *stringList, StringStream *ss) {
 	for (size_t i = 0; i < stringList->size; i++) {
 		ss_push_string(ss, stringList->data[i]);
 		da_push(ss, ' ');
