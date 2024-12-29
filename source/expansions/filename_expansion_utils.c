@@ -43,7 +43,7 @@ void remove_dotfiles(MatchEntryL *entries, const bool keep_dotfiles) {
 }
 
 void join_entries(Str **head, const MatchEntryL *entries) {
-	// Str *old_next = (*head)->next;
+	Str *old_next = (*head)->next;
 	Str *old_head = (*head);
 	old_head->str = entries->data[0].full_path;
 	old_head->kind = EXP_CMDSUB;
@@ -54,7 +54,8 @@ void join_entries(Str **head, const MatchEntryL *entries) {
 		str_add_back(&old_head, str_init(EXP_CMDSUB, entries->data[i].full_path, false));
 	}
 	// str_print(old_head, 0);
-	// str_add_back(&old_head, old_next);
+	str_add_back(&old_head, old_next);
+	(*head) = old_next;
 }
 
 void sort_entries(MatchEntryL *entries) {

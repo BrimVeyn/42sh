@@ -45,3 +45,5 @@ echo ./pm_test/..*
 echo ./pm_test/"file*"*
 echo ./pm_test/"file with*"*
 echo ./pm_test/no_perms/*
+echo ./pm_test/$(echo "*")
+echo $(echo './pm_test/')*
