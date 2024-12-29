@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:18:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/30 00:42:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "ft_regex.h"
 #include "utils.h"
 #include "libft.h"
+#include "dynamic_arrays.h"
 
 #include <limits.h>
 #include <stdio.h>

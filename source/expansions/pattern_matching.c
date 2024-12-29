@@ -1,6 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pattern_matching.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/29 23:38:11 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/29 23:38:13 by bvan-pae         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "expansion.h"
 #include "ft_regex.h"
+#include "dynamic_arrays.h"
 #include "utils.h"
+
 #include <stdio.h>
 
 static int fill_map_with_character_class(char *character_class_name, char *map, const bool reverse) {

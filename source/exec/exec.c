@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:42:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:38:37 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "expansion.h"
 #include "final_parser.h"
 #include "signals.h"
+#include "dynamic_arrays.h"
 #include "utils.h"
 #include "libft.h"
 #include "jobs.h"

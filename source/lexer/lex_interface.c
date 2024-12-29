@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 13:04:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/08 12:47:26 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:35:51 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "final_parser.h"
 #include "utils.h"
+#include "dynamic_arrays.h"
 
 #include <stdio.h>
 

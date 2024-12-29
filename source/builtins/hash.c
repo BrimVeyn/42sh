@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:33:01 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 14:54:16 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/30 00:02:01 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ int hash_func(char* s) {
     long long p = 31, m = 1e9 + 7;
     long long hash = 0;
     long long p_pow = 1;
+
     for(int i = 0; i < n; i++) {
         hash = (hash + (s[i] - 'a' + 1) * p_pow) % m;
         p_pow = (p_pow * p) % m;

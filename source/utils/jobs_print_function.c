@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:36:10 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "final_parser.h"
 #include "utils.h"
+#include "dynamic_arrays.h"
 
 void job_print_list(ListP *list, StringStream *ss);
 void job_print_function(FunctionP *func, StringStream *ss);

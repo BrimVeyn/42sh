@@ -6,19 +6,20 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/27 20:26:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 19:17:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:53:27 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "c_string.h"
 #include "expansion.h"
 #include "final_parser.h"
 #include "libft.h"
 #include "utils.h"
+#include "dynamic_arrays.h"
+
 #include <stdio.h>
 #include <sys/dir.h>
 
-static StringList *cut_pattern(char *pattern) {
+static StringList *cut_pattern(char *const pattern) {
 
     da_create(list, StringList, sizeof(char *), GC_SUBSHELL);
     char *base = pattern;
@@ -58,8 +59,6 @@ static void open_matched_dirs(MatchEntryL **entries) {
 	gc(GC_FREE, old_entries, GC_SUBSHELL);
 	*(entries) = tmp;
 }
-
-#define IS_FIRST_PATTERN (i == 0)
 
 static bool open_first_entries(MatchEntryL *const entries, int *const flag, const size_t pattern_nodes_size) {
 	if (!pattern_nodes_size) {
@@ -115,7 +114,7 @@ static bool is_first_dot(const PatternNodeL *const nodes) {
 	return (nodes->size && nodes->data[0].type == P_CHAR && nodes->data[0].c == '.');
 }
 
-static char *get_pattern(Str *head, StrList *list, size_t i) {
+static char *get_pattern(Str *const head, const StrList *const list, size_t i) {
 	char *pattern = head->str;
 	head->file_exp = true;
 	if (head->next != NULL)
@@ -130,44 +129,47 @@ static char *get_pattern(Str *head, StrList *list, size_t i) {
 	return pattern;
 }
 
-static void remove_marked_string(StrList *list, size_t i) {
+static void remove_marked_string(StrList *const list, const size_t i) {
 	while (
 		(i + 1 < list->size) &&
 		(list->data[i + 1]->file_exp == true && list->data[i + 1]->next == NULL)
 	) {
-		da_erase_index(list, i + 1);
+		da_delete_index(list, i + 1);
 	}
 	if (i + 1 < list->size && list->data[i + 1]->file_exp && list->data[i + 1]->next) {
 		list->data[i + 1]->str = NULL;
 	}
-	// str_list_print(list);
+}
+
+static bool skip_pattern(Str **head, const StrList *const string_list, size_t *const i) {
+	if ((*head)->next) {
+		(*head) = (*head)->next;
+	} else {
+		(*i)++;
+		if ((*i) >= string_list->size)
+			return true;
+		while ((*i) + 1 < string_list->size && string_list->data[(*i) + 1]->file_exp == true)
+			(*i)++;
+		(*head) = string_list->data[(*i)];
+		if ((*head)->file_exp == true)
+			(*head) = (*head)->next;
+	}
+	return false;
 }
 
 void filename_expansion(StrList * string_list) {
 
 	for (size_t i = 0; i < string_list->size; i++) {
 		Str *head = string_list->data[i];
+
 		while (head != NULL) {
 			char *pattern = get_pattern(head, string_list, i);
-			// dprintf (2, "pattern: %s\n", pattern);
 			//If we're in quotes or none of the pattern matching chars are found, skip
 			if (head->dquote || head->squote || !is_pattern(pattern, "*?[")) {
-				// dprintf(2, "abandoned: %s %s\n", pattern, boolStr(is_pattern(pattern, "*?[")));
-				if (head->next) {
-					head = head->next;
-				} else {
-					i++;
-					if (i >= string_list->size)
-						break;
-					while (i + 1 < string_list->size && string_list->data[i + 1]->file_exp == true)
-						i++;
-					head = string_list->data[i];
-					if (head->file_exp == true)
-						head = head->next;
-				}
+				if (skip_pattern(&head, string_list, &i))
+					break;
 				continue;
 			}
-			// dprintf (2, "pattern: %s\n", pattern);
 			//Open current_directories and read all entries
 			da_create(entries, MatchEntryL, sizeof(MatchEntry), GC_SUBSHELL);
 
@@ -180,7 +182,6 @@ void filename_expansion(StrList * string_list) {
 			for (size_t i = 0; i < pattern_parts->size; i++) {
 
 				PatternNodeL *pattern_nodes = compile_pattern(pattern_parts->data[i]);
-				// print_pattern_nodes(pattern_nodes);
 				//Open first dir, wheter '.' or '/'
 				if (IS_FIRST_PATTERN && open_first_entries(entries, &flag, pattern_nodes->size))
 					continue;
@@ -202,29 +203,17 @@ void filename_expansion(StrList * string_list) {
 			}
 			//If we still have entries, it means we matched with at least one file
 			if (entries->size) {
-				//This time we remove all files starting with .
-				remove_dotfiles(entries, keep_hidden_files);
+				//If keep_hidden_files, remove hidden files
+				remove_hidden_files(entries, keep_hidden_files);
 				if (entries->size) {
 					sort_entries(entries);
 					remove_marked_string(string_list, i);
-					// str_list_print(string_list);
-					// return;
 					join_entries(&head, entries);
 					continue;
 				}
 			} else {
-				if (head->next) {
-					head = head->next;
-				} else {
-					i++;
-					if (i >= string_list->size)
-						break;
-					while (i + 1 < string_list->size && string_list->data[i + 1]->file_exp == true)
-						i++;
-					head = string_list->data[i];
-					if (head->file_exp == true)
-						head = head->next;
-				}
+				if (skip_pattern(&head, string_list, &i))
+					break;
 			}
 		}
 	}

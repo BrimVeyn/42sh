@@ -1,4 +1,5 @@
 echo $(echo "")./pm_test/$(echo $(echo "b"))*
+echo a$(echo "* b c d e p")$(echo "*t eof")f
 echo ./pm_test/$(echo "*")$(echo "?")*
 var="pm_test"; echo ./${var}/$(echo "*")
 echo ./pm_test/$(echo "$(echo "?")")$(echo "*")e

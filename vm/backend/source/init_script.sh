@@ -1,8 +1,7 @@
 #!/bin/bash
 
-mkdir -p infiles outfiles
-
 #---------redirection setup---------------
+mkdir -p infiles outfiles
 
 redir_files=(
 	"infiles/no_perms"

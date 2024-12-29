@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:19:35 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:52:30 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:39:14 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "utils.h"
 #include "jobs.h"
 #include "signal.h"
+#include "dynamic_arrays.h"
 
 #include <signal.h>
 #include <stdio.h>
@@ -21,8 +22,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <termios.h>
-
-#include "colors.h"
 
 int job_wait(AndOrP *job) {
 	int status;

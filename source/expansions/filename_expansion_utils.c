@@ -1,5 +1,19 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   filename_expansion_utils.c                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/29 23:38:02 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/29 23:38:03 by bvan-pae         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "expansion.h"
 #include "utils.h"
+#include "dynamic_arrays.h"
+
 #include <stdio.h>
 #include <sys/dir.h>
 #include <dirent.h>
@@ -28,7 +42,7 @@ void print_pattern_nodes(PatternNodeL *nodes) {
     }
 }
 
-void remove_dotfiles(MatchEntryL *entries, const bool keep_dotfiles) {
+void remove_hidden_files(MatchEntryL *entries, const bool keep_dotfiles) {
     if (!entries->size || keep_dotfiles) return ;
 
 	for (size_t i = 0; i < entries->size;) {

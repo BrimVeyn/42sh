@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:02:12 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/18 17:29:57 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/30 00:09:07 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static bool is_keyword(const char *arg) {
 		"!", "[[", "]]", "coproc",
 	};
 
-	for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
+	for (size_t i = 0; i < ARRAY_SIZE(keywords); i++) {
 		if (!ft_strcmp(keywords[i], arg)) {
 			return true;
 		}
