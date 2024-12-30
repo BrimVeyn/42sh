@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:12:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/30 00:06:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/30 19:39:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ bool execute_builtin(const SimpleCommandP *command, Vars *const shell_vars) {
 	static const struct {
 		const char *bin;
 		const builtin_func_t func;
-	} map[] = {
+	} table[] = {
 		{"alias", &builtin_alias}, {"bg", &builtin_bg}, {"cd", &builtin_cd},
 		{"echo", &builtin_echo}, {"env", &builtin_env},
 		{"exit", &builtin_exit}, {"export", &builtin_export},
@@ -32,14 +32,15 @@ bool execute_builtin(const SimpleCommandP *command, Vars *const shell_vars) {
 		{"hash", &builtin_hash}, {"jobs", &builtin_jobs},
 		{"pwd", &builtin_pwd}, {"return", &builtin_return},
 		{"set", &builtin_set}, {"test", &builtin_test},
-		{"type", &builtin_type}, {"unset", &builtin_unset},
+		{"type", &builtin_type}, {"unalias", &builtin_unalias},
+		{"unset", &builtin_unset},
 	};
 
-	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
-		if (*(command->word_list->data[0]) == *(map[i].bin) &&
-			!ft_strcmp(command->word_list->data[0], map[i].bin))
+	for (size_t i = 0; i < ARRAY_SIZE(table); i++) {
+		if (*(command->word_list->data[0]) == *(table[i].bin) &&
+			!ft_strcmp(command->word_list->data[0], table[i].bin))
 		{
-			map[i].func(command, shell_vars);
+			table[i].func(command, shell_vars);
 			return true;
 		}
 	}
@@ -54,7 +55,7 @@ bool is_builtin(const char *const bin) {
 		"alias", "bg", "cd", "echo", "env", "exit",
 		"export", "fc", "fg", "hash", "jobs",
 		"pwd", "return", "set", "test", "type",
-		"unset",
+		"unalias", "unset",
 	};
 
 	for (size_t i = 0; i < ARRAY_SIZE(builtins); i++) {

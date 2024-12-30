@@ -6,7 +6,7 @@
 #    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/06 10:05:24 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/12/23 13:10:28 by bvan-pae         ###   ########.fr        #
+#    Updated: 2024/12/30 19:18:57 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@ STRING 			:= libstring/libstring.a
 CC 				:= gcc
 LDFLAGS			:= -lncurses
 
-WWFLAGS = $(WFLAGS) -Wpedantic -Wshadow -Wconversion -Wcast-align \
+WWFLAGS = -Wpedantic -Wshadow -Wconversion -Wcast-align \
   -Wstrict-prototypes -Wmissing-prototypes -Wunreachable-code -Winit-self \
   -Wmissing-declarations -Wfloat-equal -Wbad-function-cast -Wundef \
   -Waggregate-return -Wstrict-overflow=5 -Wold-style-definition -Wpadded \
@@ -29,18 +29,19 @@ SANFLAGS		:= -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fs
 LEXER_SRC 		:= $(wildcard source/lexer/*.c)
 FT_READLINE_SRC := $(wildcard source/ft_readline/*.c)
 EXEC_SRC 		:= $(wildcard source/exec/*.c)
-AST_SRC			:= $(wildcard source/ast/*.c)
 REGEX_SRC		:= $(wildcard source/regex/*.c)
 UTILS_SRC		:= $(wildcard source/utils/*.c)
 SIGNALS_SRC		:= $(wildcard source/signals/*.c)
 BUILTINS_SRC	:= $(wildcard source/builtins/*.c)
 EXPANSIONS_SRC	:= $(wildcard source/expansions/*.c)
+STRUCTS_SRC		:= $(wildcard source/structs/*.c)
 
 INC       := -I./include -I./libftprintf/header -I./libstring/include
 
 SRC 			:= source/main.c $(LEXER_SRC) $(UTILS_SRC) \
-				   $(EXPANSIONS_SRC) $(EXEC_SRC) $(SIGNALS_SRC) $(AST_SRC) \
+				   $(EXPANSIONS_SRC) $(EXEC_SRC) $(SIGNALS_SRC) \
 				   $(REGEX_SRC) $(BUILTINS_SRC) $(FT_READLINE_SRC) \
+				   $(STRUCTS_SRC)
 
 OBJ 			:= $(SRC:source/%.c=objects/%.o)
 DEPS 			:= $(OBJ:%.o=%.d)
@@ -92,10 +93,10 @@ define print_progress_bar
         EMPTY=$$((BAR_WIDTH - FILLED)); \
         FILLED_BAR=$$(printf "%$${FILLED}s" | sed "s/ /$${FILLED_BLOCK}/g") \
         EMPTY_BAR=$$(printf "%$${EMPTY}s" | sed "s/ /$${EMPTY_BLOCK}/g"); \
-		printf "\033[?25l"; \
+		printf "$(HIDE_CURSOR)"; \
 		printf "\033[1B"; \
         printf "\rProgress: [$(PASTEL_BLUE)$$FILLED_BAR$(DEF_COLOR)$$EMPTY_BAR] %d%% (%d/%d)\n" $$PERCENT $$CURRENT $$TOTAL; \
-        if [ "$$CURRENT" -eq "$$TOTAL" ]; then printf "\033[?25h"; else printf "\033[2A"; fi; \
+        if [ "$$CURRENT" -eq "$$TOTAL" ]; then printf "$(RESET_CURSOR)"; else printf "\033[2A"; fi; \
     fi
 endef
 

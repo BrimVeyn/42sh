@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/30 00:44:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/30 19:48:45 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -350,7 +350,7 @@ void			string_list_add_or_update(StringList * const sl, const char * const var);
 bool			string_list_update(StringList *sl, const char *var);
 void			string_list_append(const StringList * const sl, char * const var);
 void			string_list_clear(StringList *list);
-bool			string_list_remove(StringList *sl, char *id);
+bool			string_list_remove(StringList * const sl, const char * const id);
 char			*string_list_get_value(const StringList * const sl, const char * const id);
 char			*shell_vars_get_value(const Vars * const shell_vars, char * const id);
 void			string_list_print(const StringList *list);
