@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 15:21:56 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/30 00:03:29 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/30 19:37:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,7 @@ void add_vars_to_set(const Vars * const shell_vars, const StringList * const var
 
 void builtin_hash(const SimpleCommandP *command, Vars *const shell_vars);
 void builtin_alias(const SimpleCommandP *command, Vars *const shell_vars);
+void builtin_unalias(const SimpleCommandP *command, Vars * const shell_vars);
 void builtin_set(const SimpleCommandP *command, Vars *const shell_vars);
 void builtin_env(const SimpleCommandP *command, Vars *const shell_vars);
 void builtin_echo(const SimpleCommandP *command, Vars *const shell_vars);

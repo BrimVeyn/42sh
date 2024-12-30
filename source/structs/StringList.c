@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:18:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/30 00:42:51 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/30 19:48:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ void string_list_delete(StringList * const list) {
 	gc(GC_FREE, list, GC_ENV);
 }
 
-bool string_list_remove(StringList * const sl, char * const id) {
+bool string_list_remove(StringList * const sl, const char * const id) {
 	for (size_t i = 0; i < sl->size; i++) {
 		const char * const curr_equal_ptr = ft_strchr(sl->data[i], '=');
 		const size_t curr_equal_pos = curr_equal_ptr - sl->data[i];
