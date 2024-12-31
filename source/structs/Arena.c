@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 16:34:04 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 12:26:03 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/31 13:43:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ ArenaAllocator *arena_create(const size_t size, const gc_level garbage_level) {
 
 	arena->memory = gc(GC_CALLOC, size, sizeof(char), garbage_level);
 
+	arena->gc_level = garbage_level;
 	arena->capacity = size;
 	arena->offset = 0;
 
@@ -35,8 +36,9 @@ void *arena_alloc(ArenaAllocator * const arena, size_t const size, size_t const 
 
 	size_t next_offset = aligned_offset + size;
 	if (next_offset > (size_t)arena->memory + arena->capacity) {
-		//TODO: make it a linked list
-		_fatal("arena: max capacity exceeded", 1);
+		if (!arena->next)
+			arena->next = arena_create(arena->capacity, arena->gc_level);
+		return arena_alloc(arena->next, size, alignment);
 	}
 
 	arena->offset = next_offset - (size_t)arena->memory;
@@ -50,6 +52,7 @@ void arena_destroy(ArenaAllocator * const arena) {
 void arena_reset(ArenaAllocator * const arena) {
 	ft_memset(arena->memory, 0, arena->capacity);
 	arena->offset = 0;
+	arena->next = NULL;
 }
 
 char *arena_strdup(ArenaAllocator *arena, const char *str) {

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:42:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 23:38:37 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/31 13:39:14 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,7 +174,7 @@ static int execute_if_clause(const CommandP * const command, const bool backgrou
 static int execute_while_clause(const CommandP * const command, const bool background, Vars * const shell_vars, const int flag) {
 	const WhileClauseP * const while_clause = command->while_clause;
 
-	ArenaAllocator *arena = arena_create(1e5, GC_SUBSHELL);
+	ArenaAllocator *arena = arena_create(1e3, GC_SUBSHELL);
 
 	int *saved_fds;
 	if (SAVE_FD) saved_fds = save_std_fds();

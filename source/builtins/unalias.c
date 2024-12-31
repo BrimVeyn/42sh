@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 19:35:57 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/30 19:53:49 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/31 13:27:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void builtin_unalias(const SimpleCommandP *command, Vars * const shell_vars) {
 	bool erase_all = false;
 
 	for (size_t i = 1; i < args->size; i++) {
-		char *arg = args->data[i];
+		const char *const arg = args->data[i];
 
 		if (*arg == '-' && (*(arg + 1)) != '\0') {
 			for (size_t i = 1; arg[i]; i++) {
