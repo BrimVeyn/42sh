@@ -45,14 +45,16 @@ function UnitTest({unit}) {
 	//unitButton style
 	const unitButton = (unit, type) => {
 		let buffer = "py-1 px-2 m-2 text-center border-2 rounded";
+
 		if (type === "output" && unit["output_ok"] === "0")
+			buffer += " bg-red-500";
+		else if (type === "exit" && unit["exit_ok"] === "0")
+			buffer += " bg-red-500";
+		else if (type === "outfiles" && unit["files_ok"] === "0")
 			buffer += " bg-red-500";
 		else if (type === "error" && unit["error_ok"] === "0")
 			buffer += " bg-yellow-500";
-		else if (type === "exit" && unit["exit_ok"] === "0")
-			buffer += " bg-red-500";
-		else if (type === "oufiles" && unit["files_ok"] === "0")
-			buffer += " bg-red-500";
+
 		if (type === activeDiff)
 			buffer += " border-green-700"
 		return buffer;
@@ -115,7 +117,7 @@ function UnitTest({unit}) {
 				>
 					Ouput (stdout)
 				</button>
-				<button className={unitButton(unit, "oufiles")} 
+				<button className={unitButton(unit, "outfiles")} 
 					onClick={() => setShown("outfiles")}
 				>
 					Outfiles (>)

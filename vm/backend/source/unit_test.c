@@ -104,7 +104,9 @@ bool compare_dirs(char *path_lhs, char *path_rhs) {
 		sprintf(fileNameLhs, "%s/%s", path_lhs, it->d_name);
 		sprintf(fileNameRhs, "%s/%s", path_rhs, it->d_name);
 
-		if (!compare_files(fileNameLhs, fileNameRhs))
+		int result = compare_files(fileNameLhs, fileNameRhs);
+		// dprintf(2, "result: %d\n", result);
+		if (result <= 0)
 			return false;
 	}
 	return true;
@@ -200,7 +202,7 @@ UnitResult unit_test(char *fileName, char *line, int test_number) {
 	bool output_ok = compare_files(out_42, out_bash);
 	bool error_ok = compare_files(err_42, err_bash);
 	bool exit_ok = (exit_42sh == exit_bash);
-	bool files_ok = (!outfilesCmp) ? -1 : compare_dirs(dir_42sh, dir_bash);
+	int files_ok = (outfilesCmp) ? compare_dirs(dir_bash, dir_42sh) : -1;
 
 	if (outfilesCmp) {
 		ft_rmdir(dir_42sh);
