@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:40 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/30 19:14:36 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2025/01/02 17:36:13 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,12 +70,47 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 		[NEWLINE] = "\n", [AMPER] = "&", [SEMI] = ";",
 	};
 
-	// dprintf(2, "token: %s | %d\n", raw_value, table_row);
+	dprintf(2, "token: %s | %d\n", raw_value, table_row);
 
-	//TR 80 = 'echo >redir $$'
+	//TR 0 = first word
+	//      ex: 'ECHO ...'
+	//TR 26 = first word after a variable declaration
+	//		ex: 'var=12 ECHO ...'
+	//TR 62 = first word after a redirection and a variable declaration
+	//		ex: '<input var=smth ECHO ...'
+	//TR 80 = first word after a redir Name
+	//		ex: '<input ECHO ...'
+	//TR 28 = first word in a compound list
+	//		ex: '{ ECHO ... ; }'
+	//TR 29 = first word in a subshell
+	//		ex: '( ECHO .... )'
+	//TR 32 = first word after if
+	//		ex: 'if ECHO ...'
+	//TR 111 = first word after then
+	//		ex: 'if ....; then ECHO ...'
+	//TR 140 = first word after elif
+	//		ex: 'if ... elif ECHO ...'
+	//TR 141 = first word after else
+	//		ex: 'if ... else ECHO ...'
+	//TR 162 = first word after case pattern
+	//		ex: 'case .... in .... smth) ECHO ...'
+	//TR 107 = first word after do
+	//		ex: 'for ..... in .... do ECHO ...'
+	//TR 32 = first word after if
+	//		ex: 'if ECHO ....'
+	//TR 33 = first word after while
+	//		ex: 'while ECHO .... '
+	//TR 34 = first word after until
+	//		ex: 'until ECHO .... '
+	//TR 54/55 = first word after &&/||
+	//		ex: '... ||/&& ECHO ...'
+
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
-			( (table_row != 27 && table_row != 66 && table_row != 98 && table_row != 39 && table_row != 80) 
+			( (table_row != 27 && table_row != 66 && 
+			   table_row != 98 && table_row != 39 && 
+			   table_row != 80 && table_row != 62 &&
+			   table_row != 26) 
 			|| !is_keyword(i)) )
 		{
 			if (is_continuable(i)) { line_continuation(lexer); }
