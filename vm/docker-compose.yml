@@ -1,23 +1,24 @@
 version: '3.8'
 
 services:
-  webapp:
+  frontend:
     build:
-      context: ./42sh_tester
+      context: ./frontend
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
     volumes:
-      - ./42sh_tester/public:/app/public   # Share public folder
       - /app/node_modules                  # Avoid overwriting node_modules
     stdin_open: true
     tty: true
-
-  scheduler:
+  backend:
     build:
-      context: ./test_env
+      context: ./backend
       dockerfile: Dockerfile
-    volumes:
-      - ./42sh_tester/public:/app/public   # Shared output directory
     ports:
-      - "4000:4000"                        # WebSocket port
+      - "4000:4000"
+    volumes:
+      - /app/node_modules                  # Avoid overwriting node_modules
+      - ./backend/data:/usr/src/app/data   # Shared volume for data directory
+    stdin_open: true
+    tty: true
