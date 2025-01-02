@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/18 09:38:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/27 10:43:55 by bvan-pae         ###   ########.fr       */
+/*   Created: 2025/01/02 09:21:35 by nbardavi          #+#    #+#             */
+/*   Updated: 2025/01/02 09:21:36 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -238,6 +238,10 @@ int main(void) {
 	Category *cat = calloc(category_count, sizeof(Category));
 	pthread_t *threads = calloc(category_count, sizeof(pthread_t));
 
+	// Setting up the testing environment. Any existing files or directories from previous runs will be removed to ensure a clean state.
+	remove_directory_recursively("/tmp/42sh_testing");
+	setup_testing_environment("/tmp/42sh_testing");
+
     //Set LC_COLLATE="C" <-- posix standard sorting for file expansions
     setup_env();
 
@@ -279,7 +283,7 @@ int main(void) {
 		offset += cat[i].result_len;
 	}
 	//-----------------------------------------------------
-	
+
 	//Remove trainling comma (again)
 	offset -= 6;
 
@@ -306,6 +310,7 @@ int main(void) {
 	free(dir_buffer);
 	closedir(src_dir);
 
+	remove_directory_recursively("/tmp/42sh_testing");
     //clean cd test env, redir etc
     execute_shell_script(DESTROY_SCRIPT_PATH);
 

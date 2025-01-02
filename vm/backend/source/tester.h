@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tester.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/19 13:24:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/27 12:07:34 by bvan-pae         ###   ########.fr       */
+/*   Created: 2025/01/02 09:25:52 by nbardavi          #+#    #+#             */
+/*   Updated: 2025/01/02 09:25:53 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,5 +51,8 @@ char *read_whole_file(int fd);
 int fill_dir(DIR *src_dir, struct dirent **dir_buffer);
 void sort_dir(struct dirent **dir_buffer, int category_count);
 void print_dir(struct dirent **dir_buffer);
+
+void setup_testing_environment(const char * const base_path);
+void remove_directory_recursively(const char *path);
 
 #endif // !TESTER_H
