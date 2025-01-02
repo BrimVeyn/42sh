@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tester.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/19 13:24:36 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/20 11:01:49 by nbardavi         ###   ########.fr       */
+/*   Created: 2025/01/02 09:25:52 by nbardavi          #+#    #+#             */
+/*   Updated: 2025/01/02 09:25:53 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,9 @@ char *my_basename(const char *path);
 UnitResult unit_test(char *fileName, char *line, int test_number);
 UnitResult script_test(char *fileName, int test_number);
 int compare_files(const char *file1, const char *file2);
+int ft_strstr(const char *const haystack, const char *const needle);
+char	*ft_substr(char const *s, unsigned int start, size_t len);
+char *read_whole_file(int fd);
 
 #include <dirent.h>
 

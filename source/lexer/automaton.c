@@ -6,13 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 16:43:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/11/26 10:48:42 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/30 19:08:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-/* HomeCooked bash LALR(1) Automaton */
+/* Posix grammar LALR(1) Automaton */
 #include "final_parser.h"
-#include "utils.h"
 #include <unistd.h>
 
 char *tokenTypeStr(TokenType type) {

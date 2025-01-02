@@ -1,4 +1,4 @@
-var=10000
+var=${1}
 start_time=$(date +%s%N) # Initial timestamp in nanoseconds
 
 while true $((--var)) && ! (exit $((var >= 0))); do

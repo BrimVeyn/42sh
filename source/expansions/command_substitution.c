@@ -6,13 +6,14 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:15:03 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:50:32 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:37:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "utils.h" 
 #include "final_parser.h"
+#include "dynamic_arrays.h"
 
 #include <limits.h>
 #include <sys/wait.h>
@@ -20,7 +21,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-char *parser_command_substitution(char *const str, Vars *const shell_vars, int * const error) {
+char *command_substitution(char *const str, Vars *const shell_vars, int * const error) {
 	ShellInfos *shell_infos = shell(SHELL_GET);
 
     char file_name[] = "/tmp/command_sub_XXXXXX";

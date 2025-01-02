@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/27 10:01:51 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/27 10:01:51 by nbardavi         ###   ########.fr       */
+/*   Created: 2025/01/02 09:26:03 by nbardavi          #+#    #+#             */
+/*   Updated: 2025/01/02 09:26:06 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include "jobs.h"
 #include "ft_readline.h"
 #include "expansion.h"
+#include "dynamic_arrays.h"
 
 #include <limits.h>
 #include <signal.h>
@@ -55,25 +56,17 @@ static void	*read_input_prompt(char *input, Vars *const shell_vars) {
 	if (PS1) {
 		ShellInfos *shell_infos = shell(SHELL_GET);
 		int saved_exitno = g_exitno;
-		int error = 0;
 
 		char *maybe_prompt_command;
 		if ((maybe_prompt_command = get_variable_value(shell_vars, "PROMPT_COMMAND")) != NULL) {
 			int saved_shellstate = shell_infos->script;
+
 			shell_infos->script = true;
-
 			parse_input(maybe_prompt_command, "PROMPT_COMMAND", shell_vars);
-
 			shell_infos->script = saved_shellstate;
 		}
-
-		StringListL *maybe_prompt = do_expansions_word(PS1, &error, shell_vars, O_NONE);
-
-		if (!maybe_prompt) PS1 = "";
-		else PS1 = maybe_prompt->data[0];
-
-		PS1	= expand_prompt_special(PS1);
 		g_exitno = saved_exitno;
+		PS1 = prompt_expansion(PS1, shell_vars);
 
 		input = ft_readline(PS1, shell_vars);
     } else {
@@ -87,22 +80,24 @@ static void	*read_input_prompt(char *input, Vars *const shell_vars) {
 	return input;
 }
 
-void env_to_string_list(StringListL *const env_list, const char **env){
+void env_to_string_list(StringList *const env_list, const char **env){
 	for (size_t i = 0; env[i]; i++)
 		string_list_add_or_update(env_list, gc(GC_ADD, ft_strdup(env[i]), GC_ENV));
 }
 
 Vars *shell_vars_init(const char **env) {
-	Vars *self = gc(GC_ADD, ft_calloc(1, sizeof(Vars)), GC_ENV);
+	Vars *self = gc_unique(Vars, GC_ENV);
 
-	da_create(env_list, StringListL, sizeof(char *), GC_ENV);
+	da_create(env_list, StringList, sizeof(char *), GC_ENV);
 	self->env = env_list;
-	da_create(set_list, StringListL, sizeof(char *), GC_ENV);
+	da_create(set_list, StringList, sizeof(char *), GC_ENV);
 	self->set = set_list;
-	da_create(local_list, StringListL, sizeof(char *), GC_ENV);
+	da_create(local_list, StringList, sizeof(char *), GC_ENV);
 	self->local = local_list;
-	da_create(positional_list, StringListL, sizeof(char *), GC_ENV);
+	da_create(positional_list, StringList, sizeof(char *), GC_ENV);
 	self->positional = positional_list;
+	da_create(alias_list, StringList, sizeof(char *), GC_ENV);
+	self->alias = alias_list;
 
 	env_to_string_list(self->env, env);
 	env_to_string_list(self->set, env);

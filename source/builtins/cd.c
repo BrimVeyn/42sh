@@ -5,20 +5,16 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/10 11:18:21 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/17 10:42:08 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/12/30 00:03:10 by bvan-pae          #+#    #+#             */
+/*   Updated: 2024/12/30 00:03:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-/* ************************************************************************** */
-
 #include "ft_regex.h"
-#include "lexer.h"
-#include "parser.h"
 #include "libft.h"
 #include "utils.h"
 #include "exec.h"
-#include "regex.h"
+#include "dynamic_arrays.h"
 
 #include <limits.h>
 #include <stdio.h>
@@ -111,7 +107,7 @@ char *search_in_cdpath(char *operand, Vars *shell_vars) {
 	return gc(GC_ADD, ft_strdup(operand), GC_SUBSHELL);
 }
 
-static char *build_path(StringListL *stack){
+static char *build_path(StringList *stack){
 	char *full_path = gc(GC_ADD, ft_strdup(""), GC_SUBSHELL);
 
 	for (size_t i = 0; i < stack->size; i++){
@@ -142,7 +138,7 @@ void canonical_convertion(char **pcurpath){
 
 	// regex_test("\\/?[^\\/]+", curpath);
 	
-	da_create(stack, StringListL, sizeof(char *), GC_SUBSHELL);
+	da_create(stack, StringList, sizeof(char *), GC_SUBSHELL);
 
 	while(1){
 		result = regex_match("\\/?[^\\/]+", curpath);

@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 14:50:43 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:29:56 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:38:30 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
 #include "libft.h"
+#include "dynamic_arrays.h"
 
 char ss_pop_front(StringStream * const ss) {
     if (ss->size == 0)

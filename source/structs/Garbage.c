@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:51 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:19:28 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/31 13:28:08 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,13 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
+#define BASE_CAP 10
+
 static void gc_init(Garbage *gc) {
 	for (int n = 0; n < GC_ALL; n++) {
 		gc[n].size = 0;
-		gc[n].capacity = 10;
-		gc[n].garbage = ft_calloc(10, sizeof(void *));
+		gc[n].capacity = BASE_CAP;
+		gc[n].garbage = ft_calloc(BASE_CAP, sizeof(void *));
 		if (!gc[n].garbage)
 			_fatal("alloc error", 1);
 	}

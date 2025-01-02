@@ -6,19 +6,20 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:46 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 10:51:31 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:38:44 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "libft.h"
 #include "utils.h"
+#include "dynamic_arrays.h"
 
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-char *find_bin_location(char *bin, StringListL *env, bool *absolute){
+char *find_bin_location(char *bin, StringList *env, bool *absolute){
 	struct stat file_stat;
 	if (stat(bin, &file_stat) != -1 && ft_strchr(bin, '/')) {
 

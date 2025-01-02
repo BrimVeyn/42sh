@@ -1,17 +1,17 @@
 { echo salut && { echo mec ;} ; } && { echo salut ;}
-{ echo salut; } >./outfiles/test
+{ echo salut; } >./XXXOUTXXX/test
 echo {
 echo { echo salut ;}
-{ echo salut; echo mec ;} | ls; echo salut && echo cava
+{ echo salut; echo mec ;} | ls /usr; echo salut && echo cava
 { echo salut ;} && { echo salut;};
 { echo hello && { echo world ;} ; } && { echo welcome ;}
 { echo one ; echo two ; } && { echo three ; }
 { { echo group1 ; } && echo group2 ; } || echo group3
 echo { echo nested ; } && { echo check ;}
 { { echo inner1; } ; echo inner2 ; } | grep inner
-{ echo first ; echo second ; } | tee ./outfiles/test1
-{ echo command1 ; } >./outfiles/test2 && { echo command2 ; } >./outfiles/test3
-{ echo start ; echo end ; } && ls
+{ echo first ; echo second ; } | tee ./XXXOUTXXX/test1
+{ echo command1 ; } >./XXXOUTXXX/test2 && { echo command2 ; } >./XXXOUTXXX/test3
+{ echo start ; echo end ; } && ls /usr
 { { echo one; echo two; } ; echo three; } | cat
 { echo chain1 && echo chain2 ; } && { echo chain3 ; }
 echo  salut && { echo braces ; }
@@ -29,9 +29,9 @@ echo  salut && { echo braces ; }
 { { echo pre1 && { echo pre2 || echo altPre ;} ;      } && echo main ;} && echo final
 { { { echo doubleNested ; } && echo outer ; } || echo altOuter ; } && echo finish
 { echo pipeline ; { echo pipeStart && echo pipeMid ; } | grep pipeStart && echo pipelineDone ; }
-{ { echo redirecting ; echo toFile ; } > ./outfiles/testoutput ; } | ls && cat ./outfiles/testoutput
+{ { echo redirecting ; echo toFile ; } > ./XXXOUTXXX/testoutput ; } | ls /usr && cat ./XXXOUTXXX/testoutput
 { { { echo deep1 ; } && { echo deep2 ; echo deep3 ; } ; } || { echo fallback ; } ; } && echo completed
-{ { echo stage1 ; echo stage2 ; } | tee ./outfiles/stage && { echo log1 ; echo log2 ; } | grep log ; } && echo finished
+{ { echo stage1 ; echo stage2 ; } | tee ./XXXOUTXXX/stage && { echo log1 ; echo log2 ; } | grep log ; } && echo finished
 { { echo level1 && { echo level2 ; echo level3 ; } ; } | { grep level ; echo passed ; } ; } || echo failed
 { { echo a1 ; echo a2 ; } && { echo b1 ; { echo b2 && echo b3 ; } ; } ; } || { echo c1 ; echo c2 ; }
 { echo part1 ; { echo part2 ; { echo sub1 && echo sub2 ; } || echo altSub ; } ; } && echo final
@@ -40,7 +40,7 @@ echo  salut && { echo braces ; }
 { { echo test1 | grep test1 ; echo test2 | grep test2 ; } && echo success ; } || echo failure
 { { { echo pipe1 && echo pipe2 ; } | grep pipe1 ; } && echo pipeDone ; } || echo pipeFail
 { echo check1 && { echo check2 ; { echo check3 || echo altCheck3 ; } ; } || echo fallback ; } && echo finalCheck
-{ { echo redirectionTest ; echo moreTest ; } > ./outfiles/testRedirect && cat ./outfiles/testRedirect ; } && echo complete
+{ { echo redirectionTest ; echo moreTest ; } > ./XXXOUTXXX/testRedirect && cat ./XXXOUTXXX/testRedirect ; } && echo complete
 { { echo cmdA && echo cmdB ; } | { echo cmdC && echo cmdD ; } ; } && echo pipelineDone
 { { { echo one && echo two ; } | { echo three && echo four ; } ; } || echo fallback1 ; } && echo sequenceComplete
 { echo startChain ; { echo chain1 && { echo chain2 && echo chain3 ; } ; echo chainEnd ; } ; } || echo failedChain
@@ -48,5 +48,5 @@ echo  salut && { echo braces ; }
 { echo firstBlock ; { echo secondBlock && { echo thirdBlock ; echo fourthBlock ; } ; } ; echo fifthBlock ; } && echo endBlock
 { { echo innerStart && { { echo middleStart ; echo middleEnd ; } || echo middleAlt ; } ; } || echo failCase ; } && echo successCase
 { { { echo layer1 && echo layer2 ; } && { echo layer3 || echo altLayer3 ; } ; } && echo allLayers ; } || echo someFailed
-{ { echo fileWrite ; { echo fileWriteInner && echo toFile ; } > ./outfiles/complexOutput ; } && cat ./outfiles/complexOutput ; } || echo writeFailed
+{ { echo fileWrite ; { echo fileWriteInner && echo toFile ; } > ./XXXOUTXXX/complexOutput ; } && cat ./XXXOUTXXX/complexOutput ; } || echo writeFailed
 { echo scriptStart ; { echo scriptStep1 ; { echo scriptStep2 && echo scriptStep3 ; } ; echo scriptEnd ; } && echo success ; } || echo scriptFail

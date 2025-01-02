@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 16:42:45 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 13:20:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/31 13:32:48 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,15 @@
 #include <unistd.h>
 
 #include "final_parser.h"
+#include "utils.h"
 
-typedef struct {
+typedef struct ArenaAllocator {
+	struct ArenaAllocator *next;
 	void *memory;
 	size_t capacity;
 	size_t offset;
-} ArenaAllocator;
+	gc_level gc_level;
+} ArenaAllocator ;
 
 ArenaAllocator *arena_create(const size_t size, const gc_level garbage_level);
 void			*arena_alloc(ArenaAllocator * const arena, size_t const size, size_t const alignment);

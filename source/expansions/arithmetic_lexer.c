@@ -6,16 +6,18 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 11:46:55 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/13 16:15:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:37:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "arithmetic.h"
-#include "../../include/ft_regex.h"
+#include "ft_regex.h"
 #include "lexer.h"
 #include "libft.h"
 #include "parser.h"
 #include "utils.h"
+#include "dynamic_arrays.h"
+
 #include <stdio.h>
 #include <unistd.h>
 
