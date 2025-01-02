@@ -220,6 +220,8 @@ UnitResult unit_test(char *fileName, char *line, int test_number) {
 
 	bool output_ok = compare_files(out_42, out_bash);
 	bool error_ok = compare_files(err_42, err_bash);
+
+	//compare output fileS and delete them
 	bool exit_ok = (exit_42sh == exit_bash);
 	int files_ok = (outfilesCmp) ? compare_dirs(dir_bash, dir_42sh) : -1;
 
