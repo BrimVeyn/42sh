@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
+/*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/18 09:38:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/20 13:28:16 by nbardavi         ###   ########.fr       */
+/*   Created: 2024/12/27 10:02:09 by nbardavi          #+#    #+#             */
+/*   Updated: 2024/12/27 10:03:18 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,11 @@
 #include <stdbool.h>
 
 #include "tester.h"
+#include "colors.h"
 
 int total_tests = 0;
 int total_passed = 0;
+char **my_env = NULL;
 
 char *my_basename(const char *path) {
     const char *slash = strrchr(path, '/'); // Find last '/'
@@ -182,11 +184,41 @@ void *routine_unit(void *cat) {
 	category->result_len = offset;
 	munmap(mapped_file, ret.mapped_size);
 
-	dprintf(2, "leavin thread: %s\n", category->fileName);
+	dprintf(STDERR_FILENO, C_AQUA"Thread:" C_LIGHT_BLUE"%-20.20s "C_LIGHT_GREEN"done"C_RESET"\n", my_basename(category->fileName));
     return 0;
 }
 
+void setup_env(void) {
+    char **base_env = __environ;
+    size_t env_size = 0;
+    for (size_t i = 0; base_env[i]; i++)
+        env_size++;
+
+    my_env = calloc(env_size + 2, sizeof(char *));
+
+    size_t i;
+    for (i = 0; base_env[i]; i++) {
+        my_env[i] = strdup(base_env[i]);
+    }
+    my_env[i++] = strdup("LC_COLLATE=C");
+    my_env[i] = 0;
+}
+
+void execute_shell_script(char *path) {
+    pid_t pid = fork();
+    if (!pid) {
+        char *args[2] = { path, NULL };
+        execv(args[0], args);
+        exit(1);
+    } else {
+        waitpid(pid, NULL, 0);
+    }
+}
+
 int main(void) {
+
+    //init infiles, redir, cd env, etc
+    execute_shell_script(INIT_SCRIPT_PATH);
 
 	//Count dir entries to allocate our structures
 	DIR *src_dir = opendir(SRC_PATH);
@@ -209,6 +241,9 @@ int main(void) {
 	// Setting up the testing environment. Any existing files or directories from previous runs will be removed to ensure a clean state.
 	remove_directory_recursively("/tmp/42sh_testing");
 	setup_testing_environment("/tmp/42sh_testing");
+
+    //Set LC_COLLATE="C" <-- posix standard sorting for file expansions
+    setup_env();
 
 	int i = 0;
 	while (i < 1000 && dir_buffer[i] != NULL) {
@@ -276,5 +311,8 @@ int main(void) {
 	closedir(src_dir);
 
 	remove_directory_recursively("/tmp/42sh_testing");
+    //clean cd test env, redir etc
+    execute_shell_script(DESTROY_SCRIPT_PATH);
+
 	return 0;
 }

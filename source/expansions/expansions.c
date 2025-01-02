@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/20 10:00:54 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/26 16:32:42 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,15 @@
 #include "expansion.h"
 
 #include <fcntl.h>
-#include <regex.h>
+#include <linux/limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <unistd.h>
+#include <sys/dir.h>
+#include <dirent.h>
 
 void exp_kind_list_print(ExpKindList *list);
 
@@ -129,11 +132,11 @@ void string_list_consume(StrList *str_list, Vars *shell_vars, int *error) {
 	}
 }
 
-ExpKind identify_exp_begin(char *str) {
+ExpKind identify_exp_begin(char *str, const ExpKind context) {
 	if (!ft_strncmp(str, "$((", 3)) { return EXP_ARITHMETIC; }
 	else if (!ft_strncmp(str, "$(", 2)) { return EXP_CMDSUB; }
 	else if (!ft_strncmp(str, "${", 2)) { return EXP_VARIABLE; }
-	else if (!ft_strncmp(str, "(", 1)) { return EXP_SUB; }
+	else if (*str == '(' && (context == EXP_ARITHMETIC || context == EXP_CMDSUB)) { return EXP_SUB; }
 	else { return EXP_WORD; }
 }
 
@@ -196,10 +199,23 @@ StrList *get_range_list(const char * const candidate, Vars * const shell_vars, c
 			else if (current_char == '\'' && !dquote) squote = !squote;
 		}
 
+		while (word->size >= 2 && *word->data == '\\') {
+			if ((word->data[1] == '$' || word->data[1] == '`' || 
+				word->data[1] == '\\' || word->data[1] == '\n') &&
+				top_context != EXP_SQUOTE)
+			{
+				da_push(cache_stack, da_pop_front(word));
+				da_push(cache_stack, da_pop_front(word));
+				continue;
+			} else break;
+		}
+
 		ExpKind maybe_begin = 0;
 		ExpKind maybe_end = 0;
 
-		if (!squote && (maybe_begin = identify_exp_begin(word->data)) != EXP_WORD) {
+		if (!squote && (maybe_begin = identify_exp_begin(word->data, top_context)) != EXP_WORD) {
+			// dprintf(2, "TOP_CONTEXT: %d\n", top_context);
+			// dprintf(2, "context found %d\n", maybe_begin);
 			if (!exp_stack->size && can_push) {
 				Str * const res = str_init(EXP_WORD, ss_get_owned_slice(cache_stack), false);
 				da_push(self, res);
@@ -378,6 +394,19 @@ void printStringList(StringListL *list) {
 	}
 }
 
+void pos_insert_sorted(PosList *list, PosInfo elem) {
+	if (!list->size) {
+		da_push(list, elem); 
+		return;
+    }
+
+	size_t i;
+	for (i = 0; i < list->size && elem.list_index != list->data[i].list_index; i++);
+	for (; i < list->size && elem.index > list->data[i].index; i++);
+
+	da_insert(list, elem, i);
+}
+
 void quote_removal(const StrList * const list) {
 
 	PosInfo spair = { -1, -1 };
@@ -395,9 +424,9 @@ void quote_removal(const StrList * const list) {
 			if	(elem[j] == '\"' && !squote) {
 				dquote = !dquote;
 				if (dpair.index != -1) {
-					da_push(poses, dpair);
+					pos_insert_sorted(poses, dpair);
 					PosInfo current = { i, j };
-					da_push(poses, current);
+					pos_insert_sorted(poses, current);
 					dpair = (PosInfo) { -1, -1 }; continue;
 				} else { dpair = (PosInfo) { i, j }; }
 				continue;
@@ -405,30 +434,45 @@ void quote_removal(const StrList * const list) {
 			else if (elem[j] == '\'' && !dquote) {
 				squote = !squote;
 				if (spair.index != -1) {
-					da_push(poses, spair); 
+					pos_insert_sorted(poses, spair); 
 					PosInfo current = { i, j };
-					da_push(poses, current);
+					pos_insert_sorted(poses, current);
 					spair = (PosInfo) { -1, -1 }; 
 					continue;
 				} else { spair = (PosInfo) { i, j }; }
 				continue;
+			} else if (elem[j] == '\\' && !squote) {
+				if (dquote && elem[j + 1] &&
+					!(elem[j + 1] == '$' || elem[j + 1] == '`' || elem[j + 1] == '\"' ||
+					 elem[j + 1] == '\n' || elem[j + 1] == '\\')) {
+					continue;
+				}
+				PosInfo current = { i, j };
+				pos_insert_sorted(poses, current);
+				j++; //skip '\'
+				continue; //skip the escaped character
 			}
 		}
 	}
+
 	for (size_t i = 0; i < poses->size;) {
 		da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
-		ss_push_string(ss, list->data[poses->data[i].list_index]->str);
 
-		int offset = 0;
-		int origin = poses->data[i].list_index;
-		while (i < poses->size && poses->data[i].list_index == origin) {
-			da_erase_index(ss, ((size_t) poses->data[i].index - offset));
-			offset++;
-			i++;
+		//Retain current index aswell as string
+		const int index = poses->data[i].list_index;
+		const char *const input = list->data[index]->str;
+
+		for (int j = 0; input[j]; j++) {
+			//if i == j we don't copy it
+			if (poses->data[i].list_index == index && poses->data[i].index == j) {
+				i++;
+				continue;
+            }
+			da_push(ss, input[j]);
 		}
-
-		gc(GC_FREE, list->data[poses->data[i - 1].list_index]->str, GC_SUBSHELL);
-		list->data[poses->data[i - 1].list_index]->str = (ss->size == 0) ? NULL : ss_get_owned_slice(ss);
+		//replace the string with the one without quotes and '\'
+		gc(GC_FREE, list->data[index]->str, GC_SUBSHELL);
+		list->data[index]->str = (ss->size == 0) ? NULL : ss_get_owned_slice(ss);
 	}
 }
 
@@ -440,226 +484,49 @@ char *remove_quotes(char *word) {
 	return list->data[0]->str;
 }
 
-bool is_pattern(const char *lhs, const char *rhs) {
-	bool dquote = false, squote = false;
-
-	for (size_t i = 0; lhs[i]; i++) {
-
-		if		(lhs[i] == '\"' && !squote) dquote = !dquote;
-		else if (lhs[i] == '\'' && !dquote) squote = !squote;
-
-		if (!squote && !dquote && ft_strchr(rhs, lhs[i])) {
-			return true;
-		}
-	}
-	return false;
-}
-
-typedef struct {
-    char *name;
-    int type;
-} MatchEntry;
-
-typedef struct {
-    MatchEntry *data;
-    size_t size;
-    size_t capacity;
-    size_t size_of_element;
-    int gc_level;
-} MatchEntryL;
-
-#include <sys/dir.h>
-#include <dirent.h>
-
-MatchEntryL *get_dir_entries(const char *path) {
-    DIR *dir = opendir(path);
-    if (!dir) {return NULL;}
-
-    da_create(list, MatchEntryL, sizeof(MatchEntry), GC_SUBSHELL);
-    struct dirent *it;
-
-    while ((it = readdir(dir)) != NULL) {
-        MatchEntry elem = {
-            .name = it->d_name,
-            .type = it->d_type,
-        };
-        da_push(list, elem);
-    }
-    return list;
-}
-
-StringListL *cut_pattern(char *pattern) {
-
-    da_create(list, StringListL, sizeof(char *), GC_SUBSHELL);
-    char *base = pattern;
-    char *match = pattern;
-
-    while ((match = ft_strchr(base, '/')) != NULL) {
-        ptrdiff_t size = match - base;
-        char *part = gc(GC_ADD, ft_substr(base, 0, size), GC_SUBSHELL);
-
-        da_push(list, part);
-
-        base = match + 1;
-    }
-    if (base != NULL) {
-        char *part = gc(GC_ADD, ft_strdup(base), GC_SUBSHELL);
-        da_push(list, part);
-    }
-
-    return list;
-}
-    
-int match_pattern(int **dp, const char *str, const char *pattern, int i, int j) {
-    (void)dp;(void)str;(void)pattern;(void)i;(void)j;
-    return 1;
-}
-
-typedef enum { P_STAR, P_QMARK, P_RANGE, P_CHAR } PatternType;
-
-typedef struct {
-    PatternType type;
-    union {
-        char map[256];
-        char c;
-    };
-} PatternNode;
-
-typedef struct {
-    PatternNode *data;
-    size_t size;
-    size_t capacity;
-    size_t size_of_element;
-    int gc_level;
-} PatternNodeL;
-
-PatternNodeL *compile_pattern(const char *pattern) {
-    da_create(list, PatternNodeL, sizeof(PatternNode), GC_SUBSHELL);
-
-    bool dquote = false, squote = false;
-    const char *special = "*?[";
-
-    for (size_t i = 0; pattern[i] != 0; i++) {
-
-		if		(pattern[i] == '\"' && !squote) { dquote = !dquote; continue; }
-		else if (pattern[i] == '\'' && !dquote) { squote = !squote; continue; }
-
-        if (!ft_strchr(special, pattern[i]) || squote || dquote) {
-            PatternNode node = { .type = P_CHAR, .c = pattern[i] };
-            da_push(list, node);
-        } else {
-            if (pattern[i] == '*') {
-                PatternNode node = { .type = P_STAR, .c = 0 };
-                da_push(list, node);
-            } else if (pattern[i] == '?') {
-                PatternNode node = { .type = P_QMARK, .c = 0 };
-                da_push(list, node);
-            } else { //pattern[i] == [
-                PatternNode node = { .type = P_RANGE, .c = 0};
-                // node.map = compile_range(&pattern[i]);
-                da_push(list, node);
-            }
-        }
-    }
-    return list;
-}
-
-
-bool match_string(const char *str, const char *pattern) {
-    size_t str_len = ft_strlen(str);
-    size_t pattern_len = ft_strlen(pattern);
-
-    int **dp = calloc(str_len, sizeof(int));
-    for (size_t i = 0; i < str_len; i++) {
-        dp[i] = calloc(pattern_len, sizeof(int));
-    }
-
-    int match = match_pattern(dp, str, pattern, 0, 0);
-
-    for(size_t i = 0; i < str_len; i++) {
-        free(dp[i]);
-    }
-    free(dp);
-
-    return (match == 1);
-}
-
-void print_pattern_nodes(PatternNodeL *nodes) {
-    for (size_t i = 0; i < nodes->size; i++) {
-        PatternNode node = nodes->data[i];
-        dprintf(2, "N[%zu]: ", i);
-        switch (node.type) {
-            case P_STAR: { dprintf(2, "*"); break; }
-            case P_QMARK: { dprintf(2, "?"); break; }
-            case P_CHAR: { dprintf(2, "%c", node.c); break; }
-            case P_RANGE: { dprintf(2, "a-z"); break; }
-            default: break;
-        }
-        dprintf(2, "\n");
-    }
-}
-
-void filename_expansions(StrList * string_list) {
-	
-	// str_list_print(string_list);
-
-	for (size_t i = 0; i < string_list->size; i++) {
-		Str *head = string_list->data[i];
-		while (head) {
-			if (!head->dquote && !head->squote && is_pattern(head->str, "*?[")) {
-
-                //Open current_directories and read all entries
-                // MatchEntryL *test = get_dir_entries(".");
-                // for (size_t i = 0; i < test->size; i++) {
-                //     dprintf(2, "e: %s\n", test->data[i].name);
-                // }
-                //Separate the whole string into smaller parts with FS='/'
-                StringListL *pattern_parts = cut_pattern(head->str);
-                for (size_t i = 0; i < pattern_parts->size; i++) {
-                    // dprintf(2, "PP: %s\n", pattern_parts->data[i]);
-                    PatternNodeL *pattern_nodes = compile_pattern(pattern_parts->data[i]);
-					(void)pattern_nodes;
-                    // print_pattern_nodes(pattern_nodes);
-                }
-			}
-			head = head->next;
-		}
-	}
-	return ;
-}
-
 StringListL *do_expansions_word(char *word, int *error, Vars *const shell_vars, const int options) {
-	StrList * const string_list = get_range_list(word, shell_vars, options, error);
+	StrList * const str_list = get_range_list(word, shell_vars, options, error);
+	// str_list_print(str_list);
+
 	if (*error != 0) return NULL;
 
-	string_list_consume(string_list, shell_vars, error);
+	string_list_consume(str_list, shell_vars, error);
 	if (*error != 0) return NULL;
 
 	if (options & O_SPLIT)
-		string_list_split(string_list, shell_vars);
-	string_erase_nulls(string_list);
+		string_list_split(str_list, shell_vars);
 
-	filename_expansions(string_list);
+	string_erase_nulls(str_list);
 
-	quote_removal(string_list);
+    if (options & O_CASE_PATTERN)
+        return string_list_merge(str_list);
 
+    filename_expansion(str_list);
 
-	return string_list_merge(string_list);
+	str_list_print(str_list);
+	quote_removal(str_list);
+	// str_list_print(str_list);
+
+	return string_list_merge(str_list);
 }
 
 ExpReturn do_expansions(const StringListL * const word_list, Vars * const shell_vars, const int options) {
-	ExpReturn ret_value = { .ret = NULL, .error = 0 };
+	ExpReturn ret_struct = { 
+		.ret = NULL,
+		.error = 0 
+	};
 
-	if (!word_list) return ret_value;
+	if (!word_list) return ret_struct;
 
-	da_create(arg_list, StringListL, sizeof(char *), GC_SUBSHELL);
+	da_create(ret_list, StringListL, sizeof(char *), GC_SUBSHELL);
 
 	for (size_t it = 0; it < word_list->size; it++) {
-		StringListL *const ret = do_expansions_word(word_list->data[it], &ret_value.error, shell_vars, options);
-		if (ret_value.error != 0)
-			return ret_value;
-		string_list_push_list(arg_list, ret);
+		StringListL *const ret = do_expansions_word(word_list->data[it], &ret_struct.error, shell_vars, options);
+		if (ret_struct.error != 0)
+			return ret_struct;
+
+		string_list_push_list(ret_list, ret);
 	}
-	ret_value.ret = arg_list;	
-	return ret_value;
+	ret_struct.ret = ret_list;	
+	return ret_struct;
 }

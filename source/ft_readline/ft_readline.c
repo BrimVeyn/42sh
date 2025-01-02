@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 14:12:14 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/27 11:16:01 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -352,9 +352,8 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
 
     do {
 		char c = '\0';
-        ssize_t bytes_read = read(shell(SHELL_GET)->shell_terminal, &c, 1);
+        ssize_t bytes_read = read(STDIN_FILENO, &c, 1);
 		//maybe rl_set_position
-
 		if (c == '\n' && !should_process_enter()) {
 			continue;
 		}
@@ -379,8 +378,8 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
                 }
                 // gc(GC_FREE, line->data, GC_READLINE);
 				// gc(GC_FREE, line, GC_READLINE);
-                return NULL;
             }
+            return NULL;
 		} else if (c == CTRL_L || c == CTRL_R) {
 			handle_control_keys(rl_state, c);
         } else if (c == '\033') {

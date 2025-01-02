@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:46:35 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/03 09:00:35 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/24 10:31:22 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ typedef struct {
 #define ARITHMETIC_MAP			0b11011100  // Binary equivalent of {0, 1, 0, 1, 1, 1, 0, 0}
 #define ARITHMETIC_PAREN_MAP	0b01011100 // Binary equivalent of {0, 1, 0, 1, 1, 1, 0, 0}
 #define SINGLE_QUOTE_MAP		0b00000000  // Binary equivalent of {0, 0, 0, 0, 0, 0, 0, 0}
-#define DOUBLE_QUOTE_MAP   		0b00010110  // Binary equivalent of {0, 1, 0, 1, 1, 0, 0, 0}
+#define DOUBLE_QUOTE_MAP   		0b00010010  // Binary equivalent of {0, 1, 0, 1, 1, 0, 0, 0}
 
 typedef struct {
 	char		*input;

@@ -50,32 +50,32 @@ done
 for var in $(seq 1 10); do echo "$(echo ${var} | tr '0-9' 'a-j')"; done
 for var in $(seq 1 10); do echo "${var} $(seq $((var * 2)))"; done
 
-# # for var in $(seq 1 10); do
-# # 	if [ ${var} -eq 5 ]; then
-# # 		echo "Breaking at ${var}"
-# # 		break
-# # 	fi
-# # done
-# #
-# # for var in $(seq 1 10); do
-# # 	if [ ${var} -eq 5 ]; then
-# # 		echo "Skipping ${var}"
-# # 		continue
-# # 	fi
-# # 	echo "Value: ${var}"
-# # done
-# #
-# # for var in $(seq 0 10); do
-# # 	if [ ${var} -gt 5 ]; then
-# # 		break
-# # 	fi
-# # 	echo "Value: ${var}"
-# # done
-# #
-# # for var in $(seq 1 10); do
-# # 	if [ ${var} -eq 5 ]; then
-# # 		continue
-# # 	fi
-# # 	echo "Value: ${var}"
-# # done
+# for var in $(seq 1 10); do
+# 	if test ${var} -eq 5 ; then
+# 		echo "Breaking at ${var}"
+# 		break
+# 	fi
+# done
+#
+# for var in $(seq 1 10); do
+# 	if test ${var} -eq 5; then
+# 		echo "Skipping ${var}"
+# 		continue
+# 	fi
+# 	echo "Value: ${var}"
+# done
+#
+# for var in $(seq 0 10); do
+# 	if test ${var} -gt 5; then
+# 		break
+# 	fi
+# 	echo "Value: ${var}"
+# done
+#
+# for var in $(seq 1 10); do
+# 	if test ${var} -eq 5; then
+# 		continue
+# 	fi
+# 	echo "Value: ${var}"
+# done
 #

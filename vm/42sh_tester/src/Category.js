@@ -1,6 +1,3 @@
-import React, {useState} from 'react';
-import UnitTest from './UnitTest';
-import Resume from './Resume';
 
 function Category({ name, testsInfo, inject }) {
 

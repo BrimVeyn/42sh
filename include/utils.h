@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/19 09:37:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/23 15:53:53 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ extern int g_exitno;
 
 #ifndef __FILE_NAME__
 
-#include "libft.h"
 #define __FILE_NAME__ (ft_strrchr(__FILE__, '/') ? ft_strrchr(__FILE__, '/') + 1 : __FILE__)
 
 #endif
@@ -38,6 +37,8 @@ extern int g_exitno;
 #define MAX_WORD_LEN 65536
 #define POSIX_MAX_ID_LEN 255
 #define DATE_SIZE 255
+
+#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 #define FREE_POINTERS(...) \
     void *ptrs[] = { __VA_ARGS__ }; \
@@ -118,6 +119,19 @@ void	da_transfer(StringStream *in, StringStream *out, int number);
 			(array)->data = gc(GC_REALLOC, (array)->data, (array)->size, (array)->capacity, (array)->size_of_element, (array)->gc_level); \
 		} \
 		(array)->data[(array)->size++] = new_element; \
+	} while (0); \
+
+#define da_insert(array, new_element, index) \
+	do { \
+		if ((index) > (array)->size) \
+			break; \
+		if ((array)->size >= (array)->capacity) { \
+			(array)->capacity *= 2; \
+			(array)->data = gc(GC_REALLOC, (array)->data, (array)->size, (array)->capacity, (array)->size_of_element, (array)->gc_level); \
+		} \
+		ft_memmove(&(array)->data[index + 1], &(array)->data[index], (array)->size_of_element * ((array)->size - index)); \
+		(array)->data[index] = new_element; \
+		(array)->size++; \
 	} while (0); \
 
 #define da_push_front(array, new_element) \
