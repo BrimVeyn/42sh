@@ -112,18 +112,37 @@ bool compare_dirs(char *path_lhs, char *path_rhs) {
 	return true;
 }
 
-void ft_rmdir(char *path) {
-	DIR *dir = opendir(path);
-	struct dirent *it;
 
-	while ((it = readdir(dir)) != NULL) {
-		if (it->d_type == DT_DIR)
-			continue;
-		char fullpath[2048] = {0};
-		sprintf(fullpath, "%s/%s", path, it->d_name);
-		unlink(fullpath);
+void ft_rmdir(char *path) {
+    DIR *dir = opendir(path);
+    if (!dir) {
+        perror("opendir");
+        return;
+    }
+    struct dirent *it;
+    char fullpath[2048];
+
+    while ((it = readdir(dir)) != NULL) {
+        // Skip the special entries "." and ".."
+        if (strcmp(it->d_name, ".") == 0 || strcmp(it->d_name, "..") == 0) {
+            continue;
+        }
+        snprintf(fullpath, sizeof(fullpath), "%s/%s", path, it->d_name);
+        if (it->d_type == DT_DIR) {
+            ft_rmdir(fullpath);
+        } else {
+			// dprintf(2, "PATH: %s\n", fullpath);
+            if (unlink(fullpath) == -1) {
+                perror("unlink");
+            }
+        }
+    }
+    closedir(dir);
+
+    // Remove the directory itself
+    if (rmdir(path) == -1) {
+		return ;
 	}
-	rmdir(path);
 }
 
 void copy_outfiles(char *path, char *dest, bool cmp) {

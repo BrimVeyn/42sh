@@ -6,7 +6,7 @@
 #    By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/06 10:05:24 by bvan-pae          #+#    #+#              #
-#    Updated: 2024/12/30 19:18:57 by bvan-pae         ###   ########.fr        #
+#    Updated: 2025/01/02 13:41:39 by bvan-pae         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -107,12 +107,19 @@ endef
 
 all: compute_total $(NAME)
 
-test: $(NAME)
+
+
+test: test_service $(NAME)
 	@printf "$(CYAN)Running tests in the test environment...$(DEF_COLOR)\n"
 	@{ cp $(NAME) ./vm/backend/; [ -f "./vm/backend/tester" ] || make -C ./vm/backend; }
 	@{ cd vm/backend/ && ./tester; }
 	@printf "$(GREEN)Tests and results update complete!$(DEF_COLOR)\n"
 	@printf "$(BLUE)Open the test results at:$(DEF_COLOR) http://localhost:3000\n"
+
+test_service:
+	@if [ -z "$$(docker-compose -f ./vm/docker-compose.yml ps -q)" ]; then \
+		make -C./vm; \
+	fi;
 
 compute_total:
 	$(eval TOTAL_FILES := $(shell var=$$(./scripts/progression_bar.sh); if [ $${var} -ne 0 ]; then echo $${var} ; else echo $(TOTAL_FILES); fi))

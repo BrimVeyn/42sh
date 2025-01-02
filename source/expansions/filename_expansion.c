@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/27 20:26:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 23:53:27 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2025/01/02 10:00:11 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ static void filter_if_match(MatchEntryL *const entries, PatternNodeL *const patt
 	}
 }
 
-static bool is_dot_or_dotdot(const PatternNodeL *const nodes) {
+bool is_dot_or_dotdot(const PatternNodeL *const nodes) {
 	return (
 		(nodes->size == 1 && nodes->data[0].type == P_CHAR && nodes->data[0].c == '.')
 		||
@@ -175,8 +175,10 @@ void filename_expansion(StrList * string_list) {
 
 			//Separate the whole string into smaller parts with IFS='/'
 			StringList *pattern_parts = cut_pattern(pattern);
+			//This flag is here to tell wheter we're matching from an absolute position or relative to the current dir
 			int flag = 0;
 
+			//Depending on bash's implementation it varies wheter these two are the same or not
 			bool keep_dot_dotdot;
 			bool keep_hidden_files;
 			for (size_t i = 0; i < pattern_parts->size; i++) {
@@ -187,7 +189,7 @@ void filename_expansion(StrList * string_list) {
 					continue;
 
 				//We keep dot and dotdot only if there litteraly designated by '.' and '..' respectively
-				keep_dot_dotdot = is_dot_or_dotdot(pattern_nodes);
+				keep_dot_dotdot = is_first_dot(pattern_nodes);
 				keep_hidden_files = is_first_dot(pattern_nodes);
 
 				//Add to entries all matched directories
