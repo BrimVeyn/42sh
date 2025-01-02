@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/27 20:26:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/02 10:00:11 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2025/01/02 15:20:13 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ static void filter_if_match(MatchEntryL *const entries, PatternNodeL *const patt
 	//Iterate over every entries and compute its matching state
 	for (size_t i = 0; i < entries->size;) {
 		MatchEntry elem = entries->data[i];
-		elem.match = match_string(elem.name, pattern_nodes);
+		elem.match = match_string(elem.name, pattern_nodes, 0);
 		//If the entry didn't match the pattern, remove it.
 		if (!elem.match) {
 			//Swap with last element and decremnt size since we don't care about order yet (avoid memmove)

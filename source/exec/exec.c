@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:42:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/31 13:44:48 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2025/01/02 15:16:26 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -295,7 +295,7 @@ static int execute_case_clause(const CommandP * const command, const bool backgr
 		for (size_t inner_i = 0; inner_i < patterns->size; inner_i++) {
             char *pattern = patterns->data[inner_i];
             PatternNodeL *compiled_pattern = compile_pattern(pattern);
-            bool match = match_string(case_clause->expression, compiled_pattern);
+            bool match = match_string(case_clause->expression, compiled_pattern, 0);
 
 			if (match) {
 				if (execute_complete_command(wrap_list(case_clause->bodies->data[i]), shell_vars, background) == ERR) {
