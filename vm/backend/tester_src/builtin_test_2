@@ -1,0 +1,18 @@
+test "string1" = "string1"
+test "string1" = "string2"
+test "string1" != "string2"
+test "string1" != "string1"
+test 5 -eq 5
+test 5 -eq 10
+test ! 5 -eq 10
+test 5 -ne 10
+test 10 -gt 5
+test 10 -ge 10
+test 5 -lt 10
+test ! 5 -lt 10
+test 5 -le 5
+test 10 -ne 10
+test 5 -gt 10
+test 5 -ge 10
+test 10 -lt 5
+test 10 -le 5
