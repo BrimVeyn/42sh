@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 17:14:34 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 17:36:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:41:21 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "libft.h"
 #include "parser.h"
 #include "utils.h"
+#include "dynamic_arrays.h"
 
 #include <stdio.h>
 #include <unistd.h>

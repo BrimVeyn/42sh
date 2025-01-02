@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:18:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/19 16:48:01 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/30 19:48:46 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "ft_regex.h"
 #include "utils.h"
 #include "libft.h"
+#include "dynamic_arrays.h"
 
 #include <limits.h>
 #include <stdio.h>
@@ -29,9 +30,9 @@ char *get_variable_value(Vars * const shell_vars, const char * const id){
 	return result;
 }
 
-void add_vars_to_set(Vars * const shell_vars, const StringListL * const vars) {
-	StringListL * const set = shell_vars->set;
-	StringListL * const env = shell_vars->env;
+void add_vars_to_set(Vars * const shell_vars, const StringList * const vars) {
+	StringList * const set = shell_vars->set;
+	StringList * const env = shell_vars->env;
 	for (size_t i = 0; i < vars->size; i++) {
 		char buffer[MAX_WORD_LEN] = {0};
 		char *new_var = vars->data[i];
@@ -57,13 +58,13 @@ void add_vars_to_set(Vars * const shell_vars, const StringListL * const vars) {
 	}
 }
 
-void add_vars_to_local(StringListL * const list, const StringListL * const vars) {
+void add_vars_to_local(StringList * const list, const StringList * const vars) {
 	for (size_t i = 0; i < vars->size; i++) {
 		string_list_add_or_update(list, vars->data[i]);
 	}
 }
 
-void string_list_clear(StringListL * const list) {
+void string_list_clear(StringList * const list) {
 	for (size_t i = 0; i < list->size; i++) {
 		gc(GC_FREE, list->data[i], GC_ENV);
 		list->data[i] = NULL;
@@ -71,13 +72,13 @@ void string_list_clear(StringListL * const list) {
 	list->size = 0;
 }
 
-void string_list_delete(StringListL * const list) {
+void string_list_delete(StringList * const list) {
 	string_list_clear(list);
 	gc(GC_FREE, list->data, GC_ENV);
 	gc(GC_FREE, list, GC_ENV);
 }
 
-bool string_list_remove(StringListL * const sl, char * const id) {
+bool string_list_remove(StringList * const sl, const char * const id) {
 	for (size_t i = 0; i < sl->size; i++) {
 		const char * const curr_equal_ptr = ft_strchr(sl->data[i], '=');
 		const size_t curr_equal_pos = curr_equal_ptr - sl->data[i];
@@ -95,7 +96,7 @@ bool string_list_remove(StringListL * const sl, char * const id) {
 	return false;
 }
 
-bool string_list_update(StringListL *sl, const char *var) {
+bool string_list_update(StringList *sl, const char *var) {
 	const char * const equal_ptr = ft_strchr(var, '=');
 	const bool add_only = (!equal_ptr);
 	const size_t equal_pos = equal_ptr - var;
@@ -120,12 +121,12 @@ bool string_list_update(StringListL *sl, const char *var) {
 	return false;
 }
 
-void string_list_add_or_update(StringListL * const sl, const char * const var) {
+void string_list_add_or_update(StringList * const sl, const char * const var) {
 	if (!string_list_update(sl, var))
 		da_push(sl, gc(GC_ADD, ft_strdup(var), GC_ENV));
 }
 
-void string_list_append(const StringListL * const sl, char * const var) {
+void string_list_append(const StringList * const sl, char * const var) {
 	const size_t plus_pos = ft_strstr(var, "+");
 	char * const var_id = ft_substr(var, 0, plus_pos);
 	const char *var_tail = &var[plus_pos + 2];
@@ -146,7 +147,7 @@ void string_list_append(const StringListL * const sl, char * const var) {
 	}
 }
 
-char *string_list_get_value(const StringListL * const sl, const char * const id) {
+char *string_list_get_value(const StringList * const sl, const char * const id) {
 	for (size_t i = 0; i < sl->size; i++) {
 		const char *curr_equal_ptr = ft_strchr(sl->data[i], '=');
 		const size_t curr_equal_pos = curr_equal_ptr - sl->data[i];
@@ -161,11 +162,11 @@ char *string_list_get_value(const StringListL * const sl, const char * const id)
 	return NULL;
 }
 
-char *get_positional_value(const StringListL * const sl, const size_t idx) {
+char *get_positional_value(const StringList * const sl, const size_t idx) {
 	 return (ft_strchr(sl->data[idx], '=') + 1);
 }
 
-void string_list_print(const StringListL *list) {
+void string_list_print(const StringList *list) {
 	for (size_t i = 0; i < list->size; i++) {
 		const char *eql = ft_strchr(list->data[i], '=');
 		if (!eql)

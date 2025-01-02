@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 16:23:39 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/09 17:35:33 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 14:54:17 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 void gc_move_list(ListP *list);
 void gc_move_function(FunctionP *func);
 
-void gc_move_stringlist(StringListL *stringList) {
+void gc_move_stringlist(StringList *stringList) {
 	gc(GC_MOVE, stringList, GC_SUBSHELL, GC_ENV);
 	gc(GC_MOVE, stringList->data, GC_SUBSHELL, GC_ENV);
 	for (size_t i = 0; i < stringList->size; i++) {

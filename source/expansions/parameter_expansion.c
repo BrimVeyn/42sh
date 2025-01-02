@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/17 10:35:39 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/29 19:28:36 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,7 @@ static bool is_bad_substitution(char *full_exp){
 }
 
 char *positionals_to_string(Vars * const shell_vars) {
-	const StringListL *positional = shell_vars->positional;
+	const StringList *positional = shell_vars->positional;
 	char buffer[MAX_WORD_LEN] = {0};
 
 	for (size_t i = 1; i < positional->size; i++) {
@@ -162,28 +162,44 @@ char *positionals_to_string(Vars * const shell_vars) {
 	return gc(GC_ADD, ft_strdup(buffer), GC_SUBSHELL);
 }
 
-char *parser_parameter_expansion(char * full_exp, Vars *const shell_vars, int *const error){
+
+static char *find_pattern_or_word(const char *const full_exp) {
+	char *match;
+
+	if ((match = ft_strchr(full_exp, '%')) != NULL) {
+		if (match[1] == '%') match += 2; 
+		else match += 1; 
+	} else if ((match = ft_strchr(full_exp, '#')) != NULL) {
+		if (match[1] == '#') match += 2;
+		else match += 1;
+	} else if ((match = ft_strchr(full_exp, ':')) != NULL) {
+		if (match[1] == '-' || match[1] == '=' || match[1] == '?' || match[1] == '+')
+			match += 2;
+		else match = NULL;
+	}
+	return match;
+
+}
+
+
+char *parameter_expansion(char * full_exp, Vars *const shell_vars, int *const error){
 	regex_match_t result;
 	char *value = NULL;
-	(void)error;
 	
 	if (is_bad_substitution(full_exp) == true){
 		*error = 1; return NULL;
 	}
 
-	const char *rhs = ft_strchr(full_exp, ':');
+	const char *rhs = find_pattern_or_word(full_exp);
 	if (rhs) {
+		//TODO: add pattern removal with # ## % %%
 		size_t rhs_len = ft_strlen(rhs);
 		if (rhs[rhs_len - 1] != '}')
 			rhs_len++;
-		char * const trimmer_rhs = ft_substr(rhs, 0, rhs_len - 1);
-		da_create(expansion_result, StringListL, sizeof(char *), GC_SUBSHELL);
-		da_push(expansion_result, trimmer_rhs);
-		ExpReturn ret = do_expansions(expansion_result, shell_vars, O_NONE);
-		if (ret.error != 0){
-			return (*error) = 1, NULL;
-		}
-		expansion_result = ret.ret;
+		char * const trimmed_rhs = ft_substr(rhs, 0, rhs_len - 1);
+		StringList *expansion_result = do_expansions_word(trimmed_rhs, error, shell_vars, O_PARAMETER);
+		if ((*error) != 0) return NULL;
+
 		const char *final_rhs = *expansion_result->data;
 		char buffer[MAX_WORD_LEN] = {0};
 		const char *final_lhs = gc(GC_ADD, ft_substr(full_exp, 0, rhs - full_exp), GC_SUBSHELL);

@@ -1,4 +1,4 @@
-type ls export shell else
+type ls /usr export shell else
 type djiejde 
 type type
 type echo

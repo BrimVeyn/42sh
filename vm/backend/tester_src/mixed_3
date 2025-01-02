@@ -9,7 +9,7 @@ echo $(echo $(echo $(echo Deep $(echo Nesting))))
 (echo Stage1 || (echo Stage2 && echo Stage3)) && echo Finish
 (echo Outer1 && echo $(echo Inner1 || echo Inner2)) || echo Error
 echo $(($(echo 8 - 2) * $(echo 4 / 2)))
-echo $(echo First && echo $(ls invalid_dir || echo NotFound))
+echo $(echo First && echo $(ls /usr invalid_dir || echo NotFound))
 echo $(($(echo 1 + 1) + $(($(echo 2 + 2)))))
 (echo $(echo $(echo Final nested test)))
 varX=9; varY=2; echo $((${varX} * ${varY} + 1))
@@ -18,11 +18,11 @@ var=6; echo $((var + 3)); echo $((var--)); echo $((var))
 (echo $(echo Task1 && echo Task2) && echo Task3) || echo Failure
 echo $(($(3 + 5) * $(7 - 2)))
 false || (echo True path) && echo Finalize
-(echo $(ls nonexistent || echo Empty)) && echo All done
+(echo $(ls /usr nonexistent || echo Empty)) && echo All done
 (echo Begin && false) || echo Done with process
 echo $(($(2 * 2) + $(5 / 1)))
 var=8; echo $((${var} + 10))
-(echo $(ls invalid_dir || echo Empty again)) || echo All failed
+(echo $(ls /usr invalid_dir || echo Empty again)) || echo All failed
 echo $(( $(echo 7 + 3) * $(echo 2 + 2) ))
 echo $(echo Multi-level $(echo Nesting test))
 (echo Success path && false) || echo End state

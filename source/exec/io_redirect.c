@@ -6,9 +6,17 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:41:47 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/17 10:45:15 by nbardavi         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:39:00 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "exec.h"
+#include "dynamic_arrays.h"
+#include "expansion.h"
+#include "final_parser.h"
+#include "utils.h"
+#include "libft.h"
+#include "lexer.h"
 
 #include <fcntl.h>
 #include <stdbool.h>
@@ -18,12 +26,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "exec.h"
-#include "expansion.h"
-#include "final_parser.h"
-#include "utils.h"
-#include "libft.h"
-#include "lexer.h"
 
 #define MAX_FD 1024
 #include <sys/stat.h>
@@ -79,14 +81,14 @@ int get_filepath_mode(TokenType type){
 }
 
 static void expand_filenames(RedirectionL *const redir_list, Vars *const shell_vars) {
-	da_create(tmp_redirs, StringListL, sizeof(char *), GC_SUBSHELL);
+	da_create(tmp_redirs, StringList, sizeof(char *), GC_SUBSHELL);
 	for (size_t i =0; i < redir_list->size; i++) {
 		da_push(tmp_redirs, redir_list->data[i]->filename);
 	}
 	ExpReturn ret = do_expansions(tmp_redirs, shell_vars, O_NONE);
 	if (ret.error != 0)
 		return ;
-	StringListL *result = ret.ret;
+	StringList *result = ret.ret;
 	for (size_t i = 0; i < redir_list->size; i++) {
 		redir_list->data[i]->filename = result->data[i];
 	}

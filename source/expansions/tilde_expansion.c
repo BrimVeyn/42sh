@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:41:40 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 15:44:26 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/27 10:27:16 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ const char *get_suffix(const char *name, const int len, Vars *shell_vars){
 	}
 }
 
-void parser_tilde_expansion(StringStream *cache, StringStream *word, Vars *shell_vars, const int options){
+void tilde_expansion(StringStream *cache, StringStream *word, Vars *shell_vars, const int options){
 	(void)shell_vars;
 
 

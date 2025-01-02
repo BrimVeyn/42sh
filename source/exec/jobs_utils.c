@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:20:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/11 11:57:17 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/29 23:39:23 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "final_parser.h"
 #include "jobs.h"
 #include "utils.h"
+#include "dynamic_arrays.h"
 
 #include <stdio.h>
 #include <unistd.h>

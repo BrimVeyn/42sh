@@ -6,13 +6,12 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:25 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 11:17:53 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/30 00:45:34 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "exec.h"
 #include "final_parser.h"
-#include "lexer.h"
 #include "libft.h"
 #include "parser.h"
 #include "ft_regex.h"
@@ -22,7 +21,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-static char **sort_env(StringListL *env) {
+char **sort_env(StringList *env) {
 	char ** const self = ft_calloc(env->size + 1, sizeof(char *));
 	ft_memcpy(self, env->data, env->size * sizeof(char *));
 
@@ -38,7 +37,9 @@ static char **sort_env(StringListL *env) {
 	return self;
 }
 
-static void print_export_p(StringListL *env) {
+static void print_export_p(StringList *env) {
+	if (!env->size) return ;
+
 	char ** const res = sort_env(env);
 	for (size_t i = 0; res[i]; i++) {
 		const char * const equal_ptr = ft_strchr(res[i], '=');

@@ -10,6 +10,8 @@ function UnitTest({unit}) {
 	const [outputBash, setOutputBash] = useState(null);
 	const [error42sh, setError42sh] = useState(null);
 	const [errorBash, setErrorBash] = useState(null);
+	const [outfiles42sh, setOutfiles42sh] = useState(null);
+	const [outfilesBash, setOutfilesBash] = useState(null);
 	const [input, setInput] = useState(null);
 
 	// Function to fetch file content from the backend API
@@ -36,17 +38,23 @@ function UnitTest({unit}) {
 		fetchContent(unit["bash_output"], setOutputBash);
 		fetchContent(unit["42sh_error"], setError42sh);
 		fetchContent(unit["bash_error"], setErrorBash);
+		fetchContent(unit["42sh_files"], setOutfiles42sh);
+		fetchContent(unit["bash_files"], setOutfilesBash);
 	}, [unit]);
 
 	//unitButton style
 	const unitButton = (unit, type) => {
 		let buffer = "py-1 px-2 m-2 text-center border-2 rounded";
+
 		if (type === "output" && unit["output_ok"] === "0")
+			buffer += " bg-red-500";
+		else if (type === "exit" && unit["exit_ok"] === "0")
+			buffer += " bg-red-500";
+		else if (type === "outfiles" && unit["files_ok"] === "0")
 			buffer += " bg-red-500";
 		else if (type === "error" && unit["error_ok"] === "0")
 			buffer += " bg-yellow-500";
-		else if (type === "exit" && unit["exit_ok"] === "0")
-			buffer += " bg-red-500";
+
 		if (type === activeDiff)
 			buffer += " border-green-700"
 		return buffer;
@@ -109,6 +117,11 @@ function UnitTest({unit}) {
 				>
 					Ouput (stdout)
 				</button>
+				<button className={unitButton(unit, "outfiles")} 
+					onClick={() => setShown("outfiles")}
+				>
+					Outfiles (>)
+				</button>
 				<button className={unitButton(unit, "error")} 
 					onClick={() => setShown("error")}
 				>
@@ -141,11 +154,20 @@ function UnitTest({unit}) {
 								leftTitle={"Bash"} rightTitle={"42sh"} 
 							/>
 						}
+						{activeDiff === "outfiles" && 
+							<ReactDiffViewer key={unit.id + "error"} 
+								styles={newStyles}
+								oldValue={outfilesBash || "None"} 
+								newValue={outfiles42sh || "None"} 
+								splitView={true} showDiffOnly={false} useDarkTheme={true}
+								leftTitle={"Bash"} rightTitle={"42sh"} 
+							/>
+						}
 						{activeDiff === "exit" &&
 							<ReactDiffViewer key={unit.id + "output"} 
 								styles={newStyles}
-								oldValue={unit["42sh_exit_code"]} 
-								newValue={unit["bash_exit_code"]} 
+								oldValue={unit["bash_exit_code"]} 
+								newValue={unit["42sh_exit_code"]} 
 								splitView={true} showDiffOnly={false} useDarkTheme={true}
 								leftTitle={"Bash"} rightTitle={"42sh"} 
 							/>
