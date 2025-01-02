@@ -1,0 +1,47 @@
+echo ./pm_test/*
+echo ./pm_test/?[a-z]?
+echo ./pm_test/???
+echo ./pm_test/?""
+echo ./pm_test/[^0-9a-c]*
+echo ./pm_test/[^0-9a-c]?
+echo ./pm_test/file\ *
+echo ./pm_test/\[a-z]*
+echo ./pm_test/\*
+echo ./pm_test/\[a\]*
+echo ./pm_test/\[\?\]*
+echo ./pm_test/\*\?\[\]*
+echo ./pm_test/file\ name\ with\ spaces
+echo ./pm_test/file\[\]\ name
+echo ./pm_test/\ \ \ 
+echo ./pm_test/\#
+echo ./pm_test/*\*
+echo ./pm_test/\*abc*
+echo ./pm_test/*\[\]*
+echo ./pm_test/\*\*\*\[\]
+echo ./pm_test/*file\ *
+echo ./pm_test/\[*
+echo ./pm_test/[a-z]*
+echo ./pm_test/[A-Z]*
+echo ./pm_test/[0-9]*[a-c]*
+echo ./pm_test/[^a-zA-Z]*
+echo ./pm_test/[^a-zA-Z0-9]*
+echo ./pm_test/[^0-9]*
+echo ./pm_test/[^[:digit:]]*
+echo ./pm_test/[[:alpha:]][[:lower:]]
+echo ./pm_test/[[:punct:]]*
+echo ./pm_test/[a-z]*\*.txt
+echo ./pm_test/[^[:digit:]]*\ name
+echo ./pm_test/[a-z][0-9][A-Z]?*
+echo ./pm_test/[[:alnum:]]*[[:space:]]*
+echo ./pm_test/[[:xdigit:]]*
+echo ./pm_test/""
+echo ./pm_test/\~
+echo ./pm_test/\.\.\./*
+echo ./pm_test/./.*
+echo ./pm_test/.*/.*
+echo ./pm_test/[[:cntrl:]]*
+echo ./pm_test/.*
+echo ./pm_test/..*
+echo ./pm_test/"file*"*
+echo ./pm_test/"file with*"*
+echo ./pm_test/no_perms/*

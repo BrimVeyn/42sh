@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Category from './Category'
 import Resume from './Resume'
-import logo from './logo.svg';
 
 import './App.css';
 import './input.css'

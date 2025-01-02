@@ -92,7 +92,8 @@ function UnitTest({unit}) {
 						styles={newStyles}
 						oldValue={input || "None"} 
 						newValue={input || "None"} 
-						splitView={false} showDiffOnly={false} 
+						splitView={false} showDiffOnly={false}
+						useDarkTheme={true} hideLineNumbers={true}
 						leftTitle={"Input"}
 					/>
 					</div>
@@ -127,7 +128,7 @@ function UnitTest({unit}) {
 								styles={newStyles}
 								oldValue={outputBash || "None"} 
 								newValue={output42sh || "None"} 
-								splitView={true} showDiffOnly={false} 
+								splitView={true} showDiffOnly={false} useDarkTheme={true}
 								leftTitle={"Bash"} rightTitle={"42sh"} 
 							/>
 						}
@@ -136,7 +137,7 @@ function UnitTest({unit}) {
 								styles={newStyles}
 								oldValue={errorBash || "None"} 
 								newValue={error42sh || "None"} 
-								splitView={true} showDiffOnly={false} 
+								splitView={true} showDiffOnly={false} useDarkTheme={true}
 								leftTitle={"Bash"} rightTitle={"42sh"} 
 							/>
 						}
@@ -145,7 +146,7 @@ function UnitTest({unit}) {
 								styles={newStyles}
 								oldValue={unit["42sh_exit_code"]} 
 								newValue={unit["bash_exit_code"]} 
-								splitView={true} showDiffOnly={false} 
+								splitView={true} showDiffOnly={false} useDarkTheme={true}
 								leftTitle={"Bash"} rightTitle={"42sh"} 
 							/>
 						}

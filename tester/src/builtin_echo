@@ -3,3 +3,8 @@ echo -n salut; ls
 echo -n salut -n; ls
 echo salut; ls
 echo salut > /dev/full
+echo -e '\n\n'
+echo -e '\a\a'
+echo -e salut 'mec\c' hey 
+echo -eeeeeeeeeeeeeeee 'nope\n'
+echo -n -e 'nope\n'

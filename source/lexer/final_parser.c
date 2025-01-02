@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:40 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/19 09:46:15 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/23 15:53:36 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@
 #include <unistd.h>
 
 
-#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 extern TableEntry parsingTable[182][86];
 
@@ -605,8 +604,8 @@ int parse(Lex *lexer, Vars *shell_vars) {
 						break;
 					}
 					case 44: { /* case_list -> case_list case_item */
-						CaseClauseP *case_list = da_pop(stack)->token.case_clause;
 						CaseClauseP *case_item = da_pop(stack)->token.case_clause;
+						CaseClauseP *case_list = da_pop(stack)->token.case_clause;
 						caseClauseMerge(case_list, case_item);
 						reduced_entry->token.type = Case_List;
 						reduced_entry->token.case_clause = case_list;

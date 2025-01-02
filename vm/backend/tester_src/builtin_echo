@@ -3,4 +3,38 @@ echo -n salut; ls
 echo -n salut -n; ls
 echo salut; ls
 echo salut > /dev/full
-echo -nnnnn salut
+echo -e '\n\n'
+echo -e '\a\a'
+echo -e salut 'mec\c' hey 
+echo -eeeeeeeeeeeeeeee 'nope\n'
+echo -n -e 'nope\n'
+echo -e '\044\050this is not a command sub\051'
+echo -e "\tTab test: \tThis should be indented"
+echo -e "Backslash test: \\"
+echo -e "Octal test: \101 \102 \103 (should print A B C)"
+echo -e "Hexadecimal test: \x41\x42\x43 (should print ABC)"
+echo -e "Unicode test: \u2603 (should print a snowman ☃)"
+echo -e "\vVertical tab test:\vNext line"
+echo -e "Carriage return test:\rOverwrite"
+echo -e "Invalid escape sequence: \q (should print \q literally)"
+echo -e "\c\nThis text should not appear"
+echo -n "No newline test: This should stay on the same line"
+echo " <- Text should follow the above on the same line"
+echo -e -n "\nNo newline with escape test\n"
+echo -e -n -e -e "Multiple -e and -n options\n"
+echo -e "Combining options and text: -n and -e do not conflict"
+echo -z "Invalid option test (should print '-z Invalid option test')"
+echo -e "Dollar sign test: \$"
+echo "Quotes test: 'single' \"double\""
+echo -e "Parentheses test: \( \)"
+echo -e "Curly braces test: \{ \}"
+echo -e "Angle brackets test: \< \>"
+echo "Ampersand test: &"
+echo -e "Pipe test: |"
+echo -e "Semicolon test: ;"
+echo -n "First part"; echo " Second part (should be on the same line)"
+echo -e "Escape and text mixed: A\nB\tC\nD"
+echo -e "Mixing \c and other options: This should stop\cThis won't show"
+echo -e "Long string test: $(printf '%0100d' 0)"
+echo -e "\xFF\xFE (Invalid Unicode, check behavior)"
+#for i in {1..100}; do echo -n "$i "; done; echo # Test long looping output

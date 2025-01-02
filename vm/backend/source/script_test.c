@@ -42,10 +42,18 @@ int execute_script(char *bin, char *fileName, int test_number) {
 		close(fd_err);
 		close(fd_in);
 
-		char *args[3] = { bin, fileName, NULL };
-		if (execv(bin, args) == -1) {
-			exit(1);
-        }
+		if (*bin == 'b') {
+			char *args[4] = { bin, "--posix", fileName, NULL };
+			if (execv(bin, args) == -1) {
+				exit(1);
+			}
+		} else {
+			char *args[3] = { bin, fileName, NULL };
+			if (execv(bin, args) == -1) {
+				exit(1);
+			}
+		}
+
 	} else {
 		int status;
 		waitpid(pid, &status, 0);

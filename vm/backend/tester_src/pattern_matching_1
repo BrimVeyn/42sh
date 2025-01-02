@@ -1,0 +1,44 @@
+echo ./pm_test/*
+echo ./pm_test/[a-z]*
+echo ./pm_test/******
+echo ./pm_test/[a-z][A-Z]*
+echo ./pm_test/M*
+echo ./pm_test/*e*
+echo ./pm_test/"*"m
+echo ./pm_test/"M"*
+echo ./pm_test/[a-Z]*[0-9]
+echo ./pm_test/?
+echo ./pm_test/???
+echo ./pm_test/*.*
+echo ./pm_test/[aeiou]*
+echo ./pm_test/[^aeiou]*
+echo ./pm_test/[0-9]*
+echo ./pm_test/[0-9]*[a-z]*
+echo ./pm_test/[^a-z]*[A-Z]
+echo ./pm_test/*[0-9][0-9]
+echo ./pm_test/\*
+echo ./pm_test/\[a-z\]*
+echo ./pm_test/\\*
+echo ./pm_test/.*
+echo ./pm_test/.[a-z]*
+echo ./pm_test/..*
+echo ./pm_test/*[^0-9]*
+echo ./pm_test/???[a-z]*???
+echo ./pm_test/*[A-Z]*[a-z]
+echo ./pm_test/ab*
+echo ./pm_test/a?b*
+echo ./pm_test/[abc][def]*
+echo ./pm_test/[]
+echo ./pm_test/[a-]
+echo ./pm_test/[z-a] # Invalid range
+echo ./pm_test/[---] # Literal dash
+echo ./pm_test/*.*
+echo ./pm_test/*.*
+echo ./pm_test/file\ name*
+echo ./pm_test/""
+echo ./pm_test/'*'
+echo ./pm_test/*
+echo /etc/*
+echo /home/[a-zA-Z]*
+echo /*
+echo .*/[a-j]*

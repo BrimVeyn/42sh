@@ -17,6 +17,10 @@
 #include <stdbool.h>
 
 #define SRC_PATH "./tester_src/"
+#define INIT_SCRIPT_PATH "./source/init_script.sh"
+#define DESTROY_SCRIPT_PATH "./source/destroy_script.sh"
+
+extern char **my_env;
 
 int compare_files(const char *file1, const char *file2);
 int execute_unit(char *bin, char *input, char *fileName, int test_number);

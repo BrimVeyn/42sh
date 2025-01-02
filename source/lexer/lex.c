@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 14:30:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/19 09:35:58 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2024/12/24 10:29:25 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,6 +180,16 @@ bool get_next_token(Lex * const lexer, StringStream * const cache) {
 	while (input->size) {
 
 		line_continuation_backslash(lexer, input, pos);
+
+		if (input->size >= 2 && *input->data == '\\') {
+			WordContext open_ctx = da_peak_back(context_stack);
+			if (open_ctx != WORD_SINGLE_QUOTE) {
+				da_push(cache, da_pop_front(input));
+				da_push(cache, da_pop_front(input));
+				(pos->column)++; (pos->absolute)++;
+				continue;
+			}
+		}
 
 		const WordContext maybe_new_context = get_context(input, map, da_peak_back(context_stack));
 
