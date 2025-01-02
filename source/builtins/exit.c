@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 10:46:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/10 12:31:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2025/01/02 16:22:45 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,13 @@ void builtin_exit(const SimpleCommandP *command, __attribute__((unused)) Vars *s
 		err_exit("too many arguments\n");
 		g_exitno = 1;
 		return;
+	}
+
+	if (ft_strlen(command->word_list->data[1]) > 19) {
+		err_exit("numeric argument required\n");
+		close_fd_set();
+		gc(GC_CLEANUP, GC_ALL);
+		exit(2);
 	}
 
 	long exit_no = ft_atol(command->word_list->data[1]) % 256;

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 19:28:36 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2025/01/02 15:57:45 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@
 #include "expansion.h"
 
 #include <stdio.h>
-
-//FIX: no error when ${var:?var} ????
 
 char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 	// printf("id: %s\nword: %s\nmetachar: %s\n", id, word, metachar);
@@ -35,41 +33,43 @@ char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 			return (word);
 		}
 		else if (!ft_strcmp(metachar, ":?")){
-			ft_dprintf(2, " %s\n", word);
+			ft_dprintf(2, "42sh: %s: %s\n",id, word);
 			g_exitno = 1;
-			// TODO: ajouter un return FALSE jusquau parser pour prevenir de l'execution des commandes suivantes voir posix
-			return "";
-			// gc(GC_CLEANUP, GC_ALL);
-			// close_all_fds();
-			// exit(EXIT_FAILURE);
+			return NULL;
 		}
 	}
 	if (get_variable_value(shell_vars, id) == NULL)
 		return ft_strdup("");
 	if (metachar[0] == '#' || metachar[0] == '%'){
-		char *value = ft_strdup(get_variable_value(shell_vars, id));
-		char *regexp = NULL;
 
-		if (metachar[0] == '#'){
-			regexp = ft_strjoin("^", word);
-		} else {
-			regexp = ft_strjoin(word, "$");
-		}
-		
-		regex_match_t result = regex_match(regexp, value);
-		if (result.re_start != -1){
-			char *new_value = NULL;
-			if (metachar[0] == '#')
-				new_value = ft_substr(value, result.re_end, ft_strlen(value) - result.re_end);
-			else{
-				new_value = ft_substr(value, 0, result.re_start);
+		char *value = ft_strdup(get_variable_value(shell_vars, id));
+		ParameterPatternOpt PatternOpt = 0;
+
+		if (metachar[0] == '#' && metachar[1] == '\0'){ PatternOpt = SMAL_PREFIX; }
+		else if (metachar[0] == '#' && metachar[1] == '#' ){ PatternOpt = LONG_PREFIX; }
+		else if (metachar[0] == '%' && metachar[1] == '\0'){ PatternOpt = SMAL_SUFFIX; }
+		else if (metachar[0] == '%' && metachar[1] == '%' ){ PatternOpt = LONG_SUFFIX; }
+
+		const PatternNodeL *compiled_pattern = compile_pattern(word);
+		switch (PatternOpt) {
+			case SMAL_PREFIX : {
+				int pos = match_string(value, compiled_pattern, SMAL_PREFIX);
+				dprintf(2, "pos: %d\n", pos);
+				value += pos;
+				break;
 			}
-			free(value);
-			value = new_value;
-			new_value = NULL;
+			case LONG_PREFIX : {
+				int pos = match_string(value, compiled_pattern, LONG_PREFIX);
+				value += pos;
+				dprintf(2, "POS: %d\n", pos);
+				break;
+			}
+			case SMAL_SUFFIX : {
+			}
+			default: break;
 		}
-		free(regexp);
-		gc(GC_ADD, value, GC_SUBSHELL);
+
+		// gc(GC_ADD, value, GC_SUBSHELL);
 		return value;
 	}
 	return ft_strdup(value);
@@ -231,6 +231,10 @@ char *parameter_expansion(char * full_exp, Vars *const shell_vars, int *const er
 		result = regex_match ("\\$\\{[^\\$]*\\}", full_exp);
 		if (result.re_start != -1){
 			value = parser_get_variable_value(gc(GC_ADD, ft_substr(full_exp, result.re_start + 2, result.re_end - result.re_start - 3), GC_SUBSHELL), shell_vars);
+			if (!value){
+				*error = 1;
+				return NULL;
+			}
 		} else return NULL;
 	}
 	char *re_start = ft_substr(full_exp, 0, result.re_start);
