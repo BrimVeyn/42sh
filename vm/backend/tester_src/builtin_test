@@ -1,4 +1,5 @@
 test -b test_env/block
+test ! -b test_env/block
 test -b test_env/file
 test -c test_env/char
 test -c test_env/file
@@ -19,10 +20,13 @@ test -n ""
 test -p test_env/fifo
 test -p test_env/file
 test -r test_env/readable_file
+test ! -r test_env/readable_file
 test -r test_env/writable_file
 test -S test_env/socket
 test -S test_env/file
 test -s test_env/non_empty_string
+test ! -s test_env/non_empty_string
+test ! -s test_env/empty_file
 test -s test_env/empty_file
 test -t 0
 test -t 999

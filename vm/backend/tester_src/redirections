@@ -4,25 +4,25 @@ cat < infiles/no_write
 cat < infiles/no_read
 cat < infiles/non_existing
 cat < infiles
-echo test1 >| ./XXXOUTXXX/file1
-echo test1 >| ./XXXOUTXXX/file1
-echo test2 >| ./XXXOUTXXX/file1
-echo test3 >| ./XXXOUTXXX/no_perms
-echo test4 >| ./XXXOUTXXX/no_write
-echo test5 >| ./XXXOUTXXX/non_existing
-echo test6 >| ./XXXOUTXXX
-echo test1 > ./XXXOUTXXX/file1
-echo test1 > ./XXXOUTXXX/file1
-echo test2 > ./XXXOUTXXX/file1
-echo test3 > ./XXXOUTXXX/no_perms
-echo test4 > ./XXXOUTXXX/no_write
-echo test5 > ./XXXOUTXXX/non_existing
-echo test6 > ./XXXOUTXXX
-echo test3 >> ./XXXOUTXXX/file2
-echo test3 >> ./XXXOUTXXX/file2
-echo test3 >> ./XXXOUTXXX/no_perms
-echo test3>> ./XXXOUTXXX/no_write
-echo test3>> ./XXXOUTXXX/non_existing
+touch ./XXXOUTXXX/file1; echo test1 >| ./XXXOUTXXX/file1
+touch ./XXXOUTXXX/file1; echo test1 >| ./XXXOUTXXX/file1
+touch ./XXXOUTXXX/file1; echo test2 >| ./XXXOUTXXX/file1
+touch ./XXXOUTXXX/no_perms; echo test3 >| ./XXXOUTXXX/no_perms
+touch ./XXXOUTXXX/no_write; echo test4 >| ./XXXOUTXXX/no_write
+touch ./XXXOUTXXX/non_existing; echo test5 >| ./XXXOUTXXX/non_existing
+touch ./XXXOUTXXX/placeholder; echo test6 >| ./XXXOUTXXX
+touch ./XXXOUTXXX/file1; echo test1 > ./XXXOUTXXX/file1
+touch ./XXXOUTXXX/file1; echo test1 > ./XXXOUTXXX/file1
+touch ./XXXOUTXXX/file1; echo test2 > ./XXXOUTXXX/file1
+touch ./XXXOUTXXX/no_perms; echo test3 > ./XXXOUTXXX/no_perms
+touch ./XXXOUTXXX/no_write; echo test4 > ./XXXOUTXXX/no_write
+touch ./XXXOUTXXX/non_existing; echo test5 > ./XXXOUTXXX/non_existing
+touch ./XXXOUTXXX/placeholder; echo test6 > ./XXXOUTXXX
+touch ./XXXOUTXXX/file2; echo test3 >> ./XXXOUTXXX/file2
+touch ./XXXOUTXXX/file2; echo test3 >> ./XXXOUTXXX/file2
+touch ./XXXOUTXXX/no_perms; echo test3 >> ./XXXOUTXXX/no_perms
+touch ./XXXOUTXXX/no_write; echo test3 >> ./XXXOUTXXX/no_write
+touch ./XXXOUTXXX/non_existing; echo test3 >> ./XXXOUTXXX/non_existing
 21< infiles/test cat <&21
 22< infiles/no_exec cat <&22
 23< infiles/no_perms cat <&23
