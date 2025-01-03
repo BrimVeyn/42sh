@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 14:13:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/29 23:19:52 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2025/01/02 15:57:00 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,7 @@ typedef struct {
     int gc_level;
 } PatternNodeL;
 
+typedef enum { SMAL_SUFFIX = 1, LONG_SUFFIX = 2, SMAL_PREFIX = 4, LONG_PREFIX = 8, } ParameterPatternOpt;
 
 bool			is_pattern(const char *lhs, const char *rhs);
 int				get_dir_entries(MatchEntryL *list, const char *path, const int flag);
@@ -133,7 +134,7 @@ void			sort_entries(MatchEntryL *entries);
 void			join_entries(Str **head, const MatchEntryL *entries);
 void			remove_hidden_files(MatchEntryL *entries, const bool keep_dotfiles);
 void			print_pattern_nodes(PatternNodeL *nodes);
-bool			match_string(const char *str, const PatternNodeL *pattern_nodes);
+int				match_string(const char *str, const PatternNodeL *pattern_nodes, int flag);
 PatternNodeL	*compile_pattern(char *pattern);
 //------------------------------------------------------//
 
