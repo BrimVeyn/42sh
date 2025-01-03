@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/03 12:55:44 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/03 15:07:01 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,8 @@ size_t get_visible_length(const char * const str){
 	return cmp;
 }
 
+//TODO: gerer emojis
+
 // void print_raw(const char* str) {
 //     for (const char* p = str; *p; ++p) {
 //         if (*p == '\033') { // Code d'échappement ESC
@@ -64,6 +66,7 @@ size_t get_visible_length(const char * const str){
 //     putchar('\n');
 // }
 //
+
 void set_prompt(readline_state_t *rl_state, const char *new_prompt) {
 	gc(GC_FREE, rl_state->prompt, GC_READLINE);
 	rl_state->prompt = ft_strdup(new_prompt);
@@ -417,7 +420,9 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
 			handle_control_keys(rl_state, c);
         } else if (c == '\033') {
             result = handle_special_keys(rl_state, line, shell_vars);
-        } else {
+        } else if (c > 0 && c < 32){
+			result = handle_readline_controls(rl_state, c, line, shell_vars);
+		} else {
 			result = handle_printable_keys(rl_state, c, line);
         }
 		
