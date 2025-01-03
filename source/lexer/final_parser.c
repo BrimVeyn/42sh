@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:40 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/02 17:36:13 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2025/01/03 09:55:15 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 		[NEWLINE] = "\n", [AMPER] = "&", [SEMI] = ";",
 	};
 
-	dprintf(2, "token: %s | %d\n", raw_value, table_row);
+	// dprintf(2, "token: %s | %d\n", raw_value, table_row);
 
 	//TR 0 = first word
 	//      ex: 'ECHO ...'

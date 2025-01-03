@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 23:38:11 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/02 16:38:15 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/03 11:48:24 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,14 +154,14 @@ static bool match_pattern(int **dp, const String str, const PatternNodeL *patter
 		return dp[i][j];
     }
 
+	if (flag != 0 && j >= pattern->size) {
+		return true;
+	}
+
 	if (i >= str.size && j >= pattern->size) {
 		// dprintf(2, "RETURN MATCH: i: %zu, j: %zu\n", i, j);
 		return true;
     }
-
-	if (flag != 0 && j >= pattern->size) {
-		return true;
-	}
 
 	if (j >= pattern->size) {
 		// dprintf(2, "RETURN EOP: i: %zu, j: %zu\n", i, j);
@@ -203,27 +203,25 @@ int match_string(const char *str, const PatternNodeL *pattern_nodes, int flag) {
     for (size_t i = 0; i < string.size + 1; i++) {
         dp[i] = malloc((pattern_nodes->size + 1) * sizeof(int));
 		ft_memset(dp[i], -1, (pattern_nodes->size + 1) * sizeof(int));
-		// for (size_t j = 0; j < pattern_nodes->size + 1; j++) {
-		// 	dp[i][j] = -1;
-		// }
     }
 
-	// dprintf(2, "------------------ str: %s ------------\n", str);
     bool match = match_pattern(dp, string, pattern_nodes, 0, 0, flag);
-	// dprintf(2, "---------------------------------------\n");
 	size_t ret = match;
+
 	if (flag != 0) {
-		for (size_t i =0; i < string.size; i++) {
-			// const size_t p_size = pattern_nodes->size - 1;
-			for (size_t j = 0; j < pattern_nodes->size; j++) {
-				dprintf(2, "[%zu][%zu]: %d\n", i, j , dp[i][j]);
-			}
-			// if (flag ==  && dp[i][p_size] == true) {
-			// 	ret = i;
-			// 	break;
-			// } else if (flag == P_LONG && dp[i][p_size] == true) {
-			// 	ret = (i > ret) ? i : ret;
+		for (size_t i = 0; i < string.size; i++) {
+			const size_t p_size = pattern_nodes->size - 1;
+
+			// for (size_t j = 0; j < p_size; j++) {
+			// 	dprintf(2, "[%zu][%zu]: %d\n", i, j, dp[i][j]);
 			// }
+
+			if ((flag == SMAL_PREFIX || flag == SMAL_SUFFIX) && dp[i][p_size] == true) {
+				ret = (i + 1);
+				break;
+			} else if ((flag == LONG_SUFFIX || flag == LONG_PREFIX) && dp[i][p_size] == true) {
+				ret = (i + 1 > ret) ? (i + 1) : ret;
+			}
 		}
 	}
 
@@ -232,5 +230,5 @@ int match_string(const char *str, const PatternNodeL *pattern_nodes, int flag) {
     }
     free(dp);
 
-    return (ret == 0) ? 0 : ret + 1;
+    return ret;
 }

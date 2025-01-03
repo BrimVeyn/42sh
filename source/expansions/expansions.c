@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 11:32:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/02 09:38:10 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/03 13:55:41 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -385,10 +385,19 @@ static void pos_insert_sorted(PosList *list, PosInfo elem) {
     }
 
 	size_t i;
-	for (i = 0; i < list->size && elem.list_index != list->data[i].list_index; i++);
+	for (i = 0; i < list->size && elem.list_index > list->data[i].list_index; i++);
+	// dprintf(2, "i: %zu\n", i);
 	for (; i < list->size && elem.index > list->data[i].index; i++);
+	// dprintf(2, "ia: %zu\n", i);
 
+	// dprintf(2, "candidate: %d %d, insert at: %zu\n", elem.list_index, elem.index, i);
 	da_insert(list, elem, i);
+	// dprintf(2, "-------\n");
+	// for (size_t i = 0; i < list->size; i++) {
+	// 	dprintf(2, "str: %d, %d\n", list->data[i].list_index, list->data[i].index);
+	// }
+	// dprintf(2, "-------\n");
+	
 }
 
 static void quote_removal(const StrList * const list) {
@@ -439,24 +448,30 @@ static void quote_removal(const StrList * const list) {
 		}
 	}
 
+	// for (size_t i = 0; i < poses->size; i++) {
+	// 	dprintf(2, "str: %s, %d\n", list->data[poses->data[i].list_index]->str, poses->data[i].index);
+	// }
+
 	for (size_t i = 0; i < poses->size;) {
 		da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
 
+		// dprintf(2, "i = %zu\n", i);
 		//Retain current index aswell as string
-		const int index = poses->data[i].list_index;
-		const char *const input = list->data[index]->str;
+		const int list_index = poses->data[i].list_index;
+		const char *const input = list->data[list_index]->str;
 
 		for (int j = 0; input[j]; j++) {
 			//if i == j we don't copy it
-			if (poses->data[i].list_index == index && poses->data[i].index == j) {
+			if (poses->data[i].list_index == list_index && poses->data[i].index == j) {
 				i++;
 				continue;
             }
 			da_push(ss, input[j]);
 		}
+		// dprintf(2, "ss: %s\n", ss->data);
 		//replace the string with the one without quotes and '\'
-		gc(GC_FREE, list->data[index]->str, GC_SUBSHELL);
-		list->data[index]->str = (ss->size == 0) ? NULL : ss_get_owned_slice(ss);
+		gc(GC_FREE, list->data[list_index]->str, GC_SUBSHELL);
+		list->data[list_index]->str = (ss->size == 0) ? NULL : ss_get_owned_slice(ss);
 	}
 }
 
@@ -470,13 +485,13 @@ char *remove_quotes(char *word) {
 
 StringList *do_expansions_word(char *word, int *error, Vars *const shell_vars, const int options) {
 	StrList * const str_list = get_range_list(word, shell_vars, options, error);
-	// str_list_print(str_list);
 
 	if (*error != 0) return NULL;
 
 	string_list_consume(str_list, shell_vars, error);
 	if (*error != 0) return NULL;
 
+	// str_list_print(str_list);
 	if (options & O_SPLIT)
 		string_list_split(str_list, shell_vars);
 
@@ -501,7 +516,6 @@ ExpReturn do_expansions(const StringList * const word_list, Vars * const shell_v
 	};
 
 	if (!word_list) return ret_struct;
-
 	da_create(ret_list, StringList, sizeof(char *), GC_SUBSHELL);
 
 	for (size_t it = 0; it < word_list->size; it++) {

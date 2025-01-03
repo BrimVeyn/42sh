@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 15:42:02 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/02 15:16:26 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/03 13:21:35 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -282,6 +282,7 @@ static int execute_case_clause(const CommandP * const command, const bool backgr
 	if (ret.error != 0)
 		return ERR;
 	case_clause->expression = ret.ret->data[0];
+	// dprintf(2, "exp: %s\n", case_clause->expression);
 
 	for (size_t i = 0; i < case_clause->patterns->size; i++) {
 		ExpReturn ret = do_expansions(case_clause->patterns->data[i], shell_vars, O_PATTERN);
