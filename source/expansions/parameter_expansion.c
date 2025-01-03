@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:16:20 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/02 15:57:45 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/03 13:13:52 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,26 @@
 #include "expansion.h"
 
 #include <stdio.h>
+
+char *ft_revstr(const char *const str) {
+	size_t len = ft_strlen(str);
+	char *ret = gc(GC_CALLOC, len + 1, sizeof(char), GC_SUBSHELL);
+
+	size_t i = 0;
+	for (i = 0; i < len; i++) {
+		ret[i] = str[len - i - 1];
+	}
+	ret[i] = '\0';
+	return ret;
+}
+
+void reverse_pattern(PatternNodeL *nodes) {
+	for (size_t i = 0; i < nodes->size / 2; i++) {
+		PatternNode tmp = nodes->data[i];
+		nodes->data[i] = nodes->data[nodes->size - i - 1];
+		nodes->data[nodes->size - i - 1] = tmp;
+	}
+}
 
 char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 	// printf("id: %s\nword: %s\nmetachar: %s\n", id, word, metachar);
@@ -50,21 +70,36 @@ char *handle_format(char metachar[3], char *id, char *word, Vars *shell_vars){
 		else if (metachar[0] == '%' && metachar[1] == '\0'){ PatternOpt = SMAL_SUFFIX; }
 		else if (metachar[0] == '%' && metachar[1] == '%' ){ PatternOpt = LONG_SUFFIX; }
 
-		const PatternNodeL *compiled_pattern = compile_pattern(word);
+		// dprintf(2, "word: %s\n", word);
+		PatternNodeL *compiled_pattern = compile_pattern(word);
+		if (!compiled_pattern->size)
+			return value;
+		// print_pattern_nodes(compiled_pattern);
 		switch (PatternOpt) {
-			case SMAL_PREFIX : {
-				int pos = match_string(value, compiled_pattern, SMAL_PREFIX);
-				dprintf(2, "pos: %d\n", pos);
-				value += pos;
-				break;
-			}
+			case SMAL_PREFIX :
 			case LONG_PREFIX : {
-				int pos = match_string(value, compiled_pattern, LONG_PREFIX);
-				value += pos;
-				dprintf(2, "POS: %d\n", pos);
+				int pos = match_string(value, compiled_pattern, PatternOpt);
+				if (!pos) return value;
+
+				value += (pos);
 				break;
 			}
+			case LONG_SUFFIX :
 			case SMAL_SUFFIX : {
+				char *rev = ft_revstr(value);
+				reverse_pattern(compiled_pattern);
+				// dprintf(2, "rev: %s\n", rev);
+				// print_pattern_nodes(compiled_pattern);
+				int pos = match_string(rev, compiled_pattern, PatternOpt);
+				if (!pos) return value;
+
+				char *new_value = ft_substr(value, 0, ft_strlen(value) - pos);
+				// dprintf(2, "pos: %zu %d\n", ft_strlen(value), pos);
+				// dprintf(2, "new_value: |%s|\n", new_value);
+				gc(GC_ADD, new_value, GC_SUBSHELL);
+				value = new_value;
+				// dprintf(2, "value: %zu %d\n", ft_strlen(value), pos);
+				break;
 			}
 			default: break;
 		}
@@ -163,21 +198,33 @@ char *positionals_to_string(Vars * const shell_vars) {
 }
 
 
-static char *find_pattern_or_word(const char *const full_exp) {
-	char *match;
+typedef struct {
+	char *rhs;
+	int  type;
+} SpecialId;
 
-	if ((match = ft_strchr(full_exp, '%')) != NULL) {
-		if (match[1] == '%') match += 2; 
-		else match += 1; 
-	} else if ((match = ft_strchr(full_exp, '#')) != NULL) {
-		if (match[1] == '#') match += 2;
-		else match += 1;
-	} else if ((match = ft_strchr(full_exp, ':')) != NULL) {
-		if (match[1] == '-' || match[1] == '=' || match[1] == '?' || match[1] == '+')
-			match += 2;
-		else match = NULL;
+static SpecialId find_pattern_or_word(const char *const full_exp) {
+
+	SpecialId ret = {
+		.rhs = NULL,
+		.type = 0,
+	};
+
+	if ((ret.rhs = ft_strchr(full_exp, '%')) != NULL) {
+		ret.type = O_PATTERN;
+		if (ret.rhs[1] == '%') ret.rhs += 2;
+		else ret.rhs += 1; 
+	} else if ((ret.rhs = ft_strchr(full_exp, '#')) != NULL) {
+		ret.type = O_PATTERN;
+		if (ret.rhs[1] == '#') ret.rhs += 2;
+		else ret.rhs += 1;
+	} else if ((ret.rhs = ft_strchr(full_exp, ':')) != NULL) {
+		ret.type = O_PARAMETER;
+		if (ret.rhs[1] == '-' || ret.rhs[1] == '=' || ret.rhs[1] == '?' || ret.rhs[1] == '+')
+			ret.rhs += 2;
+		else ret.rhs = NULL;
 	}
-	return match;
+	return ret;
 
 }
 
@@ -190,19 +237,18 @@ char *parameter_expansion(char * full_exp, Vars *const shell_vars, int *const er
 		*error = 1; return NULL;
 	}
 
-	const char *rhs = find_pattern_or_word(full_exp);
-	if (rhs) {
-		//TODO: add pattern removal with # ## % %%
-		size_t rhs_len = ft_strlen(rhs);
-		if (rhs[rhs_len - 1] != '}')
+	const SpecialId maybe_special = find_pattern_or_word(full_exp);
+	if (maybe_special.rhs) {
+		size_t rhs_len = ft_strlen(maybe_special.rhs);
+		if (maybe_special.rhs[rhs_len - 1] != '}')
 			rhs_len++;
-		char * const trimmed_rhs = ft_substr(rhs, 0, rhs_len - 1);
-		StringList *expansion_result = do_expansions_word(trimmed_rhs, error, shell_vars, O_PARAMETER);
+		char * const trimmed_rhs = ft_substr(maybe_special.rhs, 0, rhs_len - 1);
+		StringList *expansion_result = do_expansions_word(trimmed_rhs, error, shell_vars, maybe_special.type);
 		if ((*error) != 0) return NULL;
 
 		const char *final_rhs = *expansion_result->data;
 		char buffer[MAX_WORD_LEN] = {0};
-		const char *final_lhs = gc(GC_ADD, ft_substr(full_exp, 0, rhs - full_exp), GC_SUBSHELL);
+		const char *final_lhs = gc(GC_ADD, ft_substr(full_exp, 0, maybe_special.rhs - full_exp), GC_SUBSHELL);
 		ft_snprintf(buffer, MAX_WORD_LEN, "%s%s}", final_lhs, final_rhs);
 		full_exp = gc(GC_ADD, ft_strdup(buffer), GC_SUBSHELL);
 	}

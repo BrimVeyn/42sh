@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 10:13:53 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/30 19:04:50 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2025/01/03 13:52:05 by bvan-pae         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,6 +175,7 @@ static char *expand_prompt_special(const char *ps) {
 	da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
 
 	while (*ps) {
+		// dprintf(2, "ll\n");
 		if (*ps == '\\') {
 			if (special[(size_t)*(ps + 1)] != NULL) {
 				ss_push_string(ss, special[(size_t)*(ps + 1)]());
@@ -218,7 +219,10 @@ char *prompt_expansion(char *prompt, Vars *shell_vars) {
 	ft_sprintf(buffer, "\"%s\"", prompt);
 
 	int error = 0;
+	// dprintf(2, "buffer: %s\n", buffer);
 	StringList *maybe_prompt = do_expansions_word(buffer, &error, shell_vars, O_NONE);
+	// return "42sh > ";
+	// dprintf(2, "ici !\n");
 	if (!maybe_prompt) prompt = "";
 	else prompt = maybe_prompt->data[0];
 

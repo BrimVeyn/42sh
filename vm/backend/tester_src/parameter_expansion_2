@@ -1,0 +1,25 @@
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#/}       # Remove the first slash
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##*/}     # Remove all characters before the last slash
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%/home*}  # Remove from the last /home to the end
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%/*}     # Remove everything after the first slash
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#xyz}     # Pattern does not match, no change
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##xyz}    # Pattern does not match, no change
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%xyz}     # Pattern does not match, no change
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%xyz}    # Pattern does not match, no change
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#}        # Empty pattern, no change
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##}       # Empty pattern, no change
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%}        # Empty pattern, no change
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%}       # Empty pattern, no change
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#*/}      # Remove up to the first slash
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##*/}     # Remove up to the last slash
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%/*}      # Remove from the last slash
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%/*}     # Remove everything after the first slash
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW#*home}   # Remove up to the first "home"
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW##*home}  # Remove up to the last "home"
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%home*}   # Remove from the last "home"
+echo ${NEWW:=/home/homecoucou/home/home}; echo ${NEWW%%home*}  # Remove everything after the first "home"
+unset NEWW; echo ${NEWW:=defaultvalue}; echo ${NEWW}                      # Assign a default value and display it
+unset NEWW; echo ${NEWW#d*}; echo ${NEWW}                                # Remove up to the first match of "d*"
+unset NEWW; echo ${NEWW##d*}; echo ${NEWW}                               # Remove all matches of "d*" 
+NEWW="/path/with/special\char/home"; echo ${NEWW#*special\\char}  # Handle escaped characters
+NEWW="/path/with/special\char/home"; echo ${NEWW##*special\\char} # Remove everything before and including special char
