@@ -56,7 +56,7 @@ function UnitTest({unit}) {
 			buffer += " bg-yellow-500";
 
 		if (type === activeDiff)
-			buffer += " border-green-700"
+			buffer += " border-blue-500"
 		return buffer;
 	}
 
