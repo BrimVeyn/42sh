@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/27 11:16:01 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/03 12:55:44 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,42 @@ void move_cursor(int x, int y);
 void set_cursor_position(readline_state_t *rl_state);
 void signal_prompt_mode(void);
 
+size_t get_visible_length(const char * const str){
+	size_t cmp = 0;
+	bool in_escape_sequence = false;
+
+	for (int i = 0; str[i]; i++){
+		if (str[i] == '\033' || str[i] == '\e') in_escape_sequence = true;
+		else if (in_escape_sequence && str[i] == 'm') in_escape_sequence = false;
+		else if (!in_escape_sequence) cmp++;
+	}
+	return cmp;
+}
+
+// void print_raw(const char* str) {
+//     for (const char* p = str; *p; ++p) {
+//         if (*p == '\033') { // Code d'échappement ESC
+//             printf("\\033");
+//         } else if (*p == '\e') { // Alias de \033
+//             printf("\\e");
+//         } else if (*p == '\n') { // Retour à la ligne
+//             printf("\\n");
+//         } else if (*p == '\t') { // Tabulation
+//             printf("\\t");
+//         } else {
+//             putchar(*p); // Caractères normaux
+//         }
+//     }
+//     putchar('\n');
+// }
+//
 void set_prompt(readline_state_t *rl_state, const char *new_prompt) {
-	gc(GC_FREE, rl_state->prompt.data, GC_READLINE);
-	rl_state->prompt = string_init_str(new_prompt);
-	gc(GC_ADD, rl_state->prompt.data, GC_READLINE);
+	gc(GC_FREE, rl_state->prompt, GC_READLINE);
+	rl_state->prompt = ft_strdup(new_prompt);
+	rl_state->prompt_size = get_visible_length(rl_state->prompt);
+	// print_raw(rl_state->prompt);
+	// printf("prompt_size: %ld\nft_strlen %ld\n", rl_state->prompt_size, ft_strlen(rl_state->prompt));
+	gc(GC_ADD, rl_state->prompt, GC_READLINE);
 }
 
 size_t get_col(void){
@@ -48,7 +80,7 @@ size_t get_col(void){
 }
 
 void rl_print_prompt(int fd, readline_state_t *rl_state){
-	if (write(fd, rl_state->prompt.data, rl_state->prompt.size) == -1) {_fatal("write error", 1);}
+	if (write(fd, rl_state->prompt, ft_strlen(rl_state->prompt)) == -1) {_fatal("write error", 1);}
 }
 
 size_t get_row(void) {
@@ -79,16 +111,16 @@ void update_cursor_x(readline_state_t *rl_state, string *line, ssize_t n) {
     size_t cols = get_col();
 	size_t rows = get_row();
     ssize_t new_cursor_x = rl_state->cursor.x + n;
-    int tchars = line->size + rl_state->prompt.size;  //total chars
+    int tchars = line->size + rl_state->prompt_size;  //total chars
     int nlines = tchars / cols; //number lines
 
     if (new_cursor_x < 0) {//back
         ssize_t lines_up = (-new_cursor_x + cols - 1) / cols;
         rl_state->cursor.y -= lines_up;
 
-        new_cursor_x = cols + new_cursor_x - ((rl_state->cursor.y == 0) ? rl_state->prompt.size : 0);
+        new_cursor_x = cols + new_cursor_x - ((rl_state->cursor.y == 0) ? rl_state->prompt_size : 0);
         rl_state->cursor.x = (size_t)new_cursor_x;
-    } else if (rl_state->cursor.y == 0 && new_cursor_x + rl_state->prompt.size >= cols){
+    } else if (rl_state->cursor.y == 0 && new_cursor_x + rl_state->prompt_size >= cols){
 		rl_state->cursor.y++;
 		rl_state->cursor.x = 0;
 	}
@@ -125,7 +157,7 @@ void ft_rl_newline() {
 	rl_state->cursor_offset.x = 0;
 	rl_state->cursor.y = 0;
 	rl_state->cursor.x = 0;
-	rl_state->prompt.size = ft_strlen(rl_state->prompt.data);
+	rl_state->prompt_size = ft_strlen(rl_state->prompt);
 	rl_print_prompt(STDOUT_FILENO, rl_state);
 }
 
@@ -142,7 +174,7 @@ void move_cursor(int x, int y) {
 }
 
 void set_cursor_position(readline_state_t *rl_state) {
-    int adjusted_x = rl_state->cursor.x + (rl_state->cursor.y == 0 ? rl_state->prompt.size + rl_state->cursor_offset.x: 0);
+    int adjusted_x = rl_state->cursor.x + (rl_state->cursor.y == 0 ? rl_state->prompt_size + rl_state->cursor_offset.x: 0);
     move_cursor(adjusted_x, rl_state->cursor.y + rl_state->cursor_offset.y);
 }
 
@@ -150,7 +182,7 @@ void ft_readline_clean(){
 	readline_state_t *rl_state = manage_rl_state(RL_GET, NULL);
 	
 	(void)rl_state;
-	gc(GC_FREE, rl_state->prompt.data, GC_READLINE);
+	gc(GC_FREE, rl_state->prompt, GC_READLINE);
 	destroy_history();
 	gc(GC_FREE, rl_state, GC_READLINE);
 }
@@ -197,14 +229,14 @@ void get_cursor_pos(position_t *position){
 
 void update_line(readline_state_t *rl_state, string *line) {
 	// int cols = get_col();
- //    int tchars = line->size + rl_state->prompt.size;
+ //    int tchars = line->size + rl_state->prompt_size;
     // int nlines = tchars / cols;
 
 	move_cursor(rl_state->cursor_offset.x, rl_state->cursor_offset.y);
 	if (write(STDOUT_FILENO, "\033[0J", 4) == -1) {_fatal("write error", 1);}
 	// for (int i = 0; i <= nlines; i++){
 	// 	if (write(STDOUT_FILENO, "\033[0K", 4); == -1) {_fatal("write error", 1);}
-	// 	move_cursor(rl_state->prompt.size, rl_state->cursor_offset.y + i + 1);
+	// 	move_cursor(rl_state->prompt_size, rl_state->cursor_offset.y + i + 1);
 	// }
 	if (rl_state->search_mode.active == false){
 		move_cursor(rl_state->cursor_offset.x, rl_state->cursor_offset.y);
@@ -216,11 +248,11 @@ void update_line(readline_state_t *rl_state, string *line) {
 			search_in_history(rl_state, line->data);
 		}
 		if (!rl_state->search_mode.word_found){
-			rl_state->prompt.size = sizeof("(failed reverse-i-search)`") - 1;
+			rl_state->prompt_size = sizeof("(failed reverse-i-search)`") - 1;
 			if (write(STDOUT_FILENO, "(failed reverse-i-search)`", 27) == -1) {_fatal("write error", 1);}
 		}
 		else{
-			rl_state->prompt.size = sizeof("(reverse-i-search)`") - 1;
+			rl_state->prompt_size = sizeof("(reverse-i-search)`") - 1;
 			if (write(STDOUT_FILENO, "(reverse-i-search)`", 20) == -1) {_fatal("write error", 1);}
 		}
 		if (write(STDOUT_FILENO, line->data, str_length(line)) == -1) {_fatal("write error", 1);}
@@ -275,20 +307,20 @@ int can_go_left(readline_state_t *rl_state){
 	if (rl_state->cursor.y == 0)
 		return rl_state->cursor.x > 0;
 	else
-		return rl_state->cursor.x > -(int)rl_state->prompt.size;
+		return rl_state->cursor.x > -(int)rl_state->prompt_size;
 }
 
 int can_go_right(readline_state_t *rl_state, string *line) {
     int cols = get_col(); //number collums
-    int tchars = line->size + rl_state->prompt.size;  //total chars
+    int tchars = line->size + rl_state->prompt_size;  //total chars
     int nlines = tchars / cols; //number lines
     int nchar_on_last_line = tchars % cols; 
 
     if (rl_state->cursor.y == 0) {
         if (nlines >= 1) {
-            return rl_state->cursor.x < (int)(cols - rl_state->prompt.size);
+            return rl_state->cursor.x < (int)(cols - rl_state->prompt_size);
         } else {
-            return rl_state->cursor.x < (int)(nchar_on_last_line - rl_state->prompt.size);
+            return rl_state->cursor.x < (int)(nchar_on_last_line - rl_state->prompt_size);
         }
     }
     
@@ -329,8 +361,9 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
 		rl_state->search_mode.active = 0;
 		rl_state->search_mode.word_found = NULL;	
 
-		rl_state->prompt = string_init_str("");
-		gc(GC_ADD, rl_state->prompt.data, GC_READLINE);
+		rl_state->prompt = ft_strdup("");
+		rl_state->prompt_size = 0;
+		gc(GC_ADD, rl_state->prompt, GC_READLINE);
 	}
 
 	

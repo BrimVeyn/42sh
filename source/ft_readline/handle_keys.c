@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/07 11:05:59 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2025/01/03 10:28:52 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ int handle_enter_key(readline_state_t *rl_state, string *line) {
 	if (rl_state->interactive){
 		if (rl_state->search_mode.active){
 			rl_state->search_mode.active = false;
-			rl_state->prompt.size = ft_strlen(rl_state->prompt.data);
+			rl_state->prompt_size = ft_strlen(rl_state->prompt);
 			if (rl_state->search_mode.word_found){
 				gc(GC_FREE, line->data, GC_READLINE);
 				*line = string_init_str(rl_state->search_mode.word_found);
@@ -66,8 +66,8 @@ void handle_backspace_key(readline_state_t *rl_state, string *line, size_t pos){
 
 int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 	
-	int pos = rl_state->cursor.y * get_col() - rl_state->prompt.size;
-	pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->prompt.size : 0);
+	int pos = rl_state->cursor.y * get_col() - rl_state->prompt_size;
+	pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->prompt_size : 0);
 
 	if (c == '\n' || c == '\0'){
 		return handle_enter_key(rl_state, line);
@@ -90,8 +90,8 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 }
 
 void handle_delete_key(readline_state_t *rl_state, string *line) {
-    int pos = rl_state->cursor.y * get_col() - rl_state->prompt.size;
-    pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->prompt.size : 0);
+    int pos = rl_state->cursor.y * get_col() - rl_state->prompt_size;
+    pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->prompt_size : 0);
 
     if (pos >= str_length(line)) return;
 
@@ -160,7 +160,7 @@ rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *she
 		//leave search mode if special key other than DEL is pressed
         if (rl_state->search_mode.active) {
             rl_state->search_mode.active = false;
-            rl_state->prompt.size = ft_strlen(rl_state->prompt.data);
+            rl_state->prompt_size = ft_strlen(rl_state->prompt);
         }
         
         if (seq[1] == 'A') {

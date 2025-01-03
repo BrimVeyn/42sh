@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2024/12/05 15:08:27 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/03 10:28:38 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,8 @@ typedef struct s_search_mode {
 } search_mode_t;
 
 typedef struct s_readline_state {
-	string prompt;
+	char *prompt;
+	size_t prompt_size;
 	position_t cursor_offset;
 	position_t cursor;
 	search_mode_t search_mode;
