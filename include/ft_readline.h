@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/03 10:28:38 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/03 15:01:33 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,7 @@ void print_history_values(HISTORY_STATE *history);
 
 #include "final_parser.h"
 
+rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line, Vars *shell_vars);
 rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *shell_vars);
 char *ft_readline(const char *prompt, Vars *shell_vars);
 void init_history(Vars *shell_vars);

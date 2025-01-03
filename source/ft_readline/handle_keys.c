@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/03 10:28:52 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/03 15:01:35 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,21 +102,21 @@ void handle_delete_key(readline_state_t *rl_state, string *line) {
     }
 }
 
-void handle_left_arrow(readline_state_t *rl_state, string *line){
+void go_left(readline_state_t *rl_state, string *line){
 	if (can_go_left(rl_state)){
 		update_cursor_x(rl_state, line, -1);
 		set_cursor_position(rl_state);
 	}
 }
 
-void handle_right_arrow(readline_state_t *rl_state, string *line){
+void go_right(readline_state_t *rl_state, string *line){
 	if (can_go_right(rl_state, line)) {
 		update_cursor_x(rl_state, line, 1);
 		set_cursor_position(rl_state);
 	}
 }
 
-rl_event handle_down_arrow(readline_state_t *rl_state, string *line) {
+rl_event down_history(readline_state_t *rl_state, string *line) {
 	if (history->navigation_offset > 0){
 		history->navigation_offset--;
 		rl_state->cursor.x = history->entries[history->length - history->navigation_offset - 1]->line.size;
@@ -127,7 +127,7 @@ rl_event handle_down_arrow(readline_state_t *rl_state, string *line) {
 	return RL_NO_OP;
 }
 
-rl_event handle_up_arrow(readline_state_t *rl_state, string *line, Vars *shell_vars) {
+rl_event up_history(readline_state_t *rl_state, string *line, Vars *shell_vars) {
 	(void)shell_vars;
 	if (history->navigation_offset < history->length - CURRENT_LINE){ //-1
 		history->navigation_offset++;
@@ -139,6 +139,21 @@ rl_event handle_up_arrow(readline_state_t *rl_state, string *line, Vars *shell_v
 	// move_cursor(0, 0);
 	// print_history_values(history);
 	// set_cursor_position(rl_state);
+	return RL_NO_OP;
+}
+
+rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line, Vars *shell_vars){
+	switch (c) {
+		case '\02': // <C> + b
+			go_left(rl_state, line); break;
+		case '\06':
+			go_right(rl_state, line); break;
+		case '\020':
+			up_history(rl_state, line, shell_vars); break;
+		case '\016':
+			down_history(rl_state, line); break;
+		default: break;
+	}
 	return RL_NO_OP;
 }
 
@@ -164,13 +179,13 @@ rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *she
         }
         
         if (seq[1] == 'A') {
-            return handle_up_arrow(rl_state, line, shell_vars);
-        } else if (seq[1] == 'B') {
-            return handle_down_arrow(rl_state, line);
-        } else if (seq[1] == 'D') {
-			handle_left_arrow(rl_state, line);
-        } else if (seq[1] == 'C'){
-			handle_right_arrow(rl_state, line);
+            return up_history(rl_state, line, shell_vars); //up arrow
+        } else if (seq[1] == 'B') { //down arrow
+            return down_history(rl_state, line);
+        } else if (seq[1] == 'D') { //left arrow
+			go_left(rl_state, line);
+        } else if (seq[1] == 'C'){ //right arrow
+			go_right(rl_state, line);
         }
     }
     return RL_NO_OP;
