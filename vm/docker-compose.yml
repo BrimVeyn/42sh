@@ -19,7 +19,7 @@ services:
       - "4000:4000"
     volumes:
       - /app/node_modules                  # Avoid overwriting node_modules
-      - ./backend/data:/usr/src/app/data   # Shared volume for data directory
-      - ./backend/tester_src:/usr/src/app/tester_src #Shared volume for tester source
+      - ./backend/data:/usr/src/app/data:z   # Shared volume for data directory
+      - ./backend/tester_src:/usr/src/app/tester_src:z #Shared volume for tester source
     stdin_open: true
     tty: true
