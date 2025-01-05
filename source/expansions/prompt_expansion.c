@@ -11,6 +11,8 @@
 /* ************************************************************************** */
 
 #include "exec.h"
+#include "final_parser.h"
+#include "ft_readline.h"
 #include "ft_regex.h"
 #include "jobs.h"
 #include "utils.h"
@@ -169,8 +171,6 @@ static char *expand_prompt_special(const char *ps) {
 		['$'] = get_uid, ['\\'] = get_backslash,
 		['l'] = get_basename,
 	};
-
-	//missing \D{format} | \e | \[...\]
 
 	da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
 

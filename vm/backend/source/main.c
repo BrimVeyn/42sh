@@ -239,8 +239,6 @@ int main(void) {
 	pthread_t *threads = calloc(category_count, sizeof(pthread_t));
 
 	// Setting up the testing environment. Any existing files or directories from previous runs will be removed to ensure a clean state.
-	remove_directory_recursively("/tmp/42sh_testing");
-	setup_testing_environment("/tmp/42sh_testing");
 
     //Set LC_COLLATE="C" <-- posix standard sorting for file expansions
     setup_env();
@@ -310,7 +308,6 @@ int main(void) {
 	free(dir_buffer);
 	closedir(src_dir);
 
-	remove_directory_recursively("/tmp/42sh_testing");
     //clean cd test env, redir etc
     execute_shell_script(DESTROY_SCRIPT_PATH);
 

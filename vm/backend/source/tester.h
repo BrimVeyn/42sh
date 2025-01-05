@@ -52,7 +52,4 @@ int fill_dir(DIR *src_dir, struct dirent **dir_buffer);
 void sort_dir(struct dirent **dir_buffer, int category_count);
 void print_dir(struct dirent **dir_buffer);
 
-void setup_testing_environment(const char * const base_path);
-void remove_directory_recursively(const char *path);
-
 #endif // !TESTER_H

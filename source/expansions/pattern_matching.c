@@ -43,8 +43,8 @@ static int fill_map_with_character_class(char *character_class_name, char *map, 
 	for (size_t i = 0; i < ARRAY_SIZE(lookup); i++) {
 		if (!ft_strcmp(character_class_name, lookup[i].name)) {
 			for (size_t j = 0; j < 256; j++) {
-				if (reverse) map[j] ^= lookup[i].map[j];
-				else map[j] |= lookup[i].map[j];
+				if (reverse) { map[j] ^= lookup[i].map[j]; }
+				else { map[j] |= lookup[i].map[j]; }
 			}
 			return 0;
 		}
@@ -211,10 +211,6 @@ int match_string(const char *str, const PatternNodeL *pattern_nodes, int flag) {
 	if (flag != 0) {
 		for (size_t i = 0; i < string.size; i++) {
 			const size_t p_size = pattern_nodes->size - 1;
-
-			// for (size_t j = 0; j < p_size; j++) {
-			// 	dprintf(2, "[%zu][%zu]: %d\n", i, j, dp[i][j]);
-			// }
 
 			if ((flag == SMAL_PREFIX || flag == SMAL_SUFFIX) && dp[i][p_size] == true) {
 				ret = (i + 1);
