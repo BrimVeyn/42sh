@@ -67,13 +67,6 @@ typedef struct {
 	int	gc_level;
 } PosList;
 
-typedef struct {
-	int *data;
-	size_t size;
-	size_t capacity;
-	size_t size_of_element;
-	int	gc_level;
-} IntList;
 
 typedef struct ContextMap {
 	char *begin;

@@ -27,7 +27,7 @@
 
 extern TableEntry parsingTable[182][86];
 
-bool is_keyword(const TokenType type) {
+static bool is_keyword(const TokenType type) {
     static const char keyword_table[256] = {
         [IF] = 1,
         [FI] = 1,
@@ -49,7 +49,16 @@ bool is_keyword(const TokenType type) {
     return keyword_table[type];
 }
 
-TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row, bool *error) {
+static void fill_token(Tokenn *token, Lex *lexer, bool *error, int table_row, Vars *shell_vars) {
+	token->raw_value = lexer_get(lexer, error);
+	if (*error)
+		return ;
+	token->type = identify_token(lexer, token, table_row, error, shell_vars);
+}
+
+TokenType identify_token(Lex *lexer, Tokenn *token, const int table_row, bool *error, Vars *shell_vars) {
+
+	char *raw_value = token->raw_value;
 
 	if (!*raw_value)
 		return END;
@@ -70,47 +79,32 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 		[NEWLINE] = "\n", [AMPER] = "&", [SEMI] = ";",
 	};
 
+	static const int alias_allowed_map[182] = {
+		[0] = 1,      // TR 0 = first word
+		[26] = 1,     // TR 26 = first word after a variable declaration
+		[62] = 1,     // TR 62 = first word after a redirection and a variable declaration
+		[80] = 1,     // TR 80 = first word after a redir Name
+		[28] = 1,     // TR 28 = first word in a compound list
+		[29] = 1,     // TR 29 = first word in a subshell
+		[32] = 1,     // TR 32 = first word after if
+		[111] = 1,    // TR 111 = first word after then
+		[140] = 1,    // TR 140 = first word after elif
+		[141] = 1,    // TR 141 = first word after else
+		[162] = 1,    // TR 162 = first word after case pattern
+		[107] = 1,    // TR 107 = first word after do
+		[33] = 1,     // TR 33 = first word after while
+		[34] = 1,     // TR 34 = first word after until
+		[54] = 1,     // TR 54 = first word after &&
+		[55] = 1,     // TR 55 = first word after ||
+	};
 	// dprintf(2, "token: %s | %d\n", raw_value, table_row);
-
-	//TR 0 = first word
-	//      ex: 'ECHO ...'
-	//TR 26 = first word after a variable declaration
-	//		ex: 'var=12 ECHO ...'
-	//TR 62 = first word after a redirection and a variable declaration
-	//		ex: '<input var=smth ECHO ...'
-	//TR 80 = first word after a redir Name
-	//		ex: '<input ECHO ...'
-	//TR 28 = first word in a compound list
-	//		ex: '{ ECHO ... ; }'
-	//TR 29 = first word in a subshell
-	//		ex: '( ECHO .... )'
-	//TR 32 = first word after if
-	//		ex: 'if ECHO ...'
-	//TR 111 = first word after then
-	//		ex: 'if ....; then ECHO ...'
-	//TR 140 = first word after elif
-	//		ex: 'if ... elif ECHO ...'
-	//TR 141 = first word after else
-	//		ex: 'if ... else ECHO ...'
-	//TR 162 = first word after case pattern
-	//		ex: 'case .... in .... smth) ECHO ...'
-	//TR 107 = first word after do
-	//		ex: 'for ..... in .... do ECHO ...'
-	//TR 32 = first word after if
-	//		ex: 'if ECHO ....'
-	//TR 33 = first word after while
-	//		ex: 'while ECHO .... '
-	//TR 34 = first word after until
-	//		ex: 'until ECHO .... '
-	//TR 54/55 = first word after &&/||
-	//		ex: '... ||/&& ECHO ...'
-
+	
 	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
 		if (!ft_strcmp(map[i], raw_value) && 
 			( (table_row != 27 && table_row != 66 && 
 			   table_row != 98 && table_row != 39 && 
 			   table_row != 80 && table_row != 62 &&
-			   table_row != 26) 
+			   table_row != 26)
 			|| !is_keyword(i)) )
 		{
 			if (is_continuable(i)) { line_continuation(lexer); }
@@ -137,8 +131,38 @@ TokenType identify_token(Lex *lexer, const char *raw_value, const int table_row,
 			return NAME;
 	}
 
+	if (alias_allowed_map[table_row]) {
+		char *maybe_value;
+		//Alias buffer must be empty and alias found in the table
+		if ((maybe_value = string_list_get_value(shell_vars->alias, raw_value)) != NULL) {
+			//Make sure we're not expandinf aliases recursively
+			if (!string_list_find(lexer->active_aliases.names, (char*)raw_value)) {
+
+				ss_insert_string(lexer->input, maybe_value, 0);
+				ss_insert_string(lexer->raw_input_ss, maybe_value, lexer->pos.absolute);
+
+				/*dprintf(2, "Updated input: %s\n", lexer->input->data);*/
+
+				size_t value_len = ft_strlen(maybe_value);
+
+				if (lexer->active_aliases.names->size != 0) {
+					for(size_t i = 0; i < lexer->active_aliases.names->size; i++) {
+						lexer->active_aliases.offsets->data[i] += value_len;
+					}
+				}
+
+				da_push(lexer->active_aliases.names, (char*)raw_value);
+				da_push(lexer->active_aliases.offsets, (lexer->pos.absolute + value_len));
+
+				fill_token(token, lexer, error, table_row, shell_vars);
+				return token->type;
+			}
+		}
+	}
+
 	return WORD;
 }
+
 
 int parse(Lex *lexer, Vars *shell_vars) {
 
@@ -147,12 +171,8 @@ int parse(Lex *lexer, Vars *shell_vars) {
 	da_create(stack, TokenStack, sizeof(StackEntry), GC_SUBSHELL);
 
 	Tokenn token;
-	token.raw_value = lexer_get(lexer, &error);
-	if (error) 
-		return ERR;
-
-	token.type = identify_token(lexer, token.raw_value, 0, &error);
-	if (error) 
+	fill_token(&token, lexer, &error, 0, shell_vars);
+	if (error)
 		return ERR;
 
 	da_push(lexer->produced_tokens, token.type);
@@ -170,15 +190,11 @@ int parse(Lex *lexer, Vars *shell_vars) {
 				new_entry->state = entry.value;
 				da_push(stack, new_entry);
 
-				token.raw_value = lexer_get(lexer, &error);
-				if (error) 
+				fill_token(&token, lexer, &error, entry.value, shell_vars);
+				if (error)
 					return ERR;
 
-				token.type = identify_token(lexer, token.raw_value, entry.value, &error);
-				// dprintf(2, "token.type: %s\n", tokenTypeStr(token.type));
 				da_push(lexer->produced_tokens, token.type);
-				if (error) 
-					return ERR;
 				break;
 			}
 			case REDUCE: {

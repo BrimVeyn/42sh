@@ -19,6 +19,14 @@
 #include <limits.h>
 #include <stdio.h>
 
+bool string_list_find(StringList *list, char *value) {
+	for (size_t i = 0; i < list->size; i++) {
+		if (!ft_strcmp(list->data[i], value))
+			return true;
+	}
+	return false;
+}
+
 char *get_variable_value(Vars * const shell_vars, const char * const id){
 	char *result = string_list_get_value(shell_vars->positional, id);
 	if (result) return result;

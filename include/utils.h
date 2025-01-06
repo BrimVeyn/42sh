@@ -91,10 +91,19 @@ typedef struct {
 	int		gc_level;
 } StringStream;
 
+typedef struct {
+	int *data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} IntList;
+
 //----------------StringStream------------------//
 char	*ss_get_owned_slice(StringStream * const ss);
 char	*ss_to_string(StringStream * const ss);
 void	ss_push_string(StringStream * const ss, const char * const str);
+void	ss_push_string_front(StringStream * const ss, const char * const str);
 void	ss_cut(StringStream * const ss, const size_t new_size);
 char	ss_pop_front(StringStream * const ss);
 void	ss_insert_string(StringStream * const ss, const char * const str, const size_t pos);

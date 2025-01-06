@@ -24,18 +24,6 @@
 
 #define isBitOne(mask, bit) (((mask) & (1U << (bit))) != 0)
 
-void printBinary(int n) {
-    unsigned int mask = 1 << (sizeof(int) * 8 - 1); // Mask for the most significant bit
-    for (; mask > 0; mask >>= 1) {
-        if (n & mask) {
-            putchar('1');
-        } else {
-            putchar('0');
-        }
-    }
-    putchar('\n'); // Add a newline at the end
-}
-
 WordContext get_context(const StringStream *input, WordContextBounds *map, const WordContext context) {
     const unsigned char byteptr = map[context].bitmap;
 
@@ -104,6 +92,8 @@ void line_continuation(const Lex * const lexer) {
 	if (lexer->raw_input_ss->data[i] != '\n' && 
 		lexer->raw_input_ss->data[i] != '\0') { return ; }
 
+	dprintf(2, "ici !!!\n");
+
 	const char * const PS2 = string_list_get_value(lexer->shell_vars->set, "PS2");
 	signal_manager(SIG_HERE_DOC);
 	char * const input_continuation = ft_readline(PS2, lexer->shell_vars);
@@ -149,9 +139,8 @@ void pass_whitespace(StringStream * const input, CursorPosition * const pos) {
 	}
 }
 
-bool get_next_token(Lex * const lexer, StringStream * const cache) {
+bool get_next_token(Lex * const lexer, StringStream *const input, StringStream * const cache) {
 
-	StringStream * const input = lexer->input;
 	CursorPosition * const  pos = &lexer->pos;
 
 	static WordContextBounds map[] = {
