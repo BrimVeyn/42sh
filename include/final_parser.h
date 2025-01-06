@@ -111,6 +111,7 @@ typedef enum TokenType {
 	Separator_Op,
 	Separatore,
 	Sequential_Sep,
+	ALIAS,
 } TokenType;
 
 typedef enum {SHIFT, REDUCE, GOTO, ACCEPT, ERROR} Action;
@@ -344,6 +345,7 @@ typedef struct {
 
 int				parse_input(char *in, char *filename, Vars * const shell_vars);
 
+bool			string_list_find(StringList *list, char *value);
 char			*get_positional_value(const StringList * const sl, const size_t idx);
 char			*get_variable_value(Vars * const shell_vars, const char * const name);
 void			string_list_add_or_update(StringList * const sl, const char * const var);
@@ -369,6 +371,11 @@ typedef struct {
 } TokenTypeVect;
 
 typedef struct {
+	StringList *names;
+	IntList *offsets;
+} ActiveAliases;
+
+typedef struct {
 	char *filename; //either script name or terminal
 	StringStream *raw_input_ss;
 	StringStream *input;
@@ -376,7 +383,10 @@ typedef struct {
 	Vars *shell_vars;
 	CursorPosition pos;
 	TokenTypeVect *produced_tokens;
+	ActiveAliases active_aliases;
 } Lex;
+
+TokenType identify_token(Lex *lexer, Tokenn *token, const int table_row, bool *error, Vars *shell_vars);
 
 Lex		*lex_init(const char * const input, char * const filename, Vars * const shell_vars);
 char	*lexer_get(Lex * const lexer, bool * const error);

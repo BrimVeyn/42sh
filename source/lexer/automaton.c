@@ -102,6 +102,7 @@ char *tokenTypeStr(TokenType type) {
 		case Separator_Op: return "Separator_Op";
 		case Separatore: return "Separator";
 		case Sequential_Sep: return "Sequential_Sep";
+		case ALIAS: return "ALIAS";
 	}
 	return NULL;
 }

@@ -118,5 +118,4 @@ void builtin_return(const SimpleCommandP *command, Vars *const shell_vars);
 void builtin_test(const SimpleCommandP *command, Vars * const shell_vars);
 //---------------------------------------------------------------------//
 
-
 #endif
