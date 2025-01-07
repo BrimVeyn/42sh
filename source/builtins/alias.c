@@ -27,7 +27,7 @@ static void print_alias(StringList *env) {
 		const char * const equal_ptr = ft_strchr(res[i], '=');
 		const char * const id = ft_substr(res[i], 0, equal_ptr - res[i]);
 		const char * const value = ft_substr(equal_ptr + 1, 0, ft_strlen(res[i]) - (equal_ptr - res[i]));
-		printf("%s=\'%s\'\n", id, value);
+		printf("alias %s=\'%s\'\n", id, value);
 	}
 	free(res);
 }
@@ -35,6 +35,7 @@ static void print_alias(StringList *env) {
 void builtin_alias(const SimpleCommandP *command, Vars * const shell_vars) {
 	StringList *args = command->word_list;
 	g_exitno = 0;
+
 
 	if (args->size == 1)
 		print_alias(shell_vars->alias);
@@ -45,12 +46,13 @@ void builtin_alias(const SimpleCommandP *command, Vars * const shell_vars) {
 		if (regex_match("^[_0-9a-zA-Z!%,@]*$", arg).is_found) {
 			char *maybe_alias = string_list_get_value(shell_vars->alias, arg);
 			if (maybe_alias) {
-				printf("%s=\'%s\'\n", arg, maybe_alias);
+				printf("alias %s=\'%s\'\n", arg, maybe_alias);
 			} else {
 				ft_dprintf(STDERR_FILENO, "42sh: alias: %s: not found\n", arg);
 				g_exitno = 1;
 			}
 		} else if (regex_match("^[_0-9a-zA-Z!%,@]+=", arg).is_found) {
+			/*dprintf(2, "hey from alias !\n");*/
 			string_list_add_or_update(shell_vars->alias, arg);
 		} else {
 			ft_dprintf(STDERR_FILENO, "42sh: alias: %s: not found\n", arg);

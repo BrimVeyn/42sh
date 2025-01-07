@@ -142,8 +142,16 @@ TokenType identify_token(Lex *lexer, Tokenn *token, const int table_row, bool *e
 				ss_insert_string(lexer->raw_input_ss, maybe_value, lexer->pos.absolute);
 
 				/*dprintf(2, "Updated input: %s\n", lexer->input->data);*/
+				/*dprintf(2, "Updated input: %s\n", lexer->raw_input_ss->data);*/
 
 				size_t value_len = ft_strlen(maybe_value);
+				size_t raw_len = ft_strlen(raw_value);
+				lexer->pos.absolute -= raw_len;
+				lexer->pos.column -= raw_len;
+
+				for (size_t i = 0; i < raw_len; i++) {
+					da_erase_index(lexer->raw_input_ss, lexer->pos.absolute);
+				}
 
 				if (lexer->active_aliases.names->size != 0) {
 					for(size_t i = 0; i < lexer->active_aliases.names->size; i++) {
