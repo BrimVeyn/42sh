@@ -92,8 +92,6 @@ void line_continuation(const Lex * const lexer) {
 	if (lexer->raw_input_ss->data[i] != '\n' && 
 		lexer->raw_input_ss->data[i] != '\0') { return ; }
 
-	dprintf(2, "ici !!!\n");
-
 	const char * const PS2 = string_list_get_value(lexer->shell_vars->set, "PS2");
 	signal_manager(SIG_HERE_DOC);
 	char * const input_continuation = ft_readline(PS2, lexer->shell_vars);
