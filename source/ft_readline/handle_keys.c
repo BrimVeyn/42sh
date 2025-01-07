@@ -65,7 +65,7 @@ void handle_backspace_key(readline_state_t *rl_state, string *line, size_t pos){
 
 
 int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
-	
+
 	int pos = rl_state->cursor.y * get_col() - rl_state->prompt_size;
 	pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->prompt_size : 0);
 
@@ -127,40 +127,75 @@ rl_event down_history(readline_state_t *rl_state, string *line) {
 	return RL_NO_OP;
 }
 
-rl_event up_history(readline_state_t *rl_state, string *line, Vars *shell_vars) {
-	(void)shell_vars;
-	if (history->navigation_offset < history->length - CURRENT_LINE){ //-1
-		history->navigation_offset++;
-		rl_state->cursor.x = history->entries[history->length - history->navigation_offset - 1]->line.size;
-		gc(GC_FREE, line->data, GC_READLINE);
-		*line = str_strdup(&history->entries[history->length - history->navigation_offset - 1]->line);
-		gc(GC_ADD, line->data, GC_READLINE);
-	}
-	// move_cursor(0, 0);
-	// print_history_values(history);
-	// set_cursor_position(rl_state);
-	return RL_NO_OP;
+void go_end(readline_state_t *rl_state, string *line){
+    while(can_go_right(rl_state, line)){
+        go_right(rl_state, line);
+    }
+}
+
+void go_start(readline_state_t *rl_state, string *line){
+    while(can_go_left(rl_state)){
+        go_left(rl_state, line);
+    }
+}
+
+void go_right_word(readline_state_t *rl_state, string *line){
+    while (can_go_right(rl_state, line) && rl_get_current_char(rl_state, line) == ' '){
+        go_right(rl_state, line);
+    }
+    char next_char = rl_get_current_char(rl_state, line);
+    while (can_go_right(rl_state, line) && next_char != ' ' && next_char != '\0') {
+        go_right(rl_state, line);
+        next_char = rl_get_current_char(rl_state, line);
+    } 
+    while (can_go_right(rl_state, line) && rl_get_current_char(rl_state, line) == ' '){
+        go_right(rl_state, line);
+    }
+}
+
+void go_left_word(readline_state_t *rl_state, string *line){
+    while (can_go_left(rl_state) && rl_get_prev_char(rl_state, line) == ' '){
+        go_left(rl_state, line);
+    }
+    char prev_char = rl_get_prev_char(rl_state, line);
+    while (can_go_left(rl_state) && prev_char != ' ' && prev_char != '\0') {
+        go_left(rl_state, line);
+        prev_char = rl_get_prev_char(rl_state, line);
+    } 
 }
 
 rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line, Vars *shell_vars){
-	switch (c) {
-		case '\02': // <C> + b
-			go_left(rl_state, line); break;
-		case '\06':
-			go_right(rl_state, line); break;
-		case '\020':
-			up_history(rl_state, line, shell_vars); break;
-		case '\016':
-			down_history(rl_state, line); break;
-		default: break;
-	}
-	return RL_NO_OP;
+    switch (c) {
+        case '\02': // <C> + b
+            go_left(rl_state, line); break;
+        case '\06':
+            go_right(rl_state, line); break;
+        case '\020':
+            up_history(rl_state, line, shell_vars); break;
+        case '\016':
+            down_history(rl_state, line); break;
+        case '\04': // <C> + e
+            go_end(rl_state, line); break;
+        case '\01': // <C> + a
+            go_start(rl_state, line); break;
+        default: {
+            break;
+        }
+    }
+    return RL_NO_OP;
 }
 
 rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *shell_vars) {
+
     char seq[3];
     if (read(STDIN_FILENO, &seq[0], 1) == 0) return RL_REFRESH;
     
+
+    if (seq[0] == 'b'){
+        go_left_word(rl_state, line);
+    } else if (seq[0] == 'f'){
+        go_right_word(rl_state, line);
+    }
     if (seq[0] == '[') {
         if (read(STDIN_FILENO, &seq[1], 1) == 0) return RL_REFRESH;
 
@@ -177,7 +212,7 @@ rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *she
             rl_state->search_mode.active = false;
             rl_state->prompt_size = ft_strlen(rl_state->prompt);
         }
-        
+         printf("char: %c\n", seq[1]);
         if (seq[1] == 'A') {
             return up_history(rl_state, line, shell_vars); //up arrow
         } else if (seq[1] == 'B') { //down arrow

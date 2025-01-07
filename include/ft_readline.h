@@ -89,6 +89,10 @@ int can_go_left(readline_state_t *rl_state);
 
 void ft_readline_clean();
 void ft_rl_newline();
+char rl_get_current_char(readline_state_t *rl_state, string *line);
+char rl_get_prev_char(readline_state_t *rl_state, string *line);
+char rl_get_next_char(readline_state_t *rl_state, string *line);
+
 
 void update_line(readline_state_t *rl_state, string *line);
 void update_cursor_x(readline_state_t *rl_state, string *line, ssize_t n);

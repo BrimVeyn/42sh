@@ -313,6 +313,22 @@ int can_go_left(readline_state_t *rl_state){
 		return rl_state->cursor.x > -(int)rl_state->prompt_size;
 }
 
+char rl_get_current_char(readline_state_t *rl_state, string *line){
+    return (line->data[rl_state->cursor.x * (rl_state->cursor.y + 1)]);
+}
+
+char rl_get_next_char(readline_state_t *rl_state, string *line){
+    size_t pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) + 1;
+    if (pos > line->size) return '\0';
+    return (line->data[pos]);
+}
+
+char rl_get_prev_char(readline_state_t *rl_state, string *line){
+    int pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) - 1;
+    if (pos < 0) return '\0';
+    return (line->data[pos]);
+}
+
 int can_go_right(readline_state_t *rl_state, string *line) {
     int cols = get_col(); //number collums
     int tchars = line->size + rl_state->prompt_size;  //total chars
@@ -420,7 +436,7 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
 			handle_control_keys(rl_state, c);
         } else if (c == '\033') {
             result = handle_special_keys(rl_state, line, shell_vars);
-        } else if (c > 0 && c < 32){
+        } else if (c > 0 && c < 32 && c != '\n'){
 			result = handle_readline_controls(rl_state, c, line, shell_vars);
 		} else {
 			result = handle_printable_keys(rl_state, c, line);
