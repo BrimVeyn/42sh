@@ -41,4 +41,3 @@ echo ./pm_test/*
 echo /etc/*
 echo /home/[a-zA-Z]*
 echo /*
-echo .*/[a-j]*

@@ -27,6 +27,8 @@ typedef enum {
 	EXP_SUB,
 	EXP_SQUOTE,
 	EXP_DQUOTE,
+	EXP_PROC_SUB_IN,
+	EXP_PROC_SUB_OUT,
 } ExpKind;
 
 typedef struct Str {
@@ -133,6 +135,7 @@ PatternNodeL	*compile_pattern(char *pattern);
 
 //---------------------------------------------------------------//
 char				*parameter_expansion(char * str, Vars *const shell_vars, int * const error);
+char				*process_substitution(char *const str, const ExpKind kind, Vars *const shell_vars, int * const error);
 char				*command_substitution(char *const str, Vars *const shell_vars, int * const error);
 char				*arithmetic_expansion(char *const str, Vars *const shell_vars, int *error);
 void				tilde_expansion(StringStream *cache, StringStream *word, Vars *shell_vars, const int options);

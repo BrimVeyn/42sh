@@ -572,7 +572,6 @@ static int execute_pipeline(AndOrP * const job, const bool background, Vars * co
 
 	const bool piped = (process->next != NULL);
 
-
 	if (!piped) {
 		return execute_single_command(job, background, shell_vars);
 	}
