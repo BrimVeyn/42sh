@@ -35,6 +35,8 @@ void str_print(Str *node, size_t i) {
 		[EXP_CMDSUB] = C_LIGHT_PINK,
 		[EXP_SQUOTE] = C_LIGHT_RED,
 		[EXP_DQUOTE] = C_DARK_BLUE,
+		[EXP_PROC_SUB_IN] = C_LIGHT_BROWN,
+		[EXP_PROC_SUB_OUT] = C_LIGHT_ORANGE,
 	};
 
 	while (node) {
@@ -55,10 +57,13 @@ void str_list_print(const StrList *list) {
 		[EXP_CMDSUB] = C_LIGHT_PINK,
 		[EXP_SQUOTE] = C_LIGHT_RED,
 		[EXP_DQUOTE] = C_DARK_BLUE,
+		[EXP_PROC_SUB_IN] = C_LIGHT_BROWN,
+		[EXP_PROC_SUB_OUT] = C_LIGHT_ORANGE,
 	};
 	
-	dprintf(STDERR_FILENO, C_LIME"Colors: %sWORD %sCMDSUB, %sARITHMETIC, %sPARAMETER %sDQUOTE %sSQUOTE"C_RESET"\n", 
-	colors[EXP_WORD], colors[EXP_CMDSUB], colors[EXP_ARITHMETIC], colors[EXP_VARIABLE], colors[EXP_DQUOTE], colors[EXP_SQUOTE]);
+	dprintf(STDERR_FILENO, C_LIME"Colors: %sWORD %sCMDSUB, %sARITHMETIC, %sPARAMETER %sDQUOTE %sSQUOTE %sPROCIN %sPROCOUT"C_RESET"\n", 
+	colors[EXP_WORD], colors[EXP_CMDSUB], colors[EXP_ARITHMETIC], colors[EXP_VARIABLE], 
+	colors[EXP_DQUOTE], colors[EXP_SQUOTE], colors[EXP_PROC_SUB_IN], colors[EXP_PROC_SUB_OUT]);
 
 	dprintf(STDERR_FILENO, C_LIME"String: "C_RESET);
 	for (size_t i = 0; i < list->size; i++) {

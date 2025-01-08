@@ -19,35 +19,26 @@
 #include "ft_readline.h"
 #include "dynamic_arrays.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <time.h>
 
-#define isBitOne(mask, bit) (((mask) & (1U << (bit))) != 0)
-
 WordContext get_context(const StringStream *input, WordContextBounds *map, const WordContext context) {
-    const unsigned char byteptr = map[context].bitmap;
+    const uint16_t byteptr = map[context].bitmap;
 
-    static const struct {
-        WordContext type;
-        int check_length;
-    } contexts[] = {
-        {WORD_ARITHMETIC, 3},
-        {WORD_CMD_SUB, 2},
-        {WORD_PARAM, 2},
-        {WORD_SUBSHELL, 1},
-        {WORD_ARITHMETIC_PAREN, 1},
-        {WORD_SINGLE_QUOTE, 1},
-        {WORD_DOUBLE_QUOTE, 1}
-    };
+    for (size_t i = 1; i < 10; i++) {
+		char *ctx_sstr = map[i].start;
+		uint16_t mask = (1 << i);
 
-    for (size_t i = 0; i < sizeof(contexts) / sizeof(contexts[0]); i++) {
-        const WordContext current_context = contexts[i].type;
-        const int length = contexts[i].check_length;
-
-        if (isBitOne(byteptr, current_context) &&
-            !ft_strncmp(input->data, map[current_context].start, length)) 
+		if (!ft_strncmp("<(", input->data, 2)) {
+			/*dprintf(2, "byteptr: %d\n", map[context].bitmap);*/
+			/*dprintf(2, "bitmask: %d\n", map[i].bitmap);*/
+			/*dprintf(2, "VALUE: %s\n", boolStr((byteptr & mask) > 0));*/
+			/*dprintf(2, "MASK: %d\n", mask);*/
+		}
+        if ((byteptr & mask) && !ft_strncmp(input->data, ctx_sstr, ft_strlen(ctx_sstr))) 
 		{
-            return current_context;
+            return i;
         }
     }
 
@@ -142,7 +133,7 @@ bool get_next_token(Lex * const lexer, StringStream *const input, StringStream *
 	CursorPosition * const  pos = &lexer->pos;
 
 	static WordContextBounds map[] = {
-		[WORD_WORD] = {.start = "NONE", .end = " \t\n;&|<>()", .bitmap = WORD_MAP},
+		[WORD_WORD] = { "NONE", " \t\n;&|<>()", WORD_MAP},
 		[WORD_CMD_SUB] = {"$(", ")", CMD_SUB_MAP},
 		[WORD_PARAM] = { "${", "}" , PARAM_MAP},
 		[WORD_SUBSHELL] = { "(", ")", SUBSHELL_MAP},
@@ -150,6 +141,8 @@ bool get_next_token(Lex * const lexer, StringStream *const input, StringStream *
 		[WORD_ARITHMETIC_PAREN] = { "(", ")" , ARITHMETIC_PAREN_MAP},
 		[WORD_SINGLE_QUOTE] = {"'", "'", SINGLE_QUOTE_MAP},
 		[WORD_DOUBLE_QUOTE] = {"\"", "\"", DOUBLE_QUOTE_MAP},
+		[WORD_PROC_SUB_IN] = {"<(", ")", PROCESS_SUB_MAP},
+		[WORD_PROC_SUB_OUT] = {">(", ")", PROCESS_SUB_MAP},
 	};
 
 	da_create(context_stack, WordContextList, sizeof(WordContext), GC_SUBSHELL);
@@ -180,6 +173,8 @@ bool get_next_token(Lex * const lexer, StringStream *const input, StringStream *
 		}
 
 		const WordContext maybe_new_context = get_context(input, map, da_peak_back(context_stack));
+
+		/*dprintf(2, "input: %s | context: %d\n", input->data, da_peak_back(context_stack));*/
 
 		if (maybe_new_context != NONE) {
 			da_push(context_stack, maybe_new_context);
@@ -225,11 +220,11 @@ bool get_next_token(Lex * const lexer, StringStream *const input, StringStream *
 		switch (input->data[0]) {
 			case ';' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
 			case '&' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
-			case '<' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
-			case '>' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
 			case '|' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
 			case '(' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
 			case ')' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
+			case '<' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
+			case '>' : da_push(cache, da_pop_front(input)); (pos->column)++; (pos->absolute)++; return true;
 			case '\n': da_push(cache, da_pop_front(input)); (pos->line)++; (pos->column) = 0; (pos->absolute)++; return true;
 		}
 	}

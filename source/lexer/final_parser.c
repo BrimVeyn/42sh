@@ -54,7 +54,33 @@ static void fill_token(Tokenn *token, Lex *lexer, bool *error, int table_row, Va
 	if (*error)
 		return ;
 	token->type = identify_token(lexer, token, table_row, error, shell_vars);
+	/*dprintf(2, "Token: %s | %s\n", token->raw_value, tokenTypeStr(token->type));*/
 }
+
+char *read_till_closing_paren(Lex *lexer, StringStream *cache) {
+	da_create(paren_stack, StringStream, sizeof(char), GC_SUBSHELL);
+
+	char paren = da_pop_front(lexer->input);
+	da_push(paren_stack, paren);
+	da_push(cache, paren);
+
+	while (paren_stack->size && lexer->input->size) {
+		char c = da_pop_front(lexer->input);
+		if (c == '(')
+			da_push(paren_stack, c);
+		if (c == ')')
+			da_pop(paren_stack);
+		da_push(cache, c);
+	}
+
+	if (paren_stack->size)
+		return NULL;
+	
+	return "";
+}
+
+
+
 
 TokenType identify_token(Lex *lexer, Tokenn *token, const int table_row, bool *error, Vars *shell_vars) {
 
@@ -63,7 +89,7 @@ TokenType identify_token(Lex *lexer, Tokenn *token, const int table_row, bool *e
 	if (!*raw_value)
 		return END;
 
-	static const char *map[] = {
+	static const char *keyword_map[] = {
 		[AND_IF] = "&&", [OR_IF] = "||",
 		[BANG] = "!", [PIPE] = "|",
 		[LPAREN] = "(", [RPAREN] = ")",
@@ -97,10 +123,10 @@ TokenType identify_token(Lex *lexer, Tokenn *token, const int table_row, bool *e
 		[54] = 1,     // TR 54 = first word after &&
 		[55] = 1,     // TR 55 = first word after ||
 	};
-	// dprintf(2, "token: %s | %d\n", raw_value, table_row);
+	/*dprintf(2, "token: %s | %d\n", raw_value, table_row);*/
 	
-	for (size_t i = 0; i < ARRAY_SIZE(map); i++) {
-		if (!ft_strcmp(map[i], raw_value) && 
+	for (size_t i = 0; i < ARRAY_SIZE(keyword_map); i++) {
+		if (!ft_strcmp(keyword_map[i], raw_value) && 
 			( (table_row != 27 && table_row != 66 && 
 			   table_row != 98 && table_row != 39 && 
 			   table_row != 80 && table_row != 62 &&

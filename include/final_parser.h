@@ -394,6 +394,7 @@ char	*lexer_peak(Lex * const lexer, bool * const error);
 char	*lexer_peak_char(Lex * const lexer);
 
 void	pretty_error(const Lex *const lexer, char *raw_token);
+char *read_till_closing_paren(Lex *lexer, StringStream *cache);
 
 
 bool	is_continuable(const TokenType type);
@@ -434,6 +435,7 @@ typedef enum {
 	O_PARAMETER = (1 << 4),
 } ExpansionsOpt;
 
-int execute_complete_command(const CompleteCommandP * const complete_command, Vars *const shell_vars, const bool bg);
-bool execute_builtin(const SimpleCommandP *command, Vars *shell_vars);
+int		execute_complete_command(const CompleteCommandP * const complete_command, Vars *const shell_vars, const bool bg);
+bool	execute_builtin(const SimpleCommandP *command, Vars *shell_vars);
+
 #endif // !FINAL_PARSER

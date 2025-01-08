@@ -92,6 +92,8 @@ static void remove_boundaries(Str *exp) {
 		[EXP_CMDSUB] = {1, 0},
 		[EXP_ARITHMETIC] = {3, 2},
 		[EXP_VARIABLE] = {0, 0},
+		[EXP_PROC_SUB_OUT] = {1, 0},
+		[EXP_PROC_SUB_IN] = {1, 0},
 	};
 	//We aint't trimming for these types
 	if (exp->kind == EXP_WORD || exp->kind == EXP_VARIABLE) {
@@ -124,6 +126,8 @@ static void string_list_consume(StrList *str_list, Vars *shell_vars, int *error)
 			case EXP_CMDSUB: { result = command_substitution(curr->str, shell_vars, error); break;}
 			case EXP_ARITHMETIC: {result = arithmetic_expansion(curr->str, shell_vars, error); break;}
 			case EXP_VARIABLE: {result = parameter_expansion(curr->str, shell_vars, error); break;}
+			case EXP_PROC_SUB_IN: {result = process_substitution(curr->str, curr->kind, shell_vars, error); break;}
+			case EXP_PROC_SUB_OUT: {result = process_substitution(curr->str, curr->kind, shell_vars, error); break;}
 			default: {}
 		}
 		
@@ -141,6 +145,8 @@ static void string_list_consume(StrList *str_list, Vars *shell_vars, int *error)
 
 static ExpKind identify_exp_begin(char *str, const ExpKind context) {
 	if (!ft_strncmp(str, "$((", 3)) { return EXP_ARITHMETIC; }
+	else if (!ft_strncmp(str, "<(", 2)) { return EXP_PROC_SUB_IN; }
+	else if (!ft_strncmp(str, ">(", 2)) { return EXP_PROC_SUB_OUT; }
 	else if (!ft_strncmp(str, "$(", 2)) { return EXP_CMDSUB; }
 	else if (!ft_strncmp(str, "${", 2)) { return EXP_VARIABLE; }
 	else if (*str == '(' && (context == EXP_ARITHMETIC || context == EXP_CMDSUB)) { return EXP_SUB; }
@@ -170,6 +176,8 @@ static StrList *get_range_list(const char * const candidate, Vars * const shell_
 	
 	static const ContextMap map[] = {
 		[EXP_ARITHMETIC]	= { .begin = "$((", .end = "))" },
+		[EXP_PROC_SUB_IN]	= { .begin = "<(",	.end = ")" },
+		[EXP_PROC_SUB_OUT]	= { .begin = ">(",	.end = ")" },
 		[EXP_CMDSUB]		= { .begin = "$(",	.end = ")"},
 		[EXP_VARIABLE]		= { .begin = "${",	.end = "}" },
 		[EXP_SUB]			= { .begin = "(",	.end = ")" },
@@ -201,8 +209,7 @@ static StrList *get_range_list(const char * const candidate, Vars * const shell_
 
 		while (word->size >= 2 && *word->data == '\\') {
 			if ((word->data[1] == '$' || word->data[1] == '`' || 
-				word->data[1] == '\\' || word->data[1] == '\n') &&
-				top_context != EXP_SQUOTE)
+				word->data[1] == '\\' || word->data[1] == '\n') && !squote)
 			{
 				da_push(cache_stack, da_pop_front(word));
 				da_push(cache_stack, da_pop_front(word));
@@ -486,12 +493,13 @@ char *remove_quotes(char *word) {
 StringList *do_expansions_word(char *word, int *error, Vars *const shell_vars, const int options) {
 	StrList * const str_list = get_range_list(word, shell_vars, options, error);
 
+	str_list_print(str_list);
 	if (*error != 0) return NULL;
 
 	string_list_consume(str_list, shell_vars, error);
+	/*str_list_print(str_list);*/
 	if (*error != 0) return NULL;
 
-	// str_list_print(str_list);
 	if (options & O_SPLIT)
 		string_list_split(str_list, shell_vars);
 

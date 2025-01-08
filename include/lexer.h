@@ -27,13 +27,15 @@ typedef enum {
 	WORD_ARITHMETIC_PAREN,
 	WORD_SINGLE_QUOTE,
 	WORD_DOUBLE_QUOTE,
+	WORD_PROC_SUB_IN,
+	WORD_PROC_SUB_OUT,
 	NONE,
 } WordContext;
 
 typedef struct {
-	char *start;
-	char *end;
-	int bitmap;
+	char	*start;
+	char	*end;
+	uint16_t bitmap;
 } WordContextBounds;
 
 typedef struct {
@@ -45,14 +47,16 @@ typedef struct {
 } WordContextList;
 
 //This represent a small automaton. 1 means can transition to
-#define WORD_MAP				0b11011011  // Binary equivalent of {0, 1, 0, 1, 1, 0, 1, 1}
-#define CMD_SUB_MAP        		0b11111011  // Binary equivalent of {0, 1, 1, 1, 1, 0, 1, 1}
-#define PARAM_MAP          		0b11011110  // Binary equivalent of {0, 0, 0, 1, 0, 0, 0, 0}
-#define SUBSHELL_MAP       		0b01111011  // Binary equivalent of {0, 1, 1, 1, 1, 0, 1, 1}
-#define ARITHMETIC_MAP			0b11011100  // Binary equivalent of {0, 1, 0, 1, 1, 1, 0, 0}
-#define ARITHMETIC_PAREN_MAP	0b01011100 // Binary equivalent of {0, 1, 0, 1, 1, 1, 0, 0}
-#define SINGLE_QUOTE_MAP		0b00000000  // Binary equivalent of {0, 0, 0, 0, 0, 0, 0, 0}
-#define DOUBLE_QUOTE_MAP   		0b00010010  // Binary equivalent of {0, 1, 0, 1, 1, 0, 0, 0}
+#define WORD_MAP				0b1111011011
+#define CMD_SUB_MAP        		0b0011111011
+#define PARAM_MAP          		0b0011011110
+#define SUBSHELL_MAP       		0b0001111011
+#define ARITHMETIC_MAP			0b0011011100
+#define ARITHMETIC_PAREN_MAP	0b0001011100
+#define SINGLE_QUOTE_MAP		0b0000000000
+#define DOUBLE_QUOTE_MAP   		0b0000010010
+#define PROCESS_SUB_MAP			0b0111011011
+#define PROCESS_SUB_MAP			0b0111011011
 
 typedef struct {
 	char		*input;
