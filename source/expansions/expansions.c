@@ -92,8 +92,8 @@ static void remove_boundaries(Str *exp) {
 		[EXP_CMDSUB] = {1, 0},
 		[EXP_ARITHMETIC] = {3, 2},
 		[EXP_VARIABLE] = {0, 0},
-		[EXP_PROC_SUB_OUT] = {1, 0},
-		[EXP_PROC_SUB_IN] = {1, 0},
+		[EXP_PROC_SUB_OUT] = {2, 1},
+		[EXP_PROC_SUB_IN] = {2, 1},
 	};
 	//We aint't trimming for these types
 	if (exp->kind == EXP_WORD || exp->kind == EXP_VARIABLE) {
@@ -493,7 +493,7 @@ char *remove_quotes(char *word) {
 StringList *do_expansions_word(char *word, int *error, Vars *const shell_vars, const int options) {
 	StrList * const str_list = get_range_list(word, shell_vars, options, error);
 
-	str_list_print(str_list);
+	/*str_list_print(str_list);*/
 	if (*error != 0) return NULL;
 
 	string_list_consume(str_list, shell_vars, error);
