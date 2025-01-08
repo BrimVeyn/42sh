@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/03 15:07:01 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/08 14:44:17 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <ncurses.h> 
 #include <sys/ioctl.h>
 #include <sys/time.h>
+#include "dynamic_arrays.h"
 
 //FIX: FIX ^C one line up 
 
@@ -303,7 +304,8 @@ void init_readline(readline_state_t *rl_state, const char *prompt, Vars *shell_v
 	move_cursor(rl_state->cursor_offset.x, rl_state->cursor_offset.y);
 	rl_print_prompt(STDOUT_FILENO, rl_state);
 	manage_rl_state(RL_SET, rl_state);
-
+    da_create(undo_stack, undo_state_stack_t, sizeof(undo_state_t *), GC_SUBSHELL);
+    rl_state->undo_stack = undo_stack;
 }
 
 int can_go_left(readline_state_t *rl_state){
