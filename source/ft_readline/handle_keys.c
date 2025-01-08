@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/03 15:01:35 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/08 15:47:07 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void handle_backspace_key(readline_state_t *rl_state, string *line, size_t pos){
 
 
 int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
-
+    rl_save_undo_state(line, rl_state);
 	int pos = rl_state->cursor.y * get_col() - rl_state->prompt_size;
 	pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->prompt_size : 0);
 
@@ -86,6 +86,7 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 
 	if (rl_state->interactive)
 		update_cursor_x(rl_state, line, 1);
+
     return RL_NO_OP;
 }
 
@@ -114,6 +115,21 @@ void go_right(readline_state_t *rl_state, string *line){
 		update_cursor_x(rl_state, line, 1);
 		set_cursor_position(rl_state);
 	}
+}
+
+rl_event up_history(readline_state_t *rl_state, string *line, Vars *shell_vars) {
+	(void)shell_vars;
+	if (history->navigation_offset < history->length - CURRENT_LINE){ //-1
+		history->navigation_offset++;
+		rl_state->cursor.x = history->entries[history->length - history->navigation_offset - 1]->line.size;
+		gc(GC_FREE, line->data, GC_READLINE);
+		*line = str_strdup(&history->entries[history->length - history->navigation_offset - 1]->line);
+		gc(GC_ADD, line->data, GC_READLINE);
+	}
+	// move_cursor(0, 0);
+	// print_history_values(history);
+	// set_cursor_position(rl_state);
+	return RL_NO_OP;
 }
 
 rl_event down_history(readline_state_t *rl_state, string *line) {
@@ -174,10 +190,12 @@ rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *li
             up_history(rl_state, line, shell_vars); break;
         case '\016':
             down_history(rl_state, line); break;
-        case '\04': // <C> + e
+        case '\05': // <C> + e
             go_end(rl_state, line); break;
         case '\01': // <C> + a
             go_start(rl_state, line); break;
+        case '\037': // <C> + _
+            rl_load_previous_state(line, rl_state); break;
         default: {
             break;
         }

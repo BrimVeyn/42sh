@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/03 15:01:33 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/08 15:24:55 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,24 @@ typedef struct _hist_state {
     HISTORY_CONFIG *config;
 } HISTORY_STATE;
 
+typedef struct s_position{
+    int x;
+    int y;
+} position_t;
+
+typedef struct s_undo_state {
+    string line;
+    position_t cursor;
+}   undo_state_t;
+
+typedef struct s_undo_state_stack {
+    undo_state_t **data;
+	size_t	size;
+	size_t	capacity;
+	size_t	size_of_element;
+	int		gc_level;
+}   undo_state_stack_t;
+
 typedef enum {
 	RL_GET,
 	RL_SET,
@@ -52,10 +70,6 @@ typedef enum {
 	RL_REFRESH,
 } rl_event;
 
-typedef struct s_position{
-    int x;
-    int y;
-} position_t;
 
 typedef struct s_search_mode {
 	char *word_found;
@@ -69,6 +83,7 @@ typedef struct s_readline_state {
 	position_t cursor_offset;
 	position_t cursor;
 	search_mode_t search_mode;
+    undo_state_stack_t *undo_stack;
 	bool interactive;
 } readline_state_t;
 
@@ -114,5 +129,8 @@ char *ft_readline(const char *prompt, Vars *shell_vars);
 void init_history(Vars *shell_vars);
 void add_history(const char *str, Vars *shell_vars);
 void handle_history_config(HISTORY_STATE *history, Vars *shell_vars);
+
+void rl_save_undo_state(string *line, readline_state_t *rl_state);
+void rl_load_previous_state(string *line, readline_state_t *rl_state);
 
 #endif
