@@ -14,13 +14,13 @@
 # define EXEC_H
 
 #include "final_parser.h"
-#include "expansion.h"
+#include "utils.h"
 
 #include <termios.h>
 #include <stdbool.h>
 
 //DA of fds to keep precisely keep track of fds in forks
-extern IntList *g_fdSet;
+extern FdSet *g_fdSet;
 
 //Needed for the return keyword to exit from a function at anytime
 extern int g_functionCtx;
@@ -55,7 +55,7 @@ ShellInfos *shell(int mode);
 #define SAVE_FD (flag == O_NOFORK && command->redir_list)
 
 void	close_saved_fds(int *saved_fds);
-void	close_fd_set();
+void	close_fd_set(FdRule flag);
 void	remove_fd_set(int fd);
 void	close_all_fds(void);
 int		get_highest_free_fd();

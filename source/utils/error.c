@@ -59,7 +59,7 @@ void pretty_error(const Lex *const lexer, char *raw_token) {
 void fatal(const char * const msg, const int line, const char *filename, const int exit_code) {
     if (msg)
         ft_dprintf(STDERR_FILENO, "%s:%d 42sh: fatal: %s\n", filename, line, msg);
-    close_fd_set();
+    close_fd_set(FD_ALL);
     gc(GC_CLEANUP, GC_ALL);
     exit(exit_code);
 }
@@ -70,7 +70,7 @@ void error(const char * const msg, const int exit_code) {
 }
 
 void exit_clean(void) {
-	close_fd_set();
+	close_fd_set(FD_ALL);
 	gc(GC_CLEANUP, GC_ALL);
 	exit(g_exitno);
 }

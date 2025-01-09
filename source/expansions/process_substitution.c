@@ -1,7 +1,9 @@
+#include "dynamic_arrays.h"
 #include "exec.h"
 #include "expansion.h"
 #include "final_parser.h"
 #include "libft.h"
+#include "signals.h"
 #include "utils.h"
 
 #include <stdio.h>
@@ -30,7 +32,8 @@ char *process_substitution(char *const str, const ExpKind kind, Vars *const shel
 
     if (IS_CHILD(pid)) {
         // Child process
-        signal(SIGINT, SIG_IGN);
+		close_fd_set(FD_ALL);
+		signal_manager(SIG_EXEC);
 
         if (kind == EXP_PROC_SUB_OUT) {
             // Redirect child process's output to the writing end of the pipe
@@ -53,9 +56,6 @@ char *process_substitution(char *const str, const ExpKind kind, Vars *const shel
                 close(pipe_fd[0]);
                 _fatal("dup2: failed", 1);
             }
-			int fdnull = open("/dev/null", 0666);
-			dup2(fdnull, STDIN_FILENO);
-			close(fdnull);
             close(pipe_fd[1]); // No longer needed
         }
 
@@ -71,11 +71,13 @@ char *process_substitution(char *const str, const ExpKind kind, Vars *const shel
         // Parent will read from the pipe
         close(pipe_fd[0]); // Close writing end
 		ft_sprintf(buffer, "/dev/fd/%d", pipe_fd[1]); // Return file descriptor as a string
+		da_push(g_fdSet, fd_init(pipe_fd[1], FD_PARENT));
 		return ft_strdup(buffer);
     } else if (kind == EXP_PROC_SUB_IN) {
         // Parent will write to the pipe
         close(pipe_fd[1]); // Close writing end
         ft_sprintf(buffer, "/dev/fd/%d", pipe_fd[0]); // Return file descriptor as a string
+		da_push(g_fdSet, fd_init(pipe_fd[0], FD_PARENT));
 		return ft_strdup(buffer);
     }
 

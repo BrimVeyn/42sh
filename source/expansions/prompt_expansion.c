@@ -12,12 +12,12 @@
 
 #include "exec.h"
 #include "final_parser.h"
-#include "ft_readline.h"
 #include "ft_regex.h"
 #include "jobs.h"
 #include "utils.h"
 #include "dynamic_arrays.h"
 #include "libft.h"
+#include "expansion.h"
 
 #include <pwd.h>
 #include <stddef.h>
@@ -175,7 +175,6 @@ static char *expand_prompt_special(const char *ps) {
 	da_create(ss, StringStream, sizeof(char), GC_SUBSHELL);
 
 	while (*ps) {
-		// dprintf(2, "ll\n");
 		if (*ps == '\\') {
 			if (special[(size_t)*(ps + 1)] != NULL) {
 				ss_push_string(ss, special[(size_t)*(ps + 1)]());
@@ -226,6 +225,6 @@ char *prompt_expansion(char *prompt, Vars *shell_vars) {
 	if (!maybe_prompt) prompt = "";
 	else prompt = maybe_prompt->data[0];
 
-	prompt	= expand_prompt_special(prompt);
+	prompt = expand_prompt_special(prompt);
 	return prompt;
 }

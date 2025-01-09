@@ -31,7 +31,7 @@ char *command_substitution(char *const str, Vars *const shell_vars, int * const 
 		_fatal("mkstemp: failed to create command_sub", 1);
 
 	const int STDOUT_SAVE = dup(STDOUT_FILENO);
-	da_push(g_fdSet, STDOUT_SAVE);
+	da_push(g_fdSet, fd_init(STDOUT_SAVE, FD_CHILD));
 
 	if (dup2(output_fd, STDOUT_FILENO) == -1)
 		_fatal("dup2: failed", 1);

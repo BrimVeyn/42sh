@@ -39,10 +39,10 @@
 int				g_debug = 0;
 int 			g_exitno = 0;
 int				g_functionCtx = 0;
-IntList	*		g_fdSet = NULL;
+FdSet*			g_fdSet = NULL;
 pid_t			g_masterPgid = 0;
-FunctionList *	g_funcList = NULL;
-JobList *		g_jobList = NULL;
+FunctionList*	g_funcList = NULL;
+JobList*		g_jobList = NULL;
 
 
 //FIX: quote bug in this case : echo "${staged:+$staged}" $ sign causes this bug surprinsigly
@@ -239,7 +239,7 @@ static void load_positional_parameters(const int ac, char ** const av, Vars * co
 static void init_globals() {
 	da_create(jobListTmp, JobList, sizeof(AndOrP *), GC_ENV);
 	da_create(funcListTmp, FunctionList, sizeof(FunctionP *), GC_ENV);
-	da_create(fdSetTmp, IntList, sizeof(int), GC_ENV);
+	da_create(fdSetTmp, FdSet, sizeof(int), GC_ENV);
 
 	g_fdSet = fdSetTmp;
 	g_jobList = jobListTmp;
@@ -295,7 +295,7 @@ int main(const int ac, char *av[], const char *env[]) {
 		}
 	}
 	if (self->interactive && !self->script) { update_history_file(history, shell_vars); }
-	close_fd_set();
+	close_fd_set(FD_ALL);
 	gc(GC_CLEANUP, GC_ALL);
 	exit(g_exitno);
 }

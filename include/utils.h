@@ -99,6 +99,23 @@ typedef struct {
 	int	gc_level;
 } IntList;
 
+typedef enum { FD_CHILD, FD_PARENT, FD_ALL } FdRule;
+
+typedef struct {
+	int fd;
+	FdRule flag;
+} Fd;
+
+Fd	*fd_init(int fd, FdRule flag);
+
+typedef struct {
+	Fd **data;
+	size_t size;
+	size_t capacity;
+	size_t size_of_element;
+	int	gc_level;
+} FdSet;
+
 //----------------StringStream------------------//
 char	*ss_get_owned_slice(StringStream * const ss);
 char	*ss_to_string(StringStream * const ss);

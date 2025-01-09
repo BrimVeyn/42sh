@@ -28,10 +28,9 @@ int job_wait(AndOrP *job) {
 	pid_t pid;
 
 	do {
-		pid = waitpid(-job->pgid, &status, WUNTRACED);
-		if (pid != -1) {
-			} else {
-		}
+		pid = waitpid(WAIT_ANY, &status, WUNTRACED);
+		if (pid != -1) { } else { }
+
 	} while (!mark_process_andor(job, pid, status, true)
 	&& !job_stopped(job)
 	&& !job_completed(job));
@@ -62,7 +61,9 @@ int put_job_foreground (AndOrP *job, int cont) {
 			_fatal("SIGCONT failed\n", 1);
 	}
 	/* Wait for it to report.  */
+	/*dprintf(2, "wait_status in : %d\n", getpid());*/
 	job_wait(job);
+	/*dprintf(2, "AAwait_status in : %d\n", getpid());*/
 	/* Put the self->shell back in the foreground.  */
 	if (tcsetpgrp(self->shell_terminal, self->shell_pgid) == -1)
 		_fatal("tcsetpgrp: failed", 1);
