@@ -64,11 +64,18 @@ char *find_bin_location(char *bin, StringList *env, bool *absolute){
 	return NULL;
 }
 
+Fd *fd_init(int fd, FdRule flag) {
+	Fd *ret = gc_unique(Fd, GC_ENV);
+	ret->fd = fd;
+	ret->flag = flag;
+	return ret;
+}
+
 int get_highest_free_fd() {
 	int highest = 0;
 	for (size_t i = 0; i < g_fdSet->size; i++) {
-		if (g_fdSet->data[i] >= highest) {
-			highest = g_fdSet->data[i];
+		if (g_fdSet->data[i]->fd >= highest) {
+			highest = g_fdSet->data[i]->fd;
 		}
 	}
 	return (highest == 0) ? 500 : highest + 1;
@@ -89,27 +96,27 @@ int *save_std_fds() {
 	fds[2] = dup(STDERR_FILENO);
 
 	fds[0] = move_to_high_fd(fds[0]);
-	da_push(g_fdSet, fds[0]);
+	da_push(g_fdSet, fd_init(fds[0], FD_CHILD));
 	fds[1] = move_to_high_fd(fds[1]);
-	da_push(g_fdSet, fds[1]);
+	da_push(g_fdSet, fd_init(fds[1], FD_CHILD));
 	fds[2] = move_to_high_fd(fds[2]);
-	da_push(g_fdSet, fds[2]);
+	da_push(g_fdSet, fd_init(fds[2], FD_CHILD));
 	
 	return fds;
 }
 
-void close_fd_set() {
+void close_fd_set(FdRule flag) {
 	while (g_fdSet->size != 0) {
-		int fd = da_pop(g_fdSet);
-		if (fd != -1) {
-			close(fd);
+		Fd *fd = da_pop(g_fdSet);
+		if (fd->fd != -1 && (fd->flag == flag || flag == FD_ALL)) {
+			close(fd->fd);
         }
 	}
 }
 
 void remove_fd_set(int fd) {
 	for (size_t i = 0; i < g_fdSet->size; i++) {
-		if (g_fdSet->data[i] == fd) {
+		if (g_fdSet->data[i]->fd == fd) {
 			da_erase_index(g_fdSet, i);
 			return ;
         }
@@ -126,11 +133,11 @@ void close_saved_fds(int *saved_fds) {
 	while (true) {
 		bool hit = false;
 		for (size_t i = 0; i < g_fdSet->size; i++) {
-			if (g_fdSet->data[i] == saved_fds[0] || 
-				g_fdSet->data[i] == saved_fds[1] || 
-				g_fdSet->data[i] == saved_fds[2])
+			if (g_fdSet->data[i]->fd == saved_fds[0] || 
+				g_fdSet->data[i]->fd == saved_fds[1] || 
+				g_fdSet->data[i]->fd == saved_fds[2])
 			{
-				close(g_fdSet->data[i]);
+				close(g_fdSet->data[i]->fd);
 				da_erase_index(g_fdSet, i);
 				hit = true;
 				break;

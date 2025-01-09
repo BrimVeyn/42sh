@@ -385,7 +385,7 @@ void builtin_fc(const SimpleCommandP *command, Vars *shell_vars) {
 			return;
 		}
 
-		da_push(g_fdSet, fd);
+		da_push(g_fdSet, fd_init(fd, FD_CHILD));
 
 		if (options.flags & FC_R){
 			for (int i = command_list->size - 1; i > 0; i--){

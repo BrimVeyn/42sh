@@ -10,13 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lexer.h"
-#include "parser.h"
 #include "libft.h"
 #include "utils.h"
 #include "exec.h"
+
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 typedef enum {
     UNARY,

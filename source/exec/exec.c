@@ -58,15 +58,7 @@ static char  *resolve_bine(SimpleCommandP * const command, Vars * const shell_va
 		hash_interface(HASH_ADD_USED, command->word_list->data[0], shell_vars);
 		return maybe_bin;
 	} else {
-		bool absolute = false;
-		maybe_bin = find_bin_location(command->word_list->data[0], shell_vars->env, &absolute);
-		if (maybe_bin) {
-			if (absolute == false)
-				hash_interface(HASH_ADD_USED, command->word_list->data[0], shell_vars);
-			return maybe_bin;
-		} else {
-			return NULL;
-		}
+		return command->word_list->data[0];
 	}
 }
 
@@ -77,8 +69,16 @@ static void execute_simple_command(CommandP *command, char *bin, Vars *shell_var
 		return;
 	if (!bin)
 		return;
+
+	//Will be update by find_bin_location
+	bool absolute = false;
+	bin = find_bin_location(command->simple_command->word_list->data[0], shell_vars->env, &absolute);
+	if (!bin)
+		return;
+	if (!absolute)
+		hash_interface(HASH_ADD_USED, command->simple_command->word_list->data[0], shell_vars);
 	
-	close_fd_set();
+	close_fd_set(FD_CHILD);
 	/*dprintf(2, "executing: %s\n", bin);*/
 	execve(bin, simple_command->word_list->data, shell_vars->env->data);
 }
@@ -688,6 +688,7 @@ static int execute_list(const ListP * const list, const bool background, Vars * 
 		}
 
 		if (wait_status == E_RETURN) return wait_status;
+
 
 		if (wait_status == WAIT) {
 			if (!shell_infos->interactive) {

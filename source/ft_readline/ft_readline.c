@@ -35,17 +35,49 @@ void move_cursor(int x, int y);
 void set_cursor_position(readline_state_t *rl_state);
 void signal_prompt_mode(void);
 
+size_t utf8_length(const unsigned char byte) {
+	if (byte < 0x80) {
+		return 1;
+	} else if ((byte >> 5) == 0x6) {
+		return 2;
+	} else if ((byte >> 4) == 0xE) {
+		return 3;
+	} else if ((byte >> 3) == 0x1E) {
+		return 4;
+	}
+	return 0;
+}
+
 size_t get_visible_length(const char * const str){
 	size_t cmp = 0;
 	bool in_escape_sequence = false;
 
-	for (int i = 0; str[i]; i++){
-		if (str[i] == '\033' || str[i] == '\e') in_escape_sequence = true;
-		else if (in_escape_sequence && str[i] == 'm') in_escape_sequence = false;
-		else if (!in_escape_sequence) cmp++;
+	for (int i = 0; str[i];){
+		if (str[i] == '\033' || str[i] == '\e') {
+			in_escape_sequence = true;
+			i++;
+		}
+		else if (in_escape_sequence && str[i] == 'm') {
+			in_escape_sequence = false;
+			i++;
+		}
+		else if (!in_escape_sequence) {
+			size_t len = utf8_length(str[i]);
+			if (len == 3)
+				cmp+= 2;
+			else if (len == 4) {
+				cmp += 2;
+			} else {
+				cmp++;
+			}
+			i += len;
+		} else {
+			i++;
+		}
 	}
 	return cmp;
 }
+
 
 // void print_raw(const char* str) {
 //     for (const char* p = str; *p; ++p) {

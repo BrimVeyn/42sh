@@ -44,7 +44,7 @@ char *here_doc(const char *eof, const heredoc_mode mode, Vars * const shell_vars
 	if (file_fd == -1) {
 		_fatal("mkstemp: failed to create here_doc", 1);
 	}
-	da_push(g_fdSet, file_fd);
+	da_push(g_fdSet, fd_init(file_fd, FD_CHILD));
 
 	signal_manager(SIG_HERE_DOC);
 

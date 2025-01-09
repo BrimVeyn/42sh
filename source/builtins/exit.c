@@ -21,14 +21,14 @@ static void err_exit(char *msg){
 
 void builtin_exit(const SimpleCommandP *command, __attribute__((unused)) Vars *shell_vars) {
 	if (!command->word_list->data[1]) {
-		close_fd_set();
+		close_fd_set(FD_ALL);
 		gc(GC_CLEANUP, GC_ALL);
 		exit(EXIT_SUCCESS);
 	}
 
 	if (regex_match("[^0-9]", command->word_list->data[1]).is_found == true){
 		err_exit("numeric argument required\n");
-		close_fd_set();
+		close_fd_set(FD_ALL);
 		gc(GC_CLEANUP, GC_ALL);
 		exit(2);
 	}
@@ -41,13 +41,13 @@ void builtin_exit(const SimpleCommandP *command, __attribute__((unused)) Vars *s
 
 	if (ft_strlen(command->word_list->data[1]) > 19) {
 		err_exit("numeric argument required\n");
-		close_fd_set();
+		close_fd_set(FD_ALL);
 		gc(GC_CLEANUP, GC_ALL);
 		exit(2);
 	}
 
 	long exit_no = ft_atol(command->word_list->data[1]) % 256;
-	close_fd_set();
+	close_fd_set(FD_ALL);
 	gc(GC_CLEANUP, GC_ALL);
 
 	exit(exit_no);
