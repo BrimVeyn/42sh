@@ -79,6 +79,7 @@ static void execute_simple_command(CommandP *command, char *bin, Vars *shell_var
 		return;
 	
 	close_fd_set();
+	/*dprintf(2, "executing: %s\n", bin);*/
 	execve(bin, simple_command->word_list->data, shell_vars->env->data);
 }
 
