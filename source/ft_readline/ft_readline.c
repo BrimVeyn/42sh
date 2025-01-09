@@ -16,41 +16,39 @@
 #include "utils.h"
 #include "exec.h"
 
+
 #include <limits.h>
 #include <stdio.h>
+#include <sys/types.h>
 #include <termios.h>
 #include <termcap.h>
 #include <unistd.h>
 #include <ncurses.h> 
 #include <sys/ioctl.h>
 #include <sys/time.h>
+#include <locale.h>
+
+
+#define __USE_XOPEN
+#include <wchar.h>
 
 //FIX: FIX ^C one line up 
 
 //TODO:fix ^R surlignement
-//
 int rl_done = 0;
 
 void move_cursor(int x, int y);
 void set_cursor_position(readline_state_t *rl_state);
 void signal_prompt_mode(void);
 
-size_t utf8_length(const unsigned char byte) {
-	if (byte < 0x80) {
-		return 1;
-	} else if ((byte >> 5) == 0x6) {
-		return 2;
-	} else if ((byte >> 4) == 0xE) {
-		return 3;
-	} else if ((byte >> 3) == 0x1E) {
-		return 4;
-	}
-	return 0;
-}
-
 size_t get_visible_length(const char * const str){
-	size_t cmp = 0;
+	size_t real_len = 0;
 	bool in_escape_sequence = false;
+
+	mbstate_t state;
+	char *saved_locale = setlocale(LC_ALL, NULL);
+	setlocale(LC_ALL, "");
+    memset(&state, 0, sizeof(mbstate_t));
 
 	for (int i = 0; str[i];){
 		if (str[i] == '\033' || str[i] == '\e') {
@@ -62,22 +60,25 @@ size_t get_visible_length(const char * const str){
 			i++;
 		}
 		else if (!in_escape_sequence) {
-			size_t len = utf8_length(str[i]);
-			if (len == 3)
-				cmp+= 2;
-			else if (len == 4) {
-				cmp += 2;
-			} else {
-				cmp++;
+			wchar_t wc;
+			size_t len = mbrtowc(&wc, &str[i], MB_CUR_MAX, &state);
+
+			if (len == (size_t)-1 || len == (size_t)-2) {
+				fprintf(stderr, "Invalid multibyte sequence\n");
+				break;
 			}
-			i += len;
+
+			int dp_len = wcwidth(wc);
+			/*dprintf(2, "Char: %lc, Bytes: %zu, Display len: %d\n", wc, len, dp_len);*/
+			real_len += dp_len;
+			i += len; // Advance the pointer
 		} else {
 			i++;
 		}
 	}
-	return cmp;
+	setlocale(LC_ALL, saved_locale);
+	return real_len;
 }
-
 
 // void print_raw(const char* str) {
 //     for (const char* p = str; *p; ++p) {
@@ -424,10 +425,14 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
 		}
 
 		if (rl_done == 1){
-			ft_rl_newline();
+			/*ft_rl_newline();*/
 			rl_done = 0;
 			str_clear(line);
-			continue; }
+			pop_history();
+			write(STDOUT_FILENO, "^C\n", 3);
+			char str[] = { '\004', '\0' };
+			return ft_strdup(str);
+		}
 
 		if (rl_done == 2){
 			str_clear(line);

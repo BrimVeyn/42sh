@@ -275,6 +275,8 @@ int main(const int ac, char *av[], const char *env[]) {
 		load_positional_parameters(ac, av, shell_vars, self);
 		if (self->interactive && !self->script) { job_notification(); }
 		if (input) {
+			if (*input == '\004')
+				continue;
 			if (self->interactive && !self->script) {
 				if (history_expansion(&input) == false)
 					continue;
