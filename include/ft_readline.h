@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/08 15:24:55 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/09 13:07:43 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,11 @@ typedef struct s_undo_state_stack {
 	size_t	size_of_element;
 	int		gc_level;
 }   undo_state_stack_t;
+
+typedef enum {
+	PRINT_KEY,
+    DELETE_KEY,
+} rl_last_action;
 
 typedef enum {
 	RL_GET,
@@ -132,5 +137,12 @@ void handle_history_config(HISTORY_STATE *history, Vars *shell_vars);
 
 void rl_save_undo_state(string *line, readline_state_t *rl_state);
 void rl_load_previous_state(string *line, readline_state_t *rl_state);
+
+int rl_get_cursor_pos_on_line(readline_state_t *rl_state);
+void rl_change_n_char(readline_state_t *rl_state, string *line, char c, int n);
+char rl_get_n_char(readline_state_t *rl_state, string *line, int n);
+void rl_change_current_char(readline_state_t *rl_state, string *line, char c);
+void rl_change_prev_char(readline_state_t *rl_state, string *line, char c);
+void rl_change_next_char(readline_state_t *rl_state, string *line, char c);
 
 #endif

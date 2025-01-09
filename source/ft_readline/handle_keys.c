@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/08 15:47:07 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/09 17:00:43 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@
 
 
 //TODO: Clean handle_enter_function
+
+int last_action = -1;
 
 int handle_enter_key(readline_state_t *rl_state, string *line) {
 	if (rl_state->interactive){
@@ -63,9 +65,98 @@ void handle_backspace_key(readline_state_t *rl_state, string *line, size_t pos){
 	update_cursor_x(rl_state, line, -1);
 }
 
+void rl_swap_char(readline_state_t *rl_state, string *line){
+    if (line->size < 2) return;
+
+    char current = rl_get_current_char(rl_state, line);
+    char prev = rl_get_prev_char(rl_state, line);
+    char next = rl_get_next_char(rl_state, line);
+    if (prev == '\02'){
+        rl_change_current_char(rl_state, line, rl_get_n_char(rl_state, line, 1));
+        rl_change_n_char(rl_state, line, current, 1);
+        update_cursor_x(rl_state, line, 2);
+    } else if (next == '\03'){
+        rl_change_prev_char(rl_state, line, rl_get_n_char(rl_state, line, -2));
+        rl_change_n_char(rl_state, line, prev, -2);
+    } else {
+        rl_change_current_char(rl_state, line, prev);
+        rl_change_prev_char(rl_state, line, current);
+        update_cursor_x(rl_state, line, 1);
+    }
+}
+
+bool is_alnum(const char c){
+    return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'));
+}
+
+typedef struct s_word_pos {
+    int curr_word_end;
+    int curr_word_start;
+    int prev_word_end;
+    int prev_word_start;
+} word_pos_t;
+
+static void get_words_pos(readline_state_t *rl_state, string *line, word_pos_t *pos){
+    // char current_char;
+    int it = rl_get_cursor_pos_on_line(rl_state);
+    
+    for (;line->data[it] && !is_alnum(line->data[it]); it++){}
+    for (;line->data[it] && is_alnum(line->data[it]); it++){}
+    it--;
+    pos->curr_word_end = it;
+    for (;it > 0 && is_alnum(line->data[it]); it--){}
+    pos->curr_word_start = it + 1;
+    for (;it > 0 && !is_alnum(line->data[it]); it--){}
+    pos->prev_word_end = it;
+
+    for (;it > 0 && is_alnum(line->data[it]); it--){}
+    pos->prev_word_start = it;
+
+    move_cursor(0, 0);
+    dprintf(2, "DEBUG: word_pos_t values:\n");
+    dprintf(2, "string: %s\n", line->data);
+    dprintf(2, "  curr_word_start: %d\n", pos->curr_word_start);
+    dprintf(2, "  curr_word_end:   %d\n", pos->curr_word_end);
+    dprintf(2, "  prev_word_start: %d\n", pos->prev_word_start);
+    dprintf(2, "  prev_word_end:   %d\n", pos->prev_word_end);
+    fflush(stderr);
+    set_cursor_position(rl_state);
+}
+
+
+void rl_swap_word(readline_state_t *rl_state, string *line){
+    if (line->size == 0) return;
+
+    word_pos_t pos;
+    get_words_pos(rl_state, line, &pos);
+
+    if (pos.prev_word_end == pos.prev_word_start) return;
+    
+    int prev_len = pos.prev_word_end - pos.prev_word_start + 1;
+    int curr_len = pos.curr_word_end - pos.curr_word_start + 1;
+    
+
+    string curr_word = str_substr(line, pos.curr_word_start, curr_len);
+    string prev_word = str_substr(line, pos.prev_word_start, prev_len);
+
+    // move_cursor(0, 0);
+    // dprintf(2, "prev_word: %s |len: %d\n", prev_word.data, prev_len);
+    // dprintf(2 , "curr_word: %s len: %d\n", curr_word.data, curr_len);
+    // fflush(stderr);
+    // set_cursor_position(rl_state);
+    //
+
+    str_erase(line, pos.prev_word_start, prev_len);
+    str_erase(line, pos.curr_word_start - prev_len, curr_len);
+
+    str_insert_str(line, curr_word.data, pos.prev_word_start);
+    str_insert_str(line, prev_word.data, pos.curr_word_start);
+    
+    // rl_state->cursor.x = pos.curr_word_start + prev_len;
+}
 
 int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
-    rl_save_undo_state(line, rl_state);
+    // rl_save_undo_state(line, rl_state);
 	int pos = rl_state->cursor.y * get_col() - rl_state->prompt_size;
 	pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->prompt_size : 0);
 
@@ -74,9 +165,18 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 	}
 
 	if (c == 127 && rl_state->interactive){
+        if (last_action != DELETE_KEY){
+            rl_save_undo_state(line, rl_state);
+            last_action = DELETE_KEY;
+        }
 		handle_backspace_key(rl_state, line, pos);
 		return RL_NO_OP;
 	}
+
+    if (last_action != PRINT_KEY){
+        rl_save_undo_state(line, rl_state);
+        last_action = PRINT_KEY;
+    }
 	
 	if (!rl_state->interactive){
 		str_push_back(line, c);
@@ -196,6 +296,8 @@ rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *li
             go_start(rl_state, line); break;
         case '\037': // <C> + _
             rl_load_previous_state(line, rl_state); break;
+        case '\024':
+            rl_swap_char(rl_state, line); break;
         default: {
             break;
         }
@@ -213,6 +315,8 @@ rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *she
         go_left_word(rl_state, line);
     } else if (seq[0] == 'f'){
         go_right_word(rl_state, line);
+    } else if (seq[0] == 't'){
+        rl_swap_word(rl_state, line);
     }
     if (seq[0] == '[') {
         if (read(STDIN_FILENO, &seq[1], 1) == 0) return RL_REFRESH;
