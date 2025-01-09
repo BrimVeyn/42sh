@@ -63,8 +63,8 @@ void signal_prompt_mode(void) {
 
 void signal_exec_mode(void) {
 	signal(SIGTERM, signal_sigterm_exec);
-	signal(SIGTTIN, SIG_IGN);
-	signal(SIGTTOU, SIG_IGN);
+	signal(SIGTTIN, SIG_DFL);
+	signal(SIGTTOU, SIG_DFL);
 	signal(SIGTSTP, SIG_DFL);
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);

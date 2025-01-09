@@ -586,6 +586,7 @@ static int execute_pipeline(AndOrP * const job, const bool background, Vars * co
 		pid_t pid;
 		if ((pid = fork()) == -1)
 			_fatal("fork: failed", 1);
+
 		if (IS_CHILD(pid)) {
 
 			setup_process(background, job, shell_infos);
@@ -625,8 +626,8 @@ static int execute_pipeline(AndOrP * const job, const bool background, Vars * co
 					exit_clean();
 					break;
 				}
-				case Subshell: { execute_subshell(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
 				case Brace_Group: { execute_brace_group(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
+				case Subshell: { execute_subshell(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
 				case If_Clause: { execute_if_clause(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
 				case While_Clause: { execute_while_clause(process->command, background, shell_vars, O_FORKED); exit_clean(); break; }
 				case Until_Clause: { execute_until_clause(process->command, background, shell_vars, O_FORKED);  exit_clean(); break; }
@@ -727,8 +728,6 @@ int execute_complete_command(const CompleteCommandP * const complete_command, Va
 
 	while (list_head) {
 
-		g_masterPgid = 0;
-
 		const bool background = (
 			(shell_infos->interactive) && 
 			( (list_head->separator == END && complete_command->separator == AMPER) ||
@@ -745,6 +744,7 @@ int execute_complete_command(const CompleteCommandP * const complete_command, Va
 
 		list_head = list_head->next;
 	}
+	g_masterPgid = 0;
 
 	return 0;
 }
