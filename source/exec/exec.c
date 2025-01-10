@@ -79,7 +79,16 @@ static void execute_simple_command(CommandP *command, char *bin, Vars *shell_var
 		hash_interface(HASH_ADD_USED, command->simple_command->word_list->data[0], shell_vars);
 	
 	close_fd_set(FD_CHILD);
-	/*dprintf(2, "executing: %s\n", bin);*/
+	// Debug information for job control
+	pid_t pid = getpid();
+	pid_t ppid = getppid();
+	pid_t pgid = getpgid(0);
+	_debug("DEBUG: Executing command: %s\n", bin);
+	_debug("DEBUG: PID: %d, PPID: %d, PGID: %d\n", pid, ppid, pgid);
+	_debug("DEBUG: Command arguments:\n");
+	for (size_t i = 0; i < simple_command->word_list->size; i++) {
+		_debug("  arg[%zu]: %s\n", i, simple_command->word_list->data[i]);
+	}
 	execve(bin, simple_command->word_list->data, shell_vars->env->data);
 }
 
@@ -431,11 +440,11 @@ static void set_group(AndOrP * const job, PipeLineP * const process, const pid_t
 	process->pid = pid;
 	if (!job->pgid && g_masterPgid != 0)
 		job->pgid = g_masterPgid;
-	else if (!job->pgid)
+	else if (!job->pgid) {
 		job->pgid = pid;
-	//HACK: fails randomly ??
-	setpgid(pid, job->pgid);
-		// _fatal("setpgid: failed", 1);
+	}
+	if (setpgid(pid, job->pgid) == -1)
+		_fatal("setpgid: failed", 1);
 }
 
 static int process_simple_command(SimpleCommandP * const simple_command, Vars *shell_vars) {
@@ -473,15 +482,18 @@ static void restore_std_fds(int *saved_fds) {
 static void setup_process(const bool background, AndOrP * const job, const ShellInfos * const shell_infos) {
 	if (shell_infos->interactive && !shell_infos->script)
 	{
+
 		pid_t pid = getpid();
-		if (job->pgid == 0) 
+		if (!job->pgid && g_masterPgid != 0)
+			job->pgid = g_masterPgid;
+		else if (!job->pgid)
 			job->pgid = pid;
-		pid_t pgid = (g_masterPgid != 0) ? g_masterPgid : job->pgid;
-		if (setpgid(pid, pgid) == -1)
+		if (setpgid(pid, job->pgid) == -1)
 			_fatal("setpgid: failed", 1);
 
 		if (!background) {
-			if (tcsetpgrp(shell_infos->shell_terminal, pgid) == -1)
+			_debug("DEBUG: Given TC to : %d\n", job->pgid);
+			if (tcsetpgrp(shell_infos->shell_terminal, job->pgid) == -1)
 				_fatal("tcsetpgrp: failed", 1);
 		}
 		signal_manager(SIG_EXEC);
@@ -590,6 +602,7 @@ static int execute_pipeline(AndOrP * const job, const bool background, Vars * co
 		if (IS_CHILD(pid)) {
 
 			setup_process(background, job, shell_infos);
+			g_masterPgid = job->pgid;
 
             if (prev_pipe[0] != -1) { 
 				dup_input(prev_pipe[0]); 
@@ -690,9 +703,8 @@ static int execute_list(const ListP * const list, const bool background, Vars * 
 
 		if (wait_status == E_RETURN) return wait_status;
 
-
 		if (wait_status == WAIT) {
-			if (!shell_infos->interactive) {
+			if (!shell_infos->interactive || g_masterPgid != 0) {
 				job_wait(andor_head);
 			} else if (!background) {
 				put_job_foreground(andor_head, false);

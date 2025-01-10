@@ -36,7 +36,7 @@
 #include <sys/mman.h>
 #include <signals.h>
 
-int				g_debug = 0;
+bool			g_debug = 0;
 int 			g_exitno = 0;
 int				g_functionCtx = 0;
 FdSet*			g_fdSet = NULL;
@@ -68,6 +68,7 @@ static void	*read_input_prompt(char *input, Vars *const shell_vars) {
 		g_exitno = saved_exitno;
 		PS1 = prompt_expansion(PS1, shell_vars);
 
+		signal_manager(SIG_PROMPT);
 		input = ft_readline(PS1, shell_vars);
     } else {
 		input = ft_readline("42sh> ", shell_vars);
@@ -247,7 +248,7 @@ static void init_globals() {
 }
 
 #define SHELL_IS_RUNNING true
-#define SCRIPT_MODE ((ac == 1) ? false : true)
+#define SCRIPT_MODE ((ac == 1 || !ft_strcmp(av[1], "-d")) ? false : true)
 #define HAS_POSITIONAL (ac > 2)
 
 int main(const int ac, char *av[], const char *env[]) {
@@ -261,7 +262,9 @@ int main(const int ac, char *av[], const char *env[]) {
 	Vars *shell_vars = shell_vars_init(env);
 	ShellInfos *self = shell(SHELL_GET);
 
-	if (SCRIPT_MODE) { self->script = true; }
+	g_debug = !ft_strcmp(av[1], "-d");
+
+	if (SCRIPT_MODE && !g_debug) { self->script = true; }
 	if (self->interactive && !self->script) { load_42shrc(shell_vars); }
 
 	char *input = NULL;

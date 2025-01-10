@@ -25,6 +25,7 @@ extern int g_exitno;
 
 #define _fatal(msg, exitno) fatal(msg, __LINE__, __FILE_NAME__, exitno);
 
+
 #ifndef __FILE_NAME__
 
 #define __FILE_NAME__ (ft_strrchr(__FILE__, '/') ? ft_strrchr(__FILE__, '/') + 1 : __FILE__)
@@ -47,6 +48,9 @@ extern int g_exitno;
             free(ptrs[i]); \
         } \
     } \
+
+void _debug(const char *format, ...);
+extern bool g_debug;
 
 //----------------Garbage-------------------//
 typedef enum {

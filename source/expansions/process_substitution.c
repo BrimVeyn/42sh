@@ -44,7 +44,7 @@ char *process_substitution(char *const str, const ExpKind kind, Vars *const shel
                 _fatal("dup2: failed", 1);
             }
 			/*int fdnull = open("/dev/null", 0666);*/
-			/*dup2(fdnull, );*/
+			/*dup2(fdnull, STDIN_FILENO);*/
 			/*close(fdnull);*/
             close(pipe_fd[0]); // No longer needed
 
