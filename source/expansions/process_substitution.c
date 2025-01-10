@@ -14,7 +14,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/wait.h>
-#include <signal.h>
 
 char *process_substitution(char *const str, const ExpKind kind, Vars *const shell_vars, int *const error) {
     int pipe_fd[2]; // Array to hold the pipe file descriptors
@@ -33,7 +32,6 @@ char *process_substitution(char *const str, const ExpKind kind, Vars *const shel
     if (IS_CHILD(pid)) {
         // Child process
 		close_fd_set(FD_ALL);
-		signal_manager(SIG_EXEC);
 
         if (kind == EXP_PROC_SUB_OUT) {
             // Redirect child process's output to the writing end of the pipe

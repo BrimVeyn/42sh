@@ -1,0 +1,5 @@
+root
+daemon
+bin
+sys
+sync
