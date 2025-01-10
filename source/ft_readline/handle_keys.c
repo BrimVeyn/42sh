@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/09 17:00:43 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:26:48 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "lexer.h"
 #include "libft.h"
 #include "utils.h"
+#include "dynamic_arrays.h"
 
 #include <limits.h>
 #include <stdio.h>
@@ -110,19 +111,18 @@ static void get_words_pos(readline_state_t *rl_state, string *line, word_pos_t *
     pos->prev_word_end = it;
 
     for (;it > 0 && is_alnum(line->data[it]); it--){}
-    pos->prev_word_start = it;
+    pos->prev_word_start = (it == 0) ? it : it + 1;
 
-    move_cursor(0, 0);
-    dprintf(2, "DEBUG: word_pos_t values:\n");
-    dprintf(2, "string: %s\n", line->data);
-    dprintf(2, "  curr_word_start: %d\n", pos->curr_word_start);
-    dprintf(2, "  curr_word_end:   %d\n", pos->curr_word_end);
-    dprintf(2, "  prev_word_start: %d\n", pos->prev_word_start);
-    dprintf(2, "  prev_word_end:   %d\n", pos->prev_word_end);
-    fflush(stderr);
-    set_cursor_position(rl_state);
+    // move_cursor(0, 0);
+    // dprintf(2, "DEBUG: word_pos_t values:\n");
+    // dprintf(2, "string: %s\n", line->data);
+    // dprintf(2, "  curr_word_start: %d\n", pos->curr_word_start);
+    // dprintf(2, "  curr_word_end:   %d\n", pos->curr_word_end);
+    // dprintf(2, "  prev_word_start: %d\n", pos->prev_word_start);
+    // dprintf(2, "  prev_word_end:   %d\n", pos->prev_word_end);
+    // fflush(stderr);
+    // set_cursor_position(rl_state);
 }
-
 
 void rl_swap_word(readline_state_t *rl_state, string *line){
     if (line->size == 0) return;
@@ -130,28 +130,36 @@ void rl_swap_word(readline_state_t *rl_state, string *line){
     word_pos_t pos;
     get_words_pos(rl_state, line, &pos);
 
-    if (pos.prev_word_end == pos.prev_word_start) return;
     
     int prev_len = pos.prev_word_end - pos.prev_word_start + 1;
     int curr_len = pos.curr_word_end - pos.curr_word_start + 1;
+    if (pos.prev_word_end == pos.prev_word_start) return;
     
-
     string curr_word = str_substr(line, pos.curr_word_start, curr_len);
     string prev_word = str_substr(line, pos.prev_word_start, prev_len);
-
-    // move_cursor(0, 0);
-    // dprintf(2, "prev_word: %s |len: %d\n", prev_word.data, prev_len);
-    // dprintf(2 , "curr_word: %s len: %d\n", curr_word.data, curr_len);
-    // fflush(stderr);
-    // set_cursor_position(rl_state);
-    //
 
     str_erase(line, pos.prev_word_start, prev_len);
     str_erase(line, pos.curr_word_start - prev_len, curr_len);
 
     str_insert_str(line, curr_word.data, pos.prev_word_start);
-    str_insert_str(line, prev_word.data, pos.curr_word_start);
+    str_insert_str(line, prev_word.data, pos.prev_word_start + curr_len + (pos.curr_word_start - pos.prev_word_end - 1));
+
+    // examples'   'nathan
+    // '   '
+    // nathan'   '
+    // nathan'  'examples
+
     
+    // move_cursor(0, 0);
+    // dprintf(2, "prev_word: %20s|len: %d\n", prev_word.data, prev_len);
+    // dprintf(2, "curr_word: %20s|len: %d\n", curr_word.data, curr_len);
+    // dprintf(2, "line: %s|\n", line->data);
+    // fflush(stderr);
+    // set_cursor_position(rl_state);
+    
+    rl_state->cursor.x = 0;
+    rl_state->cursor.y = 0;
+    update_cursor_x(rl_state, line, pos.curr_word_end + 1);
     // rl_state->cursor.x = pos.curr_word_start + prev_len;
 }
 
@@ -281,6 +289,7 @@ void go_left_word(readline_state_t *rl_state, string *line){
 }
 
 rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line, Vars *shell_vars){
+    rl_save_undo_state(line, rl_state);
     switch (c) {
         case '\02': // <C> + b
             go_left(rl_state, line); break;
@@ -294,12 +303,14 @@ rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *li
             go_end(rl_state, line); break;
         case '\01': // <C> + a
             go_start(rl_state, line); break;
-        case '\037': // <C> + _
+        case '\07': // <C> + _
+            da_pop(rl_state->undo_stack);
             rl_load_previous_state(line, rl_state); break;
         case '\024':
             rl_swap_char(rl_state, line); break;
         default: {
-            break;
+            da_pop(rl_state->undo_stack);
+            return RL_NO_OP;
         }
     }
     return RL_NO_OP;

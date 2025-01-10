@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbardavi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/08 14:41:46 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/08 16:02:23 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:18:19 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "libft.h"
 #include "utils.h"
 #include "dynamic_arrays.h"
+#include <stdio.h>
 #include <string.h>
 
 void undo_stack_pop_front(undo_state_stack_t *stack){
@@ -43,6 +44,7 @@ void rl_save_undo_state(string *line, readline_state_t *rl_state){
 
 void rl_load_previous_state(string *line, readline_state_t *rl_state){
     if (rl_state->undo_stack->size > 0){
+        last_action = -1;
         undo_state_t *state = da_pop(rl_state->undo_stack);
 
         rl_state->cursor.x = state->cursor.x;
