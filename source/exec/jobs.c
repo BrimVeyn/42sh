@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "exec.h"
+#include "final_parser.h"
 #include "utils.h"
 #include "jobs.h"
 #include "signal.h"
@@ -28,7 +29,7 @@ int job_wait(AndOrP *job) {
 	pid_t pid;
 
 	do {
-		pid = waitpid(WAIT_ANY, &status, WUNTRACED);
+		pid = waitpid(-job->pgid, &status, WUNTRACED);
 		if (pid != -1) { } else { }
 
 	} while (!mark_process_andor(job, pid, status, true)
@@ -50,6 +51,8 @@ void put_job_background(AndOrP *job) {
 int put_job_foreground (AndOrP *job, int cont) {
 	ShellInfos *self = shell(SHELL_GET);
 	/* Put the job into the foreground.  */
+	
+	_debug("DEBUG: Setting terminal foreground process group to PGID: %d\n", job->pgid);
 	if (tcsetpgrp(self->shell_terminal, job->pgid) == -1)
 		_fatal("tcsetpgrp: failed", 1);
 	/* Send the job a continue signal, if necessary.  */
@@ -65,6 +68,7 @@ int put_job_foreground (AndOrP *job, int cont) {
 	job_wait(job);
 	/*dprintf(2, "AAwait_status in : %d\n", getpid());*/
 	/* Put the self->shell back in the foreground.  */
+	_debug("DEBUG: Restoring terminal control to shell PGID: %d\n", self->shell_pgid);
 	if (tcsetpgrp(self->shell_terminal, self->shell_pgid) == -1)
 		_fatal("tcsetpgrp: failed", 1);
 	/* Restore the self->shell’s terminal modes.  */

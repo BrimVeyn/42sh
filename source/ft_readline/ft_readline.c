@@ -13,11 +13,13 @@
 #include "ft_readline.h"
 #include "c_string.h"
 #include "libft.h"
+#include "signals.h"
 #include "utils.h"
 #include "exec.h"
 
 
 #include <limits.h>
+#include <signal.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <termios.h>
@@ -190,7 +192,7 @@ void ft_rl_newline() {
 	rl_state->cursor_offset.x = 0;
 	rl_state->cursor.y = 0;
 	rl_state->cursor.x = 0;
-	rl_state->prompt_size = ft_strlen(rl_state->prompt);
+	rl_state->prompt_size = get_visible_length(rl_state->prompt);
 	rl_print_prompt(STDOUT_FILENO, rl_state);
 }
 
@@ -398,7 +400,6 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
 		rl_state->prompt_size = 0;
 		gc(GC_ADD, rl_state->prompt, GC_READLINE);
 	}
-
 	
 	ShellInfos *self = shell(SHELL_GET);
     rl_state->interactive = self->interactive;
@@ -425,13 +426,15 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
 		}
 
 		if (rl_done == 1){
-			/*ft_rl_newline();*/
+
+			ft_rl_newline();
 			rl_done = 0;
 			str_clear(line);
-			pop_history();
-			write(STDOUT_FILENO, "^C\n", 3);
-			char str[] = { '\004', '\0' };
-			return ft_strdup(str);
+			/*pop_history();*/
+			/*write(STDOUT_FILENO, "^C\n", 3);*/
+			/*char str[] = { '\004', '\0' };*/
+			/*return ft_strdup(str);*/
+			continue;
 		}
 
 		if (rl_done == 2){

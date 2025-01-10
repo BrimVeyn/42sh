@@ -132,11 +132,15 @@ void builtin_echo(const SimpleCommandP *command, UNUSED Vars *const shell_vars) 
 	for (; i < command->word_list->size; i++) {
 		char *arg = command->word_list->data[i];
 
-		if (regex_match("^-n+$", arg).is_found) {
-			options |= NO_NEWLINE;
-		} else if (regex_match("^-e+$", arg).is_found) {
-			options |= ESCAPE_SEQ;
-		} else break;
+		if (regex_match("^-[ne]+$", arg).is_found) {
+			char *arg = command->word_list->data[i];
+			for (size_t j = 1; arg[j]; j++) {
+				if (arg[j] == 'e') options |= ESCAPE_SEQ;
+				else if (arg[j] == 'n') options |= NO_NEWLINE;
+			}
+		} else {
+			break;
+		}
 	}
 
 	bool stop = false;

@@ -14,6 +14,7 @@
 #include "utils.h"
 #include "final_parser.h"
 #include "colors.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -56,7 +57,19 @@ void pretty_error(const Lex *const lexer, char *raw_token) {
 	g_exitno = 2;
 }
 
+#include <stdarg.h>
+#include <stdio.h>
+
+void _debug(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+	if (g_debug)
+		vdprintf(2, format, args);
+    va_end(args);
+}
+
 void fatal(const char * const msg, const int line, const char *filename, const int exit_code) {
+	perror("fatal");
     if (msg)
         ft_dprintf(STDERR_FILENO, "%s:%d 42sh: fatal: %s\n", filename, line, msg);
     close_fd_set(FD_ALL);

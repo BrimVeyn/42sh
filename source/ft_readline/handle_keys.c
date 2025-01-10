@@ -81,8 +81,10 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 	if (!rl_state->interactive){
 		str_push_back(line, c);
 	}
-	else
+	else {
+		/*dprintf(2, "line: %s\n", line->data);*/
 		str_insert(line, c, pos);
+	}
 
 	if (rl_state->interactive)
 		update_cursor_x(rl_state, line, 1);
@@ -154,7 +156,7 @@ rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *she
             if (seq[2] == '~') {
                 handle_delete_key(rl_state, line);
                 return RL_NO_OP;
-            }
+           }
         }
 
 		//leave search mode if special key other than DEL is pressed
