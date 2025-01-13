@@ -25,6 +25,9 @@ extern FdSet *g_fdSet;
 //Needed for the return keyword to exit from a function at anytime
 extern int g_functionCtx;
 
+//DA of pids to keep track of async process substitution
+extern IntList *g_procSub;
+
 #define NO_WAIT 0x0
 #define WAIT	0x1
 #define IS_CHILD(pid) ((pid == 0) ? true : false)

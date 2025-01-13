@@ -43,6 +43,7 @@ FdSet*			g_fdSet = NULL;
 pid_t			g_masterPgid = 0;
 FunctionList*	g_funcList = NULL;
 JobList*		g_jobList = NULL;
+IntList*		g_procSub = NULL;
 
 
 //FIX: quote bug in this case : echo "${staged:+$staged}" $ sign causes this bug surprinsigly
@@ -240,11 +241,13 @@ static void load_positional_parameters(const int ac, char ** const av, Vars * co
 static void init_globals() {
 	da_create(jobListTmp, JobList, sizeof(AndOrP *), GC_ENV);
 	da_create(funcListTmp, FunctionList, sizeof(FunctionP *), GC_ENV);
-	da_create(fdSetTmp, FdSet, sizeof(int), GC_ENV);
+	da_create(fdSetTmp, FdSet, sizeof(Fd *), GC_ENV);
+	da_create(procSubTmp, IntList, sizeof(int), GC_ENV);
 
 	g_fdSet = fdSetTmp;
 	g_jobList = jobListTmp;
 	g_funcList = funcListTmp;
+	g_procSub = procSubTmp;
 }
 
 #define SHELL_IS_RUNNING true
