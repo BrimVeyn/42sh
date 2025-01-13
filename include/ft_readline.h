@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/03 10:28:38 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:17:15 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,29 @@ typedef struct _hist_state {
     HISTORY_CONFIG *config;
 } HISTORY_STATE;
 
+typedef struct s_position{
+    int x;
+    int y;
+} position_t;
+
+typedef struct s_undo_state {
+    string line;
+    position_t cursor;
+}   undo_state_t;
+
+typedef struct s_undo_state_stack {
+    undo_state_t **data;
+	size_t	size;
+	size_t	capacity;
+	size_t	size_of_element;
+	int		gc_level;
+}   undo_state_stack_t;
+
+typedef enum {
+	PRINT_KEY,
+    DELETE_KEY,
+} rl_last_action;
+
 typedef enum {
 	RL_GET,
 	RL_SET,
@@ -52,10 +75,6 @@ typedef enum {
 	RL_REFRESH,
 } rl_event;
 
-typedef struct s_position{
-    int x;
-    int y;
-} position_t;
 
 typedef struct s_search_mode {
 	char *word_found;
@@ -69,6 +88,7 @@ typedef struct s_readline_state {
 	position_t cursor_offset;
 	position_t cursor;
 	search_mode_t search_mode;
+    undo_state_stack_t *undo_stack;
 	bool interactive;
 } readline_state_t;
 
@@ -89,6 +109,10 @@ int can_go_left(readline_state_t *rl_state);
 
 void ft_readline_clean();
 void ft_rl_newline();
+char rl_get_current_char(readline_state_t *rl_state, string *line);
+char rl_get_prev_char(readline_state_t *rl_state, string *line);
+char rl_get_next_char(readline_state_t *rl_state, string *line);
+
 
 void update_line(readline_state_t *rl_state, string *line);
 void update_cursor_x(readline_state_t *rl_state, string *line, ssize_t n);
@@ -104,10 +128,24 @@ void print_history_values(HISTORY_STATE *history);
 
 #include "final_parser.h"
 
+rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line, Vars *shell_vars);
 rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *shell_vars);
 char *ft_readline(const char *prompt, Vars *shell_vars);
 void init_history(Vars *shell_vars);
 void add_history(const char *str, Vars *shell_vars);
 void handle_history_config(HISTORY_STATE *history, Vars *shell_vars);
+
+void rl_save_undo_state(string *line, readline_state_t *rl_state);
+void rl_load_previous_state(string *line, readline_state_t *rl_state);
+void rl_pop_undo_state(readline_state_t *rl_state);
+
+int rl_get_cursor_pos_on_line(readline_state_t *rl_state);
+void rl_change_n_char(readline_state_t *rl_state, string *line, char c, int n);
+char rl_get_n_char(readline_state_t *rl_state, string *line, int n);
+void rl_change_current_char(readline_state_t *rl_state, string *line, char c);
+void rl_change_prev_char(readline_state_t *rl_state, string *line, char c);
+void rl_change_next_char(readline_state_t *rl_state, string *line, char c);
+
+extern int last_action;
 
 #endif
