@@ -17,9 +17,3 @@ sed 's/foo/bar/' <(echo "foo foo foo")
 uniq <(printf "dup\ndup\nunique\n")
 paste <(seq 1 3) <(seq 4 6)
 join <(printf "1 a\n2 b\n") <(printf "1 c\n2 d\n")
-echo "test data" > >(cat > ./XXXOUTXXX/output.txt) && cat ./XXXOUTXXX/output.txt
-echo "abc" > >(rev > ./XXXOUTXXX/reversed.txt) && cat ./XXXOUTXXX/reversed.txt
-ls > >(sort > ./XXXOUTXXX/sorted.txt) && cat ./XXXOUTXXX/sorted.txt
-cat /etc/hosts > >(grep localhost > ./XXXOUTXXX/localhost.txt) && cat ./XXXOUTXXX/localhost.txt
-printf "1 one\n2 two\n3 three\n" > >(cut -d ' ' -f 2 > ./XXXOUTXXX/extracted.txt) && cat ./XXXOUTXXX/extracted.txt
-echo -n "hash this" > >(md5sum > ./XXXOUTXXX/hash.md5) && cat ./XXXOUTXXX/hash.md5

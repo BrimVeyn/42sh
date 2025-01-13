@@ -483,7 +483,6 @@ static void restore_std_fds(int *saved_fds) {
 static void setup_process(const bool background, AndOrP * const job, const ShellInfos * const shell_infos) {
 	if (shell_infos->interactive && !shell_infos->script)
 	{
-
 		pid_t pid = getpid();
 		if (!job->pgid && g_masterPgid != 0)
 			job->pgid = g_masterPgid;
@@ -714,6 +713,7 @@ static int execute_list(const ListP * const list, const bool background, Vars * 
 			}
 			set_exit_number(andor_head->pipeline, andor_head->pipeline->banged);
 		}
+		close_fd_set(FD_PARENT);
 
 		if (andor_head->sig == SIGINT)
 			return 0;

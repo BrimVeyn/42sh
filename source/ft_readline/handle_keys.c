@@ -348,7 +348,7 @@ rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *she
             rl_state->search_mode.active = false;
             rl_state->prompt_size = ft_strlen(rl_state->prompt);
         }
-         printf("char: %c\n", seq[1]);
+         /*printf("char: %c\n", seq[1]);*/
         if (seq[1] == 'A') {
             return up_history(rl_state, line, shell_vars); //up arrow
         } else if (seq[1] == 'B') { //down arrow
