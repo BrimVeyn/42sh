@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:14:17 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/30 19:48:45 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2025/01/13 11:22:56 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -357,6 +357,7 @@ char			*string_list_get_value(const StringList * const sl, const char * const id
 char			*shell_vars_get_value(const Vars * const shell_vars, char * const id);
 void			string_list_print(const StringList *list);
 char			**sort_env(StringList *env);
+int manage_vi_option(int mode, bool new_state);
 
 typedef struct {
 	size_t line, column, absolute;

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/10 16:17:15 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/13 15:58:21 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,12 +75,26 @@ typedef enum {
 	RL_REFRESH,
 } rl_event;
 
+typedef enum {
+    VI_INSERT,
+    VI_NORMAL,
+} rl_vi_mode;
+
+typedef enum {
+    RL_VI,
+    RL_READLINE,
+} rl_inline_mode;
 
 typedef struct s_search_mode {
 	char *word_found;
 	int word_start;
 	bool active;
 } search_mode_t;
+
+typedef struct s_inline {
+    rl_inline_mode mode;
+    rl_vi_mode vi_mode;
+} inline_t;
 
 typedef struct s_readline_state {
 	char *prompt;
@@ -90,6 +104,7 @@ typedef struct s_readline_state {
 	search_mode_t search_mode;
     undo_state_stack_t *undo_stack;
 	bool interactive;
+    inline_t in_line;
 } readline_state_t;
 
 extern int rl_done;
@@ -145,6 +160,10 @@ char rl_get_n_char(readline_state_t *rl_state, string *line, int n);
 void rl_change_current_char(readline_state_t *rl_state, string *line, char c);
 void rl_change_prev_char(readline_state_t *rl_state, string *line, char c);
 void rl_change_next_char(readline_state_t *rl_state, string *line, char c);
+void go_right_word(readline_state_t *rl_state, string *line, int (*compare_func)(int));
+void go_left_word(readline_state_t *rl_state, string *line, int (*compare_func)(int));
+void rl_go_up(readline_state_t *rl_state);
+void rl_go_down(readline_state_t *rl_state, string *line);
 
 extern int last_action;
 
