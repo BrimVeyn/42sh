@@ -6,12 +6,13 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/10 13:52:36 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/13 14:43:46 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_readline.h"
 #include "c_string.h"
+#include "final_parser.h"
 #include "libft.h"
 #include "utils.h"
 #include "exec.h"
@@ -41,6 +42,7 @@ int rl_done = 0;
 void move_cursor(int x, int y);
 void set_cursor_position(readline_state_t *rl_state);
 void signal_prompt_mode(void);
+
 
 size_t get_visible_length(const char * const str){
 	size_t real_len = 0;
@@ -339,6 +341,31 @@ void init_readline(readline_state_t *rl_state, const char *prompt, Vars *shell_v
 	manage_rl_state(RL_SET, rl_state);
     da_create(undo_stack, undo_state_stack_t, sizeof(undo_state_t *), GC_SUBSHELL);
     rl_state->undo_stack = undo_stack;
+    rl_state->in_line.mode = (manage_vi_option(0, 0)) ? RL_VI : RL_READLINE;
+    rl_state->in_line.vi_mode = VI_NORMAL;
+
+    // get_variable_value(shell_vars->set, vi)
+}
+
+void rl_go_down(readline_state_t *rl_state, string *line){
+    size_t cols = get_col();
+    size_t cursor = rl_get_cursor_pos_on_line(rl_state);
+    
+    size_t goal = cols * (rl_state->cursor.y + 1);
+
+    if (goal < line->size){
+        if ((cursor + cols) < line->size){
+            rl_state->cursor.y++;
+        } else {
+            update_cursor_x(rl_state, line, line->size - cursor); // go to end
+        }
+    }
+}
+
+void rl_go_up(readline_state_t *rl_state){
+    if (rl_state->cursor.y > 0){
+        rl_state->cursor.y--;
+    }
 }
 
 int can_go_left(readline_state_t *rl_state){

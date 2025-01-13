@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/10 16:26:48 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/13 16:07:28 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,20 @@
 //TODO: Clean handle_enter_function
 
 int last_action = -1;
+
+void go_left(readline_state_t *rl_state, string *line){
+	if (can_go_left(rl_state)){
+		update_cursor_x(rl_state, line, -1);
+		set_cursor_position(rl_state);
+	}
+}
+
+void go_right(readline_state_t *rl_state, string *line){
+	if (can_go_right(rl_state, line)) {
+		update_cursor_x(rl_state, line, 1);
+		set_cursor_position(rl_state);
+	}
+}
 
 int handle_enter_key(readline_state_t *rl_state, string *line) {
 	if (rl_state->interactive){
@@ -163,6 +177,33 @@ void rl_swap_word(readline_state_t *rl_state, string *line){
     // rl_state->cursor.x = pos.curr_word_start + prev_len;
 }
 
+int ft_isnotspace(int c){
+    return (c != ' ');
+}
+
+void handle_vi_control(readline_state_t *rl_state, char c, string *line){
+    switch (c){
+        case 'j':
+            rl_go_down(rl_state, line); break;
+        case 'k':
+            rl_go_up(rl_state); break;
+        case 'i':
+            rl_state->in_line.vi_mode = VI_INSERT; break;
+        case 'h':
+            go_left(rl_state, line); break;
+        case 'l':
+            go_right(rl_state, line); break;
+        case 'w':
+            go_right_word(rl_state, line, &ft_isalnum); break;
+        case 'W':
+            go_right_word(rl_state, line, &ft_isnotspace); break;
+        case 'b':
+            go_left_word(rl_state, line, &ft_isalnum); break;
+        case 'B':
+            go_left_word(rl_state, line, &ft_isnotspace); break;
+    }
+}
+
 int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
     // rl_save_undo_state(line, rl_state);
 	int pos = rl_state->cursor.y * get_col() - rl_state->prompt_size;
@@ -171,6 +212,11 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 	if (c == '\n' || c == '\0'){
 		return handle_enter_key(rl_state, line);
 	}
+
+    if (rl_state->in_line.mode == RL_VI && rl_state->in_line.vi_mode == VI_NORMAL){
+        handle_vi_control(rl_state, c, line);
+        return RL_NO_OP;
+    }
 
 	if (c == 127 && rl_state->interactive){
         if (last_action != DELETE_KEY && rl_state->interactive){
@@ -213,19 +259,6 @@ void handle_delete_key(readline_state_t *rl_state, string *line) {
     }
 }
 
-void go_left(readline_state_t *rl_state, string *line){
-	if (can_go_left(rl_state)){
-		update_cursor_x(rl_state, line, -1);
-		set_cursor_position(rl_state);
-	}
-}
-
-void go_right(readline_state_t *rl_state, string *line){
-	if (can_go_right(rl_state, line)) {
-		update_cursor_x(rl_state, line, 1);
-		set_cursor_position(rl_state);
-	}
-}
 
 rl_event up_history(readline_state_t *rl_state, string *line, Vars *shell_vars) {
 	(void)shell_vars;
@@ -265,100 +298,115 @@ void go_start(readline_state_t *rl_state, string *line){
     }
 }
 
-void go_right_word(readline_state_t *rl_state, string *line){
-    while (can_go_right(rl_state, line) && rl_get_current_char(rl_state, line) == ' '){
+void go_right_word(readline_state_t *rl_state, string *line, int (*compare_func)(int)) {
+    while (can_go_right(rl_state, line) && !compare_func(rl_get_current_char(rl_state, line))){
         go_right(rl_state, line);
     }
     char next_char = rl_get_current_char(rl_state, line);
-    while (can_go_right(rl_state, line) && next_char != ' ' && next_char != '\0') {
+    while (can_go_right(rl_state, line) && compare_func(next_char) && next_char != '\0') {
         go_right(rl_state, line);
         next_char = rl_get_current_char(rl_state, line);
     } 
-    while (can_go_right(rl_state, line) && rl_get_current_char(rl_state, line) == ' '){
+    while (can_go_right(rl_state, line) && !compare_func(rl_get_current_char(rl_state, line))){
         go_right(rl_state, line);
     }
 }
 
-void go_left_word(readline_state_t *rl_state, string *line){
-    while (can_go_left(rl_state) && rl_get_prev_char(rl_state, line) == ' '){
+void go_left_word(readline_state_t *rl_state, string *line, int (*compare_func)(int)) {
+    while (can_go_left(rl_state) && !compare_func(rl_get_prev_char(rl_state, line))) {
         go_left(rl_state, line);
     }
+
     char prev_char = rl_get_prev_char(rl_state, line);
-    while (can_go_left(rl_state) && prev_char != ' ' && prev_char != '\0') {
+    while (can_go_left(rl_state) && compare_func(prev_char) && prev_char != '\0') {
         go_left(rl_state, line);
         prev_char = rl_get_prev_char(rl_state, line);
-    } 
+    }
 }
 
 rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line, Vars *shell_vars){
     if (rl_state->interactive)
 		rl_save_undo_state(line, rl_state);
-    switch (c) {
-        case '\02': // <C> + b
-            go_left(rl_state, line); break;
-        case '\06':
-            go_right(rl_state, line); break;
-        case '\020':
-            up_history(rl_state, line, shell_vars); break;
-        case '\016':
-            down_history(rl_state, line); break;
-        case '\05': // <C> + e
-            go_end(rl_state, line); break;
-        case '\01': // <C> + a
-            go_start(rl_state, line); break;
-        case '\07': // <C> + _
-            da_pop(rl_state->undo_stack);
-            rl_load_previous_state(line, rl_state); break;
-        case '\024':
-            rl_swap_char(rl_state, line); break;
-        default: {
-            da_pop(rl_state->undo_stack);
-            return RL_NO_OP;
+    if (rl_state->in_line.mode == RL_READLINE){
+        switch (c) {
+            case '\02': // <C> + b
+                go_left(rl_state, line); break;
+            case '\06':
+                go_right(rl_state, line); break;
+            case '\020':
+                up_history(rl_state, line, shell_vars); break;
+            case '\016':
+                down_history(rl_state, line); break;
+            case '\05': // <C> + e
+                go_end(rl_state, line); break;
+            case '\01': // <C> + a
+                go_start(rl_state, line); break;
+            case '\037': // <C> + _
+                da_pop(rl_state->undo_stack);
+                rl_load_previous_state(line, rl_state); break;
+            case '\024':
+                rl_swap_char(rl_state, line); break;
+            default: {
+                da_pop(rl_state->undo_stack);
+                return RL_NO_OP;
+            }
         }
     }
     return RL_NO_OP;
 }
-
 rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *shell_vars) {
-
     char seq[3];
-    if (read(STDIN_FILENO, &seq[0], 1) == 0) return RL_REFRESH;
-    
 
-    if (seq[0] == 'b'){
-        go_left_word(rl_state, line);
-    } else if (seq[0] == 'f'){
-        go_right_word(rl_state, line);
-    } else if (seq[0] == 't'){
-        rl_swap_word(rl_state, line);
+    fd_set set;
+    struct timeval timeout = { 0, 20 };
+    FD_ZERO(&set);
+    FD_SET(STDIN_FILENO, &set);
+
+    int selret = select(STDIN_FILENO + 1, &set, NULL, NULL, &timeout);
+
+    if (selret == -1) {
+        perror("select error");
+        return RL_NO_OP;
+    } else if (selret == 0) {
+        if (rl_state->in_line.mode == RL_VI) {
+            rl_state->in_line.vi_mode = VI_NORMAL; 
+        }
+        return RL_NO_OP;
     }
+
+    if (read(STDIN_FILENO, &seq[0], 1) != 1) {
+        return RL_REFRESH;
+    }
+
     if (seq[0] == '[') {
-        if (read(STDIN_FILENO, &seq[1], 1) == 0) return RL_REFRESH;
-
-        if (seq[1] == '3') {
-            if (read(STDIN_FILENO, &seq[2], 1) == 0) return RL_REFRESH;
-            if (seq[2] == '~') {
-                handle_delete_key(rl_state, line);
-                return RL_NO_OP;
-           }
+        if (read(STDIN_FILENO, &seq[1], 1) != 1) {
+            return RL_REFRESH;
         }
 
-		//leave search mode if special key other than DEL is pressed
-        if (rl_state->search_mode.active) {
-            rl_state->search_mode.active = false;
-            rl_state->prompt_size = ft_strlen(rl_state->prompt);
+        switch (seq[1]) {
+            case 'A': // Flèche haut
+                return up_history(rl_state, line, shell_vars);
+            case 'B': // Flèche bas
+                return down_history(rl_state, line);
+            case 'C': // Flèche droite
+                go_right(rl_state, line);
+                break;
+            case 'D': // Flèche gauche
+                go_left(rl_state, line);
+                break;
+            default:
+                break;
         }
-         printf("char: %c\n", seq[1]);
-        if (seq[1] == 'A') {
-            return up_history(rl_state, line, shell_vars); //up arrow
-        } else if (seq[1] == 'B') { //down arrow
-            return down_history(rl_state, line);
-        } else if (seq[1] == 'D') { //left arrow
-			go_left(rl_state, line);
-        } else if (seq[1] == 'C'){ //right arrow
-			go_right(rl_state, line);
+    } else if (rl_state->in_line.mode == RL_READLINE) {
+        if (seq[0] == 'b') {
+            go_left_word(rl_state, line, &ft_isalnum);
+        } else if (seq[0] == 'f') {
+            go_right_word(rl_state, line, &ft_isalnum);
+        } else if (seq[0] == 't') {
+            rl_swap_word(rl_state, line);
         }
     }
+
     return RL_NO_OP;
 }
 
