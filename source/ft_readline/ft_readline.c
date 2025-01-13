@@ -6,20 +6,18 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/03 12:55:44 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/10 13:52:36 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_readline.h"
 #include "c_string.h"
 #include "libft.h"
-#include "signals.h"
 #include "utils.h"
 #include "exec.h"
 
 
 #include <limits.h>
-#include <signal.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <termios.h>
@@ -33,6 +31,7 @@
 
 #define __USE_XOPEN
 #include <wchar.h>
+#include "dynamic_arrays.h"
 
 //FIX: FIX ^C one line up 
 
@@ -82,6 +81,8 @@ size_t get_visible_length(const char * const str){
 	return real_len;
 }
 
+//TODO: gerer emojis
+
 // void print_raw(const char* str) {
 //     for (const char* p = str; *p; ++p) {
 //         if (*p == '\033') { // Code d'échappement ESC
@@ -99,6 +100,7 @@ size_t get_visible_length(const char * const str){
 //     putchar('\n');
 // }
 //
+
 void set_prompt(readline_state_t *rl_state, const char *new_prompt) {
 	gc(GC_FREE, rl_state->prompt, GC_READLINE);
 	rl_state->prompt = ft_strdup(new_prompt);
@@ -335,7 +337,8 @@ void init_readline(readline_state_t *rl_state, const char *prompt, Vars *shell_v
 	move_cursor(rl_state->cursor_offset.x, rl_state->cursor_offset.y);
 	rl_print_prompt(STDOUT_FILENO, rl_state);
 	manage_rl_state(RL_SET, rl_state);
-
+    da_create(undo_stack, undo_state_stack_t, sizeof(undo_state_t *), GC_SUBSHELL);
+    rl_state->undo_stack = undo_stack;
 }
 
 int can_go_left(readline_state_t *rl_state){
@@ -343,6 +346,62 @@ int can_go_left(readline_state_t *rl_state){
 		return rl_state->cursor.x > 0;
 	else
 		return rl_state->cursor.x > -(int)rl_state->prompt_size;
+}
+
+int rl_get_cursor_pos_on_line(readline_state_t *rl_state){
+    return (rl_state->cursor.x * (rl_state->cursor.y + 1));
+}
+
+char rl_get_current_char(readline_state_t *rl_state, string *line){
+    return (line->data[rl_state->cursor.x * (rl_state->cursor.y + 1)]);
+}
+
+char rl_get_next_char(readline_state_t *rl_state, string *line){
+    size_t pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) + 1;
+    if (pos > line->size) return '\03';
+    return (line->data[pos]);
+}
+
+char rl_get_prev_char(readline_state_t *rl_state, string *line){
+    int pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) - 1;
+    if (pos < 0) return '\02';
+    return (line->data[pos]);
+}
+
+/**
+    * @brief cursor position relative
+*/
+char rl_get_n_char(readline_state_t *rl_state, string *line, int n){
+    int pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) + n;
+    if (pos < 0) return '\02';
+    if (pos > (int)(line->size)) return '\03';
+    return (line->data[pos]);
+}
+
+/**
+    * @brief cursor position relative
+*/
+void rl_change_n_char(readline_state_t *rl_state, string *line, char c, int n){
+    int pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) + n;
+    if (pos < 0) return;
+    if (pos > (int)(line->size)) return;
+    line->data[pos] = c;
+}
+
+void rl_change_next_char(readline_state_t *rl_state, string *line, char c){
+    size_t pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) + 1;
+    if (pos > line->size) return;
+    line->data[pos] = c;
+}
+
+void rl_change_prev_char(readline_state_t *rl_state, string *line, char c){
+    int pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) - 1;
+    if (pos < 0) return;
+    line->data[pos] = c;
+}
+
+void rl_change_current_char(readline_state_t *rl_state, string *line, char c){
+    line->data[rl_state->cursor.x * (rl_state->cursor.y + 1)] = c;
 }
 
 int can_go_right(readline_state_t *rl_state, string *line) {
@@ -457,7 +516,9 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
 			handle_control_keys(rl_state, c);
         } else if (c == '\033') {
             result = handle_special_keys(rl_state, line, shell_vars);
-        } else {
+        } else if (c > 0 && c < 32 && c != '\n'){
+			result = handle_readline_controls(rl_state, c, line, shell_vars);
+		} else {
 			result = handle_printable_keys(rl_state, c, line);
         }
 		
