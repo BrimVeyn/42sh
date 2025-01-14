@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/10 16:26:48 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/14 16:18:51 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,101 +66,35 @@ void handle_backspace_key(readline_state_t *rl_state, string *line, size_t pos){
 	update_cursor_x(rl_state, line, -1);
 }
 
-void rl_swap_char(readline_state_t *rl_state, string *line){
-    if (line->size < 2) return;
+static int ft_isnotspace(int c){
+    return (c != ' ');
+}
 
-    char current = rl_get_current_char(rl_state, line);
-    char prev = rl_get_prev_char(rl_state, line);
-    char next = rl_get_next_char(rl_state, line);
-    if (prev == '\02'){
-        rl_change_current_char(rl_state, line, rl_get_n_char(rl_state, line, 1));
-        rl_change_n_char(rl_state, line, current, 1);
-        update_cursor_x(rl_state, line, 2);
-    } else if (next == '\03'){
-        rl_change_prev_char(rl_state, line, rl_get_n_char(rl_state, line, -2));
-        rl_change_n_char(rl_state, line, prev, -2);
-    } else {
-        rl_change_current_char(rl_state, line, prev);
-        rl_change_prev_char(rl_state, line, current);
-        update_cursor_x(rl_state, line, 1);
+void handle_vi_control(readline_state_t *rl_state, char c, string *line){
+    switch (c){
+        case 'j':
+            down_history(rl_state, line); break;
+        case 'k':
+            up_history(rl_state, line); break;
+        case 'i':
+            rl_state->in_line.vi_mode = VI_INSERT; break;
+        case 'h':
+            rl_move_forward_by_char(rl_state, line); break;
+        case 'l':
+            rl_move_forward_by_char(rl_state, line); break;
+        case 'w':
+            rl_move_to_next_word_start(rl_state, line, &ft_isalnum); break;
+        case 'W':
+            rl_move_to_next_word_start(rl_state, line, &ft_isnotspace); break;
+        case 'b':
+            rl_move_to_previous_word_start(rl_state, line, &ft_isalnum); break;
+        case 'B':
+            rl_move_to_previous_word_start(rl_state, line, &ft_isnotspace); break;
+        case '0':
+            rl_move_to_start(rl_state, line); break;
+        case '$':
+            rl_move_to_end(rl_state, line); break;
     }
-}
-
-bool is_alnum(const char c){
-    return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'));
-}
-
-typedef struct s_word_pos {
-    int curr_word_end;
-    int curr_word_start;
-    int prev_word_end;
-    int prev_word_start;
-} word_pos_t;
-
-static void get_words_pos(readline_state_t *rl_state, string *line, word_pos_t *pos){
-    // char current_char;
-    int it = rl_get_cursor_pos_on_line(rl_state);
-    
-    for (;line->data[it] && !is_alnum(line->data[it]); it++){}
-    for (;line->data[it] && is_alnum(line->data[it]); it++){}
-    it--;
-    pos->curr_word_end = it;
-    for (;it > 0 && is_alnum(line->data[it]); it--){}
-    pos->curr_word_start = it + 1;
-    for (;it > 0 && !is_alnum(line->data[it]); it--){}
-    pos->prev_word_end = it;
-
-    for (;it > 0 && is_alnum(line->data[it]); it--){}
-    pos->prev_word_start = (it == 0) ? it : it + 1;
-
-    // move_cursor(0, 0);
-    // dprintf(2, "DEBUG: word_pos_t values:\n");
-    // dprintf(2, "string: %s\n", line->data);
-    // dprintf(2, "  curr_word_start: %d\n", pos->curr_word_start);
-    // dprintf(2, "  curr_word_end:   %d\n", pos->curr_word_end);
-    // dprintf(2, "  prev_word_start: %d\n", pos->prev_word_start);
-    // dprintf(2, "  prev_word_end:   %d\n", pos->prev_word_end);
-    // fflush(stderr);
-    // set_cursor_position(rl_state);
-}
-
-void rl_swap_word(readline_state_t *rl_state, string *line){
-    if (line->size == 0) return;
-
-    word_pos_t pos;
-    get_words_pos(rl_state, line, &pos);
-
-    
-    int prev_len = pos.prev_word_end - pos.prev_word_start + 1;
-    int curr_len = pos.curr_word_end - pos.curr_word_start + 1;
-    if (pos.prev_word_end == pos.prev_word_start) return;
-    
-    string curr_word = str_substr(line, pos.curr_word_start, curr_len);
-    string prev_word = str_substr(line, pos.prev_word_start, prev_len);
-
-    str_erase(line, pos.prev_word_start, prev_len);
-    str_erase(line, pos.curr_word_start - prev_len, curr_len);
-
-    str_insert_str(line, curr_word.data, pos.prev_word_start);
-    str_insert_str(line, prev_word.data, pos.prev_word_start + curr_len + (pos.curr_word_start - pos.prev_word_end - 1));
-
-    // examples'   'nathan
-    // '   '
-    // nathan'   '
-    // nathan'  'examples
-
-    
-    // move_cursor(0, 0);
-    // dprintf(2, "prev_word: %20s|len: %d\n", prev_word.data, prev_len);
-    // dprintf(2, "curr_word: %20s|len: %d\n", curr_word.data, curr_len);
-    // dprintf(2, "line: %s|\n", line->data);
-    // fflush(stderr);
-    // set_cursor_position(rl_state);
-    
-    rl_state->cursor.x = 0;
-    rl_state->cursor.y = 0;
-    update_cursor_x(rl_state, line, pos.curr_word_end + 1);
-    // rl_state->cursor.x = pos.curr_word_start + prev_len;
 }
 
 int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
@@ -171,6 +105,11 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 	if (c == '\n' || c == '\0'){
 		return handle_enter_key(rl_state, line);
 	}
+
+    if (rl_state->in_line.mode == RL_VI && rl_state->in_line.vi_mode == VI_NORMAL){
+        handle_vi_control(rl_state, c, line);
+        return RL_NO_OP;
+    }
 
 	if (c == 127 && rl_state->interactive){
         if (last_action != DELETE_KEY && rl_state->interactive){
@@ -213,152 +152,89 @@ void handle_delete_key(readline_state_t *rl_state, string *line) {
     }
 }
 
-void go_left(readline_state_t *rl_state, string *line){
-	if (can_go_left(rl_state)){
-		update_cursor_x(rl_state, line, -1);
-		set_cursor_position(rl_state);
-	}
-}
-
-void go_right(readline_state_t *rl_state, string *line){
-	if (can_go_right(rl_state, line)) {
-		update_cursor_x(rl_state, line, 1);
-		set_cursor_position(rl_state);
-	}
-}
-
-rl_event up_history(readline_state_t *rl_state, string *line, Vars *shell_vars) {
-	(void)shell_vars;
-	if (history->navigation_offset < history->length - CURRENT_LINE){ //-1
-		history->navigation_offset++;
-		rl_state->cursor.x = history->entries[history->length - history->navigation_offset - 1]->line.size;
-		gc(GC_FREE, line->data, GC_READLINE);
-		*line = str_strdup(&history->entries[history->length - history->navigation_offset - 1]->line);
-		gc(GC_ADD, line->data, GC_READLINE);
-	}
-	// move_cursor(0, 0);
-	// print_history_values(history);
-	// set_cursor_position(rl_state);
-	return RL_NO_OP;
-}
-
-rl_event down_history(readline_state_t *rl_state, string *line) {
-	if (history->navigation_offset > 0){
-		history->navigation_offset--;
-		rl_state->cursor.x = history->entries[history->length - history->navigation_offset - 1]->line.size;
-		gc(GC_FREE, line->data, GC_READLINE);
-		*line = str_strdup(&history->entries[history->length - history->navigation_offset - 1]->line);
-		gc(GC_ADD, line->data, GC_READLINE);
-	}
-	return RL_NO_OP;
-}
-
-void go_end(readline_state_t *rl_state, string *line){
-    while(can_go_right(rl_state, line)){
-        go_right(rl_state, line);
-    }
-}
-
-void go_start(readline_state_t *rl_state, string *line){
-    while(can_go_left(rl_state)){
-        go_left(rl_state, line);
-    }
-}
-
-void go_right_word(readline_state_t *rl_state, string *line){
-    while (can_go_right(rl_state, line) && rl_get_current_char(rl_state, line) == ' '){
-        go_right(rl_state, line);
-    }
-    char next_char = rl_get_current_char(rl_state, line);
-    while (can_go_right(rl_state, line) && next_char != ' ' && next_char != '\0') {
-        go_right(rl_state, line);
-        next_char = rl_get_current_char(rl_state, line);
-    } 
-    while (can_go_right(rl_state, line) && rl_get_current_char(rl_state, line) == ' '){
-        go_right(rl_state, line);
-    }
-}
-
-void go_left_word(readline_state_t *rl_state, string *line){
-    while (can_go_left(rl_state) && rl_get_prev_char(rl_state, line) == ' '){
-        go_left(rl_state, line);
-    }
-    char prev_char = rl_get_prev_char(rl_state, line);
-    while (can_go_left(rl_state) && prev_char != ' ' && prev_char != '\0') {
-        go_left(rl_state, line);
-        prev_char = rl_get_prev_char(rl_state, line);
-    } 
-}
-
-rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line, Vars *shell_vars){
+rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line){
     if (rl_state->interactive)
 		rl_save_undo_state(line, rl_state);
-    switch (c) {
-        case '\02': // <C> + b
-            go_left(rl_state, line); break;
-        case '\06':
-            go_right(rl_state, line); break;
-        case '\020':
-            up_history(rl_state, line, shell_vars); break;
-        case '\016':
-            down_history(rl_state, line); break;
-        case '\05': // <C> + e
-            go_end(rl_state, line); break;
-        case '\01': // <C> + a
-            go_start(rl_state, line); break;
-        case '\07': // <C> + _
-            da_pop(rl_state->undo_stack);
-            rl_load_previous_state(line, rl_state); break;
-        case '\024':
-            rl_swap_char(rl_state, line); break;
-        default: {
-            da_pop(rl_state->undo_stack);
-            return RL_NO_OP;
+    if (rl_state->in_line.mode == RL_READLINE){
+        switch (c) {
+            case '\02': // <C> + b
+                rl_move_back_by_char(rl_state, line); break;
+            case '\06':
+                rl_move_forward_by_char(rl_state, line); break;
+            case '\020':
+                up_history(rl_state, line); break;
+            case '\016':
+                down_history(rl_state, line); break;
+            case '\05': // <C> + e
+                rl_move_to_end(rl_state, line); break;
+            case '\01': // <C> + a
+                rl_move_to_start(rl_state, line); break;
+            case '\037': // <C> + _
+                da_pop(rl_state->undo_stack);
+                rl_load_previous_state(line, rl_state); break;
+            case '\024':
+                rl_swap_char(rl_state, line); break;
+            default: {
+                da_pop(rl_state->undo_stack);
+                return RL_NO_OP;
+            }
         }
     }
     return RL_NO_OP;
 }
 
-rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *shell_vars) {
-
+rl_event handle_special_keys(readline_state_t *rl_state, string *line) {
     char seq[3];
-    if (read(STDIN_FILENO, &seq[0], 1) == 0) return RL_REFRESH;
-    
 
-    if (seq[0] == 'b'){
-        go_left_word(rl_state, line);
-    } else if (seq[0] == 'f'){
-        go_right_word(rl_state, line);
-    } else if (seq[0] == 't'){
-        rl_swap_word(rl_state, line);
+    fd_set set;
+    struct timeval timeout = { 0, 20 };
+    FD_ZERO(&set);
+    FD_SET(STDIN_FILENO, &set);
+
+    int selret = select(STDIN_FILENO + 1, &set, NULL, NULL, &timeout);
+
+    if (selret == -1) {
+        perror("select error");
+        return RL_NO_OP;
+    } else if (selret == 0) {
+        if (rl_state->in_line.mode == RL_VI) {
+            rl_state->in_line.vi_mode = VI_NORMAL; 
+        }
+        return RL_NO_OP;
     }
+
+    if (read(STDIN_FILENO, &seq[0], 1) != 1) {
+        return RL_REFRESH;
+    }
+
     if (seq[0] == '[') {
-        if (read(STDIN_FILENO, &seq[1], 1) == 0) return RL_REFRESH;
-
-        if (seq[1] == '3') {
-            if (read(STDIN_FILENO, &seq[2], 1) == 0) return RL_REFRESH;
-            if (seq[2] == '~') {
-                handle_delete_key(rl_state, line);
-                return RL_NO_OP;
-           }
+        if (read(STDIN_FILENO, &seq[1], 1) != 1) {
+            return RL_REFRESH;
         }
 
-		//leave search mode if special key other than DEL is pressed
-        if (rl_state->search_mode.active) {
-            rl_state->search_mode.active = false;
-            rl_state->prompt_size = ft_strlen(rl_state->prompt);
+        switch (seq[1]) {
+            case 'A': // Flèche haut
+                return up_history(rl_state, line);
+            case 'B': // Flèche bas
+                return down_history(rl_state, line);
+            case 'C': // Flèche droite
+                rl_move_forward_by_char(rl_state, line); break;
+            case 'D': // Flèche gauche
+                rl_move_back_by_char(rl_state, line); break;
+                break;
+            default:
+                break;
         }
-         /*printf("char: %c\n", seq[1]);*/
-        if (seq[1] == 'A') {
-            return up_history(rl_state, line, shell_vars); //up arrow
-        } else if (seq[1] == 'B') { //down arrow
-            return down_history(rl_state, line);
-        } else if (seq[1] == 'D') { //left arrow
-			go_left(rl_state, line);
-        } else if (seq[1] == 'C'){ //right arrow
-			go_right(rl_state, line);
+    } else if (rl_state->in_line.mode == RL_READLINE) {
+        if (seq[0] == 'b') {
+            rl_move_to_previous_word_start(rl_state, line, &ft_isalnum);
+        } else if (seq[0] == 'f') {
+            rl_move_to_next_word_start(rl_state, line, &ft_isalnum);
+        } else if (seq[0] == 't') {
+            rl_swap_word(rl_state, line);
         }
     }
+
     return RL_NO_OP;
 }
 
