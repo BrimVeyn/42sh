@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/14 16:18:29 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/14 16:56:09 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,9 +181,12 @@ void rl_move_forward_by_char(readline_state_t *rl_state, string *line);
 
 void rl_move_to_end(readline_state_t *rl_state, string *line);
 void rl_move_to_start(readline_state_t *rl_state, string *line);
+void rl_move_to_first_char(readline_state_t *rl_state, string *line);
 
 void rl_move_to_next_word_start(readline_state_t *rl_state, string *line, int (*compare_func)(int));
 void rl_move_to_previous_word_start(readline_state_t *rl_state, string *line, int (*compare_func)(int));
+void rl_move_to_next_word_end(readline_state_t *rl_state, string *line, int (*compare_func)(int));
+void rl_move_to_previous_word_end(readline_state_t *rl_state, string *line, int (*compare_func)(int));
 // ──────────────────────────────────────────────────────────────────────
 
 // ── string operation ────────────────────────────────────────────────

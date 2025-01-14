@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbardavi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 11:16:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/14 16:18:26 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/14 16:56:58 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,16 @@ void rl_change_current_char(readline_state_t *rl_state, string *line, char c){
 
 // ── cursor_movement ─────────────────────────────────────────────────
 
+static bool ft_iswspace(int c) {
+    return (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r');
+}
+
+void rl_move_to_first_char(readline_state_t *rl_state, string *line){
+    while(ft_iswspace((rl_get_current_char(rl_state, line)))){
+        rl_move_forward_by_char(rl_state, line);
+    }
+}
+
 int can_go_right(readline_state_t *rl_state, string *line) {
     int cols = get_col(); //number collums
     int tchars = line->size + rl_state->prompt_size;  //total chars
@@ -150,6 +160,23 @@ void rl_move_to_end(readline_state_t *rl_state, string *line){
 
 void rl_move_to_start(readline_state_t *rl_state, string *line){
     while(can_go_left(rl_state)){
+        rl_move_back_by_char(rl_state, line);
+    }
+}
+
+void rl_move_to_next_word_end(readline_state_t *rl_state, string *line, int (*compare_func)(int)) {
+    while (can_go_right(rl_state, line) && !compare_func(rl_get_current_char(rl_state, line))){
+        rl_move_forward_by_char(rl_state, line);
+    }
+    char next_char = rl_get_current_char(rl_state, line);
+    while (can_go_right(rl_state, line) && compare_func(next_char) && next_char != '\0') {
+        rl_move_forward_by_char(rl_state, line);
+        next_char = rl_get_current_char(rl_state, line);
+    } 
+}
+
+void rl_move_to_previous_word_end(readline_state_t *rl_state, string *line, int (*compare_func)(int)) {
+    while (can_go_left(rl_state) && !compare_func(rl_get_prev_char(rl_state, line))) {
         rl_move_back_by_char(rl_state, line);
     }
 }

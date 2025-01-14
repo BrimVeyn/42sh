@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/14 16:18:51 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/14 16:56:22 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,9 +91,16 @@ void handle_vi_control(readline_state_t *rl_state, char c, string *line){
         case 'B':
             rl_move_to_previous_word_start(rl_state, line, &ft_isnotspace); break;
         case '0':
-            rl_move_to_start(rl_state, line);
+            rl_move_to_start(rl_state, line);break;
         case '$':
-            rl_move_to_end(rl_state, line);
+            rl_move_to_end(rl_state, line);break;
+        case '^':
+            rl_move_to_first_char(rl_state, line);break;
+        case 'e':
+            rl_move_to_next_word_end(rl_state, line, &ft_isalnum); break;
+        case 'E':
+            rl_move_to_next_word_end(rl_state, line, &ft_isnotspace); break;
+        
     }
 }
 
@@ -251,3 +258,5 @@ void handle_control_keys(readline_state_t *rl_state, char char_c){
 		rl_state->search_mode.active = true;
 	}
 }
+
+//Pet18005651[]
