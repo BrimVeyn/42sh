@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/13 15:58:21 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/14 16:18:29 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,28 +143,55 @@ void print_history_values(HISTORY_STATE *history);
 
 #include "final_parser.h"
 
-rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line, Vars *shell_vars);
-rl_event handle_special_keys(readline_state_t *rl_state, string *line, Vars *shell_vars);
+rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line);
+rl_event handle_special_keys(readline_state_t *rl_state, string *line);
 char *ft_readline(const char *prompt, Vars *shell_vars);
 void init_history(Vars *shell_vars);
 void add_history(const char *str, Vars *shell_vars);
 void handle_history_config(HISTORY_STATE *history, Vars *shell_vars);
 
+// ── undo function ───────────────────────────────────────────────────
 void rl_save_undo_state(string *line, readline_state_t *rl_state);
 void rl_load_previous_state(string *line, readline_state_t *rl_state);
 void rl_pop_undo_state(readline_state_t *rl_state);
+// ──────────────────────────────────────────────────────────────────────
 
+// ── Character access ────────────────────────────────────────────────
 int rl_get_cursor_pos_on_line(readline_state_t *rl_state);
-void rl_change_n_char(readline_state_t *rl_state, string *line, char c, int n);
-char rl_get_n_char(readline_state_t *rl_state, string *line, int n);
-void rl_change_current_char(readline_state_t *rl_state, string *line, char c);
+
 void rl_change_prev_char(readline_state_t *rl_state, string *line, char c);
+void rl_change_current_char(readline_state_t *rl_state, string *line, char c);
 void rl_change_next_char(readline_state_t *rl_state, string *line, char c);
-void go_right_word(readline_state_t *rl_state, string *line, int (*compare_func)(int));
-void go_left_word(readline_state_t *rl_state, string *line, int (*compare_func)(int));
-void rl_go_up(readline_state_t *rl_state);
-void rl_go_down(readline_state_t *rl_state, string *line);
+void rl_change_n_char(readline_state_t *rl_state, string *line, char c, int n);
+
+char rl_get_prev_char(readline_state_t *rl_state, string *line);
+char rl_get_current_char(readline_state_t *rl_state, string *line);
+char rl_get_next_char(readline_state_t *rl_state, string *line);
+char rl_get_n_char(readline_state_t *rl_state, string *line, int n);
+// ──────────────────────────────────────────────────────────────────────
+//
+// ── history_operation ───────────────────────────────────────────────
+rl_event up_history(readline_state_t *rl_state, string *line);
+rl_event down_history(readline_state_t *rl_state, string *line);
+// ──────────────────────────────────────────────────────────────────────
+
+// ── cursor_movement ─────────────────────────────────────────────────
+void rl_move_back_by_char(readline_state_t *rl_state, string *line);
+void rl_move_forward_by_char(readline_state_t *rl_state, string *line);
+
+void rl_move_to_end(readline_state_t *rl_state, string *line);
+void rl_move_to_start(readline_state_t *rl_state, string *line);
+
+void rl_move_to_next_word_start(readline_state_t *rl_state, string *line, int (*compare_func)(int));
+void rl_move_to_previous_word_start(readline_state_t *rl_state, string *line, int (*compare_func)(int));
+// ──────────────────────────────────────────────────────────────────────
+
+// ── string operation ────────────────────────────────────────────────
+void rl_swap_char(readline_state_t *rl_state, string *line);
+void rl_swap_word(readline_state_t *rl_state, string *line);
+// ──────────────────────────────────────────────────────────────────────
 
 extern int last_action;
+
 
 #endif

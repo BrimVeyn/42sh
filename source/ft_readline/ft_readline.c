@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/13 14:43:46 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/14 15:08:01 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -347,110 +347,6 @@ void init_readline(readline_state_t *rl_state, const char *prompt, Vars *shell_v
     // get_variable_value(shell_vars->set, vi)
 }
 
-void rl_go_down(readline_state_t *rl_state, string *line){
-    size_t cols = get_col();
-    size_t cursor = rl_get_cursor_pos_on_line(rl_state);
-    
-    size_t goal = cols * (rl_state->cursor.y + 1);
-
-    if (goal < line->size){
-        if ((cursor + cols) < line->size){
-            rl_state->cursor.y++;
-        } else {
-            update_cursor_x(rl_state, line, line->size - cursor); // go to end
-        }
-    }
-}
-
-void rl_go_up(readline_state_t *rl_state){
-    if (rl_state->cursor.y > 0){
-        rl_state->cursor.y--;
-    }
-}
-
-int can_go_left(readline_state_t *rl_state){
-	if (rl_state->cursor.y == 0)
-		return rl_state->cursor.x > 0;
-	else
-		return rl_state->cursor.x > -(int)rl_state->prompt_size;
-}
-
-int rl_get_cursor_pos_on_line(readline_state_t *rl_state){
-    return (rl_state->cursor.x * (rl_state->cursor.y + 1));
-}
-
-char rl_get_current_char(readline_state_t *rl_state, string *line){
-    return (line->data[rl_state->cursor.x * (rl_state->cursor.y + 1)]);
-}
-
-char rl_get_next_char(readline_state_t *rl_state, string *line){
-    size_t pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) + 1;
-    if (pos > line->size) return '\03';
-    return (line->data[pos]);
-}
-
-char rl_get_prev_char(readline_state_t *rl_state, string *line){
-    int pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) - 1;
-    if (pos < 0) return '\02';
-    return (line->data[pos]);
-}
-
-/**
-    * @brief cursor position relative
-*/
-char rl_get_n_char(readline_state_t *rl_state, string *line, int n){
-    int pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) + n;
-    if (pos < 0) return '\02';
-    if (pos > (int)(line->size)) return '\03';
-    return (line->data[pos]);
-}
-
-/**
-    * @brief cursor position relative
-*/
-void rl_change_n_char(readline_state_t *rl_state, string *line, char c, int n){
-    int pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) + n;
-    if (pos < 0) return;
-    if (pos > (int)(line->size)) return;
-    line->data[pos] = c;
-}
-
-void rl_change_next_char(readline_state_t *rl_state, string *line, char c){
-    size_t pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) + 1;
-    if (pos > line->size) return;
-    line->data[pos] = c;
-}
-
-void rl_change_prev_char(readline_state_t *rl_state, string *line, char c){
-    int pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) - 1;
-    if (pos < 0) return;
-    line->data[pos] = c;
-}
-
-void rl_change_current_char(readline_state_t *rl_state, string *line, char c){
-    line->data[rl_state->cursor.x * (rl_state->cursor.y + 1)] = c;
-}
-
-int can_go_right(readline_state_t *rl_state, string *line) {
-    int cols = get_col(); //number collums
-    int tchars = line->size + rl_state->prompt_size;  //total chars
-    int nlines = tchars / cols; //number lines
-    int nchar_on_last_line = tchars % cols; 
-
-    if (rl_state->cursor.y == 0) {
-        if (nlines >= 1) {
-            return rl_state->cursor.x < (int)(cols - rl_state->prompt_size);
-        } else {
-            return rl_state->cursor.x < (int)(nchar_on_last_line - rl_state->prompt_size);
-        }
-    }
-    
-    if (rl_state->cursor.y == nlines) {
-        return rl_state->cursor.x < nchar_on_last_line;
-    } 
-    
-    return rl_state->cursor.x < cols;
-}
 
 int should_process_enter() {
 	static struct timeval last_enter_time = {0};
@@ -535,16 +431,14 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
                     if (write(STDOUT_FILENO, "\n", 1) == -1) {_fatal("write error", 1);}
                     pop_history();
                 }
-                // gc(GC_FREE, line->data, GC_READLINE);
-				// gc(GC_FREE, line, GC_READLINE);
+                return NULL;
             }
-            return NULL;
 		} else if (c == CTRL_L || c == CTRL_R) {
 			handle_control_keys(rl_state, c);
         } else if (c == '\033') {
-            result = handle_special_keys(rl_state, line, shell_vars);
+            result = handle_special_keys(rl_state, line);
         } else if (c > 0 && c < 32 && c != '\n'){
-			result = handle_readline_controls(rl_state, c, line, shell_vars);
+			result = handle_readline_controls(rl_state, c, line);
 		} else {
 			result = handle_printable_keys(rl_state, c, line);
         }
