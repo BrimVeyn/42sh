@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/14 16:56:22 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/15 15:21:40 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,15 @@ int last_action = -1;
 
 int handle_enter_key(readline_state_t *rl_state, string *line) {
 	if (rl_state->interactive){
+        // reset prompt if in another mode than normal
+        if (rl_manage_args(RL_GET, 0)){
+            rl_manage_args(RL_RESET, 0);
+            set_prompt(rl_state, rl_state->normal_prompt);
+            update_line(rl_state, line);
+        }
 		if (rl_state->search_mode.active){
-			rl_state->search_mode.active = false;
-			rl_state->prompt_size = ft_strlen(rl_state->prompt);
+			rl_state->current_prompt_size = ft_strlen(rl_state->current_prompt);
+            rl_state->search_mode.active = false;
 			if (rl_state->search_mode.word_found){
 				gc(GC_FREE, line->data, GC_READLINE);
 				*line = string_init_str(rl_state->search_mode.word_found);
@@ -70,26 +76,60 @@ static int ft_isnotspace(int c){
     return (c != ' ');
 }
 
+int rl_manage_args(manage_rl_accessor mode, int n){
+    static int number = 0;
+
+    if (mode == RL_SET){
+        number *= 10;
+        number += n;
+    } else if (mode == RL_RESET){
+        number = 0;
+    }
+
+    if (number > SHRT_MAX){
+        number = 0;
+    }
+    return number;
+}
+
+static void switch_to_insert_mode(readline_state_t *rl_state){
+    rl_state->in_line.vi_mode = VI_INSERT;
+    rl_manage_args(RL_RESET, 0);
+}
+
 void handle_vi_control(readline_state_t *rl_state, char c, string *line){
+    
+    int args = rl_manage_args(RL_GET, 0);
+    if (ft_isdigit(c)){
+        args = rl_manage_args(RL_SET, c - '0');
+        return;
+    }
+    args = (!args) ? 1 : args;
     switch (c){
         case 'j':
-            down_history(rl_state, line); break;
+            rl_repeat_by_args(rl_state, line, &down_history, args) ; break;
         case 'k':
-            up_history(rl_state, line); break;
+            rl_repeat_by_args(rl_state, line, &up_history, args); break;
         case 'i':
-            rl_state->in_line.vi_mode = VI_INSERT; break;
-        case 'h':
-            rl_move_forward_by_char(rl_state, line); break;
+            switch_to_insert_mode(rl_state); rl_move_back_by_char(rl_state, line); break;
+        case 'I':
+            switch_to_insert_mode(rl_state); rl_move_to_start(rl_state, line); break;
+        case 'a':
+            switch_to_insert_mode(rl_state); break;
+        case 'A':
+            switch_to_insert_mode(rl_state); rl_move_to_end(rl_state, line); break;
         case 'l':
-            rl_move_forward_by_char(rl_state, line); break;
+            rl_repeat_by_args(rl_state, line, &rl_move_forward_by_char, args); break;
+        case 'h':
+            rl_repeat_by_args(rl_state, line, &rl_move_back_by_char, args); break;
         case 'w':
-            rl_move_to_next_word_start(rl_state, line, &ft_isalnum); break;
+            rl_repeat_by_args_with_comp(rl_state, line, &ft_isalnum, &rl_move_to_next_word_start, args); break;
         case 'W':
-            rl_move_to_next_word_start(rl_state, line, &ft_isnotspace); break;
+            rl_repeat_by_args_with_comp(rl_state, line, &ft_isnotspace, &rl_move_to_next_word_start, args); break;
         case 'b':
-            rl_move_to_previous_word_start(rl_state, line, &ft_isalnum); break;
+            rl_repeat_by_args_with_comp(rl_state, line, &ft_isalnum, &rl_move_to_previous_word_start, args); break;
         case 'B':
-            rl_move_to_previous_word_start(rl_state, line, &ft_isnotspace); break;
+            rl_repeat_by_args_with_comp(rl_state, line, &ft_isnotspace, &rl_move_to_previous_word_start, args); break;
         case '0':
             rl_move_to_start(rl_state, line);break;
         case '$':
@@ -97,17 +137,27 @@ void handle_vi_control(readline_state_t *rl_state, char c, string *line){
         case '^':
             rl_move_to_first_char(rl_state, line);break;
         case 'e':
-            rl_move_to_next_word_end(rl_state, line, &ft_isalnum); break;
+            rl_repeat_by_args_with_comp(rl_state, line, &ft_isalnum, &rl_move_to_next_word_end, args); break;
         case 'E':
-            rl_move_to_next_word_end(rl_state, line, &ft_isnotspace); break;
-        
+            rl_repeat_by_args_with_comp(rl_state, line, &ft_isnotspace, &rl_move_to_next_word_end, args); break;
+        case '|':
+            rl_move_to_n_index(rl_state, line, args); break;
+        case 'f':
+            rl_move_to_next_matching_char(rl_state, line, args, RL_NEWMATCH); break;
+        case 'F':
+            rl_move_to_prev_matching_char(rl_state, line, args, RL_NEWMATCH); break;
+        case ';':
+            rl_manage_matching_vi_mode(NULL, RL_GET)(rl_state, line, args, RL_REMATCH);
+        default:
+            return;
     }
+    rl_manage_args(RL_RESET, 0);
 }
 
 int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
     // rl_save_undo_state(line, rl_state);
-	int pos = rl_state->cursor.y * get_col() - rl_state->prompt_size;
-	pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->prompt_size : 0);
+	int pos = rl_state->cursor.y * get_col() - rl_state->current_prompt_size;
+	pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->current_prompt_size : 0);
 
 	if (c == '\n' || c == '\0'){
 		return handle_enter_key(rl_state, line);
@@ -147,8 +197,8 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 }
 
 void handle_delete_key(readline_state_t *rl_state, string *line) {
-    int pos = rl_state->cursor.y * get_col() - rl_state->prompt_size;
-    pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->prompt_size : 0);
+    int pos = rl_state->cursor.y * get_col() - rl_state->current_prompt_size;
+    pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->current_prompt_size : 0);
 
     if (pos >= str_length(line)) return;
 
@@ -221,9 +271,9 @@ rl_event handle_special_keys(readline_state_t *rl_state, string *line) {
 
         switch (seq[1]) {
             case 'A': // Flèche haut
-                return up_history(rl_state, line);
+                up_history(rl_state, line); break;
             case 'B': // Flèche bas
-                return down_history(rl_state, line);
+                down_history(rl_state, line); break;
             case 'C': // Flèche droite
                 rl_move_forward_by_char(rl_state, line); break;
             case 'D': // Flèche gauche
