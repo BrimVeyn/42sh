@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbardavi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 11:16:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/15 15:30:41 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/16 14:55:18 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,17 @@ void rl_repeat_by_args_with_comp(readline_state_t *rl_state, string *line, int (
 
 // ── Character access ────────────────────────────────────────────────
 //
+
+void rl_remove_current_char(readline_state_t *rl_state, string *line) {
+    size_t cursor = rl_get_cursor_pos_on_line(rl_state);
+    if (cursor >= line->size || line->size == 0)
+        return;
+
+    ft_memmove(line->data + cursor, line->data + cursor + 1, line->size - cursor - 1);
+    line->size--;
+    line->data[line->size] = '\0';
+}
+
 int rl_get_cursor_pos_on_line(readline_state_t *rl_state){
     return (rl_state->cursor.x * (rl_state->cursor.y + 1));
 }
@@ -326,6 +337,64 @@ void down_history(readline_state_t *rl_state, string *line) {
 	}
 }
 // ── string operation ────────────────────────────────────────────────
+
+void rl_clear_line (string *line){
+    if (!line->size) return;
+    ft_memset(line->data, 0, line->size);
+    line->size = 0;
+}
+
+void rl_substitute_line (readline_state_t *rl_state, string *line){
+    if (!line->size) return;
+    rl_clear_line(line);
+    rl_state->cursor.x = 0;
+    rl_state->cursor.y = 0;
+    switch_to_insert_mode(rl_state);
+}
+
+void rl_substitute_current_char(readline_state_t *rl_state, string *line){
+    rl_remove_current_char(rl_state, line);
+    switch_to_insert_mode(rl_state);
+}
+              
+void rl_change_in_word(readline_state_t *rl_state, string *line) {
+    if (line->size == 0) return;
+    int cursor = rl_get_cursor_pos_on_line(rl_state);
+    size_t word_end = cursor + 1;
+
+    for (; word_end < line->size && ft_isalnum(line->data[word_end]); word_end++) {}
+
+    ft_memmove(line->data + cursor, line->data + word_end, line->size - word_end);
+    ft_memset(line->data + (line->size - (word_end - cursor)), 0, word_end - cursor);
+
+    line->size -= (word_end - cursor);
+
+    switch_to_insert_mode(rl_state);
+}
+
+void rl_change_until_end(readline_state_t *rl_state, string *line){
+    if (!line->size) return;
+    size_t cursor = rl_get_cursor_pos_on_line(rl_state);
+    ft_memset(line->data + cursor, 0, line->size - cursor);
+    line->size = cursor;
+    switch_to_insert_mode(rl_state);
+}
+
+
+
+void rl_change_until_next_key_pressed(readline_state_t *rl_state, string *line){
+    char c = 0;
+
+    read(STDIN_FILENO, &c, 1);
+    switch (c){
+        case 'w':
+            rl_change_in_word(rl_state, line); break;
+        case '$':
+            rl_change_until_end(rl_state, line); break;
+        default:
+            return;
+    }
+}
 
 void rl_swap_char(readline_state_t *rl_state, string *line){
     if (line->size < 2) return;

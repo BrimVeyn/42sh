@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/15 15:16:20 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/16 11:59:57 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,6 +163,8 @@ void rl_repeat_by_args(readline_state_t *rl_state, string *line, void (*command_
 void rl_repeat_by_args_with_comp(readline_state_t *rl_state, string *line, int (*compare_func) (int), void (*command_func)(readline_state_t *, string *, int (*compare_func)(int)), size_t n);
 void (*rl_manage_matching_vi_mode(void (*matching_func)(readline_state_t *, string *, size_t, rl_matching_mode), manage_rl_accessor mode))(readline_state_t *, string *, size_t, rl_matching_mode);
 
+void switch_to_insert_mode(readline_state_t *rl_state);
+
 // ── undo function ───────────────────────────────────────────────────
 void rl_save_undo_state(string *line, readline_state_t *rl_state);
 void rl_load_previous_state(string *line, readline_state_t *rl_state);
@@ -181,6 +183,8 @@ char rl_get_prev_char(readline_state_t *rl_state, string *line);
 char rl_get_current_char(readline_state_t *rl_state, string *line);
 char rl_get_next_char(readline_state_t *rl_state, string *line);
 char rl_get_n_char(readline_state_t *rl_state, string *line, int n);
+
+void rl_remove_current_char(readline_state_t *rl_state, string *line);
 // ──────────────────────────────────────────────────────────────────────
 //
 // ── history_operation ───────────────────────────────────────────────
@@ -208,8 +212,17 @@ void rl_move_to_prev_matching_char(readline_state_t *rl_state, string *line, siz
 // ──────────────────────────────────────────────────────────────────────
 
 // ── string operation ────────────────────────────────────────────────
+void rl_change_until_next_key_pressed(readline_state_t *rl_state, string *line);
+void rl_change_until_end(readline_state_t *rl_state, string *line);
+void rl_change_in_word(readline_state_t *rl_state, string *line);
+
 void rl_swap_char(readline_state_t *rl_state, string *line);
 void rl_swap_word(readline_state_t *rl_state, string *line);
+
+void rl_substitute_current_char(readline_state_t *rl_state, string *line);
+void rl_substitute_line (readline_state_t *rl_state, string *line);
+
+void rl_clear_line (string *line);
 // ──────────────────────────────────────────────────────────────────────
 
 extern int last_action;

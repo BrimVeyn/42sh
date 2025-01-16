@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/15 15:21:40 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/16 14:55:16 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,15 +92,24 @@ int rl_manage_args(manage_rl_accessor mode, int n){
     return number;
 }
 
-static void switch_to_insert_mode(readline_state_t *rl_state){
+void switch_to_insert_mode(readline_state_t *rl_state){
     rl_state->in_line.vi_mode = VI_INSERT;
     rl_manage_args(RL_RESET, 0);
+}
+
+void rl_launch_superior_mods(readline_state_t *rl_state, string *line, void (*superior_func)(readline_state_t, string)){
+    char c = 0;
+
+    while(waiting_for_){
+        read(STDIN_FILENO, &c, 1);
+        handle
+    }
 }
 
 void handle_vi_control(readline_state_t *rl_state, char c, string *line){
     
     int args = rl_manage_args(RL_GET, 0);
-    if (ft_isdigit(c)){
+    if (c >= '1' && c <= '9'){
         args = rl_manage_args(RL_SET, c - '0');
         return;
     }
@@ -147,7 +156,15 @@ void handle_vi_control(readline_state_t *rl_state, char c, string *line){
         case 'F':
             rl_move_to_prev_matching_char(rl_state, line, args, RL_NEWMATCH); break;
         case ';':
-            rl_manage_matching_vi_mode(NULL, RL_GET)(rl_state, line, args, RL_REMATCH);
+            rl_manage_matching_vi_mode(NULL, RL_GET)(rl_state, line, args, RL_REMATCH); break;
+        case 'c':
+            rl_change_until_next_key_pressed(rl_state, line); break;
+        case 'C':
+            rl_change_until_end(rl_state, line); break;
+        case 's':
+            rl_repeat_by_args(rl_state, line, rl_substitute_current_char, args); break;
+        case 'S':
+            rl_substitute_line(rl_state, line); break;
         default:
             return;
     }
