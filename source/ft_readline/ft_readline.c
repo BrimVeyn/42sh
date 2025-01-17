@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/15 13:20:13 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/17 10:54:21 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -363,7 +363,7 @@ void init_readline(readline_state_t *rl_state, const char *prompt, Vars *shell_v
     da_create(undo_stack, undo_state_stack_t, sizeof(undo_state_t *), GC_SUBSHELL);
     rl_state->undo_stack = undo_stack;
     rl_state->in_line.mode = (manage_vi_option(0, 0)) ? RL_VI : RL_READLINE;
-    rl_state->in_line.vi_mode = VI_NORMAL;
+    rl_state->in_line.vi_mode = VI_INSERT;
 
     // get_variable_value(shell_vars->set, vi)
 }

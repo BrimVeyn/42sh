@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/16 11:59:57 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/17 15:35:07 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,11 @@ typedef enum {
     RL_REMATCH,
 } rl_matching_mode;
 
+typedef enum {
+    RL_ALLOW_ALL,
+    RL_ALLOW_LOW,
+}   rl_vi_controls_mode;
+
 typedef struct s_search_mode {
 	char *word_found;
 	int word_start;
@@ -127,6 +132,7 @@ int search_in_history(readline_state_t *rl_state, char *str);
 void handle_control_keys(readline_state_t *rl_state, char char_c);
 int handle_printable_keys(readline_state_t *rl_state, char c, string *line);
 int can_go_right(readline_state_t *rl_state, string *line);
+int can_go_right_vi(readline_state_t *rl_state, string *line);
 int can_go_left(readline_state_t *rl_state);
 
 void ft_readline_clean();
@@ -157,13 +163,16 @@ void init_history(Vars *shell_vars);
 void add_history(const char *str, Vars *shell_vars);
 void handle_history_config(HISTORY_STATE *history, Vars *shell_vars);
 
-
+char *rl_manage_clipboard(manage_rl_accessor mode, char *copy);
 int rl_manage_args(manage_rl_accessor mode, int n);
 void rl_repeat_by_args(readline_state_t *rl_state, string *line, void (*command_func)(readline_state_t *, string *), size_t n);
 void rl_repeat_by_args_with_comp(readline_state_t *rl_state, string *line, int (*compare_func) (int), void (*command_func)(readline_state_t *, string *, int (*compare_func)(int)), size_t n);
 void (*rl_manage_matching_vi_mode(void (*matching_func)(readline_state_t *, string *, size_t, rl_matching_mode), manage_rl_accessor mode))(readline_state_t *, string *, size_t, rl_matching_mode);
 
+void handle_vi_control(readline_state_t *rl_state, char c, string *line, rl_vi_controls_mode mode);
+
 void switch_to_insert_mode(readline_state_t *rl_state);
+void rl_switch_to_normal_mode(readline_state_t *rl_state);
 
 // ── undo function ───────────────────────────────────────────────────
 void rl_save_undo_state(string *line, readline_state_t *rl_state);
@@ -184,7 +193,8 @@ char rl_get_current_char(readline_state_t *rl_state, string *line);
 char rl_get_next_char(readline_state_t *rl_state, string *line);
 char rl_get_n_char(readline_state_t *rl_state, string *line, int n);
 
-void rl_remove_current_char(readline_state_t *rl_state, string *line);
+void rl_delete_curr_char(readline_state_t *rl_state, string *line);
+void rl_delete_prev_char(readline_state_t *rl_state, string *line);
 // ──────────────────────────────────────────────────────────────────────
 //
 // ── history_operation ───────────────────────────────────────────────
@@ -212,9 +222,11 @@ void rl_move_to_prev_matching_char(readline_state_t *rl_state, string *line, siz
 // ──────────────────────────────────────────────────────────────────────
 
 // ── string operation ────────────────────────────────────────────────
-void rl_change_until_next_key_pressed(readline_state_t *rl_state, string *line);
-void rl_change_until_end(readline_state_t *rl_state, string *line);
-void rl_change_in_word(readline_state_t *rl_state, string *line);
+
+void rl_paste_after_cursor(readline_state_t *rl_state, string *line);
+void rl_paste_on_cursor(readline_state_t *rl_state, string *line);
+void rl_delete_from_n_to_cursor(readline_state_t *rl_state, string *line, size_t n);
+void rl_delete_until_end(readline_state_t *rl_state, string *line);
 
 void rl_swap_char(readline_state_t *rl_state, string *line);
 void rl_swap_word(readline_state_t *rl_state, string *line);
