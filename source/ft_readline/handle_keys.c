@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/16 14:55:16 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/17 16:23:57 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,30 +97,63 @@ void switch_to_insert_mode(readline_state_t *rl_state){
     rl_manage_args(RL_RESET, 0);
 }
 
-void rl_launch_superior_mods(readline_state_t *rl_state, string *line, void (*superior_func)(readline_state_t, string)){
-    char c = 0;
-
-    while(waiting_for_){
-        read(STDIN_FILENO, &c, 1);
-        handle
+void rl_copy_from_n_to_cursor(readline_state_t *rl_state, string *line, size_t n){
+    if (line->size == 0 || n >= line->size) {
+        return;
     }
+
+    size_t cursor = rl_get_cursor_pos_on_line(rl_state);
+
+    size_t pos1 = n < cursor ? n : cursor;
+    size_t pos2 = n > cursor ? n : cursor;
+    size_t len = pos2 - pos1;
+    
+    char *copy = ft_substr(line->data, pos1, len);
+    gc(GC_ADD, copy, GC_READLINE);
+    rl_manage_clipboard(RL_SET, copy);
 }
 
-void handle_vi_control(readline_state_t *rl_state, char c, string *line){
+void rl_enter_leader_control(readline_state_t *rl_state, string *line, void (*superior_func)(readline_state_t *, string *, size_t)){
+    char c = 0;
+    int cursor = rl_get_cursor_pos_on_line(rl_state);
+
+    while(rl_get_cursor_pos_on_line(rl_state) == cursor){
+        read(STDIN_FILENO, &c, 1);
+        handle_vi_control(rl_state, c, line, RL_ALLOW_LOW);
+        
+        update_line(rl_state, line);
+        set_cursor_position(rl_state);
+    }
+    
+    rl_copy_from_n_to_cursor(rl_state, line, cursor);
+    superior_func(rl_state, line, cursor);
+}
+
+void handle_vi_control(readline_state_t *rl_state, char c, string *line, rl_vi_controls_mode mode){
     
     int args = rl_manage_args(RL_GET, 0);
-    if (c >= '1' && c <= '9'){
+    if ((c >= '1' && c <= '9') || (args && c == '0')){
         args = rl_manage_args(RL_SET, c - '0');
         return;
     }
     args = (!args) ? 1 : args;
+
+    if (mode == RL_ALLOW_ALL){
+        switch (c){
+            case 'c':
+                rl_enter_leader_control(rl_state, line, &rl_delete_from_n_to_cursor); switch_to_insert_mode(rl_state); break;
+            default:
+                break;
+        }
+    }
+
     switch (c){
         case 'j':
             rl_repeat_by_args(rl_state, line, &down_history, args) ; break;
         case 'k':
             rl_repeat_by_args(rl_state, line, &up_history, args); break;
         case 'i':
-            switch_to_insert_mode(rl_state); rl_move_back_by_char(rl_state, line); break;
+            switch_to_insert_mode(rl_state);  break;
         case 'I':
             switch_to_insert_mode(rl_state); rl_move_to_start(rl_state, line); break;
         case 'a':
@@ -157,17 +190,25 @@ void handle_vi_control(readline_state_t *rl_state, char c, string *line){
             rl_move_to_prev_matching_char(rl_state, line, args, RL_NEWMATCH); break;
         case ';':
             rl_manage_matching_vi_mode(NULL, RL_GET)(rl_state, line, args, RL_REMATCH); break;
-        case 'c':
-            rl_change_until_next_key_pressed(rl_state, line); break;
-        case 'C':
-            rl_change_until_end(rl_state, line); break;
         case 's':
             rl_repeat_by_args(rl_state, line, rl_substitute_current_char, args); break;
         case 'S':
             rl_substitute_line(rl_state, line); break;
+        case 'C':
+            rl_delete_until_end(rl_state, line); switch_to_insert_mode(rl_state); break;
+        case 'x':
+            rl_repeat_by_args(rl_state, line, &rl_delete_curr_char, args); break;
+        case 'X':
+            rl_repeat_by_args(rl_state, line, &rl_delete_prev_char, args); break;
+        case 'p':
+            rl_repeat_by_args(rl_state, line, &rl_paste_after_cursor, args); break;
+        case 'P':
+            rl_repeat_by_args(rl_state, line, &rl_paste_on_cursor, args); break;
+        case ''
         default:
             return;
     }
+
     rl_manage_args(RL_RESET, 0);
 }
 
@@ -181,7 +222,7 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 	}
 
     if (rl_state->in_line.mode == RL_VI && rl_state->in_line.vi_mode == VI_NORMAL){
-        handle_vi_control(rl_state, c, line);
+        handle_vi_control(rl_state, c, line, RL_ALLOW_ALL);
         return RL_NO_OP;
     }
 
@@ -257,6 +298,10 @@ rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *li
     return RL_NO_OP;
 }
 
+void rl_switch_to_normal_mode(readline_state_t *rl_state){
+    rl_state->in_line.vi_mode = VI_NORMAL;
+}
+
 rl_event handle_special_keys(readline_state_t *rl_state, string *line) {
     char seq[3];
 
@@ -272,7 +317,7 @@ rl_event handle_special_keys(readline_state_t *rl_state, string *line) {
         return RL_NO_OP;
     } else if (selret == 0) {
         if (rl_state->in_line.mode == RL_VI) {
-            rl_state->in_line.vi_mode = VI_NORMAL; 
+            rl_switch_to_normal_mode(rl_state);
         }
         return RL_NO_OP;
     }
@@ -325,5 +370,3 @@ void handle_control_keys(readline_state_t *rl_state, char char_c){
 		rl_state->search_mode.active = true;
 	}
 }
-
-//Pet18005651[]

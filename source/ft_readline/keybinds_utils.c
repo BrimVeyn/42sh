@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbardavi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 11:16:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/16 14:55:18 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/17 15:34:57 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,36 @@ void rl_repeat_by_args_with_comp(readline_state_t *rl_state, string *line, int (
     }
 }
 
-// ── Character access ────────────────────────────────────────────────
-//
+/**
+    * @brief copy need to be allocated and added to gc
+*/
+char *rl_manage_clipboard(manage_rl_accessor mode, char *copy){
+    static char *copied = NULL;
+    
+    if (mode == RL_SET){
+        if (copied){
+            gc(GC_FREE, copied, GC_READLINE);
+        }
+        copied = copy;
+    }
+    return copied;
+}
 
-void rl_remove_current_char(readline_state_t *rl_state, string *line) {
+// ── Character access ────────────────────────────────────────────────
+
+void rl_delete_prev_char(readline_state_t *rl_state, string *line) {
+    size_t cursor = rl_get_cursor_pos_on_line(rl_state);
+    if (cursor == 0 || line->size == 0)
+        return;
+
+    cursor--;
+    ft_memmove(line->data + cursor, line->data + cursor + 1, line->size - cursor - 1);
+    line->size--;
+    line->data[line->size] = '\0';
+    update_cursor_x(rl_state, line, -1);
+}
+
+void rl_delete_curr_char(readline_state_t *rl_state, string *line) {
     size_t cursor = rl_get_cursor_pos_on_line(rl_state);
     if (cursor >= line->size || line->size == 0)
         return;
@@ -48,60 +74,67 @@ void rl_remove_current_char(readline_state_t *rl_state, string *line) {
     line->data[line->size] = '\0';
 }
 
-int rl_get_cursor_pos_on_line(readline_state_t *rl_state){
-    return (rl_state->cursor.x * (rl_state->cursor.y + 1));
+int rl_get_cursor_pos_on_line(readline_state_t *rl_state) {
+    if (rl_state->cursor.y == 0){
+        return rl_state->cursor.x;
+    } else {
+        return rl_state->cursor.x + (rl_state->cursor.y * get_col()) - rl_state->current_prompt_size;
+    }
 }
 
-char rl_get_current_char(readline_state_t *rl_state, string *line){
-    return (line->data[rl_state->cursor.x * (rl_state->cursor.y + 1)]);
+char rl_get_current_char(readline_state_t *rl_state, string *line) {
+    int pos = rl_get_cursor_pos_on_line(rl_state);
+    if (pos >= 0 && pos < (int)line->size)
+        return line->data[pos];
+    return '\0';
 }
 
-char rl_get_next_char(readline_state_t *rl_state, string *line){
-    size_t pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) + 1;
-    if (pos > line->size) return '\03';
-    return (line->data[pos]);
+char rl_get_next_char(readline_state_t *rl_state, string *line) {
+    size_t pos = rl_get_cursor_pos_on_line(rl_state) + 1;
+    if (pos >= line->size)
+        return '\03';
+    return line->data[pos];
 }
 
-char rl_get_prev_char(readline_state_t *rl_state, string *line){
-    int pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) - 1;
-    if (pos < 0) return '\02';
-    return (line->data[pos]);
+char rl_get_prev_char(readline_state_t *rl_state, string *line) {
+    int pos = rl_get_cursor_pos_on_line(rl_state) - 1;
+    if (pos < 0)
+        return '\02';
+    return line->data[pos];
 }
 
-/**
-    * @brief cursor position relative
-*/
-char rl_get_n_char(readline_state_t *rl_state, string *line, int n){
-    int pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) + n;
-    if (pos < 0) return '\02';
-    if (pos > (int)(line->size)) return '\03';
-    return (line->data[pos]);
+char rl_get_n_char(readline_state_t *rl_state, string *line, int n) {
+    int pos = rl_get_cursor_pos_on_line(rl_state) + n;
+    if (pos < 0 || pos >= (int)line->size)
+        return pos < 0 ? '\02' : '\03';
+    return line->data[pos];
 }
 
-/**
-    * @brief cursor position relative
-*/
-void rl_change_n_char(readline_state_t *rl_state, string *line, char c, int n){
-    int pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) + n;
-    if (pos < 0) return;
-    if (pos > (int)(line->size)) return;
+void rl_change_n_char(readline_state_t *rl_state, string *line, char c, int n) {
+    int pos = rl_get_cursor_pos_on_line(rl_state) + n;
+    if (pos < 0 || pos >= (int)line->size)
+        return;
     line->data[pos] = c;
 }
 
-void rl_change_next_char(readline_state_t *rl_state, string *line, char c){
-    size_t pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) + 1;
-    if (pos > line->size) return;
+void rl_change_next_char(readline_state_t *rl_state, string *line, char c) {
+    size_t pos = rl_get_cursor_pos_on_line(rl_state) + 1;
+    if (pos >= line->size)
+        return;
     line->data[pos] = c;
 }
 
-void rl_change_prev_char(readline_state_t *rl_state, string *line, char c){
-    int pos = (rl_state->cursor.x * (rl_state->cursor.y + 1)) - 1;
-    if (pos < 0) return;
+void rl_change_prev_char(readline_state_t *rl_state, string *line, char c) {
+    int pos = rl_get_cursor_pos_on_line(rl_state) - 1;
+    if (pos < 0)
+        return;
     line->data[pos] = c;
 }
 
-void rl_change_current_char(readline_state_t *rl_state, string *line, char c){
-    line->data[rl_state->cursor.x * (rl_state->cursor.y + 1)] = c;
+void rl_change_current_char(readline_state_t *rl_state, string *line, char c) {
+    int pos = rl_get_cursor_pos_on_line(rl_state);
+    if (pos >= 0 && pos < (int)line->size)
+        line->data[pos] = c;
 }
 // ──────────────────────────────────────────────────────────────────────
 
@@ -244,24 +277,18 @@ int can_go_left(readline_state_t *rl_state){
 void rl_move_back_by_char(readline_state_t *rl_state, string *line){
 	if (can_go_left(rl_state)){
 		update_cursor_x(rl_state, line, -1);
-		set_cursor_position(rl_state);
 	}
 }
 
 void rl_move_forward_by_char(readline_state_t *rl_state, string *line){
-	if (can_go_right(rl_state, line)) {
+	if (can_go_right(rl_state, line))
 		update_cursor_x(rl_state, line, 1);
-		set_cursor_position(rl_state);
-	}
 }
 
 void rl_move_to_end(readline_state_t *rl_state, string *line){
-    while(can_go_right(rl_state, line)){
+    while(can_go_right(rl_state, line))
         rl_move_forward_by_char(rl_state, line);
-    }
 }
-
-//TODO:FIX
 
 void rl_move_to_start(readline_state_t *rl_state, string *line){
     while(can_go_left(rl_state)){
@@ -338,6 +365,25 @@ void down_history(readline_state_t *rl_state, string *line) {
 }
 // ── string operation ────────────────────────────────────────────────
 
+void rl_paste_after_cursor(readline_state_t *rl_state, string *line){
+    char *copied = rl_manage_clipboard(RL_GET, NULL);
+    if (!copied) return;
+    
+    rl_move_forward_by_char(rl_state, line);
+    size_t cursor = rl_get_cursor_pos_on_line(rl_state);
+    str_insert_str(line, copied, cursor);
+    update_cursor_x(rl_state, line, ft_strlen(copied));
+}
+
+void rl_paste_on_cursor(readline_state_t *rl_state, string *line){
+    char *copied = rl_manage_clipboard(RL_GET, NULL);
+    if (!copied) return;
+    
+    size_t cursor = rl_get_cursor_pos_on_line(rl_state);
+    str_insert_str(line, copied, cursor);
+    update_cursor_x(rl_state, line, ft_strlen(copied));
+}
+
 void rl_clear_line (string *line){
     if (!line->size) return;
     ft_memset(line->data, 0, line->size);
@@ -353,7 +399,7 @@ void rl_substitute_line (readline_state_t *rl_state, string *line){
 }
 
 void rl_substitute_current_char(readline_state_t *rl_state, string *line){
-    rl_remove_current_char(rl_state, line);
+    rl_delete_curr_char(rl_state, line);
     switch_to_insert_mode(rl_state);
 }
               
@@ -372,28 +418,33 @@ void rl_change_in_word(readline_state_t *rl_state, string *line) {
     switch_to_insert_mode(rl_state);
 }
 
-void rl_change_until_end(readline_state_t *rl_state, string *line){
+void rl_delete_until_end(readline_state_t *rl_state, string *line){
     if (!line->size) return;
     size_t cursor = rl_get_cursor_pos_on_line(rl_state);
     ft_memset(line->data + cursor, 0, line->size - cursor);
     line->size = cursor;
-    switch_to_insert_mode(rl_state);
 }
 
-
-
-void rl_change_until_next_key_pressed(readline_state_t *rl_state, string *line){
-    char c = 0;
-
-    read(STDIN_FILENO, &c, 1);
-    switch (c){
-        case 'w':
-            rl_change_in_word(rl_state, line); break;
-        case '$':
-            rl_change_until_end(rl_state, line); break;
-        default:
-            return;
+void rl_delete_from_n_to_cursor(readline_state_t *rl_state, string *line, size_t n) {
+    if (line->size == 0 || n >= line->size) {
+        return;
     }
+
+    size_t cursor = rl_get_cursor_pos_on_line(rl_state);
+
+    size_t pos1 = n < cursor ? n : cursor;
+    size_t pos2 = n > cursor ? n : cursor;
+
+    size_t delete_count = pos2 - pos1;
+
+    ft_memmove(line->data + pos1, line->data + pos2, line->size - pos2);
+
+    ft_memset(line->data + (line->size - delete_count), 0, delete_count);
+
+    line->size -= delete_count;
+    rl_state->cursor.x = 0;
+    rl_state->cursor.y = 0;
+    update_cursor_x(rl_state, line, pos1);
 }
 
 void rl_swap_char(readline_state_t *rl_state, string *line){
