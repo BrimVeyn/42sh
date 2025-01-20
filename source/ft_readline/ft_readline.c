@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/17 10:54:21 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/20 11:36:30 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -302,7 +302,7 @@ static void draw_normal_line(readline_state_t *rl_state, string *line){
 
 void update_line(readline_state_t *rl_state, string *line) {
 
-    int args = rl_manage_args(RL_GET, 0);
+    int args = rl_state->in_line.arg;
     static bool is_last_mode_args = false;
 
 	move_cursor(rl_state->cursor_offset.x, rl_state->cursor_offset.y);

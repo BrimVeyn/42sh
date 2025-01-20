@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/17 15:35:07 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/20 15:08:54 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,7 @@ typedef struct s_search_mode {
 typedef struct s_inline {
     rl_inline_mode mode;
     rl_vi_mode vi_mode;
+    int arg;
 } inline_t;
 
 typedef struct s_readline_state {
@@ -210,17 +211,25 @@ void rl_move_to_end(readline_state_t *rl_state, string *line);
 void rl_move_to_start(readline_state_t *rl_state, string *line);
 void rl_move_to_first_char(readline_state_t *rl_state, string *line);
 
-void rl_move_to_next_word_start(readline_state_t *rl_state, string *line, int (*compare_func)(int));
-void rl_move_to_previous_word_start(readline_state_t *rl_state, string *line, int (*compare_func)(int));
-void rl_move_to_next_word_end(readline_state_t *rl_state, string *line, int (*compare_func)(int));
-void rl_move_to_previous_word_end(readline_state_t *rl_state, string *line, int (*compare_func)(int));
+void rl_move_to_previous_word_start_alnum(readline_state_t *rl_state, string *line);
+void rl_move_to_previous_word_start_sp(readline_state_t *rl_state, string *line);
+void rl_move_to_next_word_start_alnum(readline_state_t *rl_state, string *line);
+void rl_move_to_next_word_start_sp(readline_state_t *rl_state, string *line);
+
+void rl_move_to_next_word_end_alnum(readline_state_t *rl_state, string *line);
+void rl_move_to_next_word_end_sp(readline_state_t *rl_state, string *line);
+void rl_move_to_previous_word_end_alnum(readline_state_t *rl_state, string *line);
+void rl_move_to_previous_word_end_sp(readline_state_t *rl_state, string *line);
 
 void rl_move_to_n_index(readline_state_t *rl_state, string *line, int n);
 
 void rl_move_to_next_matching_char(readline_state_t *rl_state, string *line, size_t n, rl_matching_mode mode);
 void rl_move_to_prev_matching_char(readline_state_t *rl_state, string *line, size_t n, rl_matching_mode mode);
 // ──────────────────────────────────────────────────────────────────────
-
+// ── clipboard operation ─────────────────────────────────────────────
+void rl_copy_until_end(readline_state_t *rl_state, string *line);
+void rl_copy_from_n_to_cursor(readline_state_t *rl_state, string *line, size_t n);
+// ──────────────────────────────────────────────────────────────────────
 // ── string operation ────────────────────────────────────────────────
 
 void rl_paste_after_cursor(readline_state_t *rl_state, string *line);
