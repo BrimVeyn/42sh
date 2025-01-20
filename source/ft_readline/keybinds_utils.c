@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbardavi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 11:16:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/17 15:34:57 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/20 16:06:06 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,7 +201,6 @@ void rl_move_to_prev_matching_char(readline_state_t *rl_state, string *line, siz
     }
 }
 
-
 void rl_move_to_n_index(readline_state_t *rl_state, string *line, int n){
     rl_state->cursor.x = 0;
     rl_state->cursor.y = 0;
@@ -296,50 +295,126 @@ void rl_move_to_start(readline_state_t *rl_state, string *line){
     }
 }
 
-void rl_move_to_next_word_end(readline_state_t *rl_state, string *line, int (*compare_func)(int)) {
-    while (can_go_right(rl_state, line) && !compare_func(rl_get_current_char(rl_state, line))){
+static int ft_isnotspace(int c){
+    return (c != ' ');
+}
+
+void rl_move_to_next_word_end_alnum(readline_state_t *rl_state, string *line){
+    while (can_go_right(rl_state, line) && !ft_isalnum(rl_get_current_char(rl_state, line))){
         rl_move_forward_by_char(rl_state, line);
     }
     char next_char = rl_get_current_char(rl_state, line);
-    while (can_go_right(rl_state, line) && compare_func(next_char) && next_char != '\0') {
+    while (can_go_right(rl_state, line) && ft_isalnum(next_char) && next_char != '\0') {
         rl_move_forward_by_char(rl_state, line);
         next_char = rl_get_current_char(rl_state, line);
     } 
 }
 
-void rl_move_to_previous_word_end(readline_state_t *rl_state, string *line, int (*compare_func)(int)) {
-    while (can_go_left(rl_state) && !compare_func(rl_get_prev_char(rl_state, line))) {
+void rl_move_to_next_word_end_sp(readline_state_t *rl_state, string *line){
+    while (can_go_right(rl_state, line) && !ft_isnotspace(rl_get_current_char(rl_state, line))){
+        rl_move_forward_by_char(rl_state, line);
+    }
+    char next_char = rl_get_current_char(rl_state, line);
+    while (can_go_right(rl_state, line) && ft_isnotspace(next_char) && next_char != '\0') {
+        rl_move_forward_by_char(rl_state, line);
+        next_char = rl_get_current_char(rl_state, line);
+    } 
+}
+
+void rl_move_to_previous_word_end_alnum(readline_state_t *rl_state, string *line) {
+    while (can_go_left(rl_state) && !ft_isalnum(rl_get_prev_char(rl_state, line))) {
         rl_move_back_by_char(rl_state, line);
     }
 }
 
-void rl_move_to_next_word_start(readline_state_t *rl_state, string *line, int (*compare_func)(int)) {
-    while (can_go_right(rl_state, line) && !compare_func(rl_get_current_char(rl_state, line))){
+void rl_move_to_previous_word_end_sp(readline_state_t *rl_state, string *line) {
+    while (can_go_left(rl_state) && !ft_isnotspace(rl_get_prev_char(rl_state, line))) {
+        rl_move_back_by_char(rl_state, line);
+    }
+}
+
+void rl_move_to_next_word_start_sp(readline_state_t *rl_state, string *line) {
+    while (can_go_right(rl_state, line) && !ft_isnotspace(rl_get_current_char(rl_state, line))){
         rl_move_forward_by_char(rl_state, line);
     }
     char next_char = rl_get_current_char(rl_state, line);
-    while (can_go_right(rl_state, line) && compare_func(next_char) && next_char != '\0') {
+    while (can_go_right(rl_state, line) && ft_isnotspace(next_char) && next_char != '\0') {
         rl_move_forward_by_char(rl_state, line);
         next_char = rl_get_current_char(rl_state, line);
     } 
-    while (can_go_right(rl_state, line) && !compare_func(rl_get_current_char(rl_state, line))){
+    while (can_go_right(rl_state, line) && !ft_isnotspace(rl_get_current_char(rl_state, line))){
         rl_move_forward_by_char(rl_state, line);
     }
 }
 
-void rl_move_to_previous_word_start(readline_state_t *rl_state, string *line, int (*compare_func)(int)) {
-    while (can_go_left(rl_state) && !compare_func(rl_get_prev_char(rl_state, line))) {
+void rl_move_to_next_word_start_alnum(readline_state_t *rl_state, string *line) {
+    while (can_go_right(rl_state, line) && !ft_isalnum(rl_get_current_char(rl_state, line))){
+        rl_move_forward_by_char(rl_state, line);
+    }
+    char next_char = rl_get_current_char(rl_state, line);
+    while (can_go_right(rl_state, line) && ft_isalnum(next_char) && next_char != '\0') {
+        rl_move_forward_by_char(rl_state, line);
+        next_char = rl_get_current_char(rl_state, line);
+    } 
+    while (can_go_right(rl_state, line) && !ft_isalnum(rl_get_current_char(rl_state, line))){
+        rl_move_forward_by_char(rl_state, line);
+    }
+}
+
+void rl_move_to_previous_word_start_sp(readline_state_t *rl_state, string *line) {
+    while (can_go_left(rl_state) && !ft_isnotspace(rl_get_prev_char(rl_state, line))) {
         rl_move_back_by_char(rl_state, line);
     }
 
     char prev_char = rl_get_prev_char(rl_state, line);
-    while (can_go_left(rl_state) && compare_func(prev_char) && prev_char != '\0') {
+    while (can_go_left(rl_state) && ft_isnotspace(prev_char) && prev_char != '\0') {
         rl_move_back_by_char(rl_state, line);
         prev_char = rl_get_prev_char(rl_state, line);
     }
 }
-// ──────────────────────────────────────────────────────────────────────
 
+void rl_move_to_previous_word_start_alnum(readline_state_t *rl_state, string *line){
+    while (can_go_left(rl_state) && !ft_isalnum(rl_get_prev_char(rl_state, line))) {
+        rl_move_back_by_char(rl_state, line);
+    }
+
+    char prev_char = rl_get_prev_char(rl_state, line);
+    while (can_go_left(rl_state) && ft_isalnum(prev_char) && prev_char != '\0') {
+        rl_move_back_by_char(rl_state, line);
+        prev_char = rl_get_prev_char(rl_state, line);
+    }
+}
+
+
+// ──────────────────────────────────────────────────────────────────────
+// ── clipboard operation ─────────────────────────────────────────────
+void rl_copy_until_end(readline_state_t *rl_state, string *line){
+    if (line->size == 0)
+        return;
+
+    size_t cursor = rl_get_cursor_pos_on_line(rl_state);
+    char *copy = ft_substr(line->data, cursor, line->size - cursor);
+    gc(GC_ADD, copy, GC_READLINE);
+    rl_manage_clipboard(RL_SET, copy);
+}
+
+void rl_copy_from_n_to_cursor(readline_state_t *rl_state, string *line, size_t n){
+    if (line->size == 0 || n >= line->size) {
+        return;
+    }
+
+    size_t cursor = rl_get_cursor_pos_on_line(rl_state);
+
+    size_t pos1 = n < cursor ? n : cursor;
+    size_t pos2 = n > cursor ? n : cursor;
+    size_t len = pos2 - pos1;
+    
+    char *copy = ft_substr(line->data, pos1, len);
+    gc(GC_ADD, copy, GC_READLINE);
+    rl_manage_clipboard(RL_SET, copy);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // ── history operation ───────────────────────────────────────────────
 void up_history(readline_state_t *rl_state, string *line) {
 	if (history->navigation_offset < history->length - CURRENT_LINE){ //-1
