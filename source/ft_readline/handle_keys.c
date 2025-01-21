@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/20 16:29:19 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/21 15:44:09 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 
 #include <limits.h>
 #include <stdio.h>
+#include <string.h>
 #include <termios.h>
 #include <termcap.h>
 #include <unistd.h>
@@ -96,28 +97,26 @@ void switch_to_insert_mode(readline_state_t *rl_state){
 bool leader_pressed_twice = false;
 bool had_a_movement = false;
 
-typedef void (rl_leader_func)(readline_state_t *, string *, size_t);
-typedef void (rl_movement_func)(readline_state_t *, string *);
 
-void rl_enter_leader_control(readline_state_t *rl_state, string *line, rl_leader_func *leader_func){
-    char c = 0;
-    int cursor = rl_get_cursor_pos_on_line(rl_state);
-
-    do {
-        read(STDIN_FILENO, &c, 1);
-        handle_vi_control(rl_state, c, line, RL_ALLOW_LOW);
-        
-        update_line(rl_state, line);
-        set_cursor_position(rl_state);
-    } while(!had_a_movement);  //rl_get_cursor_pos_on_line(rl_state) == cursor);
-    if (leader_pressed_twice){ //apply leader_func on whole line
-        leader_pressed_twice = false;
-        cursor = 0;
-    }
-    rl_copy_from_n_to_cursor(rl_state, line, cursor);
-    if (leader_func)
-        leader_func(rl_state, line, cursor);
-}
+// void rl_enter_leader_control(readline_state_t *rl_state, string *line, rl_leader_func *leader_func){
+//     char c = 0;
+//     int cursor = rl_get_cursor_pos_on_line(rl_state);
+//
+//     do {
+//         read(STDIN_FILENO, &c, 1);
+//         handle_vi_control(rl_state, c, line, RL_ALLOW_LOW);
+//         
+//         update_line(rl_state, line);
+//         set_cursor_position(rl_state);
+//     } while(!had_a_movement);  //rl_get_cursor_pos_on_line(rl_state) == cursor);
+//     if (leader_pressed_twice){ //apply leader_func on whole line
+//         leader_pressed_twice = false;
+//         cursor = 0;
+//     }
+//     rl_copy_from_n_to_cursor(rl_state, line, cursor);
+//     if (leader_func)
+//         leader_func(rl_state, line, cursor);
+// }
 
 // void handle_vi_controleee(readline_state_t *rl_state, char c, string *line, rl_vi_controls_mode mode){
 //     
@@ -219,14 +218,15 @@ void rl_enter_leader_control(readline_state_t *rl_state, string *line, rl_leader
 //1: 00000010000000000000000000000000
 //2: 
 
+
+
 bool rl_isMoveKey(char c, rl_movement_func **func) {
-    move_cursor(0, 0);
-    // set_cursor_position(rl_state);
     switch (c) {
         case 'j': { *func = &down_history; return true; }
         case 'k': { *func = &up_history; return true; }
         case 'l': { *func = &rl_move_forward_by_char; return true; }
         case 'h': { *func = &rl_move_back_by_char; return true; }
+        case ' ': { *func = &rl_move_forward_by_char; return true; }
         case 'w': { *func = &rl_move_to_next_word_start_alnum; return true; }
         case 'W': { *func = &rl_move_to_next_word_start_sp; return true; }
         case 'b': { *func = &rl_move_to_previous_word_start_sp; return true; }
@@ -236,10 +236,14 @@ bool rl_isMoveKey(char c, rl_movement_func **func) {
         case '0': { *func = &rl_move_to_start; return true; }
         case '$': { *func = &rl_move_to_end; return true; }
         case '^': { *func = &rl_move_to_first_char; return true; }
-        // case '|': { func = &rl_move_to_n_index; return true; }
-        // case 'f': { func = &rl_move_to_next_matching_char; return true; }
-        // case 'F': { func = &rl_move_to_prev_matching_char; return true; }
-        // case ';': { func = rl_manage_matching_vi_mode(NULL, RL_GET); return true; }
+        case 'p': { *func = &rl_paste_after_cursor; return true; }
+        case 'P': { *func = &rl_paste_on_cursor; return true; }
+        case '|': { *func = &rl_move_to_n_index; return true; }
+        case 'f': { *func = &rl_handle_find_next_key; return true; }
+        case 'F': { *func = &rl_handle_find_prev_key; return true; }
+        case ';': { *func = &rl_handle_redo_previous_match; return true; }
+        case 'r': { *func = &rl_replace_current_char; return true; }
+
         default: { return false; }
     }
     return false;
@@ -261,13 +265,37 @@ bool rl_isNumberKey(char c, int *arg){
     return false;
 }
 
+static void rl_dummy_leader(readline_state_t *rl_state, string *line, size_t n){
+    (void)rl_state; (void)line; (void)n;
+}
+
+static void rl_change_keybind(readline_state_t *rl_state, string *line, size_t n){
+    rl_delete_from_n_to_cursor(rl_state, line, n);
+    switch_to_insert_mode(rl_state);
+}
+
+static void rl_delete_keybind(readline_state_t *rl_state,string *line, size_t n){
+    rl_delete_from_n_to_cursor(rl_state, line, n);
+}
+
 bool rl_isLeaderKey(char c, rl_leader_func **func) {
     switch (c) {
-        case 'c': { *func = &rl_delete_from_n_to_cursor; return true; };
-        case 'y': { *func = &rl_delete_from_n_to_cursor; return true; };
-        case 'd': { *func = &rl_delete_from_n_to_cursor; return true; };
+        case 'c': { *func = &rl_change_keybind; return true; };
+        case 'y': { *func = &rl_dummy_leader; return true; };
+        case 'd': { *func = &rl_delete_keybind; return true; };
+        default: return false;
     }
-    return false;
+}
+
+static bool rl_is_changing_mode_key(readline_state_t *rl_state, string *line, char c){
+    switch (c){
+        case 'i': { switch_to_insert_mode(rl_state); return true; }
+        case 'I': { switch_to_insert_mode(rl_state); rl_move_to_start(rl_state, line); return true; }
+        case 'a': { switch_to_insert_mode(rl_state); rl_move_forward_by_char(rl_state, line); return true;}
+        case 'A': { switch_to_insert_mode(rl_state); rl_move_to_end(rl_state, line); return true; }
+        case 'u': { rl_load_previous_state(line, rl_state); return true; }
+        default: return false;
+    }
 }
 
 void handle_vi_control(readline_state_t *rl_state, char c, string *line, rl_vi_controls_mode mode){
@@ -287,6 +315,11 @@ void handle_vi_control(readline_state_t *rl_state, char c, string *line, rl_vi_c
         .arg = 0,
         .need_read = false,
     };
+    
+    rl_state->in_line.is_first_loop = true;
+
+    if (rl_is_changing_mode_key(rl_state, line, c))
+        return;
 
     while (true) {
         if (ctx.need_read){
@@ -304,49 +337,49 @@ void handle_vi_control(readline_state_t *rl_state, char c, string *line, rl_vi_c
                     ctx.state = 1;
                     ctx.need_read = true;
                     rl_state->in_line.arg = ctx.arg;
+
                     update_line(rl_state, line);
+                    set_cursor_position(rl_state);
                     continue;
                 } else if (rl_isMoveKey(ctx.c, &ctx.movement_func)){
                     ctx.state = 2;
                     continue;
                 } else {
+                    rl_state->in_line.arg = 0;
                     return;
                 }
                 break;
-                // } else if (isDirection()) { //f or t
-                //     ctx.state = 3;
-                //     continue;
-                // } else if (isMove()) {
-                //     ctx.state = 4;
-                // }
             }
             case 1: {
                 if (rl_isNumberKey(ctx.c, &ctx.arg)) {
+
                     ctx.need_read = true;
                     rl_state->in_line.arg = ctx.arg;
+
                     update_line(rl_state, line);
+                    set_cursor_position(rl_state);
                     continue;
+
                 } else if (rl_isMoveKey(ctx.c, &ctx.movement_func)) {
                     ctx.state = 2;
                     continue;
                 } else {
-                    // move_cursor(0, 0);
-                    // ft_dprintf(2, "SALUT3\n");
-                    // set_cursor_position(rl_state);
+                    rl_state->in_line.arg = 0;
                     return;
                 }
-                // break;
+                break;
             }
             case 2: {
+                rl_save_undo_state(line, rl_state);
                 int cursor = rl_get_cursor_pos_on_line(rl_state);
                 if (ctx.movement_func){
                     ctx.arg = (ctx.arg) ? ctx.arg : 1;
                     for (int i = 0; i < ctx.arg; i++){
                         ctx.movement_func(rl_state, line);
+                        rl_state->in_line.is_first_loop = false;
                     }
-                } else {
-
                 }
+
                 if (ctx.leader_func){
                     if (leader_pressed_twice){
                         leader_pressed_twice = false;
@@ -357,18 +390,13 @@ void handle_vi_control(readline_state_t *rl_state, char c, string *line, rl_vi_c
                     if (ctx.leader_func)
                         ctx.leader_func(rl_state, line, cursor);
                 }
-                rl_manage_args(RL_RESET, 0);
+                rl_state->in_line.arg = 0;
                 return;
             }
             default: {return;};
         }
     }
-    rl_manage_args(RL_RESET, 0);
 }
-
-/*
- * commit: Added multiple shortcuts for vi mode: d, D, 
-*/
 
 int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
     // rl_save_undo_state(line, rl_state);

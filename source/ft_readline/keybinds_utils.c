@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbardavi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 11:16:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/20 16:06:06 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/21 15:44:19 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,26 @@ char *rl_manage_clipboard(manage_rl_accessor mode, char *copy){
         copied = copy;
     }
     return copied;
+}
+
+void rl_handle_find_next_key(readline_state_t *rl_state, string *line){
+    rl_move_to_next_matching_char(rl_state, line, RL_NEWMATCH);
+}
+
+void rl_handle_find_prev_key(readline_state_t *rl_state, string *line){
+    rl_move_to_prev_matching_char(rl_state, line, RL_NEWMATCH);
+}
+
+void rl_handle_redo_previous_match(readline_state_t *rl_state, string *line){
+    rl_manage_matching_vi_mode(NULL, RL_GET)(rl_state, line);
+}
+
+void rl_handle_redo_next(readline_state_t *rl_state, string *line){
+    rl_move_to_next_matching_char(rl_state, line, RL_REMATCH);
+}
+
+void rl_handle_redo_prev(readline_state_t *rl_state, string *line){
+    rl_move_to_prev_matching_char(rl_state, line, RL_REMATCH);
 }
 
 // ── Character access ────────────────────────────────────────────────
@@ -139,13 +159,12 @@ void rl_change_current_char(readline_state_t *rl_state, string *line, char c) {
 // ──────────────────────────────────────────────────────────────────────
 
 // ── cursor_movement ─────────────────────────────────────────────────
-//
 
 void (*rl_manage_matching_vi_mode(
-    void (*matching_func)(readline_state_t *, string *, size_t, rl_matching_mode),
-    manage_rl_accessor mode))(readline_state_t *, string *, size_t, rl_matching_mode) 
+    void (*matching_func)(readline_state_t *, string *),
+    manage_rl_accessor mode))(readline_state_t *, string *) 
 {
-    static void (*last_function)(readline_state_t *, string *, size_t, rl_matching_mode) = NULL;
+    static void (*last_function)(readline_state_t *, string *) = NULL;
 
     if (mode == RL_SET) {
         last_function = matching_func;
@@ -153,11 +172,27 @@ void (*rl_manage_matching_vi_mode(
     return last_function;
 }
 
-void rl_repeat_last_search(readline_state_t *rl_state, string *line, size_t n){
-    rl_manage_matching_vi_mode(NULL, RL_GET)(rl_state, line, n, RL_REMATCH);
+void rl_move_to_next_matching_char(readline_state_t *rl_state, string *line, rl_matching_mode mode){
+    static char c = 0;
+
+    if (mode == RL_NEWMATCH){
+        read(STDIN_FILENO, &c, 1);
+    }
+
+    if (c){
+        rl_manage_matching_vi_mode(&rl_handle_redo_next, RL_SET);
+
+        size_t cursor_pos = rl_get_cursor_pos_on_line(rl_state);
+        for (size_t i = cursor_pos + 1; i < line->size; i++){
+            if (c == line->data[i]){
+                update_cursor_x(rl_state, line, i - cursor_pos);
+                break;
+            }
+        }
+    }
 }
 
-void rl_move_to_next_matching_char(readline_state_t *rl_state, string *line, size_t n, rl_matching_mode mode){
+void rl_move_to_prev_matching_char(readline_state_t *rl_state, string *line, rl_matching_mode mode){
     static char c = 0;
     
     if (mode == RL_NEWMATCH){
@@ -165,53 +200,25 @@ void rl_move_to_next_matching_char(readline_state_t *rl_state, string *line, siz
     }
 
     if (c){
-        rl_manage_matching_vi_mode(&rl_move_to_next_matching_char, RL_SET);
+        rl_manage_matching_vi_mode(&rl_handle_redo_prev, RL_SET);
 
-        for (size_t i = 0; i < n; i++){
-            size_t cursor_pos = rl_get_cursor_pos_on_line(rl_state);
-            for (size_t i = cursor_pos + 1; i < line->size; i++){
-                if (c == line->data[i]){
-                    update_cursor_x(rl_state, line, i - cursor_pos);
-                    break;
-                }
+        size_t cursor_pos = rl_get_cursor_pos_on_line(rl_state);
+        for (size_t i = cursor_pos - 1; i > 0; i--){
+            if (c == line->data[i]){
+                update_cursor_x(rl_state, line, i - cursor_pos);
+                break;
             }
         }
     }
 }
 
-void rl_move_to_prev_matching_char(readline_state_t *rl_state, string *line, size_t n, rl_matching_mode mode){
-    static char c = 0;
-    
-    if (mode == RL_NEWMATCH){
-        read(STDIN_FILENO, &c, 1);
-    }
-
-    if (c){
-        rl_manage_matching_vi_mode(&rl_move_to_prev_matching_char, RL_SET);
-
-        for (size_t i = 0; i < n; i++){
-            size_t cursor_pos = rl_get_cursor_pos_on_line(rl_state);
-            for (size_t i = cursor_pos - 1; i > 0; i--){
-                if (c == line->data[i]){
-                    update_cursor_x(rl_state, line, i - cursor_pos);
-                    break;
-                }
-            }
-        }
-    }
-}
-
-void rl_move_to_n_index(readline_state_t *rl_state, string *line, int n){
-    rl_state->cursor.x = 0;
-    rl_state->cursor.y = 0;
-    if (!n){
+void rl_move_to_n_index(readline_state_t *rl_state, string *line){
+    if (rl_state->in_line.is_first_loop){
         rl_move_to_start(rl_state, line);
         return;
+    } else {
+        rl_move_forward_by_char(rl_state, line);
     }
-    if ((size_t)n > line->size){
-        n = line->size;
-    }
-    update_cursor_x(rl_state, line, n);
 }
 
 static bool ft_iswspace(int c) {
@@ -439,6 +446,19 @@ void down_history(readline_state_t *rl_state, string *line) {
 	}
 }
 // ── string operation ────────────────────────────────────────────────
+
+void rl_replace_current_char(readline_state_t *rl_state, string *line){
+    static char c = '\0';
+
+    if (!rl_state->in_line.is_first_loop){
+        rl_move_forward_by_char(rl_state, line);
+    }
+    if (rl_state->in_line.is_first_loop)
+        read(STDIN_FILENO, &c, 1);
+    if (line->size && rl_get_current_char(rl_state, line) != '\0' && c){
+        rl_change_current_char(rl_state, line, c);
+    }
+}
 
 void rl_paste_after_cursor(readline_state_t *rl_state, string *line){
     char *copied = rl_manage_clipboard(RL_GET, NULL);
