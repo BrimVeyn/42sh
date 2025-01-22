@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/21 09:55:47 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/22 13:39:33 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -364,6 +364,7 @@ void init_readline(readline_state_t *rl_state, const char *prompt, Vars *shell_v
     rl_state->undo_stack = undo_stack;
     rl_state->in_line.mode = (manage_vi_option(0, 0)) ? RL_VI : RL_READLINE;
     rl_state->in_line.vi_mode = VI_INSERT;
+    rl_state->in_line.exec_line = false;
 
     // get_variable_value(shell_vars->set, vi)
 }
@@ -461,7 +462,7 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
         } else if (c > 0 && c < 32 && c != '\n'){
 			result = handle_readline_controls(rl_state, c, line);
 		} else {
-			result = handle_printable_keys(rl_state, c, line);
+			result = handle_printable_keys(rl_state, c, line, shell_vars);
         }
 		
 		if (result == RL_REFRESH) {

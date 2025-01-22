@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbardavi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 11:16:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/21 15:44:19 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/22 14:21:10 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,12 +62,22 @@ void rl_handle_redo_previous_match(readline_state_t *rl_state, string *line){
     rl_manage_matching_vi_mode(NULL, RL_GET)(rl_state, line);
 }
 
+
 void rl_handle_redo_next(readline_state_t *rl_state, string *line){
     rl_move_to_next_matching_char(rl_state, line, RL_REMATCH);
 }
 
+
 void rl_handle_redo_prev(readline_state_t *rl_state, string *line){
     rl_move_to_prev_matching_char(rl_state, line, RL_REMATCH);
+}
+
+void rl_handle_redo_reverse_match(readline_state_t *rl_state, string *line){
+    if (rl_manage_matching_vi_mode(NULL, RL_GET) == &rl_handle_redo_prev){
+        rl_move_to_next_matching_char(rl_state, line, RL_REMATCH_REVERSE);
+    } else {
+        rl_move_to_prev_matching_char(rl_state, line, RL_REMATCH_REVERSE);
+    }
 }
 
 // ── Character access ────────────────────────────────────────────────
@@ -160,6 +170,7 @@ void rl_change_current_char(readline_state_t *rl_state, string *line, char c) {
 
 // ── cursor_movement ─────────────────────────────────────────────────
 
+int g_last_matching_char = 0;
 void (*rl_manage_matching_vi_mode(
     void (*matching_func)(readline_state_t *, string *),
     manage_rl_accessor mode))(readline_state_t *, string *) 
@@ -177,10 +188,14 @@ void rl_move_to_next_matching_char(readline_state_t *rl_state, string *line, rl_
 
     if (mode == RL_NEWMATCH){
         read(STDIN_FILENO, &c, 1);
+    } else if (mode == RL_REMATCH_REVERSE){
+        c = g_last_matching_char;
     }
 
     if (c){
-        rl_manage_matching_vi_mode(&rl_handle_redo_next, RL_SET);
+        g_last_matching_char = c;
+        if (mode == RL_NEWMATCH)
+            rl_manage_matching_vi_mode(&rl_handle_redo_next, RL_SET);
 
         size_t cursor_pos = rl_get_cursor_pos_on_line(rl_state);
         for (size_t i = cursor_pos + 1; i < line->size; i++){
@@ -197,13 +212,18 @@ void rl_move_to_prev_matching_char(readline_state_t *rl_state, string *line, rl_
     
     if (mode == RL_NEWMATCH){
         read(STDIN_FILENO, &c, 1);
+    } else if (mode == RL_REMATCH_REVERSE){
+        c = g_last_matching_char;
     }
 
     if (c){
-        rl_manage_matching_vi_mode(&rl_handle_redo_prev, RL_SET);
+        g_last_matching_char = c;
+
+        if (mode == RL_NEWMATCH)
+            rl_manage_matching_vi_mode(&rl_handle_redo_prev, RL_SET);
 
         size_t cursor_pos = rl_get_cursor_pos_on_line(rl_state);
-        for (size_t i = cursor_pos - 1; i > 0; i--){
+        for (int i = cursor_pos - 1; i >= 0; i--){
             if (c == line->data[i]){
                 update_cursor_x(rl_state, line, i - cursor_pos);
                 break;

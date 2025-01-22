@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/21 15:44:05 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/22 14:12:07 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,7 @@ typedef enum {
 typedef enum {
     VI_INSERT,
     VI_NORMAL,
+    VI_REPLACE,
 } rl_vi_mode;
 
 typedef enum {
@@ -89,6 +90,7 @@ typedef enum {
 typedef enum {
     RL_NEWMATCH,
     RL_REMATCH,
+    RL_REMATCH_REVERSE,
 } rl_matching_mode;
 
 typedef enum {
@@ -107,6 +109,7 @@ typedef struct s_inline {
     rl_vi_mode vi_mode;
     int arg;
     bool is_first_loop;
+    bool exec_line;
 } inline_t;
 
 typedef struct s_readline_state {
@@ -145,7 +148,6 @@ void set_prompt(readline_state_t *rl_state, const char *new_prompt);
 int search_in_history(readline_state_t *rl_state, char *str);
 
 void handle_control_keys(readline_state_t *rl_state, char char_c);
-int handle_printable_keys(readline_state_t *rl_state, char c, string *line);
 int can_go_right(readline_state_t *rl_state, string *line);
 int can_go_right_vi(readline_state_t *rl_state, string *line);
 int can_go_left(readline_state_t *rl_state);
@@ -184,7 +186,6 @@ void rl_repeat_by_args(readline_state_t *rl_state, string *line, void (*command_
 void rl_repeat_by_args_with_comp(readline_state_t *rl_state, string *line, int (*compare_func) (int), void (*command_func)(readline_state_t *, string *, int (*compare_func)(int)), size_t n);
 void (*rl_manage_matching_vi_mode(void (*matching_func)(readline_state_t *, string *), manage_rl_accessor mode))(readline_state_t *, string *);
 
-void handle_vi_control(readline_state_t *rl_state, char c, string *line, rl_vi_controls_mode mode);
 
 void switch_to_insert_mode(readline_state_t *rl_state);
 void rl_switch_to_normal_mode(readline_state_t *rl_state);
@@ -218,6 +219,8 @@ void down_history(readline_state_t *rl_state, string *line);
 // ──────────────────────────────────────────────────────────────────────
 
 // ── cursor_movement ─────────────────────────────────────────────────
+void rl_handle_redo_reverse_match(readline_state_t *rl_state, string *line);
+
 void rl_handle_find_next_key(readline_state_t *rl_state, string *line);
 void rl_handle_find_prev_key(readline_state_t *rl_state, string *line);
 void rl_handle_redo_previous_match(readline_state_t *rl_state, string *line);
@@ -265,6 +268,9 @@ void rl_substitute_line (readline_state_t *rl_state, string *line);
 
 void rl_clear_line (string *line);
 // ──────────────────────────────────────────────────────────────────────
+
+int handle_printable_keys(readline_state_t *rl_state, char c, string *line, Vars *shell_vars);
+void handle_vi_control(readline_state_t *rl_state, char c, string *line, rl_vi_controls_mode mode, Vars *shell_vars);
 
 extern int last_action;
 

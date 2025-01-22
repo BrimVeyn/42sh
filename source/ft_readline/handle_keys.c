@@ -6,10 +6,11 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/21 15:44:09 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/22 14:13:42 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "final_parser.h"
 #include "ft_readline.h"
 #include "ft_regex.h"
 #include "c_string.h"
@@ -242,8 +243,8 @@ bool rl_isMoveKey(char c, rl_movement_func **func) {
         case 'f': { *func = &rl_handle_find_next_key; return true; }
         case 'F': { *func = &rl_handle_find_prev_key; return true; }
         case ';': { *func = &rl_handle_redo_previous_match; return true; }
+        case ',': { *func = &rl_handle_redo_reverse_match; return true; }
         case 'r': { *func = &rl_replace_current_char; return true; }
-
         default: { return false; }
     }
     return false;
@@ -287,18 +288,42 @@ bool rl_isLeaderKey(char c, rl_leader_func **func) {
     }
 }
 
-static bool rl_is_changing_mode_key(readline_state_t *rl_state, string *line, char c){
+void switch_to_replace_mode(readline_state_t *rl_state){
+    rl_state->in_line.vi_mode = VI_REPLACE;
+    rl_state->in_line.arg = 0;
+}
+
+void rl_open_line_in_editor(readline_state_t *rl_state, string *line, Vars *shell_vars){
+    char filename[] = "/tmp/42sh_rl.XXXXXX"; //7 digit max for usec
+    int fd = mkstemp(filename);
+    if (fd == -1){
+        return;
+    }
+    if (line->size)
+        dprintf(fd, "%s", line->data);
+    char *input = NULL;
+	input = gc(GC_CALLOC, ft_strlen(filename) + sizeof("${EDITOR} ") + 1, sizeof(char), GC_SUBSHELL);
+    ft_sprintf(input, "${EDITOR} %s", filename);
+	parse_input(input, NULL, shell_vars);
+    line->data = gc(GC_ADD, read_whole_file(fd), GC_SUBSHELL);
+    printf("\n%s\n", line->data);
+    rl_state->in_line.exec_line = true;
+}
+
+static bool rl_is_changing_mode_key(readline_state_t *rl_state, string *line, char c, Vars *shell_vars){
     switch (c){
         case 'i': { switch_to_insert_mode(rl_state); return true; }
         case 'I': { switch_to_insert_mode(rl_state); rl_move_to_start(rl_state, line); return true; }
         case 'a': { switch_to_insert_mode(rl_state); rl_move_forward_by_char(rl_state, line); return true;}
         case 'A': { switch_to_insert_mode(rl_state); rl_move_to_end(rl_state, line); return true; }
+        case 'R': { switch_to_replace_mode(rl_state); return true; }
         case 'u': { rl_load_previous_state(line, rl_state); return true; }
+        case 'v': { rl_open_line_in_editor(rl_state, line, shell_vars); return true; }
         default: return false;
     }
 }
 
-void handle_vi_control(readline_state_t *rl_state, char c, string *line, rl_vi_controls_mode mode){
+void handle_vi_control(readline_state_t *rl_state, char c, string *line, rl_vi_controls_mode mode, Vars *shell_vars){
     (void)mode;
     struct {
         int state;
@@ -318,9 +343,9 @@ void handle_vi_control(readline_state_t *rl_state, char c, string *line, rl_vi_c
     
     rl_state->in_line.is_first_loop = true;
 
-    if (rl_is_changing_mode_key(rl_state, line, c))
+    if (rl_is_changing_mode_key(rl_state, line, c, shell_vars))
         return;
-
+    
     while (true) {
         if (ctx.need_read){
             read(STDIN_FILENO, &ctx.c, 1);
@@ -398,7 +423,7 @@ void handle_vi_control(readline_state_t *rl_state, char c, string *line, rl_vi_c
     }
 }
 
-int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
+int handle_printable_keys(readline_state_t *rl_state, char c, string *line, Vars *shell_vars){
     // rl_save_undo_state(line, rl_state);
 	int pos = rl_state->cursor.y * get_col() - rl_state->current_prompt_size;
 	pos += rl_state->cursor.x + ((rl_state->cursor.y == 0) ? rl_state->current_prompt_size : 0);
@@ -408,7 +433,11 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 	}
 
     if (rl_state->in_line.mode == RL_VI && rl_state->in_line.vi_mode == VI_NORMAL){
-        handle_vi_control(rl_state, c, line, RL_ALLOW_ALL);
+        handle_vi_control(rl_state, c, line, RL_ALLOW_ALL, shell_vars);
+        if (rl_state->in_line.exec_line){
+            rl_state->in_line.exec_line = false;
+            return RL_REFRESH;
+        }
         return RL_NO_OP;
     }
 
@@ -431,7 +460,10 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line){
 	}
 	else {
 		/*dprintf(2, "line: %s\n", line->data);*/
-		str_insert(line, c, pos);
+        // if (rl_state->in_line.vi_mode == VI_REPLACE && (size_t)pos < line->size)
+        //     line->data[pos] = c;
+        // else
+        str_insert(line, c, pos);
 	}
 
 	if (rl_state->interactive)
