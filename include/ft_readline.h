@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbabardavid@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:15:30 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/22 14:12:07 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/23 13:29:21 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,13 @@ typedef struct s_inline {
     bool exec_line;
 } inline_t;
 
+typedef struct s_suggestion {
+    char *formated_string;
+    bool active;
+    char *word;
+    enum { RL_S_FOUND, RL_S_NOTFOUND} mode;
+} suggestion_t;
+
 typedef struct s_readline_state {
 	char *current_prompt;
     char *normal_prompt;
@@ -122,6 +129,7 @@ typedef struct s_readline_state {
     undo_state_stack_t *undo_stack;
 	bool interactive;
     inline_t in_line;
+    suggestion_t suggestion;
 } readline_state_t;
 
 typedef void (rl_leader_func)(readline_state_t *, string *, size_t);
@@ -173,7 +181,7 @@ void print_history_values(HISTORY_STATE *history);
 
 #include "final_parser.h"
 
-rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line);
+rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line, Vars *shell_vars);
 rl_event handle_special_keys(readline_state_t *rl_state, string *line);
 char *ft_readline(const char *prompt, Vars *shell_vars);
 void init_history(Vars *shell_vars);
@@ -186,6 +194,7 @@ void rl_repeat_by_args(readline_state_t *rl_state, string *line, void (*command_
 void rl_repeat_by_args_with_comp(readline_state_t *rl_state, string *line, int (*compare_func) (int), void (*command_func)(readline_state_t *, string *, int (*compare_func)(int)), size_t n);
 void (*rl_manage_matching_vi_mode(void (*matching_func)(readline_state_t *, string *), manage_rl_accessor mode))(readline_state_t *, string *);
 
+void rl_autocomplete(readline_state_t *rl_state, string *line, Vars *shell_vars);
 
 void switch_to_insert_mode(readline_state_t *rl_state);
 void rl_switch_to_normal_mode(readline_state_t *rl_state);

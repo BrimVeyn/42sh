@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/22 13:39:33 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/23 16:12:22 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -295,9 +295,16 @@ static void draw_search_line(readline_state_t *rl_state, string *line){
 }
 
 static void draw_normal_line(readline_state_t *rl_state, string *line){
-        move_cursor(rl_state->cursor_offset.x, rl_state->cursor_offset.y);
-        rl_print_prompt(STDOUT_FILENO, rl_state);
-        if (write(STDOUT_FILENO, line->data, line->size) == -1) {_fatal("write error", 1);}
+    move_cursor(rl_state->cursor_offset.x, rl_state->cursor_offset.y);
+    rl_print_prompt(STDOUT_FILENO, rl_state);
+    if (write(STDOUT_FILENO, line->data, line->size) == -1) {_fatal("write error", 1);}
+}
+
+static void draw_suggestion_line(readline_state_t *rl_state){
+    // if (write(STDOUT_FILENO, "\n", 1) == -1) {_fatal("write error", 1);}
+    if (write(STDOUT_FILENO, rl_state->suggestion.formated_string, ft_strlen(rl_state->suggestion.formated_string)) == -1) {_fatal("write error", 1);}
+    get_cursor_pos(&rl_state->cursor_offset);
+    rl_state->cursor_offset.x = 0; // crotte
 }
 
 void update_line(readline_state_t *rl_state, string *line) {
@@ -327,6 +334,11 @@ void update_line(readline_state_t *rl_state, string *line) {
     // ── Normal mode ─────────────────────────────────────────────────────
     else {
         is_last_mode_args = false;
+        if (rl_state->suggestion.active){
+            draw_normal_line(rl_state, line);
+            draw_suggestion_line(rl_state);
+            rl_state->suggestion.active = false;
+        }
         draw_normal_line(rl_state, line);
     } 
 }
@@ -365,7 +377,10 @@ void init_readline(readline_state_t *rl_state, const char *prompt, Vars *shell_v
     rl_state->in_line.mode = (manage_vi_option(0, 0)) ? RL_VI : RL_READLINE;
     rl_state->in_line.vi_mode = VI_INSERT;
     rl_state->in_line.exec_line = false;
-
+    
+    rl_state->suggestion.formated_string = NULL;
+    rl_state->suggestion.active = false;
+    rl_state->suggestion.word = NULL;
     // get_variable_value(shell_vars->set, vi)
 }
 
@@ -460,7 +475,7 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
         } else if (c == '\033') {
             result = handle_special_keys(rl_state, line);
         } else if (c > 0 && c < 32 && c != '\n'){
-			result = handle_readline_controls(rl_state, c, line);
+			result = handle_readline_controls(rl_state, c, line, shell_vars);
 		} else {
 			result = handle_printable_keys(rl_state, c, line, shell_vars);
         }

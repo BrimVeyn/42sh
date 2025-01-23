@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/22 14:13:42 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/23 14:45:52 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,128 +97,6 @@ void switch_to_insert_mode(readline_state_t *rl_state){
 
 bool leader_pressed_twice = false;
 bool had_a_movement = false;
-
-
-// void rl_enter_leader_control(readline_state_t *rl_state, string *line, rl_leader_func *leader_func){
-//     char c = 0;
-//     int cursor = rl_get_cursor_pos_on_line(rl_state);
-//
-//     do {
-//         read(STDIN_FILENO, &c, 1);
-//         handle_vi_control(rl_state, c, line, RL_ALLOW_LOW);
-//         
-//         update_line(rl_state, line);
-//         set_cursor_position(rl_state);
-//     } while(!had_a_movement);  //rl_get_cursor_pos_on_line(rl_state) == cursor);
-//     if (leader_pressed_twice){ //apply leader_func on whole line
-//         leader_pressed_twice = false;
-//         cursor = 0;
-//     }
-//     rl_copy_from_n_to_cursor(rl_state, line, cursor);
-//     if (leader_func)
-//         leader_func(rl_state, line, cursor);
-// }
-
-// void handle_vi_controleee(readline_state_t *rl_state, char c, string *line, rl_vi_controls_mode mode){
-//     
-//     int args = rl_manage_args(RL_GET, 0);
-//     if ((c >= '1' && c <= '9') || (args && c == '0')){
-//         args = rl_manage_args(RL_SET, c - '0');
-//         return;
-//     }
-//     args = (!args) ? 1 : args;
-//
-//     if (mode == RL_ALLOW_ALL){
-//         switch (c){
-//             case 'c':
-//                 rl_enter_leader_control(rl_state, line, &rl_delete_from_n_to_cursor); switch_to_insert_mode(rl_state); break;
-//             case 'd':
-//                 rl_enter_leader_control(rl_state, line, &rl_delete_from_n_to_cursor); break;
-//             case 'y':
-//                 rl_enter_leader_control(rl_state, line , NULL); break; //NULL bc leader_control copy by default
-//             default:
-//                 break;
-//         }
-//     }
-//
-//     switch (c){
-//         case 'j':
-//             rl_repeat_by_args(rl_state, line, &down_history, args) ; break;
-//         case 'k':
-//             rl_repeat_by_args(rl_state, line, &up_history, args); break;
-//         case 'i':
-//             switch_to_insert_mode(rl_state); break;
-//         case 'I':
-//             switch_to_insert_mode(rl_state); rl_move_to_start(rl_state, line); break;
-//         case 'a':
-//             switch_to_insert_mode(rl_state); break;
-//         case 'A':
-//             switch_to_insert_mode(rl_state); rl_move_to_end(rl_state, line); break;
-//         case 'l':
-//             rl_repeat_by_args(rl_state, line, &rl_move_forward_by_char, args); break;
-//         case 'h':
-//             rl_repeat_by_args(rl_state, line, &rl_move_back_by_char, args); break;
-//         case 'w':
-//             rl_repeat_by_args_with_comp(rl_state, line, &ft_isalnum, &rl_move_to_next_word_start, args); break;
-//         case 'W':
-//             rl_repeat_by_args_with_comp(rl_state, line, &ft_isnotspace, &rl_move_to_next_word_start, args); break;
-//         case 'b':
-//             rl_repeat_by_args_with_comp(rl_state, line, &ft_isalnum, &rl_move_to_previous_word_start, args); break;
-//         case 'B':
-//             rl_repeat_by_args_with_comp(rl_state, line, &ft_isnotspace, &rl_move_to_previous_word_start, args); break;
-//         case '0':
-//             rl_move_to_start(rl_state, line);break;
-//         case '$':
-//             rl_move_to_end(rl_state, line);break;
-//         case '^':
-//             rl_move_to_first_char(rl_state, line);break;
-//         case 'e':
-//             rl_repeat_by_args_with_comp(rl_state, line, &ft_isalnum, &rl_move_to_next_word_end, args); break;
-//         case 'E':
-//             rl_repeat_by_args_with_comp(rl_state, line, &ft_isnotspace, &rl_move_to_next_word_end, args); break;
-//         case '|':
-//             rl_move_to_n_index(rl_state, line, args); break;
-//         case 'f':
-//             rl_move_to_next_matching_char(rl_state, line, args, RL_NEWMATCH); break;
-//         case 'F':
-//             rl_move_to_prev_matching_char(rl_state, line, args, RL_NEWMATCH); break;
-//         case ';':
-//             rl_manage_matching_vi_mode(NULL, RL_GET)(rl_state, line, args, RL_REMATCH); break;
-//         case 's':
-//             rl_repeat_by_args(rl_state, line, rl_substitute_current_char, args); break;
-//         case 'S':
-//             rl_substitute_line(rl_state, line); break;
-//         case 'c':
-//             rl_move_to_end(rl_state, line); leader_pressed_twice = true; break;
-//         case 'C':
-//             rl_delete_until_end(rl_state, line); switch_to_insert_mode(rl_state); break;
-//         case 'd':
-//             rl_move_to_end(rl_state, line); leader_pressed_twice = true; break;
-//         case 'D':
-//             rl_delete_until_end(rl_state, line); break;
-//         case 'x':
-//             rl_repeat_by_args(rl_state, line, &rl_delete_curr_char, args); break;
-//         case 'X':
-//             rl_repeat_by_args(rl_state, line, &rl_delete_prev_char, args); break;
-//         case 'p':
-//             rl_repeat_by_args(rl_state, line, &rl_paste_after_cursor, args); break;
-//         case 'P':
-//             rl_repeat_by_args(rl_state, line, &rl_paste_on_cursor, args); break;
-//         case 'y':
-//             rl_move_to_end(rl_state, line); leader_pressed_twice = true; break;
-//         case 'Y':
-//             rl_copy_until_end(rl_state, line); break;
-//         default:
-//             return;
-//     }
-//
-//     rl_manage_args(RL_RESET, 0);
-// }
-
-//0: 11111111111111111111111111111111
-//1: 00000010000000000000000000000000
-//2: 
-
 
 
 bool rl_isMoveKey(char c, rl_movement_func **func) {
@@ -485,7 +363,7 @@ void handle_delete_key(readline_state_t *rl_state, string *line) {
     }
 }
 
-rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line){
+rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line, Vars *shell_vars){
     if (rl_state->interactive)
 		rl_save_undo_state(line, rl_state);
     if (rl_state->in_line.mode == RL_READLINE){
@@ -507,6 +385,8 @@ rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *li
                 rl_load_previous_state(line, rl_state); break;
             case '\024':
                 rl_swap_char(rl_state, line); break;
+            case '\t':
+                rl_autocomplete(rl_state, line, shell_vars); break;
             default: {
                 da_pop(rl_state->undo_stack);
                 return RL_NO_OP;
