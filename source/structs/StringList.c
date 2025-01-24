@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:18:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/23 16:07:35 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/24 10:03:24 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,7 +177,7 @@ static void add_sl_to_char(StringList *sl, char **name_list, size_t *i, char *fi
         gc(GC_ADD, curr_id, GC_SUBSHELL);
 
         if (!is_id_in_list(name_list, *i, id_with_bracket)) {
-            if (!filter || ((filter && !ft_strncmp(filter, curr_id, len_filter)) && ft_strcmp(filter, curr_id))) {
+            if (!filter || ((filter && !ft_strncmp(filter, curr_id, len_filter)))) {
                 name_list[*i] = id_with_bracket;
                 (*i)++;
             }
