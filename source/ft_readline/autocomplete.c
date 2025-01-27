@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbardavi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 14:57:20 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/24 14:50:38 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/27 10:16:02 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,5 +243,5 @@ void rl_autocomplete(readline_state_t *rl_state, string *line, Vars *shell_vars)
     gc(GC_FREE, format, GC_SUBSHELL);
 
     rl_state->suggestion.active = true;
-    rl_state->suggestion.formated_string = sugg_list_formated;
+    rl_state->suggestion.formated_string = gc(GC_ADD, ft_strdup(sugg_list_formated), GC_SUBSHELL);
 }

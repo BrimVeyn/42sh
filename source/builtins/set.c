@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 16:01:45 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/13 13:09:17 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/27 10:18:24 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void builtin_set(__attribute__((unused)) const SimpleCommandP * command, Vars * 
         } else {
             dprintf(2, "42sh: set: no such option: %s\n", argv[2]);
         }
-    } else if (argv[1] && ft_strcmp("+o", argv[1])){
+    } else if (argv[1] && !ft_strcmp("+o", argv[1])){
         if (!ft_strcmp("vi", argv[2])){
             manage_vi_option(OPTION_SET, false);
         } else {

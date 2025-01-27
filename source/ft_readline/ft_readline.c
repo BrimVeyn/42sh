@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/23 16:12:22 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/27 10:13:12 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -440,7 +440,7 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
 		char c = '\0';
         ssize_t bytes_read = read(STDIN_FILENO, &c, 1);
 		//maybe rl_set_position
-		if (c == '\n' && !should_process_enter()) {
+		if ((c == '\t' || c == '\n') && !should_process_enter()) {
 			continue;
 		}
 
