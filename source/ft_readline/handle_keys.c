@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/27 10:34:02 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/27 11:53:45 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,20 +171,47 @@ void switch_to_replace_mode(readline_state_t *rl_state){
     rl_state->in_line.arg = 0;
 }
 
-void rl_open_line_in_editor(readline_state_t *rl_state, string *line, Vars *shell_vars){
-    char filename[] = "/tmp/42sh_rl.XXXXXX"; //7 digit max for usec
+void rl_open_line_in_editor(readline_state_t *rl_state, string *line, Vars *shell_vars) {
+    char filename[] = "/tmp/42sh_rl.XXXXXX";
     int fd = mkstemp(filename);
-    if (fd == -1){
+    if (fd == -1) {
         return;
     }
-    if (line->size)
+
+    if (line->size) {
         dprintf(fd, "%s", line->data);
-    char *input = NULL;
-	input = gc(GC_CALLOC, ft_strlen(filename) + sizeof("${EDITOR} ") + 1, sizeof(char), GC_SUBSHELL);
-    ft_sprintf(input, "${EDITOR} %s", filename);
-	parse_input(input, NULL, shell_vars);
-    line->data = gc(GC_ADD, read_whole_file(fd), GC_SUBSHELL);
-    printf("\n%s\n", line->data);
+    }
+
+    const char *editor = getenv("EDITOR");
+    if (!editor) {
+        editor = "vi";
+    }
+
+    char *input = gc(GC_CALLOC, ft_strlen(editor) + ft_strlen(filename) + 2, sizeof(char), GC_SUBSHELL);
+    ft_sprintf(input, "%s %s", editor, filename);
+
+    parse_input(input, NULL, shell_vars);
+
+    char *file_content = read_whole_file(fd);
+
+    if (!file_content) {
+        close(fd);
+        unlink(filename);
+        return;
+    }
+
+    if (line->data) {
+        gc(GC_FREE, line->data, GC_SUBSHELL);
+    }   
+
+    *line = string_init_str(file_content);
+    free(file_content);
+
+    dprintf(2, "\n%s\n", line->data);
+
+    close(fd);
+    unlink(filename);
+
     rl_state->in_line.exec_line = true;
 }
 
