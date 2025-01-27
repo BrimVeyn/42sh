@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:34:05 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/27 10:13:12 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/27 10:27:40 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -474,7 +474,7 @@ char *ft_readline(const char *prompt, Vars *shell_vars) {
 			handle_control_keys(rl_state, c);
         } else if (c == '\033') {
             result = handle_special_keys(rl_state, line);
-        } else if (c > 0 && c < 32 && c != '\n'){
+        } else if (c > 0 && c < 32 && c != '\n' && c != '\t'){
 			result = handle_readline_controls(rl_state, c, line, shell_vars);
 		} else {
 			result = handle_printable_keys(rl_state, c, line, shell_vars);

@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 11:37:52 by bvan-pae          #+#    #+#             */
-/*   Updated: 2025/01/23 14:45:52 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/27 10:34:02 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -310,6 +310,11 @@ int handle_printable_keys(readline_state_t *rl_state, char c, string *line, Vars
 		return handle_enter_key(rl_state, line);
 	}
 
+    if (c == '\t' && rl_state->in_line.vi_mode == VI_INSERT){
+        rl_autocomplete(rl_state, line, shell_vars);
+        return RL_NO_OP;
+    }
+    
     if (rl_state->in_line.mode == RL_VI && rl_state->in_line.vi_mode == VI_NORMAL){
         handle_vi_control(rl_state, c, line, RL_ALLOW_ALL, shell_vars);
         if (rl_state->in_line.exec_line){
@@ -364,6 +369,7 @@ void handle_delete_key(readline_state_t *rl_state, string *line) {
 }
 
 rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *line, Vars *shell_vars){
+    (void)shell_vars;
     if (rl_state->interactive)
 		rl_save_undo_state(line, rl_state);
     if (rl_state->in_line.mode == RL_READLINE){
@@ -385,8 +391,8 @@ rl_event handle_readline_controls(readline_state_t *rl_state, char c, string *li
                 rl_load_previous_state(line, rl_state); break;
             case '\024':
                 rl_swap_char(rl_state, line); break;
-            case '\t':
-                rl_autocomplete(rl_state, line, shell_vars); break;
+            // case '\t':
+            //     rl_autocomplete(rl_state, line, shell_vars); break;
             default: {
                 da_pop(rl_state->undo_stack);
                 return RL_NO_OP;
