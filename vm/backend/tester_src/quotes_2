@@ -18,4 +18,3 @@ echo '$(echo $(echo '$(echo nested)'))'
 echo '$('echo' $(echo nested)))'
 echo '$("echo" $(echo nested)))'
 echo "$("echo" $(echo nested)))"
-echo "${var:$var}"

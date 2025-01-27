@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:18:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/30 19:48:46 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2025/01/24 10:03:24 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,6 +153,49 @@ void string_list_append(const StringList * const sl, char * const var) {
 		}
 		free(curr_id);
 	}
+}
+
+static bool is_id_in_list(char **name_list, size_t list_size, const char *id) {
+    for (size_t k = 0; k < list_size; k++) {
+        if (name_list[k] && !ft_strcmp(name_list[k], id)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static void add_sl_to_char(StringList *sl, char **name_list, size_t *i, char *filter) {
+    size_t len_filter = (filter) ? ft_strlen(filter) : 0;
+    for (size_t j = 0; j < sl->size; j++) {
+        const char *curr_equal_ptr = ft_strchr(sl->data[j], '=');
+        if (!curr_equal_ptr) continue;
+
+        const size_t curr_equal_pos = curr_equal_ptr - sl->data[j];
+        char *curr_id = ft_substr(sl->data[j], 0, curr_equal_pos);
+        char *id_with_bracket = gc(GC_CALLOC, ft_strlen(curr_id) + 4, sizeof(char), GC_SUBSHELL);
+        sprintf(id_with_bracket, "${%s}", curr_id);
+        gc(GC_ADD, curr_id, GC_SUBSHELL);
+
+        if (!is_id_in_list(name_list, *i, id_with_bracket)) {
+            if (!filter || ((filter && !ft_strncmp(filter, curr_id, len_filter)))) {
+                name_list[*i] = id_with_bracket;
+                (*i)++;
+            }
+        } else {
+            gc(GC_FREE, id_with_bracket, GC_SUBSHELL);
+        }
+    }
+}
+
+char **string_list_get_all_name(Vars *shell_vars, char *filter) {
+    size_t total_env_size = shell_vars->env->size + shell_vars->local->size + shell_vars->set->size;
+    char **name_list = gc(GC_CALLOC, total_env_size + 1, sizeof(char *), GC_SUBSHELL);
+    size_t i = 0;
+
+    add_sl_to_char(shell_vars->env, name_list, &i, filter);
+    add_sl_to_char(shell_vars->set, name_list, &i, filter);
+
+	return name_list;
 }
 
 char *string_list_get_value(const StringList * const sl, const char * const id) {
