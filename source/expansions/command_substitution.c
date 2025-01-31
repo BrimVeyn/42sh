@@ -16,6 +16,7 @@
 #include "dynamic_arrays.h"
 
 #include <limits.h>
+#include <stdio.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -32,6 +33,7 @@ char *command_substitution(char *const str, Vars *const shell_vars, int * const 
 
 	const int STDOUT_SAVE = dup(STDOUT_FILENO);
 	da_push(g_fdSet, fd_init(STDOUT_SAVE, FD_CHILD));
+	_debug("CMDSUB: size: %d, fd: %d\n", g_fdSet->size, STDOUT_SAVE);
 
 	if (dup2(output_fd, STDOUT_FILENO) == -1)
 		_fatal("dup2: failed", 1);

@@ -242,7 +242,7 @@ char *parameter_expansion(char * full_exp, Vars *const shell_vars, int *const er
 		size_t rhs_len = ft_strlen(maybe_special.rhs);
 		if (maybe_special.rhs[rhs_len - 1] != '}')
 			rhs_len++;
-		char * const trimmed_rhs = ft_substr(maybe_special.rhs, 0, rhs_len - 1);
+		char * const trimmed_rhs = gc(GC_ADD, ft_substr(maybe_special.rhs, 0, rhs_len - 1), GC_SUBSHELL);
 		StringList *expansion_result = do_expansions_word(trimmed_rhs, error, shell_vars, maybe_special.type);
 		if ((*error) != 0) return NULL;
 

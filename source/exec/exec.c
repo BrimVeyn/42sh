@@ -79,17 +79,18 @@ static void execute_simple_command(CommandP *command, char *bin, Vars *shell_var
 	if (!absolute)
 		hash_interface(HASH_ADD_USED, command->simple_command->word_list->data[0], shell_vars);
 	
+	_debug("CALLED with: %d\n", FD_CHILD);
 	close_fd_set(FD_CHILD);
 	// Debug information for job control
-	pid_t pid = getpid();
-	pid_t ppid = getppid();
-	pid_t pgid = getpgid(0);
-	_debug("DEBUG: Executing command: %s\n", bin);
-	_debug("DEBUG: PID: %d, PPID: %d, PGID: %d\n", pid, ppid, pgid);
-	_debug("DEBUG: Command arguments:\n");
-	for (size_t i = 0; i < simple_command->word_list->size; i++) {
-		_debug("  arg[%zu]: %s\n", i, simple_command->word_list->data[i]);
-	}
+	/*pid_t pid = getpid();*/
+	/*pid_t ppid = getppid();*/
+	/*pid_t pgid = getpgid(0);*/
+	/*_debug("DEBUG: Executing command: %s\n", bin);*/
+	/*_debug("DEBUG: PID: %d, PPID: %d, PGID: %d\n", pid, ppid, pgid);*/
+	/*_debug("DEBUG: Command arguments:\n");*/
+	/*for (size_t i = 0; i < simple_command->word_list->size; i++) {*/
+	/*	_debug("  arg[%zu]: %s\n", i, simple_command->word_list->data[i]);*/
+	/*}*/
 	execve(bin, simple_command->word_list->data, shell_vars->env->data);
 }
 

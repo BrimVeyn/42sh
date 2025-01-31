@@ -106,11 +106,12 @@ int *save_std_fds() {
 }
 
 void close_fd_set(FdRule flag) {
-	while (g_fdSet->size != 0) {
-		Fd *fd = da_pop(g_fdSet);
+	for (size_t i = 0; i < g_fdSet->size; i++) {
+		Fd *fd = g_fdSet->data[i];	
 		if (fd->fd != -1 && (fd->flag == flag || flag == FD_ALL)) {
 			_debug("FD: Closing fd {%d}, PID: %d\n", fd->fd, getpid());
 			close(fd->fd);
+			fd->fd = -1;
         }
 	}
 }
