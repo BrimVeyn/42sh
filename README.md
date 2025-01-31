@@ -152,6 +152,8 @@ make test  # Runs more than 1100 tests to validate the functionalities described
   - Build and launch the test environment
   - Run the tests using a multithreaded program
   - Provide a link to visualize test outputs in a web browser
+ 
+![GIF](https://github.com/BrimVeyn/42sh/blob/main/gifs/tester_demo.gif)
 
 ## Useful Links & Resources
 
