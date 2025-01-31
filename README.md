@@ -10,7 +10,10 @@
 
 - Command execution (builtins and external commands)
 - Argument parsing with proper tokenization
-- Support for single and double quotes
+- Full edition of command line
+- History managment
+- Expansions (described below)
+- Control flows (for, if, until, while, case, function)
 - Handling of environment variables
 - Handling of exit statuses
 
@@ -21,7 +24,6 @@
 - **Logical Operators (`&&`, `||`)**: Conditional execution based on exit codes.
 - **Subshells (`(...)`)**: Execute commands in a separate process.
 - **Command Grouping (`{ ... }`)**: Execute multiple commands in the current shell.
-- **Command Substitution (`$(command)`)**: Replace command output into another command.
 
 ### 🔄 Expansions & Substitutions
 
