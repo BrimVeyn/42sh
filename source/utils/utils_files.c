@@ -6,7 +6,7 @@
 /*   By: bvan-pae <bryan.vanpaemel@gmail.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 11:19:10 by bvan-pae          #+#    #+#             */
-/*   Updated: 2024/12/27 10:55:31 by bvan-pae         ###   ########.fr       */
+/*   Updated: 2025/01/27 11:55:25 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,9 @@ char *get_line_x(char *in, const size_t n) {
 
 char *read_whole_file(int fd) {
 	char buffer[BUFFER_SIZE] = {0};
-
+    if (lseek(fd, 0, SEEK_SET) == -1) {
+        _fatal("lseek error", 1);
+    }
 	size_t result_size = 0;
 	size_t result_capacity = BUFFER_SIZE;
 	size_t bytes_read = 0;

@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbardavi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 11:16:12 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/22 14:21:10 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/27 11:23:50 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,7 +186,7 @@ void (*rl_manage_matching_vi_mode(
 void rl_move_to_next_matching_char(readline_state_t *rl_state, string *line, rl_matching_mode mode){
     static char c = 0;
 
-    if (mode == RL_NEWMATCH){
+    if (mode == RL_NEWMATCH && rl_state->in_line.is_first_loop){
         read(STDIN_FILENO, &c, 1);
     } else if (mode == RL_REMATCH_REVERSE){
         c = g_last_matching_char;
@@ -210,7 +210,7 @@ void rl_move_to_next_matching_char(readline_state_t *rl_state, string *line, rl_
 void rl_move_to_prev_matching_char(readline_state_t *rl_state, string *line, rl_matching_mode mode){
     static char c = 0;
     
-    if (mode == RL_NEWMATCH){
+    if (mode == RL_NEWMATCH && rl_state->in_line.is_first_loop){
         read(STDIN_FILENO, &c, 1);
     } else if (mode == RL_REMATCH_REVERSE){
         c = g_last_matching_char;

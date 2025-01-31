@@ -6,7 +6,7 @@
 /*   By: nbardavi <nbardavi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 14:57:20 by nbardavi          #+#    #+#             */
-/*   Updated: 2025/01/27 10:16:02 by nbardavi         ###   ########.fr       */
+/*   Updated: 2025/01/27 12:02:37 by nbardavi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,7 +220,7 @@ void rl_autocomplete(readline_state_t *rl_state, string *line, Vars *shell_vars)
     char *format = gc(GC_CALLOC, 32, sizeof(char), GC_SUBSHELL);
     int next_line = get_col() / (max + 3);
     char sugg_list_formated[100000] = {0};
-    sprintf(format, "%%%ds", max + 3);
+    sprintf(format, "%%-%ds", max + 3);
     size_t buffer_len = 0;
     sugg_list_formated[buffer_len++] = '\n';
     for(int i = 0; sugg_list[i]; i++){
