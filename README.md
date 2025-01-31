@@ -90,6 +90,18 @@
 
 42sh uses a **LALR(1) parser** for parsing complex shell grammar. Since parser generators like Bison or Yacc were not allowed, the parser was implemented manually. The automaton was generated using **jsmachines' project**, and the C code was dynamically generated from the automaton using **Python**.
 
+Additionally, we implemented our own tiny regex library to ease parsing. The API is:
+
+```c
+regex_match(format, target)
+```
+
+Supported operators:
+
+```
+'^ ? + * [^a-z] $'
+```
+
 ### 🏗️ Execution Flow
 
 1. **Lexing & Parsing**: The command line is tokenized and parsed into an AST.
@@ -138,6 +150,21 @@ make test  # Runs more than 1100 tests to validate the functionalities described
   - Build and launch the test environment
   - Run the tests using a multithreaded program
   - Provide a link to visualize test outputs in a web browser
+
+## Useful Links & Resources
+
+- [LALR(1) Parser Generator](https://jsmachines.sourceforge.net/machines/lalr1.html)
+- [GNU Bash Manual](https://www.gnu.org/software/bash/manual/bash.html)
+- [POSIX Specification](https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/)
+- [Stanford CS143](http://web.stanford.edu/class/cs143/)
+- [Crafting Interpreters](https://craftinginterpreters.com/)
+- [YouTube: Bash Parsing Overview](https://www.youtube.com/watch?v=TZ5a3gCCZYo)
+- [YouTube: Shell Job Control](https://www.youtube.com/watch?v=IroPQ150F6c)
+- [Efficient C Code Optimization](https://www.codeproject.com/Articles/6154/Writing-Efficient-C-and-C-Code-Optimization)
+- [Tiny Garbage Collector](https://github.com/orangeduck/tgc/tree/master)
+- [Job Control and Termios](https://blog.nelhage.com/2010/01/a-brief-introduction-to-termios-signaling-and-job-control/)
+- [Beautiful Code - Princeton](https://www.cs.princeton.edu/courses/archive/spr09/cos333/beautiful.html)
+- [GNU Libc Job Control](https://www.gnu.org/software/libc/manual/html_node/Job-Control.html)
 
 ## License
 
