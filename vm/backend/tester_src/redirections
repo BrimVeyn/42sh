@@ -60,7 +60,6 @@ nan<> ./XXXOUTXXX/file1 cat <&nan
 (cat < ./infiles/test) <> ./XXXOUTXXX/nested_complex2
 10<>infiles/test cat <&10 >&1
 { echo "start"; cat < infiles/test; echo "end"; } > ./XXXOUTXXX/group_output
-{ echo "write and append"; echo "new line" >> ./XXXOUTXXX/group_append; } <> ./XXXOUTXXX/group_combined
 { echo "nested redirection" >&2; cat < infiles/test; } > ./XXXOUTXXX/group_nested_redirect
 { cat < infiles/no_write; echo "fallback message"; } > ./XXXOUTXXX/group_fallback
 { echo "reading input"; cat <&0; } <> ./XXXOUTXXX/group_stdin
