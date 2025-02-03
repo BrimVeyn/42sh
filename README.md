@@ -63,8 +63,6 @@
 - `type` - Display command type
 - `unalias` - Remove command aliases
 - `unset` - Unset environment variables
-- `ulimit` - Set or display resource limits
-- `wait` - Wait for background jobs to finish
 
 ### 🖊️ Command Line Editing
 
