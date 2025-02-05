@@ -1,3 +1,5 @@
+![IMG](https://github.com/BrimVeyn/42sh/blob/main/gifs/final_grade.png)
+
 # 42sh - A POSIX-Compliant Shell
 
 ## Overview
