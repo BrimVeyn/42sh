@@ -20,7 +20,7 @@
 #include "dynamic_arrays.h"
 
 #include <fcntl.h>
-#include <linux/limits.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>

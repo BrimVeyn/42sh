@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include <limits.h>
-#include <linux/limits.h>
 #include <sys/dir.h>
 #include <dirent.h>
 #include <sys/stat.h>
