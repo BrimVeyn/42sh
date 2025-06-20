@@ -176,6 +176,6 @@ MIT License
 
 ## Authors
 
-- Byan VAN PAEMEL
+- Bryan VAN PAEMEL
 - Nathan BARDAVID
 
